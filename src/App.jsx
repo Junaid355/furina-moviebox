@@ -311,6 +311,13 @@ export default function App() {
         <PlayerModal
           item={activeMedia}
           preferredServerId={preferredServer}
+          isHindiPreferred={
+            activeCategory === 'hindi' ||
+            (searchQuery && searchQuery.toLowerCase().includes('hindi')) ||
+            activeMedia.isHindiDubbed ||
+            activeMedia.original_language === 'hi' ||
+            activeMedia.category === 'hindi'
+          }
           onClose={() => setActiveMedia(null)}
         />
       )}

@@ -4,13 +4,15 @@ import { SERVERS, getStreamUrl, getDownloadUrl } from '../services/streaming';
 import { fetchSeasonEpisodes, fetchTvDetails } from '../services/tmdb';
 import { permitPopupOnce, getBlockedCount } from '../services/adblocker';
 
-export default function PlayerModal({ item, onClose, preferredServerId }) {
+export default function PlayerModal({ item, onClose, preferredServerId, isHindiPreferred }) {
   if (!item) return null;
 
   const isSeries = item.media_type === 'tv' || !!item.first_air_date;
   const title = item.title || item.name || 'Now Playing';
 
-  const initialServer = SERVERS.find((s) => s.id === preferredServerId) || SERVERS[0];
+  const initialServer = (isHindiPreferred || item.original_language === 'hi')
+    ? (SERVERS.find((s) => s.id === 'vidlink_hindi') || SERVERS[0])
+    : (SERVERS.find((s) => s.id === preferredServerId) || SERVERS[0]);
   const [selectedServer, setSelectedServer] = useState(initialServer);
   const [season, setSeason] = useState(1);
   const [episode, setEpisode] = useState(1);
@@ -312,19 +314,19 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
                 </div>
               </div>
 
-              {/* Option 2: Hollywood Titles & NetMirror/Dooflix */}
-              <div className="p-3.5 rounded-xl bg-black/50 border border-cyan-500/40 flex flex-col justify-between">
+              {/* Option 2: Hollywood Blockbusters In-App Hindi Dub */}
+              <div className="p-3.5 rounded-xl bg-black/50 border border-amber-500/40 flex flex-col justify-between">
                 <div>
-                  <div className="font-bold text-cyan-300 mb-1.5 flex items-center justify-between">
-                    <span>🎬 2. Hollywood Blockbusters (Hindi Dubbed)</span>
-                    <span className="text-[10px] bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded font-bold">Dual-Audio OTT</span>
+                  <div className="font-bold text-amber-300 mb-1.5 flex items-center justify-between">
+                    <span>🎬 2. Hollywood Titles (In-App Hindi Dub)</span>
+                    <span className="text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded font-bold">100% In-App</span>
                   </div>
                   <p className="text-[11px] text-slate-300 leading-relaxed">
-                    Apps like <strong>Dooflix</strong> and <strong>NetMirror</strong> stream Hollywood movies (e.g. <em>Avengers: Endgame</em>) in Hindi by directly tapping Disney+ Hotstar & Netflix India encrypted streams. Use our 1-Click NetMirror gateway below to access full Hindi dubbing!
+                    Watch Hollywood blockbusters (e.g. <em>Avengers, Deadpool, Spider-Man</em>) in Hindi right here! Switch to <strong>Server 1 (Hindi Dubbed)</strong>, then click <strong>⚙️ Settings (gear icon)</strong> inside the video player ➔ <strong>Audio Track</strong> ➔ Select <strong>Hindi (हिन्दी)</strong>.
                   </p>
                 </div>
-                <div className="mt-2.5 text-[10px] text-cyan-400 font-semibold bg-cyan-500/10 px-2 py-1 rounded">
-                  ✓ Web Player plays 4K/1080p original track. Tap NetMirror below for Hindi!
+                <div className="mt-2.5 text-[10px] text-amber-400 font-semibold bg-amber-500/10 px-2 py-1 rounded">
+                  ✓ Plays directly inside your player with ZERO external websites!
                 </div>
               </div>
             </div>
@@ -428,68 +430,57 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
           />
         </div>
 
-        {/* Dedicated Hindi Dubbed Dual-Audio Stream Gateway */}
-        <div className="p-3.5 bg-gradient-to-r from-[#1f1505] via-[#120e06] to-[#081329] border-t border-b border-amber-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs">
+        {/* Dedicated In-App Hindi Dubbed & Multi-Audio Control Panel */}
+        <div className="p-3.5 sm:p-4 bg-gradient-to-r from-[#1f1505] via-[#120e06] to-[#081329] border-t border-b border-amber-500/40 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-gray-950 flex items-center justify-center font-black text-lg shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.4)]">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-gray-950 flex items-center justify-center font-black text-lg shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.4)]">
               🇮🇳
             </div>
             <div>
               <div className="font-extrabold text-white text-xs sm:text-sm flex items-center gap-2">
-                <span>Want to Watch in Hindi Dubbed (हिन्दी)?</span>
-                <span className="text-[10px] bg-amber-500/25 text-amber-300 px-2 py-0.5 rounded font-bold border border-amber-500/40 animate-pulse">Dual-Audio Stream</span>
+                <span>Hindi Dubbed & Dual-Audio (In-App)</span>
+                <span className="text-[10px] bg-amber-500/25 text-amber-300 px-2 py-0.5 rounded font-bold border border-amber-500/40">
+                  {selectedServer.id === 'vidlink_hindi' ? 'Active: Server 1 (Hindi Dubbed)' : 'Available In-App'}
+                </span>
               </div>
-              <p className="text-[11px] text-amber-200/80 mt-0.5 leading-relaxed">
-                For verified <strong>Hindi Dubbed audio</strong> for <em>{title}</em>, launch NetMirror (Disney+/Hotstar streams) or our dual-audio mirrors:
+              <p className="text-[11px] text-amber-200/90 mt-0.5 leading-relaxed">
+                {item.original_language === 'hi' ? (
+                  <>🇮🇳 <strong>Bollywood Original</strong>: Filmed natively in Hindi. Plays in full Hindi audio across all servers automatically!</>
+                ) : (
+                  <>🎧 <strong>How to listen in Hindi</strong>: Inside video player, tap <strong>⚙️ Settings (bottom right)</strong> ➔ <strong>Audio Track</strong> ➔ Select <strong>Hindi (हिन्दी)</strong>!</>
+                )}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2 flex-wrap shrink-0 w-full md:w-auto">
-            <a
-              href={`https://netmirror.global/search/${encodeURIComponent(title)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={permitPopupOnce}
-              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-gray-950 font-black text-xs transition shadow-[0_0_15px_rgba(245,158,11,0.6)] flex items-center gap-1.5 hover:scale-105 border border-amber-300"
+            <button
+              onClick={() => {
+                const s = SERVERS.find((x) => x.id === 'vidlink_hindi') || SERVERS[0];
+                setSelectedServer(s);
+              }}
+              className={`px-3.5 py-2 rounded-xl font-bold text-xs transition flex items-center gap-1.5 shadow-md ${
+                selectedServer.id === 'vidlink_hindi'
+                  ? 'bg-amber-400 text-gray-950 shadow-[0_0_15px_rgba(245,158,11,0.6)] font-black scale-105 border border-amber-300'
+                  : 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40'
+              }`}
             >
-              <span>🌐 NetMirror (Hotstar Hindi) ↗</span>
-            </a>
-            <a
-              href={`https://desicinemas.tv/?s=${encodeURIComponent(title)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={permitPopupOnce}
-              className="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-300 hover:text-white font-bold text-xs transition flex items-center gap-1.5"
+              <span>🎙️</span>
+              <span>{selectedServer.id === 'vidlink_hindi' ? '✓ Hindi Dubbed Active' : 'Switch to Hindi Dub Player'}</span>
+            </button>
+            <button
+              onClick={() => {
+                const s = SERVERS.find((x) => x.id === 'smashystream') || SERVERS[3];
+                setSelectedServer(s);
+              }}
+              className={`px-3 py-2 rounded-xl font-semibold text-xs transition flex items-center gap-1.5 border ${
+                selectedServer.id === 'smashystream'
+                  ? 'bg-indigo-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.6)] font-bold border-indigo-400'
+                  : 'bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border-indigo-500/40'
+              }`}
             >
-              <span>DesiCinemas ↗</span>
-            </a>
-            <a
-              href={`https://moviesmod.vip/?s=${encodeURIComponent(title + ' Hindi Dubbed')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={permitPopupOnce}
-              className="px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/50 text-emerald-300 hover:text-white font-bold text-xs transition flex items-center gap-1.5"
-            >
-              <span>MoviesMod Hindi ↗</span>
-            </a>
-            <a
-              href={`https://hdhub4u.tv/?s=${encodeURIComponent(title + ' Hindi')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={permitPopupOnce}
-              className="px-3 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/50 text-cyan-300 hover:text-white font-bold text-xs transition flex items-center gap-1.5"
-            >
-              <span>HDHub4u Hindi ↗</span>
-            </a>
-            <a
-              href={`https://www.hotstar.com/in/explore?search_query=${encodeURIComponent(title)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={permitPopupOnce}
-              className="px-3 py-1.5 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/50 text-blue-300 hover:text-white font-bold text-xs transition flex items-center gap-1.5"
-            >
-              <span>Hotstar Hindi ↗</span>
-            </a>
+              <span>🌐</span>
+              <span>Multi-Audio Mirror</span>
+            </button>
           </div>
         </div>
 
