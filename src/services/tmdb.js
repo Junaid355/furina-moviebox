@@ -117,7 +117,15 @@ export async function fetchTrendingAll(page = 1) {
   try {
     const res = await fetch(`${BASE_URL}/trending/all/week?api_key=${API_KEY}&page=${page}`);
     const data = await res.json();
-    return data.results && data.results.length > 0 ? data.results : (page === 1 ? FALLBACK_MEDIA : []);
+    if (!data.results || data.results.length === 0) return page === 1 ? FALLBACK_MEDIA : [];
+    // Ensure all trending titles are actually released and streamable
+    const filtered = data.results.filter(item => {
+      const releaseDate = item.release_date || item.first_air_date;
+      const votes = item.vote_count || 0;
+      if (releaseDate && releaseDate > today && votes < 5) return false;
+      return true;
+    });
+    return filtered.length > 0 ? filtered : data.results;
   } catch (err) {
     return page === 1 ? FALLBACK_MEDIA : [];
   }
@@ -135,7 +143,7 @@ export async function fetchHollywoodMovies(page = 1) {
 
 export async function fetchHindiMovies(page = 1) {
   try {
-    const res = await fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_original_language=hi&region=IN&primary_release_date.lte=${today}&sort_by=popularity.desc&page=${page}`);
+    const res = await fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_original_language=hi&region=IN&primary_release_date.lte=${today}&vote_count.gte=5&sort_by=popularity.desc&page=${page}`);
     const data = await res.json();
     return data.results && data.results.length > 0 ? data.results.map(m => ({ ...m, media_type: 'movie' })) : (page === 1 ? FALLBACK_MEDIA.filter(m => m.category === 'hindi') : []);
   } catch (err) {

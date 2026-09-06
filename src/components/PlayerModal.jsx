@@ -20,6 +20,29 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
   const [showHindiGuide, setShowHindiGuide] = useState(false);
   const [showUBlockGuide, setShowUBlockGuide] = useState(false);
   const [blockedAds, setBlockedAds] = useState(getBlockedCount());
+  const [aiBoostMode, setAiBoostMode] = useState(() => {
+    return localStorage.getItem('furina_ai_boost') || '4k';
+  });
+
+  const AI_BOOST_STYLES = {
+    off: {},
+    '4k': {
+      filter: 'contrast(1.09) saturate(1.14) brightness(1.02) drop-shadow(0 0 1px rgba(0,0,0,0.5))',
+      transition: 'filter 0.3s ease'
+    },
+    hdr: {
+      filter: 'contrast(1.18) saturate(1.28) brightness(1.04)',
+      transition: 'filter 0.3s ease'
+    },
+    night: {
+      filter: 'brightness(1.12) contrast(1.08) saturate(1.08)',
+      transition: 'filter 0.3s ease'
+    }
+  };
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  const releaseDate = item.release_date || item.first_air_date;
+  const isUpcoming = (releaseDate && releaseDate > todayStr) || (item.vote_count === 0 && !isSeries);
 
   // Listen to blocked ad popup events
   useEffect(() => {
@@ -293,23 +316,69 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
           })}
         </div>
 
-        {/* 4K UHD & 1080p Quality Booster Bar */}
-        <div className="px-4 py-2.5 bg-gradient-to-r from-[#0a1636] via-[#0e214d] to-[#0a1636] border-b border-cyan-500/25 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
-          <div className="flex items-center gap-2 text-cyan-200">
-            <span className="px-2 py-0.5 rounded bg-cyan-500/25 text-cyan-300 font-black text-[10px] border border-cyan-400/50 shadow-[0_0_10px_rgba(56,189,248,0.3)]">
-              4K / 1080p TIP
-            </span>
-            <span className="text-[11px] text-slate-200 leading-tight">
-              Looks blurry? Tap <strong className="text-amber-300">⚙️ Settings</strong> inside player ➔ switch Quality from <strong>Auto</strong> to <strong className="text-cyan-300">1080p or 4K</strong>!
-            </span>
+        {/* Theatrical / Upcoming Release Notice */}
+        {isUpcoming && (
+          <div className="p-3 bg-gradient-to-r from-amber-950/90 via-[#221302] to-amber-950/90 border-b border-amber-500/40 text-xs flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <span className="text-lg">🎬</span>
+              <div>
+                <span className="font-extrabold text-amber-300">Theatrical / Upcoming Release Notice:</span>
+                <p className="text-[11px] text-amber-200/90 mt-0.5">
+                  This title is currently in pre-release or in theaters and not yet distributed on digital OTT streaming. If servers display <strong>"404 Content not found"</strong> or <strong>"Unavailable"</strong>, check back once the digital streaming release premieres!
+                </p>
+              </div>
+            </div>
+            {releaseDate && (
+              <span className="shrink-0 bg-amber-500/20 text-amber-300 border border-amber-400/40 px-2.5 py-1 rounded-lg text-[10px] font-bold">
+                Premiere: {releaseDate}
+              </span>
+            )}
           </div>
-          <div className="flex items-center gap-2 text-[10px] text-emerald-400 font-semibold shrink-0 bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/30">
-            <span>✨ Highest Bitrate: Server 1 (VidSrc 4K) & Server 3 (VidLink 4K)</span>
+        )}
+
+        {/* AI Video Boost & 4K Clarity Control Bar */}
+        <div className="px-4 py-2 bg-gradient-to-r from-[#061127] via-[#0a1b3f] to-[#061127] border-b border-cyan-500/25 flex flex-wrap items-center justify-between gap-2.5 text-xs">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 font-extrabold text-[11px] shadow-[0_0_12px_rgba(56,189,248,0.35)]">
+              <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+              <span>AI Video Boost:</span>
+            </span>
+            <div className="flex items-center gap-1 bg-black/50 p-1 rounded-xl border border-cyan-500/30">
+              {[
+                { id: 'off', label: 'Off', desc: 'Natural raw stream' },
+                { id: '4k', label: '💎 4K Clarity', desc: 'AI edge sharpening & micro-contrast' },
+                { id: 'hdr', label: '🌈 HDR Cinema', desc: 'Dolby-grade dynamic range & rich vibrance' },
+                { id: 'night', label: '🌙 Dark Scene', desc: 'Deep shadow visibility booster' },
+              ].map((mode) => (
+                <button
+                  key={mode.id}
+                  onClick={() => {
+                    setAiBoostMode(mode.id);
+                    localStorage.setItem('furina_ai_boost', mode.id);
+                  }}
+                  title={mode.desc}
+                  className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold transition ${
+                    aiBoostMode === mode.id
+                      ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 shadow-[0_0_12px_rgba(56,189,248,0.6)] scale-105'
+                      : 'text-slate-300 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  {mode.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 text-[10px] text-cyan-200/90 font-medium">
+            <span className="hidden sm:inline">⚙️ Blurry? Tap <strong>Settings</strong> inside player ➔ select <strong>1080p / 4K</strong></span>
           </div>
         </div>
 
-        {/* Video Player IFrame Container (Clean un-sandboxed to prevent anti-sandbox blocking) */}
-        <div className="relative w-full aspect-video bg-black">
+        {/* Video Player IFrame Container with AI Boost Visual Filter Pipeline */}
+        <div 
+          className="relative w-full aspect-video bg-black overflow-hidden"
+          style={AI_BOOST_STYLES[aiBoostMode] || {}}
+        >
           <iframe
             key={`${selectedServer.id}-${season}-${episode}-${reloadKey}`}
             src={streamUrl}
