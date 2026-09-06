@@ -11,21 +11,21 @@ export const SERVERS = [
   },
   {
     id: 'multiembed',
-    name: 'Server 2: MultiEmbed (6-in-1 Mirrors / Anime & Global)',
-    shortName: 'Server 2 (MultiEmbed)',
-    badge: 'Anime & Global',
+    name: 'Server 2: MultiEmbed (🎙️ Hindi Dub & Anime 6-in-1)',
+    shortName: 'Server 2 (Hindi Dub / Multi)',
+    badge: 'Hindi Dub',
     color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
     getMovieUrl: (tmdbId) => `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1`,
     getTvUrl: (tmdbId, s = 1, e = 1) => `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${s}&e=${e}`
   },
   {
-    id: 'smashystream',
-    name: 'Server 3: SmashyStream (AnyEmbed Fast HLS)',
-    shortName: 'Server 3 (SmashyStream)',
-    badge: 'Cloud HLS',
+    id: 'autoembed',
+    name: 'Server 3: AutoEmbed Prime (Global Multi-Audio & 1080p)',
+    shortName: 'Server 3 (AutoEmbed)',
+    badge: 'Multi-Audio',
     color: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-    getMovieUrl: (tmdbId) => `https://embed.smashystream.com/playere.php?tmdb=${tmdbId}`,
-    getTvUrl: (tmdbId, s = 1, e = 1) => `https://embed.smashystream.com/playere.php?tmdb=${tmdbId}&season=${s}&episode=${e}`
+    getMovieUrl: (tmdbId) => `https://autoembed.co/movie/tmdb/${tmdbId}`,
+    getTvUrl: (tmdbId, s = 1, e = 1) => `https://autoembed.co/tv/tmdb/${tmdbId}-${s}-${e}`
   },
   {
     id: 'vidsrc_in',

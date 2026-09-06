@@ -176,10 +176,26 @@ export async function fetchMatureMovies(page = 1) {
 
 export async function searchContent(query, page = 1, includeAdult = false) {
   if (!query || query.trim() === '') return [];
+  const isHindiQuery = /\b(hindi|dubbed|dub)\b/i.test(query);
   try {
-    const res = await fetch(`${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(query)}&page=${page}&include_adult=${includeAdult}`);
-    const data = await res.json();
-    return (data.results || []).filter(item => item.poster_path || item.backdrop_path);
+    let res = await fetch(`${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(query.trim())}&page=${page}&include_adult=${includeAdult}`);
+    let data = await res.json();
+    let results = (data.results || []).filter(item => item.poster_path || item.backdrop_path);
+
+    // If no results, try stripping modifiers like 'hindi dubbed', 'hindi', 'dubbed', 'full movie', 'movie', etc.
+    if (results.length === 0) {
+      const cleaned = query.replace(/\b(hindi\s*dubbed|hindi\s*dub|hindi|dubbed|dub|full\s*movie|movie|series)\b/gi, '').trim();
+      if (cleaned && cleaned.toLowerCase() !== query.trim().toLowerCase()) {
+        res = await fetch(`${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(cleaned)}&page=${page}&include_adult=${includeAdult}`);
+        data = await res.json();
+        results = (data.results || []).filter(item => item.poster_path || item.backdrop_path);
+      }
+    }
+
+    return results.map(item => ({
+      ...item,
+      isHindiDubbed: isHindiQuery || item.original_language === 'hi'
+    }));
   } catch (err) {
     return FALLBACK_MEDIA.filter(m => (m.title || m.name || '').toLowerCase().includes(query.toLowerCase()));
   }

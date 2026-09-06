@@ -4,45 +4,70 @@
 
 @layer base {
   body {
-    background-color: #050811;
-    color: #f0f6fc;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #030712;
+    color: #f1f5f9;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
   }
 }
 
-/* Custom Furina Hydro Scrollbar */
+/* Custom Furina Hydro Cyan/Indigo Glow Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
 }
 ::-webkit-scrollbar-track {
-  background: #090f21;
+  background: #060c1d;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1b326d;
-  border-radius: 4px;
+  background: #1e3a8a;
+  border-radius: 9999px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #4dc5f9;
+  background: #0284c7;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
 }
 
+/* Glassmorphic Navbar */
 .glass-nav {
-  background: rgba(9, 15, 33, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(77, 197, 249, 0.15);
+  background: rgba(6, 11, 25, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
 }
 
+/* Glass Media Card with ambient depth */
 .glass-card {
-  background: rgba(15, 28, 61, 0.6);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(77, 197, 249, 0.12);
-  transition: all 0.25s ease-in-out;
+  background: linear-gradient(180deg, rgba(13, 23, 51, 0.65) 0%, rgba(7, 13, 31, 0.8) 100%);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(56, 189, 248, 0.14);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(77, 197, 249, 0.4);
-  box-shadow: 0 10px 25px -5px rgba(77, 197, 249, 0.2);
+  transform: translateY(-6px) scale(1.02);
+  border-color: rgba(56, 189, 248, 0.45);
+  box-shadow: 0 16px 35px -8px rgba(0, 0, 0, 0.8), 0 0 25px -4px rgba(56, 189, 248, 0.25);
+}
+
+/* Ambient Hydro Glow */
+.hydro-glow {
+  box-shadow: 0 0 25px rgba(56, 189, 248, 0.35);
+}
+
+.hydro-glow-lg {
+  box-shadow: 0 0 50px rgba(56, 189, 248, 0.45);
+}
+
+/* Hide scrollbars for clean pill rows */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

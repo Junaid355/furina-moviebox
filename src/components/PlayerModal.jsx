@@ -16,6 +16,7 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
   const [episodesList, setEpisodesList] = useState([]);
   const [isLoadingEpisodes, setIsLoadingEpisodes] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  const [showHindiGuide, setShowHindiGuide] = useState(false);
 
   // Load episodes if TV series
   useEffect(() => {
@@ -39,29 +40,50 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/92 backdrop-blur-xl p-2 sm:p-4 overflow-y-auto">
-      <div className="relative w-full max-w-5xl bg-[#091024] border border-cyan-500/30 rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(77,197,249,0.25)] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-2xl p-2 sm:p-4 overflow-y-auto">
+      {/* Ambient background glow */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-900/20 via-transparent to-transparent" />
+
+      <div className="relative w-full max-w-5xl bg-[#081026] border border-cyan-500/30 rounded-2xl overflow-hidden shadow-[0_0_60px_rgba(56,189,248,0.28)] flex flex-col z-10">
         
         {/* Header Bar */}
-        <div className="flex items-center justify-between p-3.5 sm:p-4 border-b border-cyan-500/20 bg-[#060b19]">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full overflow-hidden border border-cyan-400/40">
+        <div className="flex items-center justify-between p-3.5 sm:p-4 border-b border-cyan-500/20 bg-[#050b1d]">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-cyan-400/50 shadow-[0_0_12px_rgba(56,189,248,0.4)] shrink-0">
               <img src="./favicon.png" alt="Furina" className="w-full h-full object-cover" />
             </div>
-            <div>
-              <h2 className="font-bold text-sm sm:text-base text-white line-clamp-1">
-                {title} {isSeries && <span className="text-cyan-400 font-normal">S{season} E{episode}</span>}
+            <div className="min-w-0">
+              <h2 className="font-extrabold text-sm sm:text-base text-white truncate flex items-center gap-2">
+                <span>{title}</span>
+                {isSeries && <span className="text-cyan-400 font-normal text-xs bg-cyan-500/15 px-2 py-0.5 rounded-full border border-cyan-500/30">S{season} E{episode}</span>}
               </h2>
-              <p className="text-[11px] text-cyan-200/50">Fast 4K Multi-Mirror Player</p>
+              <div className="flex items-center gap-2 text-[11px] text-cyan-200/60">
+                <span>4K Ultra HD Multi-Mirror</span>
+                <span>•</span>
+                <span className="text-emerald-400 font-semibold">{selectedServer.badge}</span>
+              </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Hindi Dubbed Audio Switcher Guide Toggle */}
+            <button
+              onClick={() => setShowHindiGuide(!showHindiGuide)}
+              title="How to enable Hindi Dubbed Audio"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition shadow-sm ${
+                showHindiGuide
+                  ? 'bg-amber-500 text-gray-950 border-amber-400 shadow-[0_0_14px_rgba(251,191,36,0.6)] scale-105'
+                  : 'bg-amber-500/15 border-amber-500/40 text-amber-300 hover:bg-amber-500/25'
+              }`}
+            >
+              <span>🎙️ Hindi Dub Guide</span>
+            </button>
+
             {/* Reload stream button */}
             <button
               onClick={handleReload}
               title="Reload video player"
-              className="p-1.5 rounded-lg bg-[#0c1836] border border-cyan-500/30 text-cyan-300 hover:text-white hover:bg-white/10 transition"
+              className="p-2 rounded-xl bg-[#0c1836] border border-cyan-500/30 text-cyan-300 hover:text-white hover:bg-white/10 transition"
             >
               <RefreshCw className="w-3.5 h-3.5" />
             </button>
@@ -70,10 +92,10 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
             <button
               onClick={openInNewWindow}
               title="Open full stream in new tab"
-              className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-300 hover:text-white text-xs font-semibold transition"
+              className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-300 hover:text-white text-xs font-bold transition shadow-sm"
             >
               <ExternalLink className="w-3.5 h-3.5" />
-              <span>Full Player</span>
+              <span>Full Player ↗</span>
             </button>
 
             {/* Close Modal */}
@@ -86,9 +108,94 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
           </div>
         </div>
 
+        {/* Expandable Hindi Audio Instructions Drawer */}
+        {showHindiGuide && (
+          <div className="p-4 bg-gradient-to-r from-[#0d1e3d] via-[#09152b] to-[#171408] border-b border-amber-500/30 text-xs">
+            <div className="flex items-center justify-between mb-2.5">
+              <div className="flex items-center gap-2 text-amber-300 font-bold text-xs sm:text-sm">
+                <span>🎙️ How to Play Hindi Dubbed Audio for Hollywood & International Movies:</span>
+              </div>
+              <button 
+                onClick={() => setShowHindiGuide(false)} 
+                className="text-amber-200/60 hover:text-white p-1"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2">
+              {/* Option 1: MultiEmbed */}
+              <div className="p-3 rounded-xl bg-black/40 border border-emerald-500/30 flex flex-col justify-between">
+                <div>
+                  <div className="font-bold text-emerald-300 mb-1 flex items-center justify-between">
+                    <span>1. Server 2 (MultiEmbed)</span>
+                    <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-bold">Recommended</span>
+                  </div>
+                  <p className="text-[11px] text-slate-300 leading-relaxed">
+                    Inside the player, click the <strong>≡ Menu / Servers</strong> icon (top-left or bottom) and select <strong>StreamWish</strong> or <strong>Filemoon</strong> for Dual-Audio Hindi.
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    const s = SERVERS.find(srv => srv.id === 'multiembed');
+                    if (s) setSelectedServer(s);
+                  }}
+                  className="mt-3 w-full py-1.5 rounded-lg bg-emerald-500/25 hover:bg-emerald-500/35 border border-emerald-400/40 text-emerald-300 font-bold text-xs transition"
+                >
+                  Switch to Server 2 (Hindi Dub)
+                </button>
+              </div>
+
+              {/* Option 2: VidLink */}
+              <div className="p-3 rounded-xl bg-black/40 border border-cyan-500/30 flex flex-col justify-between">
+                <div>
+                  <div className="font-bold text-cyan-300 mb-1 flex items-center justify-between">
+                    <span>2. Server 1 (VidLink 4K)</span>
+                    <span className="text-[10px] bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded font-bold">Fastest 4K</span>
+                  </div>
+                  <p className="text-[11px] text-slate-300 leading-relaxed">
+                    Inside the player, click the <strong>⚙️ Settings</strong> icon at the bottom-right ➔ click <strong>Audio Track</strong> ➔ select <strong>Hindi (हिन्दी)</strong> if dual-track is loaded.
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    const s = SERVERS.find(srv => srv.id === 'vidlink');
+                    if (s) setSelectedServer(s);
+                  }}
+                  className="mt-3 w-full py-1.5 rounded-lg bg-cyan-500/25 hover:bg-cyan-500/35 border border-cyan-400/40 text-cyan-300 font-bold text-xs transition"
+                >
+                  Switch to Server 1 (VidLink)
+                </button>
+              </div>
+
+              {/* Option 3: AutoEmbed */}
+              <div className="p-3 rounded-xl bg-black/40 border border-purple-500/30 flex flex-col justify-between">
+                <div>
+                  <div className="font-bold text-purple-300 mb-1 flex items-center justify-between">
+                    <span>3. Server 3 (AutoEmbed)</span>
+                    <span className="text-[10px] bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded font-bold">Auto Multi-Audio</span>
+                  </div>
+                  <p className="text-[11px] text-slate-300 leading-relaxed">
+                    AutoEmbed automatically routes regional Indian blockbusters (*Avengers: Endgame, Deadpool*) to multi-language streams.
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    const s = SERVERS.find(srv => srv.id === 'autoembed');
+                    if (s) setSelectedServer(s);
+                  }}
+                  className="mt-3 w-full py-1.5 rounded-lg bg-purple-500/25 hover:bg-purple-500/35 border border-purple-400/40 text-purple-300 font-bold text-xs transition"
+                >
+                  Switch to Server 3 (AutoEmbed)
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Server Switcher Bar */}
-        <div className="p-3 bg-[#0a142e] border-b border-cyan-500/15 flex items-center gap-2 overflow-x-auto no-scrollbar">
-          <span className="text-[11px] font-semibold text-cyan-300/80 flex items-center gap-1.5 whitespace-nowrap px-2">
+        <div className="p-3 bg-[#070e24] border-b border-cyan-500/15 flex items-center gap-2 overflow-x-auto no-scrollbar">
+          <span className="text-[11px] font-bold text-cyan-300/80 flex items-center gap-1.5 whitespace-nowrap px-2">
             <Zap className="w-3.5 h-3.5 text-amber-400" />
             Active Server:
           </span>
@@ -98,9 +205,9 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
               <button
                 key={srv.id}
                 onClick={() => setSelectedServer(srv)}
-                className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition border ${
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition border ${
                   isSelected
-                    ? 'bg-cyan-500 text-gray-950 border-cyan-400 shadow-[0_0_12px_rgba(77,197,249,0.5)] font-bold scale-105'
+                    ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 border-cyan-300 shadow-[0_0_15px_rgba(56,189,248,0.5)] font-bold scale-105'
                     : `${srv.color} hover:bg-white/10`
                 }`}
               >
@@ -123,7 +230,7 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
         </div>
 
         {/* Playback Guidance & Quick Server Fallback Bar */}
-        <div className="px-4 py-3 bg-[#060c1d] border-t border-cyan-500/15 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+        <div className="px-4 py-3 bg-[#050b1b] border-t border-cyan-500/15 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2 text-cyan-200/90 text-xs">
             <Zap className="w-4 h-4 text-amber-400 shrink-0 animate-pulse" />
             <span>

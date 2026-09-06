@@ -128,7 +128,12 @@ export default function App() {
   };
 
   return (
-    <div className={`min-h-screen ${isStealthMode ? 'bg-[#080b11]' : 'bg-[#050811]'} text-white flex flex-col selection:bg-cyan-500 selection:text-gray-950 pb-20 lg:pb-8`}>
+    <div className={`min-h-screen ${isStealthMode ? 'bg-[#080b11]' : 'bg-[#030712]'} text-white flex flex-col selection:bg-cyan-500 selection:text-gray-950 pb-20 lg:pb-8 relative overflow-hidden`}>
+      
+      {/* Background Ambient Hydro Glow Blobs */}
+      <div className="fixed -top-40 left-1/4 w-[650px] h-[650px] bg-cyan-500/[0.07] rounded-full blur-[160px] pointer-events-none -z-10" />
+      <div className="fixed top-1/3 -right-40 w-[550px] h-[550px] bg-blue-600/[0.06] rounded-full blur-[160px] pointer-events-none -z-10" />
+      <div className="fixed -bottom-40 left-10 w-[600px] h-[600px] bg-indigo-600/[0.05] rounded-full blur-[160px] pointer-events-none -z-10" />
       
       {/* Top Navigation */}
       <Navbar
@@ -144,15 +149,15 @@ export default function App() {
       />
 
       {/* Main Container */}
-      <main className="max-w-7xl mx-auto w-full px-4 sm:px-8 py-6 flex-1">
+      <main className="max-w-7xl mx-auto w-full px-4 sm:px-8 py-6 flex-1 relative z-10">
         
-        {/* Stealth Mode Indicator (Discreet banner) */}
+        {/* Stealth Mode Indicator */}
         {isStealthMode && (
-          <div className="mb-4 bg-slate-900/90 border border-slate-700/60 rounded-xl px-4 py-2 flex items-center justify-between text-xs text-slate-300">
-            <span>🛡️ Stealth Mode Active: Neutral theme & Furina artwork hidden</span>
+          <div className="mb-5 bg-slate-900/90 border border-slate-700/60 rounded-2xl px-5 py-2.5 flex items-center justify-between text-xs text-slate-300 shadow-md">
+            <span>🛡️ Stealth Mode Active: Neutral cinema theme & Furina branding disguised</span>
             <button 
               onClick={() => setIsStealthMode(false)}
-              className="text-cyan-400 hover:underline text-[11px] font-semibold"
+              className="text-cyan-400 hover:underline text-[11px] font-bold"
             >
               Restore Furina Theme
             </button>
@@ -169,38 +174,66 @@ export default function App() {
           />
         )}
 
-        {/* Section Header */}
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-2">
-            <span className={`w-2.5 h-2.5 rounded-full ${activeCategory === 'mature' ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]' : 'bg-cyan-400 shadow-[0_0_8px_rgba(77,197,249,0.8)]'}`} />
-            <h2 className="text-lg sm:text-xl font-bold tracking-tight text-white capitalize">
-              {searchQuery
-                ? `Results for "${searchQuery}"`
-                : activeCategory === 'trending'
-                ? '🔥 Trending Movies & Series'
-                : activeCategory === 'hollywood'
-                ? '🎬 Hollywood (English)'
-                : activeCategory === 'hindi'
-                ? '🇮🇳 Bollywood & Hindi Dubbed'
-                : activeCategory === 'series'
-                ? '📺 Latest Web Series'
-                : activeCategory === 'anime'
-                ? '✨ Anime & Animations'
-                : activeCategory === 'mature'
-                ? '🔞 18+ Mature & Uncut Cinema'
-                : '❤️ My Saved Watchlist'}
-            </h2>
+        {/* Section Header & Quick Filter Pills */}
+        <div className="mb-6 space-y-3">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2.5">
+              <span className={`w-3 h-3 rounded-full ${activeCategory === 'mature' ? 'bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.9)]' : 'bg-cyan-400 shadow-[0_0_12px_rgba(56,189,248,0.9)]'}`} />
+              <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white capitalize drop-shadow-sm">
+                {searchQuery
+                  ? `Results for "${searchQuery}"`
+                  : activeCategory === 'trending'
+                  ? '🔥 Trending Worldwide (Movies & Series)'
+                  : activeCategory === 'hollywood'
+                  ? '🎬 Hollywood Cinema (English)'
+                  : activeCategory === 'hindi'
+                  ? '🇮🇳 Bollywood & Hindi Dubbed Blockbusters'
+                  : activeCategory === 'series'
+                  ? '📺 Top Global Web Series'
+                  : activeCategory === 'anime'
+                  ? '✨ Anime & Japanese Animations'
+                  : activeCategory === 'mature'
+                  ? '🔞 18+ Mature & Uncut Cinema'
+                  : '❤️ My Saved Watchlist'}
+              </h2>
+            </div>
+            <span className="text-xs text-cyan-300/60 font-semibold bg-[#0a132b] px-3 py-1 rounded-full border border-cyan-500/15">
+              {items.length} titles loaded (Page {page})
+            </span>
           </div>
-          <span className="text-xs text-cyan-300/50 font-medium">
-            {items.length} titles loaded (Page {page})
-          </span>
+
+          {/* Quick Search & Filter Suggestions Chips */}
+          {searchQuery && (
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 text-xs">
+              <span className="text-cyan-200/50 text-[11px] whitespace-nowrap font-medium">Quick Filters:</span>
+              <button
+                onClick={() => setSearchQuery(searchQuery.replace(/\s*hindi\s*/gi, '').trim() + ' Hindi')}
+                className="px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-300 font-bold whitespace-nowrap hover:bg-amber-500/25 transition flex items-center gap-1"
+              >
+                <span>🇮🇳</span>
+                <span>Search in Hindi Dubbed</span>
+              </button>
+              <button
+                onClick={() => setSearchQuery(searchQuery.replace(/\s*hindi\s*/gi, '').trim())}
+                className="px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-500/40 text-cyan-300 font-bold whitespace-nowrap hover:bg-cyan-500/25 transition"
+              >
+                Original Version
+              </button>
+              <button
+                onClick={() => { setSearchQuery(''); setActiveCategory('hindi'); }}
+                className="px-3 py-1 rounded-full bg-[#0c1836] border border-cyan-500/20 text-cyan-200/70 font-medium whitespace-nowrap hover:text-white transition"
+              >
+                Browse All Bollywood / Hindi
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Loading Spinner */}
         {loading ? (
           <div className="py-24 flex flex-col items-center justify-center gap-3 text-cyan-400">
-            <RefreshCw className="w-8 h-8 animate-spin" />
-            <p className="text-xs text-cyan-200/60 font-medium">Fetching 4K catalog...</p>
+            <RefreshCw className="w-8 h-8 animate-spin text-cyan-400" />
+            <p className="text-xs text-cyan-200/60 font-semibold tracking-wide">Loading 4K catalog...</p>
           </div>
         ) : items.length > 0 ? (
           <>
