@@ -31,7 +31,12 @@ export default function App() {
   const [isStealthMode, setIsStealthMode] = useState(false);
   const [includeMature, setIncludeMature] = useState(false);
   const [preferredServer, setPreferredServer] = useState(() => {
-    return localStorage.getItem('furina_moviebox_server') || 'vidlink_hd';
+    const saved = localStorage.getItem('furina_moviebox_server');
+    const validIds = ['vidsrc_in', 'twoembed_vip', 'vidsrc_pm', 'vidsrc_me', 'vidlink_hd'];
+    if (saved && validIds.includes(saved)) {
+      return saved;
+    }
+    return 'vidsrc_in';
   });
 
   useEffect(() => {

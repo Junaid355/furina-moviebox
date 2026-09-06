@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Server, Film, Tv, RefreshCw, ExternalLink, Info, Shield } from 'lucide-react';
+import { X, Server, Film, Tv, RefreshCw, ExternalLink, Info, Zap, Play } from 'lucide-react';
 import { SERVERS, getStreamUrl } from '../services/streaming';
 import { fetchSeasonEpisodes } from '../services/tmdb';
 
@@ -15,6 +15,7 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
   const [episode, setEpisode] = useState(1);
   const [episodesList, setEpisodesList] = useState([]);
   const [isLoadingEpisodes, setIsLoadingEpisodes] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   // Load episodes if TV series
   useEffect(() => {
@@ -33,6 +34,10 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
     window.open(streamUrl, '_blank', 'noopener,noreferrer');
   };
 
+  const handleReload = () => {
+    setReloadKey((prev) => prev + 1);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/92 backdrop-blur-xl p-2 sm:p-4 overflow-y-auto">
       <div className="relative w-full max-w-5xl bg-[#091024] border border-cyan-500/30 rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(77,197,249,0.25)] flex flex-col">
@@ -47,19 +52,28 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
               <h2 className="font-bold text-sm sm:text-base text-white line-clamp-1">
                 {title} {isSeries && <span className="text-cyan-400 font-normal">S{season} E{episode}</span>}
               </h2>
-              <p className="text-[11px] text-cyan-200/50">Free 4K Streaming Engine</p>
+              <p className="text-[11px] text-cyan-200/50">Fast 4K Multi-Mirror Player</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Reload stream button */}
+            <button
+              onClick={handleReload}
+              title="Reload video player"
+              className="p-1.5 rounded-lg bg-[#0c1836] border border-cyan-500/30 text-cyan-300 hover:text-white hover:bg-white/10 transition"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+            </button>
+
             {/* Open stream in clean external window */}
             <button
               onClick={openInNewWindow}
               title="Open full stream in new tab"
-              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#0c1836] border border-cyan-500/30 text-cyan-300 hover:text-white hover:bg-white/10 text-xs font-semibold transition"
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-300 hover:text-white text-xs font-semibold transition"
             >
               <ExternalLink className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Popout</span>
+              <span>Full Player</span>
             </button>
 
             {/* Close Modal */}
@@ -75,8 +89,8 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
         {/* Server Switcher Bar */}
         <div className="p-3 bg-[#0a142e] border-b border-cyan-500/15 flex items-center gap-2 overflow-x-auto no-scrollbar">
           <span className="text-[11px] font-semibold text-cyan-300/80 flex items-center gap-1.5 whitespace-nowrap px-2">
-            <Server className="w-3.5 h-3.5" />
-            Server:
+            <Zap className="w-3.5 h-3.5 text-amber-400" />
+            Stream Server:
           </span>
           {SERVERS.map((srv) => {
             const isSelected = selectedServer.id === srv.id;
@@ -86,7 +100,7 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
                 onClick={() => setSelectedServer(srv)}
                 className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition border ${
                   isSelected
-                    ? 'bg-cyan-500 text-gray-950 border-cyan-400 shadow-[0_0_10px_rgba(77,197,249,0.5)] font-bold'
+                    ? 'bg-cyan-500 text-gray-950 border-cyan-400 shadow-[0_0_10px_rgba(77,197,249,0.5)] font-bold scale-105'
                     : `${srv.color} hover:bg-white/10`
                 }`}
               >
@@ -96,16 +110,39 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
           })}
         </div>
 
-        {/* Video Player IFrame Container (Un-sandboxed so embed scripts never get blocked) */}
+        {/* Video Player IFrame Container */}
         <div className="relative w-full aspect-video bg-black">
           <iframe
-            key={`${selectedServer.id}-${season}-${episode}`}
+            key={`${selectedServer.id}-${season}-${episode}-${reloadKey}`}
             src={streamUrl}
             title={title}
             className="w-full h-full border-0"
             allowFullScreen
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
           />
+        </div>
+
+        {/* Fast Fallback Helper Bar */}
+        <div className="px-4 py-2.5 bg-[#060c1d] border-t border-cyan-500/15 flex items-center justify-between flex-wrap gap-2 text-xs">
+          <div className="flex items-center gap-2 text-cyan-200/70">
+            <Zap className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>If video stays buffering, click play button inside or switch:</span>
+          </div>
+          <div className="flex items-center gap-1.5 overflow-x-auto">
+            {SERVERS.slice(0, 4).map((s) => (
+              <button
+                key={s.id}
+                onClick={() => setSelectedServer(s)}
+                className={`px-2.5 py-1 rounded text-[11px] font-semibold transition border ${
+                  selectedServer.id === s.id
+                    ? 'bg-cyan-500 text-gray-950 border-cyan-400 font-bold'
+                    : 'bg-[#0d1c44] border-cyan-500/20 text-cyan-300 hover:text-white'
+                }`}
+              >
+                {s.shortName}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* TV Series Episode & Season Navigation */}
@@ -182,11 +219,11 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
           </div>
         )}
 
-        {/* Footer Info & Troubleshooting Guidance */}
+        {/* Footer Info */}
         <div className="p-3 bg-[#050917] border-t border-cyan-500/15 flex items-center justify-between flex-wrap gap-2 text-[11px] text-cyan-200/60">
           <span className="flex items-center gap-1.5">
             <Info className="w-3.5 h-3.5 text-cyan-400" />
-            If one server buffers or shows content missing, switch to another server above (Server 1-5).
+            High-speed multi-server engine active. If one stream buffers, tap Server 1-4 above.
           </span>
           <span className="font-semibold text-cyan-400">4K Ultra HD</span>
         </div>
