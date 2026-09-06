@@ -164,12 +164,13 @@ export default function App() {
           </div>
         )}
 
-        {/* Featured Hero Banner */}
-        {!searchQuery && activeCategory !== 'watchlist' && heroItem && (
+        {/* Featured Hero Carousel Banner */}
+        {!searchQuery && activeCategory !== 'watchlist' && items && items.length > 0 && (
           <HeroBanner
+            items={items}
             item={heroItem}
             onPlay={setActiveMedia}
-            isWatchlisted={isWatchlisted(heroItem.id)}
+            isWatchlisted={isWatchlisted}
             onToggleWatchlist={toggleWatchlist}
           />
         )}
@@ -229,11 +230,18 @@ export default function App() {
           )}
         </div>
 
-        {/* Loading Spinner */}
+        {/* Skeleton Shimmer Loading Grid */}
         {loading ? (
-          <div className="py-24 flex flex-col items-center justify-center gap-3 text-cyan-400">
-            <RefreshCw className="w-8 h-8 animate-spin text-cyan-400" />
-            <p className="text-xs text-cyan-200/60 font-semibold tracking-wide">Loading 4K catalog...</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-5">
+            {[...Array(10)].map((_, i) => (
+              <div key={i} className="rounded-2xl overflow-hidden glass-card flex flex-col animate-pulse">
+                <div className="aspect-[2/3] w-full skeleton-shimmer" />
+                <div className="p-3 bg-[#050b1d] border-t border-white/[0.04] space-y-2">
+                  <div className="h-3.5 bg-white/10 rounded-md skeleton-shimmer w-3/4" />
+                  <div className="h-2.5 bg-white/5 rounded-md skeleton-shimmer w-1/2" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : items.length > 0 ? (
           <>
