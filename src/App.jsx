@@ -5,6 +5,7 @@ import MediaCard from './components/MediaCard';
 import PlayerModal from './components/PlayerModal';
 import SettingsModal from './components/SettingsModal';
 import IPhoneAppModal from './components/IPhoneAppModal';
+import ErrorBoundary from './components/ErrorBoundary';
 import { 
   fetchTrendingAll, 
   fetchHollywoodMovies, 
@@ -36,37 +37,48 @@ export default function App() {
   const [isStealthMode, setIsStealthMode] = useState(false);
   const [includeMature, setIncludeMature] = useState(false);
   const [preferredServer, setPreferredServer] = useState(() => {
-    const saved = localStorage.getItem('furina_moviebox_server');
-    const validIds = SERVERS.map((s) => s.id);
-    if (saved && validIds.includes(saved)) {
-      return saved;
-    }
-    return SERVERS[0]?.id || 'autoembed';
+    try {
+      const saved = localStorage.getItem('furina_moviebox_server');
+      const validIds = SERVERS.map((s) => s.id);
+      if (saved && validIds.includes(saved)) {
+        return saved;
+      }
+    } catch (e) {}
+    return SERVERS[0]?.id || 'vidlink_hindi';
   });
 
   useEffect(() => {
-    localStorage.setItem('furina_moviebox_server', preferredServer);
+    try {
+      localStorage.setItem('furina_moviebox_server', preferredServer);
+    } catch (e) {}
   }, [preferredServer]);
 
   const [watchlist, setWatchlist] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem('furina_moviebox_watchlist')) || [];
+      const saved = localStorage.getItem('furina_moviebox_watchlist');
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
     } catch {
       return [];
     }
   });
 
   useEffect(() => {
-    localStorage.setItem('furina_moviebox_watchlist', JSON.stringify(watchlist));
+    try {
+      localStorage.setItem('furina_moviebox_watchlist', JSON.stringify(Array.isArray(watchlist) ? watchlist : []));
+    } catch (e) {}
   }, [watchlist]);
 
   const toggleWatchlist = (item) => {
+    if (!item || !item.id) return;
     setWatchlist((prev) => {
-      const exists = prev.some((x) => x.id === item.id);
+      const arr = Array.isArray(prev) ? prev : [];
+      const exists = arr.some((x) => x && x.id === item.id);
       if (exists) {
-        return prev.filter((x) => x.id !== item.id);
+        return arr.filter((x) => x && x.id !== item.id);
       }
-      return [item, ...prev];
+      return [item, ...arr];
     });
   };
 
@@ -78,7 +90,10 @@ export default function App() {
     }
   };
 
-  const isWatchlisted = (id) => watchlist.some((x) => x.id === id);
+  const isWatchlisted = (id) => {
+    if (!id || !Array.isArray(watchlist)) return false;
+    return watchlist.some((x) => x && x.id === id);
+  };
 
   // Helper function to fetch data for given category & page
   const fetchCategoryItems = async (cat, pageNum, query = '') => {
@@ -173,13 +188,15 @@ export default function App() {
 
         {/* Featured Hero Carousel Banner */}
         {!searchQuery && activeCategory !== 'watchlist' && items && items.length > 0 && (
-          <HeroBanner
-            items={items}
-            item={heroItem}
-            onPlay={setActiveMedia}
-            isWatchlisted={isWatchlisted}
-            onToggleWatchlist={toggleWatchlist}
-          />
+          <ErrorBoundary inline>
+            <HeroBanner
+              items={items}
+              item={heroItem}
+              onPlay={setActiveMedia}
+              isWatchlisted={isWatchlisted}
+              onToggleWatchlist={toggleWatchlist}
+            />
+          </ErrorBoundary>
         )}
 
         {/* Section Header & Quick Filter Pills */}
@@ -308,18 +325,20 @@ export default function App() {
 
       {/* Video Player Modal */}
       {activeMedia && (
-        <PlayerModal
-          item={activeMedia}
-          preferredServerId={preferredServer}
-          isHindiPreferred={
-            activeCategory === 'hindi' ||
-            (searchQuery && searchQuery.toLowerCase().includes('hindi')) ||
-            activeMedia.isHindiDubbed ||
-            activeMedia.original_language === 'hi' ||
-            activeMedia.category === 'hindi'
-          }
-          onClose={() => setActiveMedia(null)}
-        />
+        <ErrorBoundary inline>
+          <PlayerModal
+            item={activeMedia}
+            preferredServerId={preferredServer}
+            isHindiPreferred={
+              activeCategory === 'hindi' ||
+              (searchQuery && searchQuery.toLowerCase().includes('hindi')) ||
+              Boolean(activeMedia?.isHindiDubbed) ||
+              activeMedia?.original_language === 'hi' ||
+              activeMedia?.category === 'hindi'
+            }
+            onClose={() => setActiveMedia(null)}
+          />
+        </ErrorBoundary>
       )}
 
       {/* Settings & Secret Master Vault Modal (Passcode: 2030) */}

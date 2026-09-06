@@ -3,15 +3,18 @@ import { Play, Star, Bookmark, Check, Sparkles } from 'lucide-react';
 import { IMG_BASE } from '../services/tmdb';
 
 export default function MediaCard({ item, onPlay, isWatchlisted, onToggleWatchlist }) {
+  if (!item) return null;
   const [imageLoaded, setImageLoaded] = useState(false);
   const title = item.title || item.name || 'Untitled';
-  const year = (item.release_date || item.first_air_date || '').substring(0, 4);
-  const rating = item.vote_average ? item.vote_average.toFixed(1) : '7.8';
-  const isSeries = item.media_type === 'tv' || !!item.first_air_date;
-  const isHindi = item.isHindiDubbed || item.original_language === 'hi' || item.category === 'hindi';
+  const year = String(item.release_date || item.first_air_date || '').substring(0, 4);
+  const rating = typeof item.vote_average === 'number' 
+    ? item.vote_average.toFixed(1) 
+    : (item.vote_average || '7.8');
+  const isSeries = item.media_type === 'tv' || Boolean(item.first_air_date);
+  const isHindi = Boolean(item.isHindiDubbed || item.original_language === 'hi' || item.category === 'hindi');
   
   const todayStr = new Date().toISOString().split('T')[0];
-  const isUpcoming = item.release_date && item.release_date > todayStr;
+  const isUpcoming = Boolean(item.release_date && item.release_date > todayStr);
 
   return (
     <div 

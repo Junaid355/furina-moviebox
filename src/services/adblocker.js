@@ -35,48 +35,45 @@ export function isAdBlockEnabled() {
 export function initAdBlocker() {
   if (typeof window === 'undefined') return;
 
-  isShieldEnabled = isAdBlockEnabled();
-
-  // 1. Intercept window.open on top-level window to stop unsolicited popups and ads
-  const originalWindowOpen = window.open;
-  window.open = function(url, target, features) {
-    if (!isShieldEnabled) {
-      return originalWindowOpen.apply(window, arguments);
-    }
-
-    if (allowNextPopup) {
-      allowNextPopup = false;
-      return originalWindowOpen.apply(window, arguments);
-    }
-
-    blockedCount++;
-    console.warn('[Furina AdBlock Shield] Blocked top-level popup #' + blockedCount, url);
-    
-    // Dispatch event so UI can show blocked badge/counter
-    window.dispatchEvent(new CustomEvent('furina-ad-blocked', { 
-      detail: { count: blockedCount, url: url || 'popunder' } 
-    }));
-
-    return null;
-  };
-
-  // 2. Prevent malicious background redirect & retain window focus
-  window.addEventListener('blur', () => {
-    if (!isShieldEnabled) return;
-    // When user clicks the video and an iframe attempts to steal focus for an ad,
-    // re-focus the moviebox tab
-    setTimeout(() => {
-      window.focus();
-    }, 150);
-  });
-
-  // 3. Prevent third-party top-navigation hijack (attempting to redirect site away to an ad URL)
   try {
-    window.addEventListener('beforeunload', (e) => {
-      // If a popup tries to forcefully redirect the main window while playing, prevent silent navigation
-    });
-  } catch (e) {}
+    isShieldEnabled = isAdBlockEnabled();
 
-  console.log('[Furina AdBlock Shield] Initialized & Active 🛡️');
+    // 1. Intercept window.open on top-level window to stop unsolicited popups and ads
+    const originalWindowOpen = window.open;
+    window.open = function(url, target, features) {
+      if (!isShieldEnabled) {
+        return originalWindowOpen.apply(window, arguments);
+      }
+
+      if (allowNextPopup) {
+        allowNextPopup = false;
+        return originalWindowOpen.apply(window, arguments);
+      }
+
+      blockedCount++;
+      console.warn('[Furina AdBlock Shield] Blocked top-level popup #' + blockedCount, url);
+      
+      // Dispatch event so UI can show blocked badge/counter
+      window.dispatchEvent(new CustomEvent('furina-ad-blocked', { 
+        detail: { count: blockedCount, url: url || 'popunder' } 
+      }));
+
+      return null;
+    };
+
+    // 2. Prevent malicious background redirect & retain window focus
+    window.addEventListener('blur', () => {
+      if (!isShieldEnabled) return;
+      // When user clicks the video and an iframe attempts to steal focus for an ad,
+      // re-focus the moviebox tab
+      setTimeout(() => {
+        window.focus();
+      }, 150);
+    });
+
+    console.log('[Furina AdBlock Shield] Initialized & Active 🛡️');
+  } catch (err) {
+    console.warn('[Furina AdBlock Shield] Failed to initialize:', err);
+  }
 }
 

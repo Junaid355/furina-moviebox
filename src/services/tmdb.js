@@ -118,14 +118,16 @@ export async function fetchTrendingAll(page = 1) {
     const res = await fetch(`${BASE_URL}/trending/all/week?api_key=${API_KEY}&page=${page}`);
     const data = await res.json();
     if (!data.results || data.results.length === 0) return page === 1 ? FALLBACK_MEDIA : [];
-    // Ensure all trending titles are actually released and streamable
     const filtered = data.results.filter(item => {
+      if (!item || typeof item !== 'object' || !item.id) return false;
+      if (item.media_type === 'person') return false;
       const releaseDate = item.release_date || item.first_air_date;
       const votes = item.vote_count || 0;
       if (releaseDate && releaseDate > today && votes < 5) return false;
       return true;
     });
-    return filtered.length > 0 ? filtered : data.results;
+    const validResults = (data.results || []).filter(item => item && item.media_type !== 'person' && item.id);
+    return filtered.length > 0 ? filtered : validResults;
   } catch (err) {
     return page === 1 ? FALLBACK_MEDIA : [];
   }
@@ -210,7 +212,7 @@ export async function searchContent(query, page = 1, includeAdult = false) {
   try {
     let res = await fetch(`${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(query.trim())}&page=${page}&include_adult=${includeAdult}`);
     let data = await res.json();
-    let results = (data.results || []).filter(item => item.poster_path || item.backdrop_path);
+    let results = (data.results || []).filter(item => item && item.id && item.media_type !== 'person' && (item.poster_path || item.backdrop_path));
 
     // If no results, try stripping modifiers like 'hindi dubbed', 'hindi', 'dubbed', 'full movie', 'movie', etc.
     if (results.length === 0) {
@@ -218,7 +220,7 @@ export async function searchContent(query, page = 1, includeAdult = false) {
       if (cleaned && cleaned.toLowerCase() !== query.trim().toLowerCase()) {
         res = await fetch(`${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(cleaned)}&page=${page}&include_adult=${includeAdult}`);
         data = await res.json();
-        results = (data.results || []).filter(item => item.poster_path || item.backdrop_path);
+        results = (data.results || []).filter(item => item && item.id && item.media_type !== 'person' && (item.poster_path || item.backdrop_path));
       }
     }
 

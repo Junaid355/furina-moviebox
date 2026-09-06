@@ -4,7 +4,9 @@ import { BACKDROP_BASE } from '../services/tmdb';
 
 export default function HeroBanner({ items, item, onPlay, isWatchlisted, onToggleWatchlist }) {
   // Support both items array or single item prop
-  const list = items && items.length > 0 ? items.slice(0, 6) : (item ? [item] : []);
+  const list = (Array.isArray(items) && items.length > 0)
+    ? items.filter(Boolean).slice(0, 6)
+    : (item ? [item] : []);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -17,14 +19,16 @@ export default function HeroBanner({ items, item, onPlay, isWatchlisted, onToggl
   }, [list.length, isPaused]);
 
   if (list.length === 0) return null;
-  const currentItem = list[currentIndex] || list[0];
+  const currentItem = list[currentIndex] || list[0] || {};
 
   const title = currentItem.title || currentItem.name || 'Featured Blockbuster';
-  const year = (currentItem.release_date || currentItem.first_air_date || '').substring(0, 4);
-  const rating = currentItem.vote_average ? currentItem.vote_average.toFixed(1) : '8.2';
-  const isSeries = currentItem.media_type === 'tv' || !!currentItem.first_air_date;
-  const isHindi = currentItem.isHindiDubbed || currentItem.original_language === 'hi' || currentItem.category === 'hindi';
-  const saved = isWatchlisted ? isWatchlisted(currentItem.id) : false;
+  const year = String(currentItem.release_date || currentItem.first_air_date || '').substring(0, 4);
+  const rating = typeof currentItem.vote_average === 'number'
+    ? currentItem.vote_average.toFixed(1)
+    : (currentItem.vote_average || '8.2');
+  const isSeries = currentItem.media_type === 'tv' || Boolean(currentItem.first_air_date);
+  const isHindi = Boolean(currentItem.isHindiDubbed || currentItem.original_language === 'hi' || currentItem.category === 'hindi');
+  const saved = (isWatchlisted && currentItem.id) ? isWatchlisted(currentItem.id) : false;
 
   return (
     <div 

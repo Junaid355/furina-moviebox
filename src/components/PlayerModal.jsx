@@ -7,13 +7,13 @@ import { permitPopupOnce, getBlockedCount } from '../services/adblocker';
 export default function PlayerModal({ item, onClose, preferredServerId, isHindiPreferred }) {
   if (!item) return null;
 
-  const isSeries = item.media_type === 'tv' || !!item.first_air_date;
-  const title = item.title || item.name || 'Now Playing';
+  const isSeries = item?.media_type === 'tv' || Boolean(item?.first_air_date);
+  const title = item?.title || item?.name || 'Now Playing';
 
-  const initialServer = (isHindiPreferred || item.original_language === 'hi')
+  const initialServer = (isHindiPreferred || item?.original_language === 'hi')
     ? (SERVERS.find((s) => s.id === 'vidlink_hindi') || SERVERS[0])
     : (SERVERS.find((s) => s.id === preferredServerId) || SERVERS[0]);
-  const [selectedServer, setSelectedServer] = useState(initialServer);
+  const [selectedServer, setSelectedServer] = useState(initialServer || SERVERS[0]);
   const [season, setSeason] = useState(1);
   const [episode, setEpisode] = useState(1);
   const [totalSeasons, setTotalSeasons] = useState(1);
@@ -78,8 +78,9 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     }
   }, [item.id, season, isSeries]);
 
-  const streamUrl = getStreamUrl(selectedServer, item.id, isSeries ? 'tv' : 'movie', season, episode);
-  const downloadUrl = getDownloadUrl(item.id, isSeries ? 'tv' : 'movie', season, episode);
+  const currentServer = selectedServer || SERVERS[0];
+  const streamUrl = getStreamUrl(currentServer, item?.id, isSeries ? 'tv' : 'movie', season, episode);
+  const downloadUrl = getDownloadUrl(item?.id, isSeries ? 'tv' : 'movie', season, episode);
 
   const openInNewWindow = () => {
     permitPopupOnce();
@@ -87,7 +88,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   };
 
   const handleNextServer = () => {
-    const currentIndex = SERVERS.findIndex((s) => s.id === selectedServer.id);
+    const currentIndex = SERVERS.findIndex((s) => s.id === (currentServer?.id || SERVERS[0].id));
     const nextServer = SERVERS[(currentIndex + 1) % SERVERS.length];
     setSelectedServer(nextServer);
   };
@@ -340,7 +341,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
             Active Server:
           </span>
           {SERVERS.map((srv) => {
-            const isSelected = selectedServer.id === srv.id;
+            const isSelected = currentServer.id === srv.id;
             return (
               <button
                 key={srv.id}
@@ -421,7 +422,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
           style={AI_BOOST_STYLES[aiBoostMode] || {}}
         >
           <iframe
-            key={`${selectedServer.id}-${season}-${episode}-${reloadKey}`}
+            key={`${currentServer.id}-${season}-${episode}-${reloadKey}`}
             src={streamUrl}
             title={title}
             className="w-full h-full border-0"
@@ -440,7 +441,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
               <div className="font-extrabold text-white text-xs sm:text-sm flex items-center gap-2">
                 <span>Hindi Dubbed & Dual-Audio (In-App)</span>
                 <span className="text-[10px] bg-amber-500/25 text-amber-300 px-2 py-0.5 rounded font-bold border border-amber-500/40">
-                  {selectedServer.id === 'vidlink_hindi' ? 'Active: Server 1 (Hindi Dubbed)' : 'Available In-App'}
+                  {currentServer.id === 'vidlink_hindi' ? 'Active: Server 1 (Hindi Dubbed)' : 'Available In-App'}
                 </span>
               </div>
               <p className="text-[11px] text-amber-200/90 mt-0.5 leading-relaxed">
