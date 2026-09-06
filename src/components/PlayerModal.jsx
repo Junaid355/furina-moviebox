@@ -305,6 +305,62 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
           />
         </div>
 
+        {/* Dedicated Hindi Dubbed Dual-Audio Stream Gateway */}
+        <div className="p-3.5 bg-gradient-to-r from-[#1f1505] via-[#120e06] to-[#081329] border-t border-b border-amber-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-gray-950 flex items-center justify-center font-black text-lg shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.4)]">
+              🇮🇳
+            </div>
+            <div>
+              <div className="font-extrabold text-white text-xs sm:text-sm flex items-center gap-2">
+                <span>Want to Watch in Hindi Dubbed (हिन्दी)?</span>
+                <span className="text-[10px] bg-amber-500/25 text-amber-300 px-2 py-0.5 rounded font-bold border border-amber-500/40 animate-pulse">Dual-Audio Stream</span>
+              </div>
+              <p className="text-[11px] text-amber-200/80 mt-0.5 leading-relaxed">
+                Hollywood web scrapers play original English audio. For full <strong>Hindi dubbed audio</strong> for <em>{title}</em>, launch our verified dual-audio portals:
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap shrink-0 w-full md:w-auto">
+            <a
+              href={`https://desicinemas.tv/?s=${encodeURIComponent(title)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={permitPopupOnce}
+              className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-gray-950 font-extrabold text-xs transition shadow-[0_0_12px_rgba(245,158,11,0.5)] flex items-center gap-1.5 hover:scale-105"
+            >
+              <span>DesiCinemas ↗</span>
+            </a>
+            <a
+              href={`https://moviesmod.vip/?s=${encodeURIComponent(title + ' Hindi Dubbed')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={permitPopupOnce}
+              className="px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/50 text-emerald-300 hover:text-white font-bold text-xs transition flex items-center gap-1.5"
+            >
+              <span>MoviesMod Hindi ↗</span>
+            </a>
+            <a
+              href={`https://hdhub4u.tv/?s=${encodeURIComponent(title + ' Hindi')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={permitPopupOnce}
+              className="px-3 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/50 text-cyan-300 hover:text-white font-bold text-xs transition flex items-center gap-1.5"
+            >
+              <span>HDHub4u Hindi ↗</span>
+            </a>
+            <a
+              href={`https://www.hotstar.com/in/explore?search_query=${encodeURIComponent(title)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={permitPopupOnce}
+              className="px-3 py-1.5 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/50 text-blue-300 hover:text-white font-bold text-xs transition flex items-center gap-1.5"
+            >
+              <span>Hotstar Hindi ↗</span>
+            </a>
+          </div>
+        </div>
+
         {/* Playback Guidance & Quick Server Fallback Bar */}
         <div className="px-4 py-3 bg-[#050b1b] border-t border-cyan-500/15 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2 text-cyan-200/90 text-xs">
