@@ -78,26 +78,26 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            {/* AdBlock Shield Live Status */}
+            {/* AdBlock Shield Live Status with Native Sandbox Pill */}
             <div 
-              title="Built-in AdBlock Shield blocks third-party popups and redirects"
-              className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold shadow-sm"
+              title="Native Browser Sandbox Shield actively blocks popups, pop-unders, and ad redirects"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold shadow-sm"
             >
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-              <span>Shield {blockedAds > 0 ? `(${blockedAds} Blocked)` : 'Active'}</span>
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0 animate-pulse" />
+              <span>AdBlock Active (Sandbox Shield)</span>
             </div>
 
             {/* Hindi Dubbed Audio Switcher Guide Toggle */}
             <button
               onClick={() => setShowHindiGuide(!showHindiGuide)}
-              title="How to enable Hindi Dubbed Audio"
+              title="Hindi Audio Information"
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition shadow-sm ${
                 showHindiGuide
                   ? 'bg-amber-500 text-gray-950 border-amber-400 shadow-[0_0_14px_rgba(251,191,36,0.6)] scale-105'
                   : 'bg-amber-500/15 border-amber-500/40 text-amber-300 hover:bg-amber-500/25'
               }`}
             >
-              <span>🎙️ Hindi Dub Guide</span>
+              <span>🎙️ Hindi Audio Info</span>
             </button>
 
             {/* Reload stream button */}
@@ -112,7 +112,7 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
             {/* Open stream in clean external window */}
             <button
               onClick={openInNewWindow}
-              title="Open full stream in new tab"
+              title="Open full stream in new clean tab"
               className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-300 hover:text-white text-xs font-bold transition shadow-sm"
             >
               <ExternalLink className="w-3.5 h-3.5" />
@@ -129,12 +129,12 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
           </div>
         </div>
 
-        {/* Expandable Hindi Audio Instructions Drawer */}
+        {/* Expandable Hindi Audio Information Drawer */}
         {showHindiGuide && (
           <div className="p-4 bg-gradient-to-r from-[#0d1e3d] via-[#09152b] to-[#171408] border-b border-amber-500/30 text-xs">
             <div className="flex items-center justify-between mb-2.5">
               <div className="flex items-center gap-2 text-amber-300 font-bold text-xs sm:text-sm">
-                <span>🎙️ How to Play Hindi Dubbed Audio for Hollywood & International Movies:</span>
+                <span>🎙️ Audio Track & Hindi Dubbing Details:</span>
               </div>
               <button 
                 onClick={() => setShowHindiGuide(false)} 
@@ -144,71 +144,37 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
               </button>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2">
-              {/* Option 1: MultiEmbed */}
-              <div className="p-3 rounded-xl bg-black/40 border border-emerald-500/30 flex flex-col justify-between">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+              {/* Option 1: Bollywood & Indian Cinema */}
+              <div className="p-3.5 rounded-xl bg-black/50 border border-emerald-500/40 flex flex-col justify-between">
                 <div>
-                  <div className="font-bold text-emerald-300 mb-1 flex items-center justify-between">
-                    <span>1. Server 2 (MultiEmbed)</span>
-                    <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-bold">Recommended</span>
+                  <div className="font-bold text-emerald-300 mb-1.5 flex items-center justify-between">
+                    <span>🇮🇳 1. Bollywood & Indian Cinema</span>
+                    <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-bold">100% Hindi Audio</span>
                   </div>
                   <p className="text-[11px] text-slate-300 leading-relaxed">
-                    Inside the player, click the <strong>≡ Menu / Servers</strong> icon (top-left or bottom) and select <strong>StreamWish</strong> or <strong>Filemoon</strong> for Dual-Audio Hindi.
+                    All Indian titles (e.g. <em>Kalki 2898 AD, Stree 2, Jawan, Pathaan, Animal, Salaar, RRR</em>) play in <strong>full native Hindi audio</strong> automatically on Server 1 and Server 2! No settings changes needed.
                   </p>
                 </div>
-                <button
-                  onClick={() => {
-                    const s = SERVERS.find(srv => srv.id === 'multiembed');
-                    if (s) setSelectedServer(s);
-                  }}
-                  className="mt-3 w-full py-1.5 rounded-lg bg-emerald-500/25 hover:bg-emerald-500/35 border border-emerald-400/40 text-emerald-300 font-bold text-xs transition"
-                >
-                  Switch to Server 2 (Hindi Dub)
-                </button>
+                <div className="mt-2.5 text-[10px] text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-1 rounded">
+                  ✓ Explore our "🇮🇳 Bollywood & Hindi Dubbed" tab on the homepage!
+                </div>
               </div>
 
-              {/* Option 2: VidLink */}
-              <div className="p-3 rounded-xl bg-black/40 border border-cyan-500/30 flex flex-col justify-between">
+              {/* Option 2: Hollywood Titles */}
+              <div className="p-3.5 rounded-xl bg-black/50 border border-cyan-500/40 flex flex-col justify-between">
                 <div>
-                  <div className="font-bold text-cyan-300 mb-1 flex items-center justify-between">
-                    <span>2. Server 1 (VidLink 4K)</span>
-                    <span className="text-[10px] bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded font-bold">Fastest 4K</span>
+                  <div className="font-bold text-cyan-300 mb-1.5 flex items-center justify-between">
+                    <span>🎬 2. Hollywood Blockbusters</span>
+                    <span className="text-[10px] bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded font-bold">Original English Track</span>
                   </div>
                   <p className="text-[11px] text-slate-300 leading-relaxed">
-                    Inside the player, click the <strong>⚙️ Settings</strong> icon at the bottom-right ➔ click <strong>Audio Track</strong> ➔ select <strong>Hindi (हिन्दी)</strong> if dual-track is loaded.
+                    Hollywood movies (e.g. <em>Avengers: Endgame, Deadpool, Oppenheimer</em>) are streamed with high-definition original English audio. Scraped web embeds do not re-encode multi-track Hindi audio streams.
                   </p>
                 </div>
-                <button
-                  onClick={() => {
-                    const s = SERVERS.find(srv => srv.id === 'vidlink');
-                    if (s) setSelectedServer(s);
-                  }}
-                  className="mt-3 w-full py-1.5 rounded-lg bg-cyan-500/25 hover:bg-cyan-500/35 border border-cyan-400/40 text-cyan-300 font-bold text-xs transition"
-                >
-                  Switch to Server 1 (VidLink)
-                </button>
-              </div>
-
-              {/* Option 3: AutoEmbed */}
-              <div className="p-3 rounded-xl bg-black/40 border border-purple-500/30 flex flex-col justify-between">
-                <div>
-                  <div className="font-bold text-purple-300 mb-1 flex items-center justify-between">
-                    <span>3. Server 3 (AutoEmbed)</span>
-                    <span className="text-[10px] bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded font-bold">Auto Multi-Audio</span>
-                  </div>
-                  <p className="text-[11px] text-slate-300 leading-relaxed">
-                    AutoEmbed automatically routes regional Indian blockbusters (*Avengers: Endgame, Deadpool*) to multi-language streams.
-                  </p>
+                <div className="mt-2.5 text-[10px] text-cyan-400 font-semibold bg-cyan-500/10 px-2 py-1 rounded">
+                  ✓ Instant 1080p/4K playback on Server 1 (AutoEmbed) & Server 2 (VidSrc 4K)
                 </div>
-                <button
-                  onClick={() => {
-                    const s = SERVERS.find(srv => srv.id === 'autoembed');
-                    if (s) setSelectedServer(s);
-                  }}
-                  className="mt-3 w-full py-1.5 rounded-lg bg-purple-500/25 hover:bg-purple-500/35 border border-purple-400/40 text-purple-300 font-bold text-xs transition"
-                >
-                  Switch to Server 3 (AutoEmbed)
-                </button>
               </div>
             </div>
           </div>
@@ -238,7 +204,7 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
           })}
         </div>
 
-        {/* Video Player IFrame Container */}
+        {/* Video Player IFrame Container with Sandbox Ad Blocker */}
         <div className="relative w-full aspect-video bg-black">
           <iframe
             key={`${selectedServer.id}-${season}-${episode}-${reloadKey}`}
@@ -246,6 +212,7 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
             title={title}
             className="w-full h-full border-0"
             allowFullScreen
+            sandbox="allow-forms allow-scripts allow-same-origin allow-presentation"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
           />
         </div>
