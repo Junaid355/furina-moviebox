@@ -13,6 +13,7 @@ import {
   fetchMatureMovies,
   searchContent 
 } from './services/tmdb';
+import { SERVERS } from './services/streaming';
 import { Flame, Film, Tv, Sparkles, Heart, RefreshCw, Shield, Settings, ChevronDown } from 'lucide-react';
 
 export default function App() {
@@ -32,11 +33,11 @@ export default function App() {
   const [includeMature, setIncludeMature] = useState(false);
   const [preferredServer, setPreferredServer] = useState(() => {
     const saved = localStorage.getItem('furina_moviebox_server');
-    const validIds = ['vidsrc_in', 'twoembed_vip', 'vidsrc_pm', 'vidsrc_me', 'vidlink_hd'];
+    const validIds = SERVERS.map((s) => s.id);
     if (saved && validIds.includes(saved)) {
       return saved;
     }
-    return 'vidsrc_in';
+    return 'vidlink';
   });
 
   useEffect(() => {
@@ -278,12 +279,13 @@ export default function App() {
       />
 
       {/* Mobile iOS Style Bottom Navigation Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-[#070d1e]/90 backdrop-blur-xl border-t border-cyan-500/20 px-3 py-2 flex items-center justify-around">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-[#070d1e]/90 backdrop-blur-xl border-t border-cyan-500/20 px-2 py-2 flex items-center justify-around">
         {[
           { id: 'trending', label: 'Trending', icon: Flame },
           { id: 'hollywood', label: 'Movies', icon: Film },
           { id: 'hindi', label: 'Hindi', icon: Sparkles },
           { id: 'series', label: 'Series', icon: Tv },
+          { id: 'anime', label: 'Anime', icon: Sparkles },
           ...(includeMature ? [{ id: 'mature', label: '18+', icon: Flame }] : []),
           { id: 'watchlist', label: 'Saved', icon: Heart },
         ].map((tab) => {

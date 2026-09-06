@@ -90,7 +90,7 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
         <div className="p-3 bg-[#0a142e] border-b border-cyan-500/15 flex items-center gap-2 overflow-x-auto no-scrollbar">
           <span className="text-[11px] font-semibold text-cyan-300/80 flex items-center gap-1.5 whitespace-nowrap px-2">
             <Zap className="w-3.5 h-3.5 text-amber-400" />
-            Stream Server:
+            Active Server:
           </span>
           {SERVERS.map((srv) => {
             const isSelected = selectedServer.id === srv.id;
@@ -100,11 +100,11 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
                 onClick={() => setSelectedServer(srv)}
                 className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition border ${
                   isSelected
-                    ? 'bg-cyan-500 text-gray-950 border-cyan-400 shadow-[0_0_10px_rgba(77,197,249,0.5)] font-bold scale-105'
+                    ? 'bg-cyan-500 text-gray-950 border-cyan-400 shadow-[0_0_12px_rgba(77,197,249,0.5)] font-bold scale-105'
                     : `${srv.color} hover:bg-white/10`
                 }`}
               >
-                {srv.name}
+                {srv.shortName || srv.name}
               </button>
             );
           })}
@@ -122,21 +122,23 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
           />
         </div>
 
-        {/* Fast Fallback Helper Bar */}
-        <div className="px-4 py-2.5 bg-[#060c1d] border-t border-cyan-500/15 flex items-center justify-between flex-wrap gap-2 text-xs">
-          <div className="flex items-center gap-2 text-cyan-200/70">
-            <Zap className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>If video stays buffering, click play button inside or switch:</span>
+        {/* Playback Guidance & Quick Server Fallback Bar */}
+        <div className="px-4 py-3 bg-[#060c1d] border-t border-cyan-500/15 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2 text-cyan-200/90 text-xs">
+            <Zap className="w-4 h-4 text-amber-400 shrink-0 animate-pulse" />
+            <span>
+              <strong>Tip:</strong> Tap inside player to start sound/video. If loading persists, switch mirror:
+            </span>
           </div>
-          <div className="flex items-center gap-1.5 overflow-x-auto">
-            {SERVERS.slice(0, 4).map((s) => (
+          <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
+            {SERVERS.map((s) => (
               <button
                 key={s.id}
                 onClick={() => setSelectedServer(s)}
-                className={`px-2.5 py-1 rounded text-[11px] font-semibold transition border ${
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition border ${
                   selectedServer.id === s.id
-                    ? 'bg-cyan-500 text-gray-950 border-cyan-400 font-bold'
-                    : 'bg-[#0d1c44] border-cyan-500/20 text-cyan-300 hover:text-white'
+                    ? 'bg-cyan-500 text-gray-950 border-cyan-400 font-bold shadow'
+                    : 'bg-[#0d1c44] border-cyan-500/20 text-cyan-300 hover:text-white hover:bg-white/10'
                 }`}
               >
                 {s.shortName}
