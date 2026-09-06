@@ -20,6 +20,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const [episodesList, setEpisodesList] = useState([]);
   const [isLoadingEpisodes, setIsLoadingEpisodes] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  const handleReload = () => setReloadKey((k) => k + 1);
   const [showHindiGuide, setShowHindiGuide] = useState(false);
   const [showUBlockGuide, setShowUBlockGuide] = useState(false);
   const [blockedAds, setBlockedAds] = useState(getBlockedCount());

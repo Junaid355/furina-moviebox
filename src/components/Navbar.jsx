@@ -21,7 +21,10 @@ export default function Navbar({
     { id: 'anime', label: '🌸 Anime', icon: Sparkles },
     { id: 'horror', label: '👻 Horror', icon: Skull },
     { id: 'series', label: 'Web Series', icon: Tv },
-    ...(includeMature ? [{ id: 'mature', label: '🔞 18+ Mature', icon: Flame, is18: true }] : []),
+    ...((isMasterMode || includeMature) ? [
+      { id: 'ecchi_anime', label: '🔞 18+ Anime', icon: Flame, is18: true },
+      { id: 'mature', label: '🔞 18+ Cinema', icon: Flame, is18: true }
+    ] : []),
     { id: 'watchlist', label: 'Watchlist', icon: Heart },
   ];
 

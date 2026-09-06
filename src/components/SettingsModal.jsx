@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { 
   X, Settings, Lock, Unlock, Eye, EyeOff, Flame, ShieldCheck, 
   Server, Sliders, Trash2, CheckCircle2, AlertTriangle, KeyRound, Shield,
-  Sparkles, RefreshCw
+  Sparkles, RefreshCw, Play
 } from 'lucide-react';
 import { SERVERS } from '../services/streaming';
 import { isAdBlockEnabled, setShieldEnabled } from '../services/adblocker';
 import { isAiUpdaterEnabled, setAiUpdaterEnabled, triggerAiSync, getLastSyncTime } from '../services/aiUpdater';
+import { SECRET_ECCHI_ANIME, IMG_BASE } from '../services/tmdb';
 
 export default function SettingsModal({
   isOpen,
@@ -19,7 +20,9 @@ export default function SettingsModal({
   setIncludeMature,
   preferredServer,
   setPreferredServer,
-  onClearWatchlist
+  onClearWatchlist,
+  onPlayMedia,
+  onSelectCategory
 }) {
   const [pin, setPin] = useState('');
   const [pinError, setPinError] = useState(false);
@@ -383,6 +386,81 @@ export default function SettingsModal({
                         includeMature ? 'translate-x-6' : 'translate-x-0'
                       }`} />
                     </button>
+                  </div>
+
+                  {/* 🔞 Secret 18+ Anime Vault (Overflow, ComicFesta & Ecchi Uncut) */}
+                  <div className="bg-[#0b1633] border border-amber-500/30 rounded-2xl p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">🔞</span>
+                        <div>
+                          <h4 className="font-extrabold text-sm text-amber-300 flex items-center gap-2">
+                            <span>Secret 18+ Anime Vault</span>
+                            <span className="text-[9px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full border border-amber-500/30 font-mono font-bold">OVERFLOW & COMICFESTA</span>
+                          </h4>
+                          <p className="text-[11px] text-cyan-200/60 mt-0.5">
+                            Uncensored ComicFesta & Ecchi series available in full HD streaming.
+                          </p>
+                        </div>
+                      </div>
+                      {onSelectCategory && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onSelectCategory('ecchi_anime');
+                            onClose();
+                          }}
+                          className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-gray-950 font-black text-xs transition shadow-[0_0_15px_rgba(245,158,11,0.4)] whitespace-nowrap cursor-pointer"
+                        >
+                          View All on Home ➔
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Quick Play Mini Grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-2 max-h-60 overflow-y-auto pr-1">
+                      {SECRET_ECCHI_ANIME.map((anime) => (
+                        <div
+                          key={anime.id}
+                          className="group relative rounded-xl overflow-hidden border border-white/10 bg-[#070e22] hover:border-amber-400/60 transition flex flex-col"
+                        >
+                          <div className="aspect-[3/4] w-full relative overflow-hidden bg-black/40">
+                            <img
+                              src={anime.poster_path ? `${IMG_BASE}${anime.poster_path}` : './icon-512.png'}
+                              alt={anime.name}
+                              className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                              loading="lazy"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (onPlayMedia) {
+                                  onPlayMedia(anime);
+                                  onClose();
+                                }
+                              }}
+                              className="absolute inset-0 m-auto w-10 h-10 rounded-full bg-amber-500 text-gray-950 flex items-center justify-center opacity-0 group-hover:opacity-100 transition transform scale-75 group-hover:scale-100 shadow-[0_0_20px_rgba(245,158,11,0.8)] cursor-pointer"
+                              title={`Play ${anime.name}`}
+                            >
+                              <Play className="w-4 h-4 fill-gray-950 ml-0.5" />
+                            </button>
+                            <span className="absolute top-1.5 left-1.5 text-[8px] font-black bg-amber-500/90 text-gray-950 px-1.5 py-0.5 rounded shadow">
+                              18+
+                            </span>
+                          </div>
+                          <div className="p-2 flex flex-col justify-between flex-1">
+                            <div className="text-[11px] font-bold text-white line-clamp-1 group-hover:text-amber-300 transition">
+                              {anime.name}
+                            </div>
+                            <div className="flex items-center justify-between mt-1 text-[9px] text-cyan-200/50 font-medium">
+                              <span>{String(anime.first_air_date || '').substring(0, 4)}</span>
+                              <span className="text-amber-400 font-bold">★ {anime.vote_average}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
                   {/* Stealth Disguise in Master Mode */}

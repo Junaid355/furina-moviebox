@@ -206,6 +206,183 @@ export async function fetchMatureMovies(page = 1) {
   }
 }
 
+// 🔞 Curated 18+ Ecchi & ComicFesta Anime (Overflow, Joshiochi, Araiya-san, etc.)
+export const SECRET_ECCHI_ANIME = [
+  {
+    id: 95897,
+    name: 'Overflow',
+    title: 'Overflow',
+    overview: 'Kazushi Sudo is a college student whose childhood friends, the Shirakawa sisters Ayane and Kotone, frequently visit his apartment. When an accidental shared bath occurs, things quickly turn intimate.',
+    poster_path: '/8RtwL5gxUvh9YViqjhNlVRvJpum.jpg',
+    backdrop_path: '/8RtwL5gxUvh9YViqjhNlVRvJpum.jpg',
+    media_type: 'tv',
+    vote_average: 8.4,
+    first_air_date: '2020-01-06',
+    category: 'ecchi_anime',
+    is_mature: true
+  },
+  {
+    id: 81044,
+    name: 'Joshiochi! 2-kai kara Onnanoko ga... Futtekita!?',
+    title: 'Joshiochi! 2-kai kara Onnanoko ga... Futtekita!?',
+    overview: 'Sosuke Sunomori lives in a run-down apartment when one day the ceiling collapses and tenant Sunao Oumi falls straight into his room from the 2nd floor, beginning a steamy cohabitation.',
+    poster_path: '/7x8x6dl4leOSw6KGUcOrQew7Eua.jpg',
+    backdrop_path: '/7x8x6dl4leOSw6KGUcOrQew7Eua.jpg',
+    media_type: 'tv',
+    vote_average: 7.9,
+    first_air_date: '2018-07-02',
+    category: 'ecchi_anime',
+    is_mature: true
+  },
+  {
+    id: 88090,
+    name: 'Araiya-san! Ore to Aitsu ga Onnayu de!?',
+    title: 'Araiya-san! Ore to Aitsu ga Onnayu de!?',
+    overview: 'Souta begins working at his family public bathhouse as a back-washer. While on duty, he ends up washing his classmate Aoi who disguised herself, leading to a secret relationship.',
+    poster_path: '/upxgNd7JdqbxUXDuEkgba18iG8F.jpg',
+    backdrop_path: '/upxgNd7JdqbxUXDuEkgba18iG8F.jpg',
+    media_type: 'tv',
+    vote_average: 7.8,
+    first_air_date: '2019-04-08',
+    category: 'ecchi_anime',
+    is_mature: true
+  },
+  {
+    id: 78501,
+    name: "Sweet Punishment: I'm the Guard's Personal Pet",
+    title: "Sweet Punishment: I'm the Guard's Personal Pet",
+    overview: 'Falsely convicted office worker Hina Saotome is sentenced to a harsh penitentiary where the ruthless head guard Aki Myojin singles her out for special treatment.',
+    poster_path: '/rbETzzJLGIB2Bg6NwNekWTKfM6d.jpg',
+    backdrop_path: '/rbETzzJLGIB2Bg6NwNekWTKfM6d.jpg',
+    media_type: 'tv',
+    vote_average: 7.7,
+    first_air_date: '2018-04-02',
+    category: 'ecchi_anime',
+    is_mature: true
+  },
+  {
+    id: 90388,
+    name: 'Fire in His Fingertips',
+    title: 'Fire in His Fingertips: A Flirty Fireman',
+    overview: 'When an apartment fire threatens Ryo, she is saved by her childhood friend and handsome firefighter Souma, sparking a passionate romance.',
+    poster_path: '/yHUDRf2e9FGeWXPsT5lVF3iCUwc.jpg',
+    backdrop_path: '/yHUDRf2e9FGeWXPsT5lVF3iCUwc.jpg',
+    media_type: 'tv',
+    vote_average: 7.8,
+    first_air_date: '2019-07-08',
+    category: 'ecchi_anime',
+    is_mature: true
+  },
+  {
+    id: 131660,
+    name: 'Show Time! Uta no Oneesan Datte Shitai',
+    title: 'Show Time! Uta no Oneesan Datte Shitai',
+    overview: 'A single father meets the lead singer of a popular children show at a restaurant, sparking a secret romance behind the cameras.',
+    poster_path: '/7S86pkMfatspJmXENcPZfgaKB33.jpg',
+    backdrop_path: '/7S86pkMfatspJmXENcPZfgaKB33.jpg',
+    media_type: 'tv',
+    vote_average: 7.6,
+    first_air_date: '2021-10-04',
+    category: 'ecchi_anime',
+    is_mature: true
+  },
+  {
+    id: 118588,
+    name: 'Seduced by My Best Friend (Kuro Gal)',
+    title: 'I Became a Kuro Gal so I Had Sex With My Best Friend',
+    overview: 'Two close male friends take an experimental potion that transforms one into a blonde gyaru, taking their friendship to the next level.',
+    poster_path: '/kRytTcYHz6pq3cPEwNTAOkSQhQ4.jpg',
+    backdrop_path: '/kRytTcYHz6pq3cPEwNTAOkSQhQ4.jpg',
+    media_type: 'tv',
+    vote_average: 7.5,
+    first_air_date: '2021-04-05',
+    category: 'ecchi_anime',
+    is_mature: true
+  },
+  {
+    id: 99071,
+    name: 'Redo of Healer',
+    title: 'Redo of Healer',
+    overview: 'Healing magician Keyaru uses magic to rewind four years into the past, embarking on a quest for vengeance against those who wronged him.',
+    poster_path: '/9T7TT0w92RbeRP5QSnNq81HHxde.jpg',
+    backdrop_path: '/9T7TT0w92RbeRP5QSnNq81HHxde.jpg',
+    media_type: 'tv',
+    vote_average: 8.3,
+    first_air_date: '2021-01-13',
+    category: 'ecchi_anime',
+    is_mature: true
+  },
+  {
+    id: 96444,
+    name: 'Interspecies Reviewers',
+    title: 'Interspecies Reviewers',
+    overview: 'Adventurers travel through a fantasy world reviewing adult entertainment establishments run by various monster girls.',
+    poster_path: '/xJZwaZAXoon6wxkgXiWQNEeyW4C.jpg',
+    backdrop_path: '/xJZwaZAXoon6wxkgXiWQNEeyW4C.jpg',
+    media_type: 'tv',
+    vote_average: 8.1,
+    first_air_date: '2020-01-11',
+    category: 'ecchi_anime',
+    is_mature: true
+  },
+  {
+    id: 45950,
+    name: 'High School DxD',
+    title: 'High School DxD',
+    overview: 'Issei Hyodo is killed on his first date by a fallen angel and resurrected as a devil by the glamorous Rias Gremory.',
+    poster_path: '/5a9vaaLDAZTYjgfWIw7ZYhL1m1A.jpg',
+    backdrop_path: '/5a9vaaLDAZTYjgfWIw7ZYhL1m1A.jpg',
+    media_type: 'tv',
+    vote_average: 8.6,
+    first_air_date: '2012-01-06',
+    category: 'ecchi_anime',
+    is_mature: true
+  },
+  {
+    id: 68005,
+    name: 'Yosuga no Sora',
+    title: 'Yosuga no Sora: In Solitude, Where We Are Least Alone',
+    overview: 'Twin siblings Haruka and Sora move to their rural grandparents house, discovering lingering past memories and intense bonds.',
+    poster_path: '/9F80WGUD6WYfoEDMImf988NlXhC.jpg',
+    backdrop_path: '/9F80WGUD6WYfoEDMImf988NlXhC.jpg',
+    media_type: 'tv',
+    vote_average: 7.7,
+    first_air_date: '2010-10-04',
+    category: 'ecchi_anime',
+    is_mature: true
+  },
+  {
+    id: 64706,
+    name: 'Prison School',
+    title: 'Prison School',
+    overview: 'Five boys enroll in a formerly all-girls boarding academy and find themselves imprisoned after getting caught in forbidden places.',
+    poster_path: '/tqtd72674k19IfGYJ2wdGJGvXX.jpg',
+    backdrop_path: '/tqtd72674k19IfGYJ2wdGJGvXX.jpg',
+    media_type: 'tv',
+    vote_average: 8.0,
+    first_air_date: '2015-07-11',
+    category: 'ecchi_anime',
+    is_mature: true
+  }
+];
+
+export async function fetchEcchiAnime(page = 1) {
+  if (page === 1) return SECRET_ECCHI_ANIME;
+  try {
+    const res = await fetch(`${BASE_URL}/discover/tv?api_key=${API_KEY}&with_genres=16&include_adult=true&sort_by=popularity.desc&page=${page}`);
+    const data = await res.json();
+    if (data.results && data.results.length > 0) {
+      return data.results.filter(item => item && item.id && item.media_type !== 'person').map(m => ({
+        ...m,
+        media_type: 'tv',
+        category: 'ecchi_anime',
+        is_mature: true
+      }));
+    }
+  } catch (e) {}
+  return [];
+}
+
 export async function searchContent(query, page = 1, includeAdult = false) {
   if (!query || query.trim() === '') return [];
   const isHindiQuery = /\b(hindi|dubbed|dub)\b/i.test(query);

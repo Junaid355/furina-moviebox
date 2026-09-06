@@ -15,6 +15,7 @@ import {
   fetchKDramas,
   fetchHorrorMovies,
   fetchMatureMovies,
+  fetchEcchiAnime,
   searchContent 
 } from './services/tmdb';
 import { SERVERS } from './services/streaming';
@@ -107,6 +108,7 @@ export default function App() {
     if (cat === 'kdrama') return await fetchKDramas(pageNum);
     if (cat === 'horror') return await fetchHorrorMovies(pageNum);
     if (cat === 'anime') return await fetchAnime(pageNum);
+    if (cat === 'ecchi_anime' || cat === 'mature_anime') return await fetchEcchiAnime(pageNum);
     if (cat === 'mature') return await fetchMatureMovies(pageNum);
     if (cat === 'watchlist') return watchlist;
     return [];
@@ -221,6 +223,8 @@ export default function App() {
                   ? '👻 Horror & Supernatural Thrillers'
                   : activeCategory === 'anime'
                   ? '🌸 Anime & Japanese Animations (Sub/Dub)'
+                  : activeCategory === 'ecchi_anime'
+                  ? '🔞 Secret 18+ Anime Vault (Overflow, ComicFesta & Ecchi Uncut)'
                   : activeCategory === 'mature'
                   ? '🔞 18+ Mature & Uncut Cinema'
                   : '❤️ My Saved Watchlist'}
@@ -354,6 +358,8 @@ export default function App() {
         preferredServer={preferredServer}
         setPreferredServer={setPreferredServer}
         onClearWatchlist={clearWatchlist}
+        onPlayMedia={setActiveMedia}
+        onSelectCategory={(cat) => { setActiveCategory(cat); setSearchQuery(''); }}
       />
 
       {/* iPhone & iPad Installation & Zero-Ads Guide Modal */}
@@ -370,7 +376,8 @@ export default function App() {
           { id: 'hindi', label: 'Hindi', icon: Sparkles },
           { id: 'series', label: 'Series', icon: Tv },
           { id: 'anime', label: 'Anime', icon: Sparkles },
-          ...(includeMature ? [{ id: 'mature', label: '18+', icon: Flame }] : []),
+          ...((isMasterMode || includeMature) ? [{ id: 'ecchi_anime', label: '18+ Anime', icon: Flame }] : []),
+          ...(includeMature ? [{ id: 'mature', label: '18+ Cinema', icon: Flame }] : []),
           { id: 'watchlist', label: 'Saved', icon: Heart },
         ].map((tab) => {
           const Icon = tab.icon;
