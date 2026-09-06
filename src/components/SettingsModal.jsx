@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { 
   X, Settings, Lock, Unlock, Eye, EyeOff, Flame, ShieldCheck, 
-  Server, Sliders, Trash2, CheckCircle2, AlertTriangle, KeyRound
+  Server, Sliders, Trash2, CheckCircle2, AlertTriangle, KeyRound, Shield
 } from 'lucide-react';
 import { SERVERS } from '../services/streaming';
+import { isAdBlockEnabled, setShieldEnabled } from '../services/adblocker';
 
 export default function SettingsModal({
   isOpen,
@@ -21,6 +22,7 @@ export default function SettingsModal({
   const [pin, setPin] = useState('');
   const [pinError, setPinError] = useState(false);
   const [activeTab, setActiveTab] = useState('general'); // 'general' | 'vault'
+  const [adBlockOn, setAdBlockOn] = useState(() => isAdBlockEnabled());
 
   if (!isOpen) return null;
 
@@ -126,6 +128,34 @@ export default function SettingsModal({
                     );
                   })}
                 </div>
+              </div>
+
+              {/* Built-in AdBlock Shield Toggle */}
+              <div className="bg-[#0b1633] border border-cyan-500/20 rounded-xl p-4 flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2 font-bold text-sm text-emerald-400">
+                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                    Built-in AdBlock Shield
+                  </div>
+                  <p className="text-xs text-cyan-200/60 mt-1 max-w-xs">
+                    Automatically intercepts and neutralizes unwanted server popups, pop-unders, and clickjack redirects.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = !adBlockOn;
+                    setAdBlockOn(next);
+                    setShieldEnabled(next);
+                  }}
+                  className={`w-12 h-6 rounded-full transition-colors relative p-0.5 shrink-0 ml-3 ${
+                    adBlockOn ? 'bg-emerald-500' : 'bg-white/10'
+                  }`}
+                >
+                  <div className={`w-5 h-5 rounded-full bg-white transition-transform ${
+                    adBlockOn ? 'translate-x-6' : 'translate-x-0'
+                  }`} />
+                </button>
               </div>
 
               {/* Stealth Disguise Mode (Public quick toggle) */}

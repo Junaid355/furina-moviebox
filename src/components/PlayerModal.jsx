@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, Server, Film, Tv, RefreshCw, ExternalLink, Info, Zap, Play } from 'lucide-react';
+import { X, Server, Film, Tv, RefreshCw, ExternalLink, Info, Zap, Play, Sparkles, ShieldCheck } from 'lucide-react';
 import { SERVERS, getStreamUrl } from '../services/streaming';
 import { fetchSeasonEpisodes } from '../services/tmdb';
+import { permitPopupOnce, getBlockedCount } from '../services/adblocker';
 
 export default function PlayerModal({ item, onClose, preferredServerId }) {
   if (!item) return null;
@@ -17,6 +18,16 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
   const [isLoadingEpisodes, setIsLoadingEpisodes] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const [showHindiGuide, setShowHindiGuide] = useState(false);
+  const [blockedAds, setBlockedAds] = useState(getBlockedCount());
+
+  // Listen to blocked ad popup events
+  useEffect(() => {
+    const handleBlocked = (e) => {
+      setBlockedAds(e.detail?.count || getBlockedCount());
+    };
+    window.addEventListener('furina-ad-blocked', handleBlocked);
+    return () => window.removeEventListener('furina-ad-blocked', handleBlocked);
+  }, []);
 
   // Load episodes if TV series
   useEffect(() => {
@@ -32,6 +43,7 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
   const streamUrl = getStreamUrl(selectedServer, item.id, isSeries ? 'tv' : 'movie', season, episode);
 
   const openInNewWindow = () => {
+    permitPopupOnce();
     window.open(streamUrl, '_blank', 'noopener,noreferrer');
   };
 
@@ -66,6 +78,15 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            {/* AdBlock Shield Live Status */}
+            <div 
+              title="Built-in AdBlock Shield blocks third-party popups and redirects"
+              className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold shadow-sm"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <span>Shield {blockedAds > 0 ? `(${blockedAds} Blocked)` : 'Active'}</span>
+            </div>
+
             {/* Hindi Dubbed Audio Switcher Guide Toggle */}
             <button
               onClick={() => setShowHindiGuide(!showHindiGuide)}
