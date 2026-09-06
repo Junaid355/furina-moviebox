@@ -10,7 +10,23 @@
     <meta name="apple-mobile-web-app-title" content="MovieBox" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.json" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <title>Furina MovieBox — 4K Free Movies & Web Series</title>
+    <script>
+      // Clear stale caches so user gets the freshest un-sandboxed streaming player
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(regs) {
+          for (var r of regs) { r.unregister(); }
+        });
+      }
+      if ('caches' in window) {
+        caches.keys().then(function(names) {
+          for (var n of names) { caches.delete(n); }
+        });
+      }
+    </script>
   </head>
   <body class="bg-[#050811] text-white select-none overflow-x-hidden antialiased">
     <div id="root"></div>
