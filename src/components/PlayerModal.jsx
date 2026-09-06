@@ -18,6 +18,7 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
   const [isLoadingEpisodes, setIsLoadingEpisodes] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const [showHindiGuide, setShowHindiGuide] = useState(false);
+  const [showUBlockGuide, setShowUBlockGuide] = useState(false);
   const [blockedAds, setBlockedAds] = useState(getBlockedCount());
 
   // Listen to blocked ad popup events
@@ -78,14 +79,19 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            {/* AdBlock Shield Live Status with Native Sandbox Pill */}
-            <div 
-              title="Native Browser Sandbox Shield actively blocks popups, pop-unders, and ad redirects"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold shadow-sm"
+            {/* uBlock Origin Lite - 100% Zero-Ad Protection Button */}
+            <button
+              onClick={() => setShowUBlockGuide(!showUBlockGuide)}
+              title="uBlock Origin Lite - Zero Ad Playback Guide"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition shadow-sm ${
+                showUBlockGuide
+                  ? 'bg-emerald-500 text-gray-950 border-emerald-400 shadow-[0_0_14px_rgba(16,185,129,0.6)] scale-105'
+                  : 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/25'
+              }`}
             >
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0 animate-pulse" />
-              <span>AdBlock Active (Sandbox Shield)</span>
-            </div>
+              <span>🛡️ uBlock Origin Lite</span>
+            </button>
 
             {/* Hindi Dubbed Audio Switcher Guide Toggle */}
             <button
@@ -128,6 +134,89 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
             </button>
           </div>
         </div>
+
+        {/* Expandable uBlock Origin Lite Protection Drawer */}
+        {showUBlockGuide && (
+          <div className="p-4 bg-gradient-to-r from-[#061e19] via-[#081b29] to-[#04121d] border-b border-emerald-500/30 text-xs">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2 text-emerald-300 font-bold text-xs sm:text-sm">
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <span>🛡️ How to Block 100% of Ads Across Every Streaming Server:</span>
+              </div>
+              <button 
+                onClick={() => setShowUBlockGuide(false)} 
+                className="text-emerald-200/60 hover:text-white p-1"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            
+            <p className="text-[11px] text-slate-300 leading-relaxed mb-3">
+              Free streaming embed providers inject popups and anti-sandbox blockers into cross-origin iframes. Webpages cannot block external iframe scripts directly due to browser security. <strong>Installing the official free uBlock Origin Lite extension</strong> blocks 100% of ads at the browser level with zero configuration:
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              {/* Chrome / Edge / Opera / Brave */}
+              <a
+                href="https://chromewebstore.google.com/detail/ublock-origin-lite/ddkjiahejlhfcafbddmgiahcphecmpfh"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={permitPopupOnce}
+                className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/40 hover:bg-emerald-500/25 transition flex flex-col justify-between group"
+              >
+                <div>
+                  <div className="font-bold text-emerald-300 text-xs flex items-center justify-between">
+                    <span>Chrome / Edge / Opera</span>
+                    <ExternalLink className="w-3 h-3 text-emerald-400 group-hover:scale-110 transition" />
+                  </div>
+                  <p className="text-[10px] text-slate-300 mt-1">
+                    Official Chrome Web Store. 1-Click Install, 0 configuration needed.
+                  </p>
+                </div>
+                <div className="mt-2 text-[10px] font-bold text-emerald-400 bg-emerald-500/20 py-1 text-center rounded">
+                  Install uBlock Origin Lite ↗
+                </div>
+              </a>
+
+              {/* Firefox */}
+              <a
+                href="https://addons.mozilla.org/en-US/firefox/addon/ublock-origin/"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={permitPopupOnce}
+                className="p-3 rounded-xl bg-cyan-500/15 border border-cyan-500/40 hover:bg-cyan-500/25 transition flex flex-col justify-between group"
+              >
+                <div>
+                  <div className="font-bold text-cyan-300 text-xs flex items-center justify-between">
+                    <span>Firefox Browser</span>
+                    <ExternalLink className="w-3 h-3 text-cyan-400 group-hover:scale-110 transition" />
+                  </div>
+                  <p className="text-[10px] text-slate-300 mt-1">
+                    Official Mozilla Add-ons. Maximum protection against all popups.
+                  </p>
+                </div>
+                <div className="mt-2 text-[10px] font-bold text-cyan-400 bg-cyan-500/20 py-1 text-center rounded">
+                  Install uBlock Origin ↗
+                </div>
+              </a>
+
+              {/* Mobile / iOS */}
+              <div className="p-3 rounded-xl bg-purple-500/15 border border-purple-500/40 flex flex-col justify-between">
+                <div>
+                  <div className="font-bold text-purple-300 text-xs">
+                    <span>iPhone / Android / Mac</span>
+                  </div>
+                  <p className="text-[10px] text-slate-300 mt-1">
+                    Use <strong>Brave Browser</strong> (has built-in uBlock shield) or Safari with <strong>AdGuard iOS</strong> for zero ads.
+                  </p>
+                </div>
+                <div className="mt-2 text-[10px] font-semibold text-purple-300 bg-purple-500/20 py-1 text-center rounded">
+                  Built-in Mobile Shield
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Expandable Hindi Audio Information Drawer */}
         {showHindiGuide && (
@@ -204,7 +293,7 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
           })}
         </div>
 
-        {/* Video Player IFrame Container with Sandbox Ad Blocker */}
+        {/* Video Player IFrame Container (Clean un-sandboxed to prevent anti-sandbox blocking) */}
         <div className="relative w-full aspect-video bg-black">
           <iframe
             key={`${selectedServer.id}-${season}-${episode}-${reloadKey}`}
@@ -212,7 +301,6 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
             title={title}
             className="w-full h-full border-0"
             allowFullScreen
-            sandbox="allow-forms allow-scripts allow-same-origin allow-presentation"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
           />
         </div>

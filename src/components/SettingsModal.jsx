@@ -158,6 +158,38 @@ export default function SettingsModal({
                 </button>
               </div>
 
+              {/* uBlock Origin Lite Recommendation Card */}
+              <div className="bg-gradient-to-r from-emerald-950/40 via-[#0a1b2a] to-[#081226] border border-emerald-500/30 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center gap-2 font-bold text-sm text-emerald-300">
+                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                    Recommended: uBlock Origin Lite
+                  </div>
+                  <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-bold">100% Ad-Free</span>
+                </div>
+                <p className="text-xs text-slate-300 leading-relaxed mb-3">
+                  To eliminate all popups, banners, and redirects across every external streaming server, install the official free uBlock Origin Lite browser extension:
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <a
+                    href="https://chromewebstore.google.com/detail/ublock-origin-lite/ddkjiahejlhfcafbddmgiahcphecmpfh"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/40 text-emerald-300 text-xs font-bold transition flex items-center gap-1.5"
+                  >
+                    <span>Install for Chrome / Edge / Opera ↗</span>
+                  </a>
+                  <a
+                    href="https://addons.mozilla.org/en-US/firefox/addon/ublock-origin/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-300 text-xs font-bold transition flex items-center gap-1.5"
+                  >
+                    <span>Install for Firefox ↗</span>
+                  </a>
+                </div>
+              </div>
+
               {/* Stealth Disguise Mode (Public quick toggle) */}
               <div className="bg-[#0b1633] border border-cyan-500/20 rounded-xl p-4 flex items-center justify-between">
                 <div>
