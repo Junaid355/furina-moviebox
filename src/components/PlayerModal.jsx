@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X, Server, Film, Tv, RefreshCw, ExternalLink, Info, Zap, Play, Sparkles, ShieldCheck } from 'lucide-react';
-import { SERVERS, getStreamUrl } from '../services/streaming';
-import { fetchSeasonEpisodes } from '../services/tmdb';
+import { X, Server, Film, Tv, RefreshCw, ExternalLink, Info, Zap, Play, Sparkles, ShieldCheck, Download } from 'lucide-react';
+import { SERVERS, getStreamUrl, getDownloadUrl } from '../services/streaming';
+import { fetchSeasonEpisodes, fetchTvDetails } from '../services/tmdb';
 import { permitPopupOnce, getBlockedCount } from '../services/adblocker';
 
 export default function PlayerModal({ item, onClose, preferredServerId }) {
@@ -14,6 +14,7 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
   const [selectedServer, setSelectedServer] = useState(initialServer);
   const [season, setSeason] = useState(1);
   const [episode, setEpisode] = useState(1);
+  const [totalSeasons, setTotalSeasons] = useState(1);
   const [episodesList, setEpisodesList] = useState([]);
   const [isLoadingEpisodes, setIsLoadingEpisodes] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
@@ -53,6 +54,17 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
     return () => window.removeEventListener('furina-ad-blocked', handleBlocked);
   }, []);
 
+  // Fetch actual TV details to determine real number of seasons
+  useEffect(() => {
+    if (isSeries) {
+      fetchTvDetails(item.id).then((details) => {
+        if (details && details.number_of_seasons) {
+          setTotalSeasons(Math.max(1, details.number_of_seasons));
+        }
+      });
+    }
+  }, [item.id, isSeries]);
+
   // Load episodes if TV series
   useEffect(() => {
     if (isSeries) {
@@ -65,14 +77,17 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
   }, [item.id, season, isSeries]);
 
   const streamUrl = getStreamUrl(selectedServer, item.id, isSeries ? 'tv' : 'movie', season, episode);
+  const downloadUrl = getDownloadUrl(item.id, isSeries ? 'tv' : 'movie', season, episode);
 
   const openInNewWindow = () => {
     permitPopupOnce();
     window.open(streamUrl, '_blank', 'noopener,noreferrer');
   };
 
-  const handleReload = () => {
-    setReloadKey((prev) => prev + 1);
+  const handleNextServer = () => {
+    const currentIndex = SERVERS.findIndex((s) => s.id === selectedServer.id);
+    const nextServer = SERVERS[(currentIndex + 1) % SERVERS.length];
+    setSelectedServer(nextServer);
   };
 
   return (
@@ -102,6 +117,29 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            {/* 1-Click Download Option */}
+            <a
+              href={downloadUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={permitPopupOnce}
+              title="Download movie or episode in HD / 4K"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 hover:from-emerald-500/30 hover:to-teal-500/30 border border-emerald-400/40 text-emerald-300 hover:text-white text-xs font-bold transition shadow-sm"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Download</span>
+            </a>
+
+            {/* Auto-Switch Next Working Server button */}
+            <button
+              onClick={handleNextServer}
+              title="Auto-switch to next working mirror if stream stalls"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-300 hover:text-white text-xs font-bold transition shadow-sm"
+            >
+              <Zap className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+              <span className="hidden sm:inline">Auto-Switch</span>
+            </button>
+
             {/* uBlock Origin Lite - 100% Zero-Ad Protection Button */}
             <button
               onClick={() => setShowUBlockGuide(!showUBlockGuide)}
@@ -113,7 +151,7 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
               }`}
             >
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0 animate-pulse" />
-              <span>🛡️ uBlock Origin Lite</span>
+              <span className="hidden md:inline">🛡️ uBlock Origin Lite</span>
             </button>
 
             {/* Hindi Dubbed Audio Switcher Guide Toggle */}
@@ -126,7 +164,8 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
                   : 'bg-amber-500/15 border-amber-500/40 text-amber-300 hover:bg-amber-500/25'
               }`}
             >
-              <span>🎙️ Hindi Audio Info</span>
+              <span className="hidden md:inline">🎙️ Hindi Info</span>
+              <span className="md:hidden">🎙️ Hindi</span>
             </button>
 
             {/* Reload stream button */}
@@ -490,7 +529,7 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
 
               {/* Season Tabs */}
               <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-                {[1, 2, 3, 4, 5, 6].map((sNum) => (
+                {Array.from({ length: totalSeasons }, (_, i) => i + 1).map((sNum) => (
                   <button
                     key={sNum}
                     onClick={() => { setSeason(sNum); setEpisode(1); }}

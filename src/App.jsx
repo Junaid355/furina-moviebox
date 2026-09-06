@@ -4,12 +4,15 @@ import HeroBanner from './components/HeroBanner';
 import MediaCard from './components/MediaCard';
 import PlayerModal from './components/PlayerModal';
 import SettingsModal from './components/SettingsModal';
+import IPhoneAppModal from './components/IPhoneAppModal';
 import { 
   fetchTrendingAll, 
   fetchHollywoodMovies, 
   fetchHindiMovies, 
   fetchTrendingSeries, 
   fetchAnime,
+  fetchKDramas,
+  fetchHorrorMovies,
   fetchMatureMovies,
   searchContent 
 } from './services/tmdb';
@@ -28,6 +31,7 @@ export default function App() {
   
   // Settings & Secret Master Mode (Passcode: 2030)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isIPhoneModalOpen, setIsIPhoneModalOpen] = useState(false);
   const [isMasterMode, setIsMasterMode] = useState(false);
   const [isStealthMode, setIsStealthMode] = useState(false);
   const [includeMature, setIncludeMature] = useState(false);
@@ -37,7 +41,7 @@ export default function App() {
     if (saved && validIds.includes(saved)) {
       return saved;
     }
-    return 'vidlink';
+    return SERVERS[0]?.id || 'autoembed';
   });
 
   useEffect(() => {
@@ -85,6 +89,8 @@ export default function App() {
     if (cat === 'hollywood') return await fetchHollywoodMovies(pageNum);
     if (cat === 'hindi') return await fetchHindiMovies(pageNum);
     if (cat === 'series') return await fetchTrendingSeries(pageNum);
+    if (cat === 'kdrama') return await fetchKDramas(pageNum);
+    if (cat === 'horror') return await fetchHorrorMovies(pageNum);
     if (cat === 'anime') return await fetchAnime(pageNum);
     if (cat === 'mature') return await fetchMatureMovies(pageNum);
     if (cat === 'watchlist') return watchlist;
@@ -146,6 +152,7 @@ export default function App() {
         isMasterMode={isMasterMode}
         includeMature={includeMature}
         onOpenSettings={() => setIsSettingsOpen(true)}
+        onOpenIPhoneModal={() => setIsIPhoneModalOpen(true)}
       />
 
       {/* Main Container */}
@@ -191,8 +198,12 @@ export default function App() {
                   ? '🇮🇳 Bollywood & Hindi Dubbed Blockbusters'
                   : activeCategory === 'series'
                   ? '📺 Top Global Web Series'
+                  : activeCategory === 'kdrama'
+                  ? '🇰🇷 Top Korean Dramas (K-Drama)'
+                  : activeCategory === 'horror'
+                  ? '👻 Horror & Supernatural Thrillers'
                   : activeCategory === 'anime'
-                  ? '✨ Anime & Japanese Animations'
+                  ? '🌸 Anime & Japanese Animations (Sub/Dub)'
                   : activeCategory === 'mature'
                   ? '🔞 18+ Mature & Uncut Cinema'
                   : '❤️ My Saved Watchlist'}
@@ -317,6 +328,12 @@ export default function App() {
         preferredServer={preferredServer}
         setPreferredServer={setPreferredServer}
         onClearWatchlist={clearWatchlist}
+      />
+
+      {/* iPhone & iPad Installation & Zero-Ads Guide Modal */}
+      <IPhoneAppModal
+        isOpen={isIPhoneModalOpen}
+        onClose={() => setIsIPhoneModalOpen(false)}
       />
 
       {/* Mobile iOS Style Bottom Navigation Bar */}

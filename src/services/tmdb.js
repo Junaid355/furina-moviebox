@@ -163,9 +163,31 @@ export async function fetchTrendingSeries(page = 1) {
 
 export async function fetchAnime(page = 1) {
   try {
-    const res = await fetch(`${BASE_URL}/discover/tv?api_key=${API_KEY}&with_genres=16&with_original_language=ja&sort_by=popularity.desc&page=${page}`);
+    const res = await fetch(`${BASE_URL}/discover/tv?api_key=${API_KEY}&with_genres=16&with_original_language=ja&first_air_date.lte=${today}&vote_count.gte=10&sort_by=popularity.desc&page=${page}`);
     const data = await res.json();
-    return (data.results || []).map(m => ({ ...m, media_type: 'tv' }));
+    return (data.results || []).map(m => ({ ...m, media_type: 'tv', category: 'anime', isAnime: true }));
+  } catch (err) {
+    return [];
+  }
+}
+
+// 👻 Horror Cinema
+export async function fetchHorrorMovies(page = 1) {
+  try {
+    const res = await fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=27&primary_release_date.lte=${today}&vote_count.gte=25&sort_by=popularity.desc&page=${page}`);
+    const data = await res.json();
+    return (data.results || []).map(m => ({ ...m, media_type: 'movie', category: 'horror' }));
+  } catch (err) {
+    return [];
+  }
+}
+
+// 🇰🇷 K-Drama (Korean Dramas)
+export async function fetchKDramas(page = 1) {
+  try {
+    const res = await fetch(`${BASE_URL}/discover/tv?api_key=${API_KEY}&with_original_language=ko&with_genres=18|10759|9648&first_air_date.lte=${today}&vote_count.gte=8&sort_by=popularity.desc&page=${page}`);
+    const data = await res.json();
+    return (data.results || []).map(m => ({ ...m, media_type: 'tv', category: 'kdrama' }));
   } catch (err) {
     return [];
   }
@@ -222,8 +244,18 @@ export async function fetchSeasonEpisodes(tvId, seasonNum) {
   try {
     const res = await fetch(`${BASE_URL}/tv/${tvId}/season/${seasonNum}?api_key=${API_KEY}`);
     const data = await res.json();
-    return data.episodes || [];
+    if (data.episodes && data.episodes.length > 0) {
+      return data.episodes;
+    }
+    // Fallback: generate default episodes if empty so user is never stuck
+    return Array.from({ length: 12 }, (_, i) => ({
+      episode_number: i + 1,
+      name: `Episode ${i + 1}`
+    }));
   } catch (err) {
-    return [];
+    return Array.from({ length: 12 }, (_, i) => ({
+      episode_number: i + 1,
+      name: `Episode ${i + 1}`
+    }));
   }
 }

@@ -1,13 +1,13 @@
 // High-speed verified 4K/HD streaming servers with sub-second response times
 export const SERVERS = [
   {
-    id: 'twoembed_vip',
-    name: 'Server 1: 2Embed VIP (Direct Playback / Verified)',
-    shortName: 'Server 1 (2Embed VIP)',
-    badge: 'VIP Stream',
+    id: 'autoembed',
+    name: 'Server 1: AutoEmbed Prime (Instant Play / 1080p HD)',
+    shortName: 'Server 1 (AutoEmbed)',
+    badge: '1080p HD',
     color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-    getMovieUrl: (tmdbId) => `https://www.2embed.cc/embed/${tmdbId}`,
-    getTvUrl: (tmdbId, s = 1, e = 1) => `https://www.2embed.cc/embedtv/${tmdbId}&s=${s}&e=${e}`
+    getMovieUrl: (tmdbId) => `https://autoembed.co/movie/tmdb/${tmdbId}`,
+    getTvUrl: (tmdbId, s = 1, e = 1) => `https://autoembed.co/tv/tmdb/${tmdbId}-${s}-${e}`
   },
   {
     id: 'vidsrc_in',
@@ -28,18 +28,9 @@ export const SERVERS = [
     getTvUrl: (tmdbId, s = 1, e = 1) => `https://vidsrc.pm/embed/tv/${tmdbId}/${s}/${e}`
   },
   {
-    id: 'autoembed',
-    name: 'Server 4: AutoEmbed Prime (Instant Play / 1080p HD)',
-    shortName: 'Server 4 (AutoEmbed)',
-    badge: '1080p HD',
-    color: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-    getMovieUrl: (tmdbId) => `https://autoembed.co/movie/tmdb/${tmdbId}`,
-    getTvUrl: (tmdbId, s = 1, e = 1) => `https://autoembed.co/tv/tmdb/${tmdbId}-${s}-${e}`
-  },
-  {
     id: 'vidsrc_to',
-    name: 'Server 5: VidSrc TO (Cinema Master / Verified ID)',
-    shortName: 'Server 5 (VidSrc TO)',
+    name: 'Server 4: VidSrc TO (Cinema Master / Verified ID)',
+    shortName: 'Server 4 (VidSrc TO)',
     badge: 'Cinema Master',
     color: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
     getMovieUrl: (tmdbId) => `https://vidsrc.to/embed/movie/${tmdbId}`,
@@ -47,12 +38,21 @@ export const SERVERS = [
   },
   {
     id: 'vidsrc_su',
-    name: 'Server 6: VidSrc SU (Global Mirror / Verified ID)',
-    shortName: 'Server 6 (VidSrc SU)',
+    name: 'Server 5: VidSrc SU (Global Mirror / Verified ID)',
+    shortName: 'Server 5 (VidSrc SU)',
     badge: 'Global Mirror',
     color: 'bg-pink-500/20 text-pink-400 border-pink-500/30',
     getMovieUrl: (tmdbId) => `https://vidsrc.su/embed/movie/${tmdbId}`,
     getTvUrl: (tmdbId, s = 1, e = 1) => `https://vidsrc.su/embed/tv/${tmdbId}/${s}/${e}`
+  },
+  {
+    id: 'twoembed_vip',
+    name: 'Server 6: 2Embed VIP (Direct Playback / Verified)',
+    shortName: 'Server 6 (2Embed VIP)',
+    badge: 'VIP Stream',
+    color: 'bg-sky-500/20 text-sky-400 border-sky-500/30',
+    getMovieUrl: (tmdbId) => `https://www.2embed.cc/embed/${tmdbId}`,
+    getTvUrl: (tmdbId, s = 1, e = 1) => `https://www.2embed.cc/embedtv/${tmdbId}&s=${s}&e=${e}`
   }
 ];
 
@@ -62,4 +62,11 @@ export function getStreamUrl(server, tmdbId, type = 'movie', season = 1, episode
     return server.getTvUrl(tmdbId, season, episode);
   }
   return server.getMovieUrl(tmdbId);
+}
+
+export function getDownloadUrl(tmdbId, type = 'movie', season = 1, episode = 1) {
+  if (type === 'tv') {
+    return `https://dl.vidsrc.vip/tv/${tmdbId}/${season}/${episode}`;
+  }
+  return `https://dl.vidsrc.vip/movie/${tmdbId}`;
 }

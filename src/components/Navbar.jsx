@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Film, Tv, Flame, Heart, Sparkles, X, Shield, Lock, Settings } from 'lucide-react';
+import { Search, Film, Tv, Flame, Heart, Sparkles, X, Shield, Lock, Settings, Smartphone, Skull } from 'lucide-react';
 
 export default function Navbar({ 
   activeCategory, 
@@ -10,14 +10,17 @@ export default function Navbar({
   isStealthMode,
   isMasterMode,
   includeMature,
-  onOpenSettings
+  onOpenSettings,
+  onOpenIPhoneModal
 }) {
   const categories = [
     { id: 'trending', label: 'Trending', icon: Flame },
-    { id: 'hollywood', label: 'Hollywood (Eng)', icon: Film },
+    { id: 'hollywood', label: 'Hollywood', icon: Film },
     { id: 'hindi', label: 'Bollywood & Hindi', icon: Sparkles },
+    { id: 'kdrama', label: '🇰🇷 K-Drama', icon: Tv },
+    { id: 'anime', label: '🌸 Anime', icon: Sparkles },
+    { id: 'horror', label: '👻 Horror', icon: Skull },
     { id: 'series', label: 'Web Series', icon: Tv },
-    { id: 'anime', label: 'Anime', icon: Sparkles },
     ...(includeMature ? [{ id: 'mature', label: '🔞 18+ Mature', icon: Flame, is18: true }] : []),
     { id: 'watchlist', label: 'Watchlist', icon: Heart },
   ];
@@ -110,8 +113,17 @@ export default function Navbar({
           })}
         </nav>
 
-        {/* Action Controls: Settings & Secret Master Vault */}
+        {/* Action Controls: iPhone App, Settings & Secret Master Vault */}
         <div className="flex items-center gap-2">
+          <button
+            onClick={onOpenIPhoneModal}
+            title="Install App on iPhone / iPad (Zero Ads)"
+            className="px-3 py-1.5 rounded-full border border-cyan-500/30 bg-[#0b1633] text-cyan-300 hover:text-white hover:bg-white/10 transition flex items-center gap-1.5 text-xs font-semibold"
+          >
+            <Smartphone className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="hidden sm:inline">iPhone App</span>
+          </button>
+
           <button
             onClick={onOpenSettings}
             title="Settings & Secret Vault (Passcode: 2030)"
