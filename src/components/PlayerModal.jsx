@@ -250,19 +250,19 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
                 </div>
               </div>
 
-              {/* Option 2: Hollywood Titles */}
+              {/* Option 2: Hollywood Titles & NetMirror/Dooflix */}
               <div className="p-3.5 rounded-xl bg-black/50 border border-cyan-500/40 flex flex-col justify-between">
                 <div>
                   <div className="font-bold text-cyan-300 mb-1.5 flex items-center justify-between">
-                    <span>🎬 2. Hollywood Blockbusters</span>
-                    <span className="text-[10px] bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded font-bold">Original English Track</span>
+                    <span>🎬 2. Hollywood Blockbusters (Hindi Dubbed)</span>
+                    <span className="text-[10px] bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded font-bold">Dual-Audio OTT</span>
                   </div>
                   <p className="text-[11px] text-slate-300 leading-relaxed">
-                    Hollywood movies (e.g. <em>Avengers: Endgame, Deadpool, Oppenheimer</em>) are streamed with high-definition original English audio. Scraped web embeds do not re-encode multi-track Hindi audio streams.
+                    Apps like <strong>Dooflix</strong> and <strong>NetMirror</strong> stream Hollywood movies (e.g. <em>Avengers: Endgame</em>) in Hindi by directly tapping Disney+ Hotstar & Netflix India encrypted streams. Use our 1-Click NetMirror gateway below to access full Hindi dubbing!
                   </p>
                 </div>
                 <div className="mt-2.5 text-[10px] text-cyan-400 font-semibold bg-cyan-500/10 px-2 py-1 rounded">
-                  ✓ Instant 1080p/4K playback on Server 1 (AutoEmbed) & Server 2 (VidSrc 4K)
+                  ✓ Web Player plays 4K/1080p original track. Tap NetMirror below for Hindi!
                 </div>
               </div>
             </div>
@@ -293,6 +293,21 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
           })}
         </div>
 
+        {/* 4K UHD & 1080p Quality Booster Bar */}
+        <div className="px-4 py-2.5 bg-gradient-to-r from-[#0a1636] via-[#0e214d] to-[#0a1636] border-b border-cyan-500/25 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
+          <div className="flex items-center gap-2 text-cyan-200">
+            <span className="px-2 py-0.5 rounded bg-cyan-500/25 text-cyan-300 font-black text-[10px] border border-cyan-400/50 shadow-[0_0_10px_rgba(56,189,248,0.3)]">
+              4K / 1080p TIP
+            </span>
+            <span className="text-[11px] text-slate-200 leading-tight">
+              Looks blurry? Tap <strong className="text-amber-300">⚙️ Settings</strong> inside player ➔ switch Quality from <strong>Auto</strong> to <strong className="text-cyan-300">1080p or 4K</strong>!
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-[10px] text-emerald-400 font-semibold shrink-0 bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/30">
+            <span>✨ Highest Bitrate: Server 1 (VidSrc 4K) & Server 3 (VidLink 4K)</span>
+          </div>
+        </div>
+
         {/* Video Player IFrame Container (Clean un-sandboxed to prevent anti-sandbox blocking) */}
         <div className="relative w-full aspect-video bg-black">
           <iframe
@@ -317,17 +332,26 @@ export default function PlayerModal({ item, onClose, preferredServerId }) {
                 <span className="text-[10px] bg-amber-500/25 text-amber-300 px-2 py-0.5 rounded font-bold border border-amber-500/40 animate-pulse">Dual-Audio Stream</span>
               </div>
               <p className="text-[11px] text-amber-200/80 mt-0.5 leading-relaxed">
-                Hollywood web scrapers play original English audio. For full <strong>Hindi dubbed audio</strong> for <em>{title}</em>, launch our verified dual-audio portals:
+                For verified <strong>Hindi Dubbed audio</strong> for <em>{title}</em>, launch NetMirror (Disney+/Hotstar streams) or our dual-audio mirrors:
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2 flex-wrap shrink-0 w-full md:w-auto">
             <a
+              href={`https://netmirror.global/search/${encodeURIComponent(title)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={permitPopupOnce}
+              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-gray-950 font-black text-xs transition shadow-[0_0_15px_rgba(245,158,11,0.6)] flex items-center gap-1.5 hover:scale-105 border border-amber-300"
+            >
+              <span>🌐 NetMirror (Hotstar Hindi) ↗</span>
+            </a>
+            <a
               href={`https://desicinemas.tv/?s=${encodeURIComponent(title)}`}
               target="_blank"
               rel="noopener noreferrer"
               onClick={permitPopupOnce}
-              className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-gray-950 font-extrabold text-xs transition shadow-[0_0_12px_rgba(245,158,11,0.5)] flex items-center gap-1.5 hover:scale-105"
+              className="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-300 hover:text-white font-bold text-xs transition flex items-center gap-1.5"
             >
               <span>DesiCinemas ↗</span>
             </a>

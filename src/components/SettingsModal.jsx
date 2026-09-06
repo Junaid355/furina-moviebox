@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { 
   X, Settings, Lock, Unlock, Eye, EyeOff, Flame, ShieldCheck, 
-  Server, Sliders, Trash2, CheckCircle2, AlertTriangle, KeyRound, Shield
+  Server, Sliders, Trash2, CheckCircle2, AlertTriangle, KeyRound, Shield,
+  Sparkles, RefreshCw
 } from 'lucide-react';
 import { SERVERS } from '../services/streaming';
 import { isAdBlockEnabled, setShieldEnabled } from '../services/adblocker';
+import { isAiUpdaterEnabled, setAiUpdaterEnabled, triggerAiSync, getLastSyncTime } from '../services/aiUpdater';
 
 export default function SettingsModal({
   isOpen,
@@ -23,6 +25,9 @@ export default function SettingsModal({
   const [pinError, setPinError] = useState(false);
   const [activeTab, setActiveTab] = useState('general'); // 'general' | 'vault'
   const [adBlockOn, setAdBlockOn] = useState(() => isAdBlockEnabled());
+  const [aiUpdaterOn, setAiUpdaterOn] = useState(() => isAiUpdaterEnabled());
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [lastSync, setLastSync] = useState(() => getLastSyncTime());
 
   if (!isOpen) return null;
 
@@ -187,6 +192,61 @@ export default function SettingsModal({
                   >
                     <span>Install for Firefox ↗</span>
                   </a>
+                </div>
+              </div>
+
+              {/* AI Movie Auto-Updater & 4K Stream Sync */}
+              <div className="bg-gradient-to-r from-blue-950/40 via-[#07132a] to-[#041d24] border border-cyan-500/30 rounded-xl p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-cyan-300">
+                      <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-sm text-white flex items-center gap-2">
+                        <span>AI Movie Auto-Updater</span>
+                        <span className="text-[10px] bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded font-bold border border-cyan-500/40">4K UHD Sync</span>
+                      </div>
+                      <p className="text-xs text-cyan-200/60 mt-0.5">
+                        Automatically scans for latest releases & verifies 4K high-bitrate streams.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const next = !aiUpdaterOn;
+                      setAiUpdaterOn(next);
+                      setAiUpdaterEnabled(next);
+                    }}
+                    className={`w-12 h-6 rounded-full transition-colors relative p-0.5 shrink-0 ml-3 ${
+                      aiUpdaterOn ? 'bg-cyan-500' : 'bg-white/10'
+                    }`}
+                  >
+                    <div className={`w-5 h-5 rounded-full bg-white transition-transform ${
+                      aiUpdaterOn ? 'translate-x-6' : 'translate-x-0'
+                    }`} />
+                  </button>
+                </div>
+
+                <div className="mt-3 pt-3 border-t border-cyan-500/15 flex items-center justify-between text-xs flex-wrap gap-2">
+                  <div className="text-cyan-200/70 text-[11px] flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                    <span>Status: {aiUpdaterOn ? 'Active • 4K Streams Auto-Optimized' : 'Paused'} (Synced: {lastSync})</span>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      setIsSyncing(true);
+                      const res = await triggerAiSync();
+                      setIsSyncing(false);
+                      setLastSync(res.time);
+                    }}
+                    disabled={isSyncing}
+                    className="px-3 py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-300 font-bold text-xs transition flex items-center gap-1.5"
+                  >
+                    <RefreshCw className={`w-3 h-3 ${isSyncing ? 'animate-spin text-amber-400' : ''}`} />
+                    <span>{isSyncing ? 'AI Syncing...' : 'Sync 4K Now'}</span>
+                  </button>
                 </div>
               </div>
 
