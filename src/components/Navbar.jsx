@@ -11,7 +11,8 @@ export default function Navbar({
   isMasterMode,
   includeMature,
   onOpenSettings,
-  onOpenIPhoneModal
+  onOpenIPhoneModal,
+  onOpenStudio
 }) {
   const baseCategories = [
     { id: 'trending', label: 'Trending', icon: Flame },
@@ -22,6 +23,7 @@ export default function Navbar({
     { id: 'horror', label: '👻 Horror', icon: Skull },
     { id: 'series', label: 'Web Series', icon: Tv },
     { id: 'watchlist', label: 'Watchlist', icon: Heart },
+    { id: 'studio', label: '🎬 Studio', icon: Film },
   ];
 
   const categories = isMasterMode
@@ -103,7 +105,11 @@ export default function Navbar({
             return (
               <button
                 key={cat.id}
-                onClick={() => { setActiveCategory(cat.id); setSearchQuery(''); }}
+                onClick={() => {
+                  if (cat.id === 'studio' && onOpenStudio) onOpenStudio();
+                  setActiveCategory(cat.id);
+                  setSearchQuery('');
+                }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition ${
                   cat.isVault
                     ? isActive
@@ -121,8 +127,18 @@ export default function Navbar({
           })}
         </nav>
 
-        {/* Action Controls: iPhone App, Settings & Secret Master Vault */}
+        {/* Action Controls: Movie Studio, iPhone App, Settings & Secret Master Vault */}
         <div className="flex items-center gap-2">
+          <button
+            onClick={onOpenStudio}
+            data-testid="studio-btn"
+            title="Furina Movie Studio & Content Platform"
+            className="px-3 py-1.5 rounded-full border border-cyan-500/40 bg-gradient-to-r from-cyan-500/20 to-blue-600/20 hover:from-cyan-500/35 hover:to-blue-600/35 text-cyan-300 hover:text-white transition flex items-center gap-1.5 text-xs font-bold cursor-pointer shadow-sm"
+          >
+            <Film className="w-3.5 h-3.5 text-cyan-400" />
+            <span>🎬 Studio</span>
+          </button>
+
           <button
             onClick={onOpenIPhoneModal}
             title="Install App on iPhone / iPad (Zero Ads)"

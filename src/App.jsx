@@ -5,6 +5,7 @@ import MediaCard from './components/MediaCard';
 import PlayerModal from './components/PlayerModal';
 import SettingsModal from './components/SettingsModal';
 import IPhoneAppModal from './components/IPhoneAppModal';
+import MovieStudioModal, { getStoredStudioMovies } from './components/MovieStudioModal';
 import ErrorBoundary from './components/ErrorBoundary';
 import { 
   fetchTrendingAll, 
@@ -37,6 +38,7 @@ export default function App() {
   // Settings & Secret Master Mode (Passcode: 2030)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isIPhoneModalOpen, setIsIPhoneModalOpen] = useState(false);
+  const [isStudioOpen, setIsStudioOpen] = useState(false);
   const [isMasterMode, setIsMasterMode] = useState(false);
   const [isStealthMode, setIsStealthMode] = useState(false);
   const [includeMature, setIncludeMature] = useState(false);
@@ -124,6 +126,7 @@ export default function App() {
     }
     if (cat === 'mature') return await fetchMatureMovies(pageNum);
     if (cat === 'watchlist') return watchlist;
+    if (cat === 'studio') return getStoredStudioMovies();
     return [];
   };
 
@@ -137,6 +140,14 @@ export default function App() {
       const cleanWatchlist = deduplicateMedia(watchlist);
       setItems(cleanWatchlist);
       setHeroItem(cleanWatchlist[0] || null);
+      setLoading(false);
+      return;
+    }
+
+    if (activeCategory === 'studio') {
+      const studioList = deduplicateMedia(getStoredStudioMovies());
+      setItems(studioList);
+      setHeroItem(studioList[0] || null);
       setLoading(false);
       return;
     }
@@ -195,6 +206,7 @@ export default function App() {
         includeMature={includeMature}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenIPhoneModal={() => setIsIPhoneModalOpen(true)}
+        onOpenStudio={() => setIsStudioOpen(true)}
       />
 
       {/* Main Container */}
@@ -510,6 +522,13 @@ export default function App() {
         onClose={() => setIsIPhoneModalOpen(false)}
       />
 
+      {/* Furina Movie Studio & Creator Modal */}
+      <MovieStudioModal
+        isOpen={isStudioOpen}
+        onClose={() => setIsStudioOpen(false)}
+        onPlayMovie={(movie) => setActiveMedia(movie)}
+      />
+
       {/* Mobile iOS Style Bottom Navigation Bar */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-[#070d1e]/95 backdrop-blur-2xl border-t border-cyan-500/20 px-1 py-2 flex items-center justify-around shadow-[0_-5px_25px_rgba(0,0,0,0.7)]">
         {[
@@ -517,6 +536,7 @@ export default function App() {
           { id: 'hollywood', label: 'Movies', icon: Film },
           { id: 'hindi', label: 'Hindi', icon: Sparkles },
           { id: 'anime', label: 'Anime', icon: Sparkles },
+          { id: 'studio', label: 'Studio', icon: Film },
           ...(isMasterMode ? [
             { id: 'mature', label: 'Uncut', icon: Flame },
             { id: 'ecchi_anime', label: 'Vault', icon: Flame }
