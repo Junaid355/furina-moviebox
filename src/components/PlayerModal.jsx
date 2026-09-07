@@ -57,10 +57,10 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     ? SERVERS.filter((s) => s.id !== 'autoembed') 
     : SERVERS;
 
-  // Determine initial server: VidSrc 4K or VidLink Pro
+  // Determine initial server: VidLink Pro for English Dub Anime, VidSrc 4K otherwise
   const getInitialServer = () => {
     if (audioMode === 'english' && isAnime) {
-      return availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
+      return availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
     }
     return availableServers.find((s) => s.id === preferredServerId) || availableServers[0];
   };
@@ -110,12 +110,28 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const releaseDate = item?.release_date || item?.first_air_date;
   const isUpcoming = (releaseDate && releaseDate > todayStr) || (item?.vote_count === 0 && !isSeries);
 
-  // Lock background body scroll while modal is open
+  // Safely close modal and exit browser fullscreen mode
+  const handleSafeClose = () => {
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      }
+    }
+    setIsFullscreen(false);
+    onClose();
+  };
+
+  // Lock background body and document scroll while modal is open
   useEffect(() => {
     const originalOverflow = document.body.style.overflow;
+    const originalDocOverflow = document.documentElement.style.overflow;
     document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = originalOverflow || '';
+      document.documentElement.style.overflow = originalDocOverflow || '';
     };
   }, []);
 
@@ -129,7 +145,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
           }
           setIsFullscreen(false);
         } else {
-          onClose();
+          handleSafeClose();
         }
       } else if (e.key === 'f' || e.key === 'F') {
         if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
@@ -216,7 +232,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   }, [item?.id, season, isSeries]);
 
   const currentServer = selectedServer || availableServers[0];
-  const streamUrl = getStreamUrl(currentServer, item?.id, isSeries ? 'tv' : 'movie', season, episode);
+  const streamUrl = getStreamUrl(currentServer, item?.id, isSeries ? 'tv' : 'movie', season, episode, audioMode);
   const downloadUrl = getDownloadUrl(item?.id, isSeries ? 'tv' : 'movie', season, episode);
 
   const openInNewWindow = () => {
@@ -233,7 +249,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   return (
     <div 
       className="fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl flex items-center justify-center p-0 sm:p-3 md:p-4 overflow-hidden select-none"
-      onClick={(e) => { if (e.target === e.currentTarget && !isFullscreen) onClose(); }}
+      onClick={(e) => { if (e.target === e.currentTarget && !isFullscreen) handleSafeClose(); }}
     >
       {/* Ambient background glow */}
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-900/25 via-transparent to-transparent" />
@@ -245,7 +261,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
         onTouchStart={handleUserActivity}
         className={`relative flex flex-col bg-[#050b1d] border-0 sm:border sm:border-cyan-500/35 overflow-hidden transition-all duration-300 ${
           isFullscreen
-            ? 'fixed inset-0 z-[99999] w-screen h-screen rounded-none max-w-none max-h-none p-0 bg-black'
+            ? 'fixed inset-0 z-[99999] w-screen h-screen rounded-none max-w-none max-h-none p-0 bg-black overflow-hidden select-none'
             : 'w-full max-w-5xl h-[100dvh] sm:h-[92vh] max-h-[100dvh] sm:max-h-[92vh] rounded-none sm:rounded-2xl shadow-[0_0_80px_rgba(56,189,248,0.35)] animate-fade-in'
         }`}
         onClick={(e) => e.stopPropagation()}
@@ -317,7 +333,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
               </button>
 
               <button
-                onClick={onClose}
+                onClick={handleSafeClose}
                 title="Close Player (Esc)"
                 className="w-10 h-10 rounded-full bg-rose-600 hover:bg-rose-500 text-white border-2 border-rose-400 flex items-center justify-center transition shadow-[0_0_20px_rgba(244,63,94,0.8)] cursor-pointer"
               >
@@ -422,7 +438,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
               {/* HIGH-CONTRAST RED CLOSE BUTTON - ALWAYS VISIBLE, NEVER SCROLLS AWAY */}
               <button
-                onClick={onClose}
+                onClick={handleSafeClose}
                 aria-label="Close video player modal"
                 title="Close Player (Esc)"
                 className="w-10 h-10 rounded-full bg-rose-600 hover:bg-rose-500 text-white border-2 border-rose-400/80 hover:border-white flex items-center justify-center transition shadow-[0_0_18px_rgba(244,63,94,0.7)] hover:shadow-[0_0_28px_rgba(244,63,94,0.95)] shrink-0 ml-1.5 transform hover:scale-105 active:scale-90 touch-manipulation cursor-pointer"
@@ -448,13 +464,11 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 <button
                   onClick={() => {
                     setAudioMode('english');
-                    // When user chooses English Dub for anime, route to verified English stream servers
-                    if (isAnime) {
-                      const engServer = availableServers.find((s) => s.id === 'vidsrc_in') || availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
-                      setSelectedServer(engServer);
-                    }
+                    // Route to verified VidLink Pro English Dub
+                    const engServer = availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
+                    setSelectedServer(engServer);
                   }}
-                  className={`px-3 py-1 rounded-full text-xs font-extrabold transition flex items-center gap-1 border ${
+                  className={`px-3 py-1 rounded-full text-xs font-extrabold transition flex items-center gap-1 border cursor-pointer ${
                     audioMode === 'english'
                       ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 border-cyan-300 shadow-[0_0_12px_rgba(56,189,248,0.5)] scale-105'
                       : 'bg-cyan-500/10 text-cyan-200/70 border-cyan-500/30 hover:text-white'
@@ -469,10 +483,10 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   <button
                     onClick={() => {
                       setAudioMode('sub');
-                      const subServer = availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
+                      const subServer = availableServers.find((s) => s.id === 'vidsrc_in') || availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
                       setSelectedServer(subServer);
                     }}
-                    className={`px-3 py-1 rounded-full text-xs font-extrabold transition flex items-center gap-1 border ${
+                    className={`px-3 py-1 rounded-full text-xs font-extrabold transition flex items-center gap-1 border cursor-pointer ${
                       audioMode === 'sub'
                         ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white border-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.5)] scale-105'
                         : 'bg-purple-500/10 text-purple-200/70 border-purple-500/30 hover:text-white'
@@ -488,10 +502,10 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   <button
                     onClick={() => {
                       setAudioMode('hindi');
-                      const hindiServer = availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
+                      const hindiServer = availableServers.find((s) => s.id === 'vidsrc_in') || availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
                       setSelectedServer(hindiServer);
                     }}
-                    className={`px-3 py-1 rounded-full text-xs font-extrabold transition flex items-center gap-1 border ${
+                    className={`px-3 py-1 rounded-full text-xs font-extrabold transition flex items-center gap-1 border cursor-pointer ${
                       audioMode === 'hindi'
                         ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-gray-950 border-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.6)] scale-105'
                         : 'bg-amber-500/10 text-amber-200/70 border-amber-500/30 hover:text-white'
@@ -508,17 +522,17 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
             <div className="text-[11px] text-cyan-200/70">
               {audioMode === 'english' && (
                 <span className="text-cyan-300 font-medium">
-                  ✓ <strong>English Dub Active</strong> (Tap ⚙️ inside player or switch mirrors below if needed)
+                  ✓ <strong>English Dub Active</strong> (VidLink Pro & Multi-Audio servers loaded with English audio)
                 </span>
               )}
               {audioMode === 'sub' && (
                 <span className="text-purple-300 font-medium">
-                  ✓ <strong>Japanese Subbed Active</strong> (Tap 💬 CC for subtitles)
+                  ✓ <strong>Japanese Subbed Active</strong> (Original Japanese Audio • Tap 💬 CC for subtitles)
                 </span>
               )}
               {audioMode === 'hindi' && (
                 <span className="text-amber-300 font-medium">
-                  ✓ <strong>Hindi Audio Track Active</strong> (RareAnimes format)
+                  ✓ <strong>Hindi Audio Track Active</strong> (RareAnimes format • Hindi broadcast)
                 </span>
               )}
             </div>
@@ -528,7 +542,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
         {/* ========================================================================= */}
         {/* 4. SCROLLABLE INNER BODY - Video, Rescue Bar, Audio Info & Episodes        */}
         {/* ========================================================================= */}
-        <div className={`flex-1 overflow-y-auto overscroll-contain ${isFullscreen ? 'flex flex-col justify-center items-center h-full bg-black p-0' : ''}`}>
+        <div className={`flex-1 ${isFullscreen ? 'w-full h-full flex flex-col items-center justify-center bg-black overflow-hidden p-0 m-0' : 'overflow-y-auto overscroll-contain'}`}>
           
           {/* Expandable uBlock Origin Lite Protection Drawer */}
           {!isFullscreen && showUBlockGuide && (
@@ -648,8 +662,8 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
           {/* 5. VIDEO PLAYER IFRAME (100% RESPONSIVE, 16:9 PRESERVED, NO CUTOFF)       */}
           {/* ========================================================================= */}
           <div 
-            className={`relative w-full bg-black overflow-hidden flex items-center justify-center ${
-              isFullscreen ? 'h-full flex-1 max-h-screen' : 'aspect-video'
+            className={`relative w-full bg-black flex items-center justify-center overflow-hidden ${
+              isFullscreen ? 'w-full h-full flex-1 max-w-full max-h-full' : 'aspect-video'
             }`}
             style={AI_BOOST_STYLES[aiBoostMode] || {}}
           >
@@ -657,7 +671,11 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
               key={`${currentServer.id}-${season}-${episode}-${audioMode}-${reloadKey}`}
               src={streamUrl}
               title={title}
-              className={`w-full h-full border-0 ${isFullscreen ? 'max-w-full max-h-full aspect-video' : ''}`}
+              className={`border-0 ${
+                isFullscreen 
+                  ? 'w-full h-full aspect-video max-w-[calc(100vh*16/9)] max-h-[calc(100vw*9/16)] shadow-2xl' 
+                  : 'w-full h-full'
+              }`}
               allowFullScreen
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
             />
@@ -714,7 +732,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   </div>
                   <p className="text-[11px] text-purple-200/80 mt-1 leading-relaxed">
                     {audioMode === 'english' 
-                      ? 'English Dubbed audio stream is loaded. If the current server plays Japanese audio for this episode, switch to Server 2 (VidLink Pro) or Server 3 (VidSrc CC) above, or tap ⚙️ Settings inside the video player to select English Dub.'
+                      ? 'English Dubbed audio stream is loaded via VidLink Pro (verified multi-audio). If the current mirror plays Japanese audio for this episode, switch to Server 1 (VidLink Pro) or Server 6 (MultiEmbed) above, or tap ⚙️ Settings inside the video player to select English Dub.'
                       : audioMode === 'hindi'
                       ? 'Official Hindi Dub audio broadcast (RareAnimes format). Server 1 and Server 2 provide direct 1080p playback.'
                       : 'Japanese original audio stream with subtitles. Tap 💬 CC inside the player to select subtitle languages.'}
@@ -814,7 +832,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
           {!isFullscreen && (
             <div className="p-3 bg-[#040816] border-t border-cyan-500/20 flex items-center justify-between gap-3">
               <button
-                onClick={onClose}
+                onClick={handleSafeClose}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 border border-rose-400 text-white text-xs font-bold transition shadow-[0_0_15px_rgba(244,63,94,0.6)] cursor-pointer"
               >
                 <X className="w-4 h-4" />

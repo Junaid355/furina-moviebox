@@ -24,6 +24,7 @@ import { Flame, Film, Tv, Sparkles, Heart, RefreshCw, Shield, Settings, ChevronD
 export default function App() {
   const [activeCategory, setActiveCategory] = useState('trending');
   const [animeAudioFilter, setAnimeAudioFilter] = useState('all');
+  const [movieFilter, setMovieFilter] = useState('hollywood');
   const [searchQuery, setSearchQuery] = useState('');
   const [items, setItems] = useState([]);
   const [heroItem, setHeroItem] = useState(null);
@@ -124,7 +125,11 @@ export default function App() {
       return await searchContent(query, pageNum, includeMature);
     }
     if (cat === 'trending') return await fetchTrendingAll(pageNum);
-    if (cat === 'hollywood') return await fetchHollywoodMovies(pageNum);
+    if (cat === 'hollywood') {
+      if (movieFilter === 'hindi') return await fetchHindiMovies(pageNum);
+      if (movieFilter === 'popular') return await fetchTrendingAll(pageNum);
+      return await fetchHollywoodMovies(pageNum);
+    }
     if (cat === 'hindi') return await fetchHindiMovies(pageNum);
     if (cat === 'series') return await fetchTrendingSeries(pageNum);
     if (cat === 'kdrama') return await fetchKDramas(pageNum);
@@ -162,7 +167,7 @@ export default function App() {
       }
       setLoading(false);
     });
-  }, [activeCategory, searchQuery, animeAudioFilter, includeMature, isMasterMode, watchlist.length]);
+  }, [activeCategory, searchQuery, animeAudioFilter, movieFilter, includeMature, isMasterMode, watchlist.length]);
 
   // Load More (Pagination) with strict dual deduplication
   const handleLoadMore = async () => {
@@ -294,29 +299,18 @@ export default function App() {
               <span className="text-cyan-200/50 text-[11px] whitespace-nowrap font-medium">Anime Audio:</span>
               <button
                 onClick={() => setAnimeAudioFilter('all')}
-                className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border ${
+                className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border cursor-pointer ${
                   animeAudioFilter === 'all'
                     ? 'bg-cyan-500 text-gray-950 border-cyan-400 shadow'
                     : 'bg-cyan-500/15 border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/25'
                 }`}
               >
                 <span>⭐</span>
-                <span>All Popular Anime</span>
-              </button>
-              <button
-                onClick={() => setAnimeAudioFilter('hindi')}
-                className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border ${
-                  animeAudioFilter === 'hindi'
-                    ? 'bg-amber-500 text-gray-950 border-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.6)] font-black'
-                    : 'bg-amber-500/15 border-amber-500/30 text-amber-300 hover:bg-amber-500/25'
-                }`}
-              >
-                <span>🇮🇳</span>
-                <span>Hindi Dubbed Anime (RareAnimes)</span>
+                <span>All Anime</span>
               </button>
               <button
                 onClick={() => setAnimeAudioFilter('english')}
-                className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border ${
+                className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border cursor-pointer ${
                   animeAudioFilter === 'english'
                     ? 'bg-blue-500 text-white border-blue-400 shadow'
                     : 'bg-blue-500/15 border-blue-500/40 text-blue-300 hover:bg-blue-500/25'
@@ -326,8 +320,19 @@ export default function App() {
                 <span>English Dubbed</span>
               </button>
               <button
+                onClick={() => setAnimeAudioFilter('hindi')}
+                className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border cursor-pointer ${
+                  animeAudioFilter === 'hindi'
+                    ? 'bg-amber-500 text-gray-950 border-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.6)] font-black'
+                    : 'bg-amber-500/15 border-amber-500/30 text-amber-300 hover:bg-amber-500/25'
+                }`}
+              >
+                <span>🇮🇳</span>
+                <span>Hindi Dubbed (RareAnimes format)</span>
+              </button>
+              <button
                 onClick={() => setAnimeAudioFilter('sub')}
-                className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border ${
+                className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border cursor-pointer ${
                   animeAudioFilter === 'sub'
                     ? 'bg-purple-500 text-white border-purple-400 shadow'
                     : 'bg-purple-500/15 border-purple-500/40 text-purple-300 hover:bg-purple-500/25'
@@ -345,21 +350,21 @@ export default function App() {
               <span className="text-amber-300/70 text-[11px] whitespace-nowrap font-medium">Audio Collection:</span>
               <button
                 onClick={() => { setSearchQuery(''); }}
-                className="px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border bg-amber-500 text-gray-950 border-amber-400 shadow"
+                className="px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border bg-amber-500 text-gray-950 border-amber-400 shadow cursor-pointer"
               >
                 <span>🇮🇳</span>
                 <span>All Bollywood & Hindi Dubbed</span>
               </button>
               <button
                 onClick={() => setSearchQuery('Hindi Dubbed')}
-                className="px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border bg-amber-500/15 border-amber-500/30 text-amber-300 hover:bg-amber-500/25"
+                className="px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border bg-amber-500/15 border-amber-500/30 text-amber-300 hover:bg-amber-500/25 cursor-pointer"
               >
                 <span>🎬</span>
                 <span>Hollywood in Hindi Dub</span>
               </button>
               <button
                 onClick={() => { setActiveCategory('anime'); setAnimeAudioFilter('hindi'); }}
-                className="px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border bg-cyan-500/15 border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/25"
+                className="px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border bg-cyan-500/15 border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/25 cursor-pointer"
               >
                 <span>🌸</span>
                 <span>Hindi Anime (Naruto, DBZ, Doraemon)</span>
@@ -367,23 +372,42 @@ export default function App() {
             </div>
           )}
 
-          {/* Hollywood Cinema Quick Filters */}
+          {/* Hollywood & Movies Dedicated Tabs */}
           {activeCategory === 'hollywood' && !searchQuery && (
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 text-xs">
-              <span className="text-cyan-200/50 text-[11px] whitespace-nowrap font-medium">Audio Options:</span>
+              <span className="text-cyan-200/50 text-[11px] whitespace-nowrap font-medium">Movie Curation:</span>
               <button
-                onClick={() => { setSearchQuery(''); }}
-                className="px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border bg-cyan-500 text-gray-950 border-cyan-400 shadow"
+                onClick={() => setMovieFilter('hollywood')}
+                className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border cursor-pointer ${
+                  movieFilter === 'hollywood'
+                    ? 'bg-cyan-500 text-gray-950 border-cyan-400 shadow'
+                    : 'bg-cyan-500/15 border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/25'
+                }`}
               >
                 <span>🎬</span>
-                <span>Original English Audio</span>
+                <span>Hollywood Blockbusters</span>
               </button>
               <button
-                onClick={() => setSearchQuery('Hindi Dubbed')}
-                className="px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border bg-amber-500/15 border-amber-500/30 text-amber-300 hover:bg-amber-500/25"
+                onClick={() => setMovieFilter('hindi')}
+                className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border cursor-pointer ${
+                  movieFilter === 'hindi'
+                    ? 'bg-amber-500 text-gray-950 border-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.6)] font-black'
+                    : 'bg-amber-500/15 border-amber-500/30 text-amber-300 hover:bg-amber-500/25'
+                }`}
               >
                 <span>🇮🇳</span>
-                <span>Hollywood in Hindi Dub</span>
+                <span>Bollywood & Hindi Dubbed</span>
+              </button>
+              <button
+                onClick={() => setMovieFilter('popular')}
+                className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border cursor-pointer ${
+                  movieFilter === 'popular'
+                    ? 'bg-blue-500 text-white border-blue-400 shadow'
+                    : 'bg-blue-500/15 border-blue-500/40 text-blue-300 hover:bg-blue-500/25'
+                }`}
+              >
+                <span>⭐</span>
+                <span>Popular Movies</span>
               </button>
             </div>
           )}

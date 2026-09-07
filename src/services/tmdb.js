@@ -1577,13 +1577,14 @@ export async function fetchAnime(page = 1, audioFilter = 'all') {
       const filteredHindi = cleanDiscovered.filter((m) => isHindiDubbedAnime(m));
       if (filteredHindi.length < 12) {
         // Query specific iconic Hindi dubbed anime series/movies for infinite Hindi pagination
-        const hindiSearchTerms = ['Dragon Ball', 'Naruto', 'Doraemon', 'Shinchan', 'Demon Slayer', 'One Piece', 'Jujutsu Kaisen', 'Beyblade', 'Bleach', 'Pokemon', 'Inazuma Eleven', 'Perman', 'Hattori'];
+        const hindiSearchTerms = ['Dragon Ball', 'Naruto', 'Doraemon', 'Shinchan', 'Demon Slayer', 'One Piece', 'Jujutsu Kaisen', 'Beyblade', 'Bleach', 'Pokemon', 'Inazuma Eleven', 'Perman', 'Hattori', 'Slime', 'Solo Leveling'];
         const queryTerm = hindiSearchTerms[(page - 2) % hindiSearchTerms.length];
+        const subPage = Math.floor((page - 2) / hindiSearchTerms.length) + 1;
         try {
-          const sRes = await fetch(`${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(queryTerm)}&page=1`);
+          const sRes = await fetch(`${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(queryTerm)}&page=${subPage}`);
           const sData = await sRes.json();
           const extra = (sData.results || [])
-            .filter((it) => it && it.id && (it.poster_path || it.backdrop_path) && !allCuratedIds.has(Number(it.id)) && !isHanimeContent(it))
+            .filter((it) => it && it.id && it.media_type !== 'person' && (it.poster_path || it.backdrop_path) && !allCuratedIds.has(Number(it.id)) && !isHanimeContent(it))
             .map((it) => ({
               ...it,
               media_type: it.media_type || (it.first_air_date ? 'tv' : 'movie'),
@@ -1630,7 +1631,7 @@ export async function fetchKDramas(page = 1) {
   }
 }
 
-// 18+ Mature & Uncut Cinema
+// Master Vault Uncut Cinema
 export async function fetchMatureMovies(page = 1) {
   try {
     const res = await fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&include_adult=true&certification_country=US&certification=R|NC-17&sort_by=popularity.desc&page=${page}`);
@@ -2037,7 +2038,7 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
   }
 ];
 
-// 🔞 Blacklist of 18+ Ecchi, Hentai & ComicFesta Anime (kept strictly in secret vault)
+// Master Vault Curated Anime Collection (kept strictly in secret vault)
 export const BLOCKED_HANIME_IDS = new Set([
   95897, 81044, 88090, 78501, 90388, 131660, 118588, 99071, 96444, 45950,
   68005, 64706, 85588, 70998, 70830, 74180, 75778, 103409, 236338, 114477,

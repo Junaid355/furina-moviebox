@@ -343,7 +343,7 @@ export default function SettingsModal({
                   </button>
                 </form>
               ) : (
-                /* UNLOCKED STATE: Master Controls & 18+ Cinema */
+                /* UNLOCKED STATE: Master Controls & Exclusive Cinema */
                 <div className="space-y-4">
                   
                   {/* Status Banner */}
