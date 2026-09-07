@@ -10,11 +10,19 @@ export default function MediaCard({ item, onPlay, isWatchlisted, onToggleWatchli
   const rating = typeof item.vote_average === 'number' 
     ? item.vote_average.toFixed(1) 
     : (item.vote_average || '7.8');
+  const isSeries = Boolean(
+    item.media_type === 'tv' || 
+    Boolean(item.first_air_date) || 
+    item.category === 'series' || 
+    item.category === 'kdrama'
+  );
   const isAnime = Boolean(
     item.category === 'anime' ||
+    item.category === 'ecchi_anime' ||
     item.isAnime === true ||
     item.original_language === 'ja' ||
-    item.genre_ids?.includes(16)
+    (Array.isArray(item.origin_country) && item.origin_country.includes('JP')) ||
+    ((item.genre_ids?.includes(16) || item.genres?.some((g) => g.id === 16 || g.name === 'Animation')) && item.original_language === 'ja')
   );
   const isHindi = !isAnime && Boolean(isHindiAvailable(item));
   

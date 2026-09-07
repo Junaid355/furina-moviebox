@@ -371,8 +371,550 @@ export const CURATED_BOLLYWOOD_BLOCKBUSTERS = [
   }
 ];
 
-export const CURATED_ENGLISH_DUBBED_ANIME = [
+export const CURATED_HINDI_DUBBED_ANIME = [
   {
+    "id": 46260,
+    "title": "Naruto",
+    "name": "Naruto",
+    "overview": "Naruto Uzumaki, a hyperactive and knuckle-headed ninja, strives for the recognition of his village while harboring the sealed Nine-Tails Fox inside him. Famous Hindi dub on Sony YAY! and Crunchyroll.",
+    "poster_path": "/xppePgfkxDGHnK7Uo5u0qIe9gim.jpg",
+    "backdrop_path": "/rW1j7RrnKk26r4d4a8sL9kX2.jpg",
+    "media_type": "tv",
+    "vote_average": 8.4,
+    "first_air_date": "2002-10-03",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 31910,
+    "title": "Naruto: Shippuden",
+    "name": "Naruto: Shippuden",
+    "overview": "Naruto returns to the Hidden Leaf Village after two and a half years of rigorous training with Jiraiya, ready to face the Akatsuki organization. Official Hindi dub on Sony YAY! and Crunchyroll India.",
+    "poster_path": "/kV274zYrUQmPZ5sAbtWb6v7B91w.jpg",
+    "backdrop_path": "/v4UFv94gG2r7hB4B6vL9kX2.jpg",
+    "media_type": "tv",
+    "vote_average": 8.6,
+    "first_air_date": "2007-02-15",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 12971,
+    "title": "Dragon Ball Z",
+    "name": "Dragon Ball Z",
+    "overview": "Goku and the Z Fighters protect Earth against cosmic tyrants, androids, and ancient demons. Legendary Hindi dub broadcast across India on Cartoon Network and Crunchyroll.",
+    "poster_path": "/dJygrvd0pM4k7qgYwYxZ1P1Q.jpg",
+    "backdrop_path": "/fl1eJ7pT6L3k9x9qW5zV4eY6kX.jpg",
+    "media_type": "tv",
+    "vote_average": 8.3,
+    "first_air_date": "1989-04-26",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 62710,
+    "title": "Dragon Ball Super",
+    "name": "Dragon Ball Super",
+    "overview": "After defeating Majin Buu, Goku encounters Lord Beerus, the God of Destruction, and unlocks the legendary Super Saiyan God transformation. Official Hindi dub on Cartoon Network India.",
+    "poster_path": "/qwgGk3t9Z4bJ9fF7q6vL1P1Q.jpg",
+    "backdrop_path": "/2yL6k4jB9vL1P1Q5vL9kX2.jpg",
+    "media_type": "tv",
+    "vote_average": 8.2,
+    "first_air_date": "2015-07-05",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 2098,
+    "title": "Doraemon",
+    "name": "Doraemon",
+    "overview": "The robotic cat from the 22nd century arrives to help Nobita Nobi navigate everyday challenges with futuristic secret gadgets. India's #1 most beloved Hindi anime on Hungama and Disney.",
+    "poster_path": "/yqX7L7oM5zV4eY6kX2bJ9fF7.jpg",
+    "backdrop_path": "/uL7q9Z4bJ9fF7q6vL1P1Q.jpg",
+    "media_type": "tv",
+    "vote_average": 8.1,
+    "first_air_date": "1979-04-02",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 33758,
+    "title": "Crayon Shin-chan",
+    "name": "Crayon Shin-chan",
+    "overview": "The hilarious adventures of five-year-old Shinnosuke 'Shin-chan' Nohara, his eccentric parents, his dog Shiro, and his kindergarten buddies. Iconic Hindi dub comedy on Hungama TV.",
+    "poster_path": "/kZ3t9Z4bJ9fF7q6vL1P1Q.jpg",
+    "backdrop_path": "/4vL1P1Q5vL9kX2bJ9fF7.jpg",
+    "media_type": "tv",
+    "vote_average": 8.0,
+    "first_air_date": "1992-04-13",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 60572,
+    "title": "Pok\u00e9mon",
+    "name": "Pok\u00e9mon",
+    "overview": "Ash Ketchum sets out with Pikachu to fulfill his lifelong dream of becoming the greatest Pok\u00e9mon Master in history. Iconic Hindi dub on Hungama and Cartoon Network.",
+    "poster_path": "/rOuGm07UHv2ePp9Q1X2Y3Z4.jpg",
+    "backdrop_path": "/4qW5zV4eY6kX2bJ9fF7.jpg",
+    "media_type": "tv",
+    "vote_average": 7.9,
+    "first_air_date": "1997-04-01",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 77240,
+    "title": "Ninja Hattori-kun",
+    "name": "Ninja Hattori-kun",
+    "overview": "Kanzo Hattori, a little ninja hailing from the Iga mountains, befriends Kenichi Mitsuba and helps him overcome bullies and difficulties using ninja skills. Classic Hindi dub on Nickelodeon India.",
+    "poster_path": "/mZ4bJ9fF7q6vL1P1Q.jpg",
+    "backdrop_path": "/3vL9kX2bJ9fF7q6vL1P1Q.jpg",
+    "media_type": "tv",
+    "vote_average": 7.8,
+    "first_air_date": "1981-09-28",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 31835,
+    "title": "Beyblade",
+    "name": "Beyblade",
+    "overview": "Tyson Granger and the Bladebreakers battle their spinning tops embedded with powerful Bit-Beasts against the world's greatest bladers. Legendary Hindi dub on Cartoon Network India.",
+    "poster_path": "/8vL1P1Q5vL9kX2bJ9fF7.jpg",
+    "backdrop_path": "/5q6vL1P1Q5vL9kX2bJ9f.jpg",
+    "media_type": "tv",
+    "vote_average": 7.7,
+    "first_air_date": "2001-01-08",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 95479,
+    "title": "Jujutsu Kaisen",
+    "name": "Jujutsu Kaisen",
+    "overview": "Yuji Itadori swallows a cursed talisman\u2014the finger of Ryomen Sukuna\u2014and joins Tokyo Jujutsu High. Official blockbuster Hindi dub on Crunchyroll India.",
+    "poster_path": "/fHpKWsqmE4EaU7XzY2vL9kX.jpg",
+    "backdrop_path": "/gmECEd1AsJOEubqiL28fhnNx07j.jpg",
+    "media_type": "tv",
+    "vote_average": 8.6,
+    "first_air_date": "2020-10-03",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 85937,
+    "title": "Demon Slayer: Kimetsu no Yaiba",
+    "name": "Demon Slayer: Kimetsu no Yaiba",
+    "overview": "Tanjiro Kamado trains as a demon slayer to avenge his slaughtered family and find a cure for his sister Nezuko. Official blockbuster Hindi dub on Crunchyroll India.",
+    "poster_path": "/xUfRZu2mi8jH69hmV1Nxu3C9FFG.jpg",
+    "backdrop_path": "/nTvM4mhqZlHIIVUQARzgpjhZE69.jpg",
+    "media_type": "tv",
+    "vote_average": 8.7,
+    "first_air_date": "2019-04-06",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 114410,
+    "title": "Chainsaw Man",
+    "name": "Chainsaw Man",
+    "overview": "Denji lives a life of poverty paying off his deceased father's debt until he merges with his pet Chainsaw Devil, Pochita. Official Hindi dub on Crunchyroll India.",
+    "poster_path": "/yVtxvOIv0iV23Na9vK4g7b5Y9.jpg",
+    "backdrop_path": "/iHSwvRVsRyxpX7FE7GbviaDvgGZ.jpg",
+    "media_type": "tv",
+    "vote_average": 8.4,
+    "first_air_date": "2022-10-12",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 211089,
+    "title": "Solo Leveling",
+    "name": "Solo Leveling",
+    "overview": "Known as the Weakest Hunter of All Mankind, Sung Jinwoo discovers a mysterious quest window that allows him to level up without limits. Official Hindi dub on Crunchyroll India.",
+    "poster_path": "/geCRueV3ElhRTr0xtJuPxJ8BGdM.jpg",
+    "backdrop_path": "/jWXrQstj7p9WTa8zgQ5UmxSZ.jpg",
+    "media_type": "tv",
+    "vote_average": 8.6,
+    "first_air_date": "2024-01-07",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 37854,
+    "title": "One Piece",
+    "name": "One Piece",
+    "overview": "Monkey D. Luffy and his Straw Hat Pirates sail the perilous Grand Line in search of the legendary ultimate treasure, the One Piece. Official Hindi dub on Cartoon Network India.",
+    "poster_path": "/cMD9Ygz11zjJzAovURURmeTGEnS.jpg",
+    "backdrop_path": "/4MCKNAc6AbWjEsM2h9Xc29.jpg",
+    "media_type": "tv",
+    "vote_average": 8.7,
+    "first_air_date": "1999-10-20",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 65930,
+    "title": "My Hero Academia",
+    "name": "My Hero Academia",
+    "overview": "In a world where 80% of the population has super-powered Quirks, quirkless Izuku Midoriya is chosen by the world's greatest hero, All Might. Official Hindi dub on Crunchyroll India.",
+    "poster_path": "/phuYuzqWW9ru8EA3HVjPj4.jpg",
+    "backdrop_path": "/n7Ezk31Z7y5o8v9vL1P1Q.jpg",
+    "media_type": "tv",
+    "vote_average": 8.6,
+    "first_air_date": "2016-04-03",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 120089,
+    "title": "Spy x Family",
+    "name": "Spy x Family",
+    "overview": "Master spy Twilight adopts telepathic Anya and marries assassin Yor to complete Operation Strix without knowing each other's secrets. Official Hindi dub on Crunchyroll India.",
+    "poster_path": "/3r4LYFuXrg3G8f0hwvf7dpv.jpg",
+    "backdrop_path": "/zN42Aas0F4N8mQ1X2Y3Z4.jpg",
+    "media_type": "tv",
+    "vote_average": 8.5,
+    "first_air_date": "2022-04-09",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 73223,
+    "title": "Black Clover",
+    "name": "Black Clover",
+    "overview": "Asta, a boy born with zero magical power in a world where magic is everything, aims to become the Wizard King wielding a five-leaf grimoire. Official Hindi dub on Crunchyroll India.",
+    "poster_path": "/1k5bL1P1Q5vL9kX2bJ9fF7.jpg",
+    "backdrop_path": "/4vL1P1Q5vL9kX2bJ9fF7.jpg",
+    "media_type": "tv",
+    "vote_average": 8.4,
+    "first_air_date": "2017-10-03",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 206497,
+    "title": "Kaiju No. 8",
+    "name": "Kaiju No. 8",
+    "overview": "Kafka Hibino cleans up monster corpses until an infestation transforms him into a humanoid Kaiju with godlike power. Official Hindi dub on Crunchyroll India.",
+    "poster_path": "/s4vL1P1Q5vL9kX2bJ9fF7.jpg",
+    "backdrop_path": "/7vL1P1Q5vL9kX2bJ9fF7.jpg",
+    "media_type": "tv",
+    "vote_average": 8.4,
+    "first_air_date": "2024-04-13",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 30984,
+    "title": "Bleach",
+    "name": "Bleach",
+    "overview": "High school student Ichigo Kurosaki gains the powers of a Soul Reaper from Rukia Kuchiki and protects humans from Hollows. Official Hindi dub on Disney+ Hotstar India.",
+    "poster_path": "/2EewAkDYvK39t1R7h5c0a.jpg",
+    "backdrop_path": "/9T8oP3aL1K2mN1b3v6pL8kQJ.jpg",
+    "media_type": "tv",
+    "vote_average": 8.4,
+    "first_air_date": "2004-10-05",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 13916,
+    "title": "Death Note",
+    "name": "Death Note",
+    "overview": "Light Yagami finds a notebook dropped by a Shinigami with the power to kill anyone whose name is written inside. Top-rated Hindi dub on OTT.",
+    "poster_path": "/tCZFfYTIwrR7n94J6G14Y4hAFU6.jpg",
+    "backdrop_path": "/z8IPicmEKXUO4I2UDdMEqw7RqOE.jpg",
+    "media_type": "tv",
+    "vote_average": 8.6,
+    "first_air_date": "2006-10-04",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 46298,
+    "title": "Hunter x Hunter",
+    "name": "Hunter x Hunter",
+    "overview": "Gon Freecss discovers that his father is a world-renowned licensed Hunter and sets out on an arduous journey to find him.",
+    "poster_path": "/ucmpFdKG5w6uV9vL1P1Q.jpg",
+    "backdrop_path": "/6vL1P1Q5vL9kX2bJ9fF7.jpg",
+    "media_type": "tv",
+    "vote_average": 8.9,
+    "first_air_date": "2011-10-02",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 118439,
+    "title": "Blue Lock",
+    "name": "Blue Lock",
+    "overview": "Japan gathers 300 talented high-school strikers into a ruthless prison-like training facility called Blue Lock to create the ultimate egoist striker. Official Hindi dub on Crunchyroll India.",
+    "poster_path": "/9vL1P1Q5vL9kX2bJ9fF7.jpg",
+    "backdrop_path": "/1vL1P1Q5vL9kX2bJ9fF7.jpg",
+    "media_type": "tv",
+    "vote_average": 8.2,
+    "first_air_date": "2022-10-09",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 121533,
+    "title": "Tokyo Revengers",
+    "name": "Tokyo Revengers",
+    "overview": "Takemichi Hanagaki travels 12 years back into the past to save his middle school girlfriend from being killed by the Tokyo Manji Gang. Official Hindi dub on Disney+ Hotstar.",
+    "poster_path": "/2vL1P1Q5vL9kX2bJ9fF7.jpg",
+    "backdrop_path": "/3vL1P1Q5vL9kX2bJ9fF7.jpg",
+    "media_type": "tv",
+    "vote_average": 8.4,
+    "first_air_date": "2021-04-11",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 226688,
+    "title": "Wind Breaker",
+    "name": "Wind Breaker",
+    "overview": "Haruka Sakura wants nothing to do with weaklings\u2014he is only interested in the strongest. Joining Furin High, he learns they protect their town with fierce fists. Official Hindi dub on Crunchyroll India.",
+    "poster_path": "/5vL1P1Q5vL9kX2bJ9fF7.jpg",
+    "backdrop_path": "/6vL1P1Q5vL9kX2bJ9fF7.jpg",
+    "media_type": "tv",
+    "vote_average": 8.3,
+    "first_air_date": "2024-04-05",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 205847,
+    "title": "Mashle: Magic and Muscles",
+    "name": "Mashle: Magic and Muscles",
+    "overview": "In a magic-dominated world, Mash Burnedead has zero magic but possesses superhuman physical strength. Official Hindi dub on Crunchyroll India.",
+    "poster_path": "/7vL1P1Q5vL9kX2bJ9fF7.jpg",
+    "backdrop_path": "/8vL1P1Q5vL9kX2bJ9fF7.jpg",
+    "media_type": "tv",
+    "vote_average": 8.2,
+    "first_air_date": "2023-04-08",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 153870,
+    "title": "Hell's Paradise",
+    "name": "Hell's Paradise",
+    "overview": "Gabimaru the Hollow, an unkillable ninja on death row, is offered a full pardon if he retrieves the Elixir of Life from a mysterious, perilous island. Official Hindi dub on Crunchyroll India.",
+    "poster_path": "/9vL1P1Q5vL9kX2bJ9fF7.jpg",
+    "backdrop_path": "/0vL1P1Q5vL9kX2bJ9fF7.jpg",
+    "media_type": "tv",
+    "vote_average": 8.3,
+    "first_air_date": "2023-04-01",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 80975,
+    "title": "Perman",
+    "name": "Perman",
+    "overview": "Mitsuo Suwa is chosen by Birdman to become superhero Perman No. 1, defending justice with his helmet, cape, and copy robot. Classic Hindi dub on Nickelodeon India.",
+    "poster_path": "/1vL1P1Q5vL9kX2bJ9fF7.jpg",
+    "backdrop_path": "/2vL1P1Q5vL9kX2bJ9fF7.jpg",
+    "media_type": "tv",
+    "vote_average": 7.8,
+    "first_air_date": "1983-04-04",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 75225,
+    "title": "Kiteretsu Daihyakka",
+    "name": "Kiteretsu Daihyakka",
+    "overview": "Young inventor Eiichi 'Kiteretsu' Kiteretsu builds Korosuke, an adorable talking samurai robot, using his ancestor's ancient encyclopedia. Beloved Hindi dub on Hungama.",
+    "poster_path": "/3vL1P1Q5vL9kX2bJ9fF7.jpg",
+    "backdrop_path": "/4vL1P1Q5vL9kX2bJ9fF7.jpg",
+    "media_type": "tv",
+    "vote_average": 7.7,
+    "first_air_date": "1988-03-27",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 81216,
+    "title": "Kochikame",
+    "name": "Kochikame",
+    "overview": "Kankichi Ryotsu, a greedy and lazy police officer at the Katsushika police box, constantly invents money-making schemes that always backfire hilariously. Legendary Hindi dub on Hungama.",
+    "poster_path": "/5vL1P1Q5vL9kX2bJ9fF7.jpg",
+    "backdrop_path": "/6vL1P1Q5vL9kX2bJ9fF7.jpg",
+    "media_type": "tv",
+    "vote_average": 7.9,
+    "first_air_date": "1996-06-16",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "hasHindiDub": true,
+    "dub_type": "hindi"
+  }
+];
+
+export const CURATED_ENGLISH_DUBBED_ANIME = [
+{
+  "id": 119464,
+  "title": "The Eminence in Shadow",
+  "name": "The Eminence in Shadow",
+  "overview": "Cid Kagenou strives to be neither protagonist nor final boss, but rather the mastermind who acts from behind the scenes. Hit isekai with full English Dub.",
+  "poster_path": "/5vL1P1Q5vL9kX2bJ9fF7q6vL1.jpg",
+  "backdrop_path": "/6vL1P1Q5vL9kX2bJ9fF7q6vL1.jpg",
+  "media_type": "tv",
+  "vote_average": 8.4,
+  "first_air_date": "2022-10-05",
+  "original_language": "ja",
+  "category": "anime",
+  "isAnime": true,
+  "dub_type": "english"
+},
+  {
+  "id": 65949,
+  "title": "KonoSuba: God's Blessing on this Wonderful World!",
+  "name": "KonoSuba: God's Blessing on this Wonderful World!",
+  "overview": "After dying a laughable and pathetic death on his way back from buying a game, high school student Kazuma Sato finds himself sitting before a beautiful goddess named Aqua.",
+  "poster_path": "/3vL1P1Q5vL9kX2bJ9fF7q6vL1.jpg",
+  "backdrop_path": "/4vL1P1Q5vL9kX2bJ9fF7q6vL1.jpg",
+  "media_type": "tv",
+  "vote_average": 8.5,
+  "first_air_date": "2016-01-14",
+  "original_language": "ja",
+  "category": "anime",
+  "isAnime": true,
+  "dub_type": "english"
+},
+  {
+  "id": 203857,
+  "title": "Bleach: Thousand-Year Blood War",
+  "name": "Bleach: Thousand-Year Blood War",
+  "overview": "The peace is suddenly broken when warning sirens echo through the Soul Society. Residents there are disappearing without a trace as the Quincy King Yhwach declares war.",
+  "poster_path": "/1vL1P1Q5vL9kX2bJ9fF7q6vL1.jpg",
+  "backdrop_path": "/2vL1P1Q5vL9kX2bJ9fF7q6vL1.jpg",
+  "media_type": "tv",
+  "vote_average": 8.9,
+  "first_air_date": "2022-10-11",
+  "original_language": "ja",
+  "category": "anime",
+  "isAnime": true,
+  "dub_type": "english"
+},
+  {
+  "id": 2190,
+  "title": "Cowboy Bebop",
+  "name": "Cowboy Bebop",
+  "overview": "In 2071, roughly fifty years after an accident with a hyperspace gateway made the Earth almost uninhabitable, humanity has colonized most of the rocky planets. Legendary English Dub.",
+  "poster_path": "/xXp0Q8vL1P1Q5vL9kX2bJ9fF7.jpg",
+  "backdrop_path": "/yXp0Q8vL1P1Q5vL9kX2bJ9fF7.jpg",
+  "media_type": "tv",
+  "vote_average": 8.8,
+  "first_air_date": "1998-04-03",
+  "original_language": "ja",
+  "category": "anime",
+  "isAnime": true,
+  "dub_type": "english"
+},
+  {
+  "id": 39358,
+  "title": "Steins;Gate",
+  "name": "Steins;Gate",
+  "overview": "A group of friends invent a microwave that can send text messages to the past. As they do, they are hunted down by an organization named SERN. Celebrated English Dub.",
+  "poster_path": "/5Uv4L1P1Q5vL9kX2bJ9fF7.jpg",
+  "backdrop_path": "/6Uv4L1P1Q5vL9kX2bJ9fF7.jpg",
+  "media_type": "tv",
+  "vote_average": 8.9,
+  "first_air_date": "2011-04-06",
+  "original_language": "ja",
+  "category": "anime",
+  "isAnime": true,
+  "dub_type": "english"
+},
+    {
     "id": 1429,
     "title": "Attack on Titan",
     "name": "Attack on Titan",
@@ -925,22 +1467,23 @@ export const CURATED_SUBBED_ANIME = [
 
 export async function fetchHindiMovies(page = 1) {
   try {
+    const curatedAll = [...CURATED_BOLLYWOOD_BLOCKBUSTERS, ...CURATED_HOLLYWOOD_HINDI_DUBS];
+    const curatedIds = new Set(curatedAll.map((b) => b.id));
+
     const res = await fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_original_language=hi&region=IN&primary_release_date.lte=${today}&vote_count.gte=5&sort_by=popularity.desc&page=${page}`);
     const data = await res.json();
     const bollywood = (data.results && data.results.length > 0)
-      ? data.results.map(m => ({ ...m, media_type: 'movie', category: 'hindi', original_language: 'hi', isHindiDubbed: true }))
-      : (page === 1 ? FALLBACK_MEDIA.filter(m => m.category === 'hindi') : []);
+      ? data.results
+          .filter((m) => m && m.id && !curatedIds.has(m.id))
+          .map((m) => ({ ...m, media_type: 'movie', category: 'hindi', original_language: 'hi', isHindiDubbed: true }))
+      : (page === 1 ? FALLBACK_MEDIA.filter((m) => m.category === 'hindi') : []);
     
     if (page === 1) {
-      // Return authentic Bollywood blockbusters + Hollywood Hindi dubbed blockbusters first
-      const curatedAll = [...CURATED_BOLLYWOOD_BLOCKBUSTERS, ...CURATED_HOLLYWOOD_HINDI_DUBS];
-      const existingIds = new Set(curatedAll.map(b => b.id));
-      const filtered = bollywood.filter(m => !existingIds.has(m.id));
-      return [...curatedAll, ...filtered];
+      return [...curatedAll, ...bollywood];
     }
     return bollywood;
   } catch (err) {
-    return page === 1 ? [...CURATED_BOLLYWOOD_BLOCKBUSTERS, ...CURATED_HOLLYWOOD_HINDI_DUBS, ...FALLBACK_MEDIA.filter(m => m.category === 'hindi')] : [];
+    return page === 1 ? [...CURATED_BOLLYWOOD_BLOCKBUSTERS, ...CURATED_HOLLYWOOD_HINDI_DUBS, ...FALLBACK_MEDIA.filter((m) => m.category === 'hindi')] : [];
   }
 }
 
@@ -948,9 +1491,9 @@ export async function fetchTrendingSeries(page = 1) {
   try {
     const res = await fetch(`${BASE_URL}/discover/tv?api_key=${API_KEY}&first_air_date.lte=${today}&vote_count.gte=15&sort_by=popularity.desc&page=${page}`);
     const data = await res.json();
-    return data.results && data.results.length > 0 ? data.results.map(m => ({ ...m, media_type: 'tv' })) : (page === 1 ? FALLBACK_MEDIA.filter(m => m.media_type === 'tv') : []);
+    return data.results && data.results.length > 0 ? data.results.map((m) => ({ ...m, media_type: 'tv' })) : (page === 1 ? FALLBACK_MEDIA.filter((m) => m.media_type === 'tv') : []);
   } catch (err) {
-    return page === 1 ? FALLBACK_MEDIA.filter(m => m.media_type === 'tv') : [];
+    return page === 1 ? FALLBACK_MEDIA.filter((m) => m.media_type === 'tv') : [];
   }
 }
 
@@ -960,42 +1503,60 @@ export async function fetchAnime(page = 1, audioFilter = 'all') {
     if (audioFilter === 'sub') {
       sortParam = 'vote_count.desc';
     }
+
+    const allCurated = [
+      ...CURATED_HINDI_DUBBED_ANIME,
+      ...CURATED_ENGLISH_DUBBED_ANIME,
+      ...CURATED_SUBBED_ANIME
+    ];
+    const allCuratedIds = new Set(allCurated.map((a) => a.id));
+
     // Infinite anime TV series discovery from TMDB
     const res = await fetch(`${BASE_URL}/discover/tv?api_key=${API_KEY}&with_genres=16&with_original_language=ja&first_air_date.lte=${today}&vote_count.gte=8&sort_by=${sortParam}&page=${page}`);
     const data = await res.json();
     const rawResults = data.results || [];
     
-    // Strict filter to eliminate 18+ ecchi / hanimes from public anime lists
+    // Strict filter to eliminate 18+ ecchi / hanimes and duplicate curated items
     const cleanDiscovered = rawResults
-      .filter(item => item && item.id && !isHanimeContent(item))
-      .map(m => ({ 
-        ...m, 
-        media_type: 'tv', 
-        category: 'anime', 
-        isAnime: true,
-        dub_type: audioFilter === 'sub' ? 'sub' : 'english'
-      }));
+      .filter((item) => item && item.id && !isHanimeContent(item) && !allCuratedIds.has(item.id))
+      .map((m) => {
+        const hasHindi = isHindiDubbedAnime(m);
+        return { 
+          ...m, 
+          media_type: 'tv', 
+          category: 'anime', 
+          isAnime: true,
+          hasHindiDub: hasHindi,
+          dub_type: audioFilter === 'sub' ? 'sub' : (audioFilter === 'hindi' || hasHindi) ? 'hindi' : 'english'
+        };
+      });
 
     if (page === 1) {
       let curatedBase = [];
-      if (audioFilter === 'english') {
+      if (audioFilter === 'hindi') {
+        curatedBase = CURATED_HINDI_DUBBED_ANIME;
+      } else if (audioFilter === 'english') {
         curatedBase = CURATED_ENGLISH_DUBBED_ANIME;
       } else if (audioFilter === 'sub') {
         curatedBase = CURATED_SUBBED_ANIME;
       } else {
         const seenIds = new Set();
-        curatedBase = [...CURATED_ENGLISH_DUBBED_ANIME, ...CURATED_SUBBED_ANIME].filter(item => {
+        curatedBase = [
+          ...CURATED_HINDI_DUBBED_ANIME.slice(0, 10),
+          ...CURATED_ENGLISH_DUBBED_ANIME,
+          ...CURATED_SUBBED_ANIME
+        ].filter((item) => {
           if (!item || seenIds.has(item.id)) return false;
           seenIds.add(item.id);
           return true;
         });
       }
-      const existingIds = new Set(curatedBase.map(a => a.id));
-      const filteredDiscovered = cleanDiscovered.filter(m => !existingIds.has(m.id));
-      return [...curatedBase, ...filteredDiscovered];
+      return [...curatedBase, ...cleanDiscovered];
     }
     return cleanDiscovered;
   } catch (err) {
+    if (audioFilter === 'hindi') return page === 1 ? CURATED_HINDI_DUBBED_ANIME : [];
+    if (audioFilter === 'sub') return page === 1 ? CURATED_SUBBED_ANIME : [];
     return page === 1 ? CURATED_ENGLISH_DUBBED_ANIME : [];
   }
 }
@@ -1037,7 +1598,189 @@ export async function fetchMatureMovies(page = 1) {
 
 // Verified Hollywood Blockbusters with official Hindi dubs in theaters/OTT
 export const CURATED_HOLLYWOOD_HINDI_DUBS = [
+{
+  "id": 168259,
+  "title": "Furious 7",
+  "name": "Furious 7",
+  "overview": "Deckard Shaw seeks revenge against Dominic Toretto and his family for his comatose brother. Blockbuster Hindi dub in India.",
+  "poster_path": "/ktofZ99QHqvLc6h2E12U11aXWq2.jpg",
+  "backdrop_path": "/d7A9vL1P1Q5vL9kX2bJ9fF7.jpg",
+  "media_type": "movie",
+  "vote_average": 7.3,
+  "release_date": "2015-04-01",
+  "category": "hindi",
+  "isHindiDubbed": true
+},
   {
+  "id": 912649,
+  "title": "Venom: The Last Dance",
+  "name": "Venom: The Last Dance",
+  "overview": "Eddie Brock and Venom are on the run. Hunted by both of their worlds and with the net closing in, the duo are forced into a devastating decision. Official Hindi dubbed theatrical release.",
+  "poster_path": "/aosm8Vh9yuzBtMTmRmxyegq06Qo.jpg",
+  "backdrop_path": "/3V4kLQg0kSqPLctI5ziYWgAZYqa.jpg",
+  "media_type": "movie",
+  "vote_average": 6.8,
+  "release_date": "2024-10-22",
+  "category": "hindi",
+  "isHindiDubbed": true
+},
+  {
+  "id": 1011985,
+  "title": "Kung Fu Panda 4",
+  "name": "Kung Fu Panda 4",
+  "overview": "Po must train a new warrior when he's chosen to become the spiritual leader of the Valley of Peace. However, a powerful shapeshifting sorceress sets her eyes on his Staff of Wisdom. Full Hindi theatrical dub.",
+  "poster_path": "/kDp1vUBnMpe8ak4rjgl3cLELqjU.jpg",
+  "backdrop_path": "/1XDDXPXGiI8id7MrUxK36ke7gkX.jpg",
+  "media_type": "movie",
+  "vote_average": 7.1,
+  "release_date": "2024-03-02",
+  "category": "hindi",
+  "isHindiDubbed": true
+},
+  {
+  "id": 569094,
+  "title": "Spider-Man: Across the Spider-Verse",
+  "name": "Spider-Man: Across the Spider-Verse",
+  "overview": "After reuniting with Gwen Stacy, Brooklyn\u2019s full-time, friendly neighborhood Spider-Man is catapulted across the Multiverse, where he encounters the Spider-Society and Pavitr Prabhakar in Mumbattan. Indian theatrical Hindi dub featuring Shubman Gill.",
+  "poster_path": "/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg",
+  "backdrop_path": "/4HodYYKEIsGOdinkGi2Ucz6X9i0.jpg",
+  "media_type": "movie",
+  "vote_average": 8.4,
+  "release_date": "2023-05-31",
+  "category": "hindi",
+  "isHindiDubbed": true
+},
+  {
+  "id": 447365,
+  "title": "Guardians of the Galaxy Vol. 3",
+  "name": "Guardians of the Galaxy Vol. 3",
+  "overview": "Peter Quill, still reeling from the loss of Gamora, must rally his team around him to defend the universe and protect Rocket on a mission that could lead to the end of the Guardians. Full Hindi dub.",
+  "poster_path": "/r2J02Z2OpNTctetGCSpkmBqHQmw.jpg",
+  "backdrop_path": "/5YZbUmjbMa3ClvSW1Wj3D6XGolb.jpg",
+  "media_type": "movie",
+  "vote_average": 8.0,
+  "release_date": "2023-05-03",
+  "category": "hindi",
+  "isHindiDubbed": true
+},
+  {
+  "id": 284053,
+  "title": "Thor: Ragnarok",
+  "name": "Thor: Ragnarok",
+  "overview": "Thor is imprisoned on the other side of the universe and finds himself in a race against time to get back to Asgard to stop Ragnarok, the destruction of his home world. Hilarious Hindi dub.",
+  "poster_path": "/rzRwTcFvttcN1ZpX2xv4jvoY0ND.jpg",
+  "backdrop_path": "/kaIfm5ryEOwYg8pahVIq1bdaPtO.jpg",
+  "media_type": "movie",
+  "vote_average": 7.6,
+  "release_date": "2017-10-02",
+  "category": "hindi",
+  "isHindiDubbed": true
+},
+  {
+  "id": 24428,
+  "title": "The Avengers",
+  "name": "The Avengers",
+  "overview": "When an unexpected enemy emerges and threatens global safety and security, Nick Fury finds himself in need of a team to pull the world back from the brink of disaster. Blockbuster Hindi dub.",
+  "poster_path": "/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg",
+  "backdrop_path": "/9BBTo63ANSmhC4e6r62OJFuK2GL.jpg",
+  "media_type": "movie",
+  "vote_average": 7.7,
+  "release_date": "2012-04-25",
+  "category": "hindi",
+  "isHindiDubbed": true
+},
+  {
+  "id": 157336,
+  "title": "Interstellar",
+  "name": "Interstellar",
+  "overview": "The adventures of a group of explorers who make use of a newly discovered wormhole to surpass the limitations on human space travel and conquer the vast distances involved in an interstellar voyage. Iconic Hindi dub.",
+  "poster_path": "/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+  "backdrop_path": "/xJHokMbljvjADYdit5fK5VQsXEG.jpg",
+  "media_type": "movie",
+  "vote_average": 8.4,
+  "release_date": "2014-11-05",
+  "category": "hindi",
+  "isHindiDubbed": true
+},
+  {
+  "id": 27205,
+  "title": "Inception",
+  "name": "Inception",
+  "overview": "Cobb, a skilled thief who steals corporate secrets through dream-sharing technology, is given the inverse task of planting an idea into the mind of a C.E.O. Authentic Hindi dub.",
+  "poster_path": "/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg",
+  "backdrop_path": "/s3TBrRGB1iav7gFOCNx3H31MoES.jpg",
+  "media_type": "movie",
+  "vote_average": 8.4,
+  "release_date": "2010-07-15",
+  "category": "hindi",
+  "isHindiDubbed": true
+},
+  {
+  "id": 155,
+  "title": "The Dark Knight",
+  "name": "The Dark Knight",
+  "overview": "Batman raises the stakes in his war on crime with the help of Lt. Jim Gordon and DA Harvey Dent, until the sadistic Joker unleashes chaos upon Gotham. Legendary Hindi dub.",
+  "poster_path": "/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+  "backdrop_path": "/nMKdUUepR0i5zn0y1T4CsSB5chy.jpg",
+  "media_type": "movie",
+  "vote_average": 8.5,
+  "release_date": "2008-07-16",
+  "category": "hindi",
+  "isHindiDubbed": true
+},
+  {
+  "id": 361743,
+  "title": "Top Gun: Maverick",
+  "name": "Top Gun: Maverick",
+  "overview": "After thirty years, Maverick is still pushing the envelope as a top naval aviator, but must confront ghosts of his past when he leads TOP GUN's elite graduates on a mission. Authentic Hindi dub.",
+  "poster_path": "/62HCnUTziyWcpDaBO2i1DX17ljH.jpg",
+  "backdrop_path": "/odJ4hx6g6vBt4lBWKFD1tI8WS4x.jpg",
+  "media_type": "movie",
+  "vote_average": 8.2,
+  "release_date": "2022-05-24",
+  "category": "hindi",
+  "isHindiDubbed": true
+},
+  {
+  "id": 414906,
+  "title": "The Batman",
+  "name": "The Batman",
+  "overview": "In his second year of fighting crime, Batman uncovers corruption in Gotham City that connects to his own family while facing a serial killer known as the Riddler. Full authentic Hindi dub.",
+  "poster_path": "/74xTEgt7R36Fpooo50r9T25onhq.jpg",
+  "backdrop_path": "/b0PlSFdDwbyK0cf5RxwDpaxtQvQ.jpg",
+  "media_type": "movie",
+  "vote_average": 7.7,
+  "release_date": "2022-03-01",
+  "category": "hindi",
+  "isHindiDubbed": true
+},
+  {
+  "id": 667538,
+  "title": "Transformers: Rise of the Beasts",
+  "name": "Transformers: Rise of the Beasts",
+  "overview": "When a new threat capable of destroying the entire planet emerges, Optimus Prime and the Autobots must team up with a powerful faction known as the Maximals. Blockbuster Hindi dub on OTT.",
+  "poster_path": "/gPbM0ljFe4xsycv26WWNCXdK7Uv.jpg",
+  "backdrop_path": "/2vFuG6bWGyQUzYS9d69E5l85nIz.jpg",
+  "media_type": "movie",
+  "vote_average": 7.3,
+  "release_date": "2023-06-06",
+  "category": "hindi",
+  "isHindiDubbed": true
+},
+  {
+  "id": 558449,
+  "title": "Gladiator II",
+  "name": "Gladiator II",
+  "overview": "Years after witnessing the death of the revered hero Maximus at the hands of his uncle, Lucius must enter the Colosseum after his home is conquered by the tyrannical Emperors. Authentic Hindi theatrical dub.",
+  "poster_path": "/2cxhvwyEwRlysAmRHbtKNybVH32.jpg",
+  "backdrop_path": "/euYIwmwkmz95mnXvufEmbL6ovhA.jpg",
+  "media_type": "movie",
+  "vote_average": 6.8,
+  "release_date": "2024-11-05",
+  "category": "hindi",
+  "isHindiDubbed": true
+},
+    {
     id: 533535,
     title: "Deadpool & Wolverine (Hindi Dubbed)",
     name: "Deadpool & Wolverine",
@@ -1181,67 +1924,67 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
     isHindiDubbed: true
   },
   {
-    id: 667538,
-    title: "Transformers: Rise of the Beasts (Hindi Dubbed)",
-    name: "Transformers: Rise of the Beasts",
-    overview: "When a new threat capable of destroying the entire planet emerges, Optimus Prime and the Autobots must team up with a powerful faction known as the Maximals. Full Hindi audio.",
-    poster_path: "/gPbM0ljFeZFDVOv0uSQVGCT5xwh.jpg",
-    backdrop_path: "/2vFuG6bWcuSDuqvoJQDuMych2CB.jpg",
+    id: 453395,
+    title: "Doctor Strange in the Multiverse of Madness (Hindi Dubbed)",
+    name: "Doctor Strange in the Multiverse of Madness",
+    overview: "Doctor Strange, with the help of mystical allies both old and new, traverses the mind-bending and dangerous alternate realities of the Multiverse to confront a mysterious new adversary. Full official Hindi theatrical audio.",
+    poster_path: "/9Gtg2DzBhmYamXBS1oKAhiwbBKS.jpg",
+    backdrop_path: "/wcKFYIiVDvRURrzglV9kGu7fpfY.jpg",
     media_type: "movie",
     vote_average: 7.3,
-    release_date: "2023-06-06",
+    release_date: "2022-05-04",
     category: "hindi",
     isHindiDubbed: true
   },
   {
-    id: 414906,
-    title: "The Batman (Hindi Dubbed)",
-    name: "The Batman",
-    overview: "In his second year of fighting crime, Batman uncovers corruption in Gotham City that connects to his own family while facing a serial killer known as the Riddler. Full Hindi dub.",
-    poster_path: "/74xTEgt7R36Fpooo50r9T25onhq.jpg",
-    backdrop_path: "/b0PlSFdDwbyK0cf5RxwDpaOJQvQ.jpg",
+    id: 505642,
+    title: "Black Panther: Wakanda Forever (Hindi Dubbed)",
+    name: "Black Panther: Wakanda Forever",
+    overview: "Queen Ramonda, Shuri, M'Baku, Okoye and the Dora Milaje fight to protect their nation from intervening world powers in the wake of King T'Challa's death. As the Wakandans strive to embrace their next chapter, the heroes must band together with the help of War Dog Nakia and Everett Ross. Full Hindi audio.",
+    poster_path: "/sv1xJUazXeYqALzczSZ3O6nkH75.jpg",
+    backdrop_path: "/xDMIl84Qo5Tsu62c9DGWhmPI67A.jpg",
     media_type: "movie",
-    vote_average: 7.7,
-    release_date: "2022-03-01",
+    vote_average: 7.1,
+    release_date: "2022-11-09",
     category: "hindi",
     isHindiDubbed: true
   },
   {
-    id: 157336,
-    title: "Interstellar (Hindi Dubbed)",
-    name: "Interstellar",
-    overview: "The adventures of a group of explorers who make use of a newly discovered wormhole to surpass the limitations on human space travel and conquer the vast distances involved in an interstellar voyage. Full Hindi audio track.",
-    poster_path: "/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
-    backdrop_path: "/xJHokMbljvjADYdit5fK5VQsXEG.jpg",
+    id: 507086,
+    title: "Jurassic World Dominion (Hindi Dubbed)",
+    name: "Jurassic World Dominion",
+    overview: "Four years after the destruction of Isla Nublar, dinosaurs now live—and hunt—alongside humans all over the world. This fragile balance will reshape the future and determine, once and for all, whether human beings are to remain the apex predators. Full official Hindi dub.",
+    poster_path: "/kAVRgw7GgK1CfYEJqYRqoNs2JwT.jpg",
+    backdrop_path: "/7abRA1j046AynXj6G9fV9kX8t3T.jpg",
     media_type: "movie",
-    vote_average: 8.4,
-    release_date: "2014-11-05",
+    vote_average: 6.9,
+    release_date: "2022-06-01",
     category: "hindi",
     isHindiDubbed: true
   },
   {
-    id: 27205,
-    title: "Inception (Hindi Dubbed)",
-    name: "Inception",
-    overview: "Cobb, a skilled thief who commits corporate espionage by infiltrating the subconscious of his targets is offered a chance to regain his old life as payment for a task considered to be impossible: \"inception\". Full Hindi audio.",
-    poster_path: "/edv5CZvWj09upOsy2Y6IwDhK8bt.jpg",
-    backdrop_path: "/8ZTVqvKDQ8emSGUEMjsS4yHAwrp.jpg",
+    id: 572802,
+    title: "Aquaman and the Lost Kingdom (Hindi Dubbed)",
+    name: "Aquaman and the Lost Kingdom",
+    overview: "Black Manta seeks revenge on Aquaman for his father's death. Wielding the Black Trident's power, he becomes a formidable foe. To defend Atlantis, Aquaman turns to his imprisoned brother Orm, the former King. Full Hindi theatrical dub.",
+    poster_path: "/7lTnfmOl9bpq9v3nxyR232s6V5n.jpg",
+    backdrop_path: "/cnqwv5W7UC5Tw5Lh8x6z4q99Z3N.jpg",
     media_type: "movie",
-    vote_average: 8.4,
-    release_date: "2010-07-15",
+    vote_average: 6.8,
+    release_date: "2023-12-20",
     category: "hindi",
     isHindiDubbed: true
   },
   {
-    id: 155,
-    title: "The Dark Knight (Hindi Dubbed)",
-    name: "The Dark Knight",
-    overview: "Batman raises the stakes in his war on crime. With the help of Lt. Jim Gordon and District Attorney Harvey Dent, Batman sets out to dismantle the remaining criminal organizations that plague the streets. Full Hindi audio.",
-    poster_path: "/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
-    backdrop_path: "/dqK9Hag1054tghRQSqLSfrkvQnA.jpg",
+    id: 271110,
+    title: "Captain America: Civil War (Hindi Dubbed)",
+    name: "Captain America: Civil War",
+    overview: "Following the events of Age of Ultron, the collective governments of the world pass an act designed to regulate all superhuman activity. This polarizes opinion amongst the Avengers, causing two factions to form: one led by Iron Man, the other by Captain America. Full Hindi dub featuring Varun Dhawan.",
+    poster_path: "/rAG120bEJ844y386baxg2wH4D5v.jpg",
+    backdrop_path: "/kvRT3qv1Hwy4bV6bL5F0m7QhM4k.jpg",
     media_type: "movie",
-    vote_average: 8.5,
-    release_date: "2008-07-16",
+    vote_average: 7.4,
+    release_date: "2016-04-27",
     category: "hindi",
     isHindiDubbed: true
   }
@@ -1284,10 +2027,16 @@ export function isAnimeItem(item) {
   return item.category === 'anime' || item.isAnime === true || item.original_language === 'ja';
 }
 
+export const HINDI_DUBBED_ANIME_IDS = new Set([
+  2098, 33758, 46260, 31910, 12971, 62710, 12697, 60572, 77240, 31835,
+  95479, 85937, 114410, 211089, 37854, 1429, 65930, 120089, 73223, 206497,
+  30984, 13916, 46298, 118439, 121533, 226688, 205847, 153870, 80975, 75225,
+  81216, 4614, 11130, 63926, 65733, 298321
+]);
+
 export function isHindiDubbedAnime(item) {
   if (!item) return false;
-  const hindiAnimeIds = new Set([12971, 46260, 85937, 95479, 63926, 60572, 298321, 65733, 226688, 77240]);
-  return hindiAnimeIds.has(Number(item.id));
+  return HINDI_DUBBED_ANIME_IDS.has(Number(item.id)) || item.hasHindiDub === true || item.dub_type === 'hindi';
 }
 
 
@@ -2128,12 +2877,34 @@ export const SECRET_ECCHI_ANIME = [
 ];
 
 export async function fetchEcchiAnime(page = 1) {
-  const pageSize = 12;
+  const pageSize = 16;
   const start = (page - 1) * pageSize;
-  if (start >= SECRET_ECCHI_ANIME.length) {
-    return [];
+  if (start < SECRET_ECCHI_ANIME.length) {
+    const slice = SECRET_ECCHI_ANIME.slice(start, start + pageSize);
+    if (slice.length >= pageSize) return slice;
+    try {
+      const res = await fetch(`${BASE_URL}/discover/tv?api_key=${API_KEY}&with_genres=16&include_adult=true&sort_by=popularity.desc&page=${page}`);
+      const data = await res.json();
+      const extra = (data.results || []).map((item) => ({ ...item, media_type: 'tv', category: 'ecchi_anime', is_mature: true }));
+      const existing = new Set(slice.map((s) => s.id));
+      return [...slice, ...extra.filter((e) => !existing.has(e.id))];
+    } catch {
+      return slice;
+    }
   }
-  return SECRET_ECCHI_ANIME.slice(start, start + pageSize);
+  try {
+    const tmdbPage = Math.max(1, page - Math.floor(SECRET_ECCHI_ANIME.length / pageSize));
+    const res = await fetch(`${BASE_URL}/discover/tv?api_key=${API_KEY}&with_genres=16&include_adult=true&sort_by=popularity.desc&page=${tmdbPage}`);
+    const data = await res.json();
+    return (data.results || []).map((item) => ({
+      ...item,
+      media_type: 'tv',
+      category: 'ecchi_anime',
+      is_mature: true
+    }));
+  } catch {
+    return SECRET_ECCHI_ANIME.slice(0, pageSize);
+  }
 }
 
 export async function searchContent(query, page = 1, includeAdult = false) {

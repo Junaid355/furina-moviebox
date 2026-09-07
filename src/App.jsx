@@ -245,9 +245,9 @@ export default function App() {
                   : activeCategory === 'anime'
                   ? '🌸 Anime & Japanese Animations (Sub/Dub)'
                   : activeCategory === 'ecchi_anime'
-                  ? '🔞 Secret 18+ Anime Vault (Overflow, ComicFesta & Ecchi Uncut)'
+                  ? '🔞 Secret Uncut Anime Vault (Overflow & Ecchi Uncut)'
                   : activeCategory === 'mature'
-                  ? '🔞 18+ Mature & Uncut Cinema'
+                  ? '🔞 Master Cinema Vault (Uncut Cinema)'
                   : '❤️ My Saved Watchlist'}
               </h2>
             </div>
@@ -282,7 +282,7 @@ export default function App() {
             </div>
           )}
 
-          {/* Anime Quick Sub / Dub Filter Chips (Zero 18+ Hanime in normal anime) */}
+          {/* Anime Quick Sub / Dub Filter Chips (Zero Hanime in normal anime) */}
           {activeCategory === 'anime' && !searchQuery && (
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 text-xs">
               <span className="text-cyan-200/50 text-[11px] whitespace-nowrap font-medium">Anime Audio:</span>
@@ -296,6 +296,17 @@ export default function App() {
               >
                 <span>⭐</span>
                 <span>All Popular Anime</span>
+              </button>
+              <button
+                onClick={() => setAnimeAudioFilter('hindi')}
+                className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border ${
+                  animeAudioFilter === 'hindi'
+                    ? 'bg-amber-500 text-gray-950 border-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.6)] font-black'
+                    : 'bg-amber-500/15 border-amber-500/30 text-amber-300 hover:bg-amber-500/25'
+                }`}
+              >
+                <span>🇮🇳</span>
+                <span>Hindi Dubbed Anime (RareAnimes)</span>
               </button>
               <button
                 onClick={() => setAnimeAudioFilter('english')}
@@ -339,6 +350,13 @@ export default function App() {
               >
                 <span>🎬</span>
                 <span>Hollywood in Hindi Dub</span>
+              </button>
+              <button
+                onClick={() => { setActiveCategory('anime'); setAnimeAudioFilter('hindi'); }}
+                className="px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border bg-cyan-500/15 border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/25"
+              >
+                <span>🌸</span>
+                <span>Hindi Anime (Naruto, DBZ, Doraemon)</span>
               </button>
             </div>
           )}
@@ -476,8 +494,10 @@ export default function App() {
           { id: 'hollywood', label: 'Movies', icon: Film },
           { id: 'hindi', label: 'Hindi', icon: Sparkles },
           { id: 'anime', label: 'Anime', icon: Sparkles },
-          { id: 'mature', label: '18+ Cinema', icon: Flame },
-          ...(isMasterMode ? [{ id: 'ecchi_anime', label: '18+ Hanime', icon: Flame }] : []),
+          ...(isMasterMode ? [
+            { id: 'mature', label: 'Uncut', icon: Flame },
+            { id: 'ecchi_anime', label: 'Vault', icon: Flame }
+          ] : []),
           { id: 'watchlist', label: 'Saved', icon: Heart },
         ].map((tab) => {
           const Icon = tab.icon;

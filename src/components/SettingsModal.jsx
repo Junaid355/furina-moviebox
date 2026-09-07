@@ -364,15 +364,15 @@ export default function SettingsModal({
                     </button>
                   </div>
 
-                  {/* 18+ Mature & Uncut Cinema Feature */}
+                  {/* Mature & Uncut Cinema Feature */}
                   <div className="bg-gradient-to-r from-amber-950/40 to-[#0b1633] border border-amber-500/30 rounded-xl p-4 flex items-center justify-between">
                     <div>
                       <div className="flex items-center gap-2 font-bold text-sm text-amber-300">
                         <Flame className="w-4 h-4 text-amber-400" />
-                        18+ Mature & Uncut Cinema
+                        Uncut & Mature Cinema Vault
                       </div>
                       <p className="text-xs text-amber-200/60 mt-1 max-w-xs">
-                        Enables R-rated, NC-17, and uncut films in search and adds the 🔞 Mature navigation category.
+                        Enables R-rated, NC-17, and uncut films in search and adds the Uncut Cinema navigation category.
                       </p>
                     </div>
                     <button
@@ -388,14 +388,14 @@ export default function SettingsModal({
                     </button>
                   </div>
 
-                  {/* 🔞 Secret 18+ Anime Vault (Overflow, ComicFesta & Ecchi Uncut) */}
+                  {/* 🔞 Secret Anime Vault (Overflow, ComicFesta & Ecchi Uncut) */}
                   <div className="bg-[#0b1633] border border-amber-500/30 rounded-2xl p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-xl">🔞</span>
                         <div>
                           <h4 className="font-extrabold text-sm text-amber-300 flex items-center gap-2">
-                            <span>Secret 18+ Anime Vault</span>
+                            <span>Secret Anime Vault</span>
                             <span className="text-[9px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full border border-amber-500/30 font-mono font-bold">OVERFLOW & COMICFESTA</span>
                           </h4>
                           <p className="text-[11px] text-cyan-200/60 mt-0.5">
@@ -446,7 +446,7 @@ export default function SettingsModal({
                               <Play className="w-4 h-4 fill-gray-950 ml-0.5" />
                             </button>
                             <span className="absolute top-1.5 left-1.5 text-[8px] font-black bg-amber-500/90 text-gray-950 px-1.5 py-0.5 rounded shadow">
-                              18+
+                              UNCUT
                             </span>
                           </div>
                           <div className="p-2 flex flex-col justify-between flex-1">

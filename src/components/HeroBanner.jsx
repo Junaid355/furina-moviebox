@@ -29,9 +29,11 @@ export default function HeroBanner({ items, item, onPlay, isWatchlisted, onToggl
   const isSeries = currentItem.media_type === 'tv' || Boolean(currentItem.first_air_date);
   const isAnime = Boolean(
     currentItem.category === 'anime' ||
+    currentItem.category === 'ecchi_anime' ||
     currentItem.isAnime === true ||
     currentItem.original_language === 'ja' ||
-    currentItem.genre_ids?.includes(16)
+    (Array.isArray(currentItem.origin_country) && currentItem.origin_country.includes('JP')) ||
+    ((currentItem.genre_ids?.includes(16) || currentItem.genres?.some((g) => g.id === 16 || g.name === 'Animation')) && currentItem.original_language === 'ja')
   );
   const isHindi = !isAnime && Boolean(isHindiAvailable(currentItem));
   const saved = (isWatchlisted && currentItem.id) ? isWatchlisted(currentItem.id) : false;

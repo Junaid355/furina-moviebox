@@ -19,7 +19,6 @@ export default function Navbar({
     { id: 'hindi', label: 'Bollywood & Hindi', icon: Sparkles },
     { id: 'kdrama', label: '🇰🇷 K-Drama', icon: Tv },
     { id: 'anime', label: '🌸 Anime', icon: Sparkles },
-    { id: 'mature', label: '🔞 18+ Cinema', icon: Flame, is18: true },
     { id: 'horror', label: '👻 Horror', icon: Skull },
     { id: 'series', label: 'Web Series', icon: Tv },
     { id: 'watchlist', label: 'Watchlist', icon: Heart },
@@ -28,7 +27,8 @@ export default function Navbar({
   const categories = isMasterMode
     ? [
         ...baseCategories.slice(0, 5),
-        { id: 'ecchi_anime', label: '🔞 Secret Hanime', icon: Flame, is18: true },
+        { id: 'mature', label: '🔞 Uncut Cinema', icon: Flame, is18: true },
+        { id: 'ecchi_anime', label: '🔞 Secret Vault', icon: Flame, is18: true },
         ...baseCategories.slice(5)
       ]
     : baseCategories;

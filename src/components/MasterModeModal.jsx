@@ -107,7 +107,7 @@ export default function MasterModeModal({
               <div>
                 <div className="flex items-center gap-1.5 font-bold text-sm text-white">
                   <Flame className="w-4 h-4 text-amber-400" />
-                  18+ Mature / Uncut Cinema
+                  Mature / Uncut Cinema Vault
                 </div>
                 <p className="text-[11px] text-cyan-200/50 mt-0.5">
                   Includes R-rated, NC-17, and unfiltered releases.

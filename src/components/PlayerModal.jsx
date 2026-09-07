@@ -1,33 +1,56 @@
 import React, { useState, useEffect } from 'react';
 import { X, Server, Film, Tv, RefreshCw, ExternalLink, Info, Zap, Play, Sparkles, ShieldCheck, Download } from 'lucide-react';
 import { SERVERS, getStreamUrl, getDownloadUrl } from '../services/streaming';
-import { fetchSeasonEpisodes, fetchTvDetails, isHindiAvailable } from '../services/tmdb';
+import { fetchSeasonEpisodes, fetchTvDetails, isHindiAvailable, isHindiDubbedAnime } from '../services/tmdb';
 import { permitPopupOnce, getBlockedCount } from '../services/adblocker';
 
 export default function PlayerModal({ item, onClose, preferredServerId, isHindiPreferred }) {
   if (!item) return null;
 
-  const isSeries = item?.media_type === 'tv' || Boolean(item?.first_air_date);
+  const isSeries = item?.media_type === 'tv' || (item?.media_type !== 'movie' && Boolean(item?.first_air_date));
   const title = item?.title || item?.name || 'Now Playing';
 
   // Accurate classification: Anime vs Bollywood Hindi vs Hollywood English
   const isAnime = Boolean(
     item?.category === 'anime' ||
+    item?.category === 'ecchi_anime' ||
     item?.isAnime === true ||
     item?.original_language === 'ja' ||
-    item?.genre_ids?.includes(16) ||
-    item?.genres?.some((g) => g.id === 16 || g.name === 'Animation')
+    (Array.isArray(item?.origin_country) && item?.origin_country.includes('JP')) ||
+    ((item?.genre_ids?.includes(16) || item?.genres?.some((g) => g.id === 16 || g.name === 'Animation')) && item?.original_language === 'ja')
   );
+
+  const hasHindiDubOption = isAnime
+    ? isHindiDubbedAnime(item)
+    : (!isAnime && Boolean(item?.isHindiDubbed || isHindiAvailable(item)));
 
   const isBollywoodHindi = Boolean(
-    !isAnime && (item?.original_language === 'hi' || item?.category === 'hindi' || item?.isHindiDubbed)
+    !isAnime && (
+      item?.original_language === 'hi' ||
+      item?.category === 'hindi' ||
+      Boolean(item?.isHindiDubbed) ||
+      (Array.isArray(item?.origin_country) && item?.origin_country.includes('IN'))
+    )
   );
 
-  const initialServer = isAnime
-    ? (SERVERS.find((s) => s.id === 'vidsrc_in') || SERVERS[0])
-    : (SERVERS.find((s) => s.id === preferredServerId) || SERVERS[0]);
+  // For anime, filter out AutoEmbed because AutoEmbed 404s on Bleach, Doraemon, and many anime titles
+  const availableServers = isAnime 
+    ? SERVERS.filter((s) => s.id !== 'autoembed') 
+    : SERVERS;
 
-  const [selectedServer, setSelectedServer] = useState(initialServer || SERVERS[0]);
+  const initialServer = isAnime
+    ? (availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0])
+    : (availableServers.find((s) => s.id === preferredServerId) || availableServers[0]);
+
+  const [selectedServer, setSelectedServer] = useState(initialServer || availableServers[0]);
+
+  // Auto-protect against 404 on anime: If autoembed was somehow selected, automatically switch to VidSrc 4K
+  useEffect(() => {
+    if (isAnime && selectedServer?.id === 'autoembed') {
+      const safeServer = availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
+      setSelectedServer(safeServer);
+    }
+  }, [isAnime, selectedServer?.id, availableServers]);
   const [season, setSeason] = useState(1);
   const [episode, setEpisode] = useState(1);
   const [totalSeasons, setTotalSeasons] = useState(1);
@@ -112,21 +135,27 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   };
 
   const handleNextServer = () => {
-    const currentIndex = SERVERS.findIndex((s) => s.id === (currentServer?.id || SERVERS[0].id));
-    const nextServer = SERVERS[(currentIndex + 1) % SERVERS.length];
+    const currentIndex = availableServers.findIndex((s) => s.id === (currentServer?.id || availableServers[0].id));
+    const nextServer = availableServers[(currentIndex + 1) % availableServers.length];
     setSelectedServer(nextServer);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-2xl p-2 sm:p-4">
+    <div 
+      className="fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl overflow-y-auto flex flex-col items-center justify-start sm:justify-center p-0 sm:p-3 md:p-4"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
       {/* Ambient background glow */}
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-900/25 via-transparent to-transparent" />
 
-      {/* Modal Card with Strict max-h Containment and Flex Column */}
-      <div className="relative w-full max-w-5xl max-h-[96vh] sm:max-h-[92vh] bg-[#081026] border border-cyan-500/35 rounded-2xl shadow-[0_0_65px_rgba(56,189,248,0.3)] flex flex-col z-10 animate-fade-in overflow-hidden">
+      {/* Modal Card with Strict dynamic viewport containment and Flex Column */}
+      <div 
+        className="relative w-full max-w-5xl my-0 sm:my-auto bg-[#081026] border-0 sm:border sm:border-cyan-500/35 rounded-none sm:rounded-2xl shadow-[0_0_75px_rgba(56,189,248,0.35)] flex flex-col z-10 animate-fade-in overflow-hidden h-full sm:h-auto max-h-[100dvh] sm:max-h-[92vh]"
+        onClick={(e) => e.stopPropagation()}
+      >
         
-        {/* STICKY TOP HEADER BAR - ALWAYS VISIBLE, NEVER SCROLLED AWAY */}
-        <div className="sticky top-0 z-50 flex items-center justify-between p-3 sm:p-4 border-b border-cyan-500/25 bg-[#050b1d]/98 backdrop-blur-xl shrink-0 shadow-md">
+        {/* STICKY TOP HEADER BAR - ALWAYS PINNED AT TOP & TOUCH FRIENDLY */}
+        <div className="sticky top-0 z-50 flex items-center justify-between p-3 sm:p-4 border-b border-cyan-500/30 bg-[#050b1d]/98 backdrop-blur-2xl shrink-0 shadow-lg pt-[max(env(safe-area-inset-top),0.75rem)]">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden border-2 border-cyan-400/60 shadow-[0_0_12px_rgba(56,189,248,0.45)] shrink-0">
               <img src="./favicon.png" alt="Furina" className="w-full h-full object-cover" />
@@ -189,7 +218,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
             </button>
 
             {/* Hindi Dubbed Audio Switcher Guide Toggle */}
-            {(isBollywoodHindi || isAnime) && (
+            {(isBollywoodHindi || isAnime || hasHindiDubOption) && (
               <button
                 onClick={() => setShowHindiGuide(!showHindiGuide)}
                 title="Audio Information & Dub Details"
@@ -200,7 +229,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 }`}
               >
                 <span>🎙️</span>
-                <span className="hidden sm:inline">{isAnime ? 'Dub Info' : 'Hindi Audio'}</span>
+                <span className="hidden sm:inline">{isAnime ? 'Dub Info' : 'Audio Info'}</span>
               </button>
             )}
 
@@ -226,11 +255,11 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
             {/* CLOSE MODAL BUTTON - ALWAYS VISIBLE, HIGH CONTRAST & CLICKABLE */}
             <button
               onClick={onClose}
-              aria-label="Close modal"
+              aria-label="Close video player modal"
               title="Close Player (Esc)"
-              className="w-9 h-9 rounded-full bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/40 hover:border-rose-400 flex items-center justify-center transition shadow-[0_0_12px_rgba(244,63,94,0.3)] hover:shadow-[0_0_20px_rgba(244,63,94,0.7)] shrink-0 ml-1 transform hover:scale-105 active:scale-95"
+              className="w-10 h-10 rounded-full bg-rose-600 hover:bg-rose-500 text-white border-2 border-rose-400/80 hover:border-white flex items-center justify-center transition shadow-[0_0_15px_rgba(244,63,94,0.6)] hover:shadow-[0_0_25px_rgba(244,63,94,0.9)] shrink-0 ml-1.5 transform hover:scale-105 active:scale-90 touch-manipulation cursor-pointer"
             >
-              <X className="w-5 h-5 font-black stroke-[2.5]" />
+              <X className="w-5 h-5 font-black stroke-[3]" />
             </button>
           </div>
         </div>
@@ -378,7 +407,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
               <Zap className="w-3.5 h-3.5 text-amber-400" />
               Active Server:
             </span>
-            {SERVERS.map((srv) => {
+            {availableServers.map((srv) => {
               const isSelected = currentServer.id === srv.id;
               return (
                 <button
@@ -478,7 +507,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
               </span>
             </div>
             <div className="flex items-center gap-1.5 flex-wrap">
-              {SERVERS.slice(0, 5).map((srv) => {
+              {availableServers.slice(0, 5).map((srv) => {
                 const isActive = selectedServer.id === srv.id;
                 return (
                   <button
@@ -499,15 +528,20 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
           {/* MUTUALLY EXCLUSIVE AUDIO BADGE & INFORMATION PANEL */}
           {isAnime ? (
-            /* 🌸 ANIME ONLY PANEL - Plays in Japanese Sub or English Dub with VidSrc 4K */
+            /* 🌸 ANIME ONLY PANEL - Plays in Japanese Sub or English Dub with VidSrc 4K (and Hindi Dub where available) */
             <div className="p-3 sm:p-3.5 bg-gradient-to-r from-[#13072b] via-[#091024] to-[#070e24] border-t border-b border-purple-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow">
-                  🇯🇵
+                  {hasHindiDubOption ? '🇮🇳' : '🇯🇵'}
                 </div>
                 <div>
                   <div className="font-bold text-white text-xs flex items-center gap-1.5 flex-wrap">
-                    <span>Anime Audio & Multi-Language Subtitles</span>
+                    <span>Anime Audio & Subtitles</span>
+                    {hasHindiDubOption && (
+                      <span className="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded font-bold border border-amber-500/40">
+                        🇮🇳 Hindi Dub Available
+                      </span>
+                    )}
                     <span className="text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded font-semibold border border-purple-500/30">
                       {selectedServer?.shortName || 'VidSrc 4K Active'}
                     </span>
@@ -516,41 +550,27 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                     </span>
                   </div>
                   <p className="text-[10px] sm:text-[11px] text-purple-200/80 mt-0.5">
-                    Stream plays in Japanese with Subtitles or English Dub. Tap <strong>💬 CC</strong> inside the player for subtitles. Switch servers if you want alternate dub tracks.
+                    {hasHindiDubOption
+                      ? 'Official Hindi Dub broadcast on Indian TV & Crunchyroll (RareAnimes format). On our 4K player, stream in English Dub or Japanese with Subtitles!'
+                      : 'Stream plays in Japanese with Subtitles or English Dub. Tap 💬 CC inside the player for subtitles or toggle mirror servers above.'
+                    }
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto flex-wrap">
-                <button
-                  onClick={() => setSelectedServer(SERVERS[0])}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm border ${
-                    selectedServer.id === SERVERS[0].id
-                      ? 'bg-cyan-500 text-gray-950 border-cyan-400 font-black'
-                      : 'bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border-cyan-500/40'
-                  }`}
-                >
-                  <span>Server 1 (VidSrc 4K)</span>
-                </button>
-                <button
-                  onClick={() => setSelectedServer(SERVERS[1] || SERVERS[0])}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm border ${
-                    selectedServer.id === SERVERS[1]?.id
-                      ? 'bg-purple-500 text-white border-purple-400 font-black'
-                      : 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border-purple-500/40'
-                  }`}
-                >
-                  <span>Server 2 (AutoEmbed)</span>
-                </button>
-                <button
-                  onClick={() => setSelectedServer(SERVERS[2] || SERVERS[0])}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm border ${
-                    selectedServer.id === SERVERS[2]?.id
-                      ? 'bg-indigo-500 text-white border-indigo-400 font-black'
-                      : 'bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border-indigo-500/40'
-                  }`}
-                >
-                  <span>Server 3 (VidSrc CC)</span>
-                </button>
+                {availableServers.slice(0, 3).map((srv) => (
+                  <button
+                    key={srv.id}
+                    onClick={() => setSelectedServer(srv)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm border ${
+                      selectedServer.id === srv.id
+                        ? 'bg-cyan-500 text-gray-950 border-cyan-400 font-black'
+                        : 'bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border-cyan-500/40'
+                    }`}
+                  >
+                    <span>{srv.shortName}</span>
+                  </button>
+                ))}
               </div>
             </div>
           ) : isBollywoodHindi ? (
@@ -602,11 +622,19 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
               <div className="flex items-center gap-2.5">
                 <span className="text-lg">🔊</span>
                 <div>
-                  <div className="font-bold text-cyan-300 text-xs flex items-center gap-1.5">
-                    <span>English Original Audio • Multi-Language Subtitles</span>
+                  <div className="font-bold text-cyan-300 text-xs flex items-center gap-1.5 flex-wrap">
+                    <span>{hasHindiDubOption ? '🇮🇳 Hindi Dub Available & 🔊 English Audio' : 'English Original Audio • Multi-Language Subtitles'}</span>
+                    {hasHindiDubOption && (
+                      <span className="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded font-bold border border-amber-500/40">
+                        Hindi Dubbed Blockbuster
+                      </span>
+                    )}
                   </div>
                   <p className="text-[10px] sm:text-[11px] text-cyan-200/70 mt-0.5">
-                    English audio active. Turn on subtitles (English, Hindi, Spanish, etc.) via <strong>⚙️ Settings ➔ Subtitles</strong> inside player.
+                    {hasHindiDubOption
+                      ? 'Official Hindi dubbed audio track available on Indian OTT. Select audio or turn on subtitles via ⚙️ Settings inside the player.'
+                      : 'English audio active. Turn on subtitles (English, Hindi, Spanish, etc.) via ⚙️ Settings ➔ Subtitles inside player.'
+                    }
                   </p>
                 </div>
               </div>
@@ -691,6 +719,20 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
               )}
             </div>
           )}
+
+          {/* Quick Exit / Close Player Action Bar */}
+          <div className="p-3 bg-[#040816] border-t border-cyan-500/20 flex items-center justify-between gap-3">
+            <button
+              onClick={onClose}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500 border border-rose-500/50 hover:border-rose-400 text-rose-200 hover:text-white text-xs font-bold transition shadow-sm"
+            >
+              <X className="w-4 h-4" />
+              <span>Close Video Player (Esc)</span>
+            </button>
+            <div className="text-[11px] text-cyan-200/50 hidden sm:inline">
+              Press <kbd className="bg-black/50 px-1.5 py-0.5 rounded border border-cyan-500/30 text-cyan-300 font-mono">Esc</kbd> or click backdrop to close
+            </div>
+          </div>
 
           {/* Footer Info */}
           <div className="p-3 bg-[#050917] border-t border-cyan-500/15 flex items-center justify-between flex-wrap gap-2 text-[11px] text-cyan-200/60">
