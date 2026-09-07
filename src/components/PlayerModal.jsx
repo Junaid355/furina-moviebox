@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Server, Film, Tv, RefreshCw, ExternalLink, Info, Zap, Play, Sparkles, ShieldCheck, Download } from 'lucide-react';
 import { SERVERS, getStreamUrl, getDownloadUrl } from '../services/streaming';
-import { fetchSeasonEpisodes, fetchTvDetails } from '../services/tmdb';
+import { fetchSeasonEpisodes, fetchTvDetails, isHindiAvailable } from '../services/tmdb';
 import { permitPopupOnce, getBlockedCount } from '../services/adblocker';
 
 export default function PlayerModal({ item, onClose, preferredServerId, isHindiPreferred }) {
@@ -9,8 +9,9 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
   const isSeries = item?.media_type === 'tv' || Boolean(item?.first_air_date);
   const title = item?.title || item?.name || 'Now Playing';
+  const hasHindi = isHindiAvailable(item);
 
-  const initialServer = (isHindiPreferred || item?.original_language === 'hi')
+  const initialServer = (isHindiPreferred && hasHindi && item?.original_language !== 'hi')
     ? (SERVERS.find((s) => s.id === 'vidlink_hindi') || SERVERS[0])
     : (SERVERS.find((s) => s.id === preferredServerId) || SERVERS[0]);
   const [selectedServer, setSelectedServer] = useState(initialServer || SERVERS[0]);
@@ -159,18 +160,20 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
             </button>
 
             {/* Hindi Dubbed Audio Switcher Guide Toggle */}
-            <button
-              onClick={() => setShowHindiGuide(!showHindiGuide)}
-              title="Hindi Audio Information"
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition shadow-sm ${
-                showHindiGuide
-                  ? 'bg-amber-500 text-gray-950 border-amber-400 shadow-[0_0_14px_rgba(251,191,36,0.6)] scale-105'
-                  : 'bg-amber-500/15 border-amber-500/40 text-amber-300 hover:bg-amber-500/25'
-              }`}
-            >
-              <span className="hidden md:inline">🎙️ Hindi Info</span>
-              <span className="md:hidden">🎙️ Hindi</span>
-            </button>
+            {hasHindi && (
+              <button
+                onClick={() => setShowHindiGuide(!showHindiGuide)}
+                title="Hindi Audio Information"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition shadow-sm ${
+                  showHindiGuide
+                    ? 'bg-amber-500 text-gray-950 border-amber-400 shadow-[0_0_14px_rgba(251,191,36,0.6)] scale-105'
+                    : 'bg-amber-500/15 border-amber-500/40 text-amber-300 hover:bg-amber-500/25'
+                }`}
+              >
+                <span className="hidden md:inline">🎙️ Hindi Info</span>
+                <span className="md:hidden">🎙️ Hindi</span>
+              </button>
+            )}
 
             {/* Reload stream button */}
             <button
@@ -432,59 +435,61 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
           />
         </div>
 
-        {/* Dedicated In-App Hindi Dubbed & Multi-Audio Control Panel */}
-        <div className="p-3.5 sm:p-4 bg-gradient-to-r from-[#1f1505] via-[#120e06] to-[#081329] border-t border-b border-amber-500/40 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-gray-950 flex items-center justify-center font-black text-lg shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.4)]">
-              🇮🇳
-            </div>
-            <div>
-              <div className="font-extrabold text-white text-xs sm:text-sm flex items-center gap-2">
-                <span>Hindi Dubbed & Dual-Audio (In-App)</span>
-                <span className="text-[10px] bg-amber-500/25 text-amber-300 px-2 py-0.5 rounded font-bold border border-amber-500/40">
-                  {currentServer.id === 'vidlink_hindi' ? 'Active: Server 1 (Hindi Dubbed)' : 'Available In-App'}
-                </span>
+        {/* Dedicated In-App Hindi Dubbed & Multi-Audio Control Panel (Only for titles with Hindi audio) */}
+        {hasHindi && (
+          <div className="p-3.5 sm:p-4 bg-gradient-to-r from-[#1f1505] via-[#120e06] to-[#081329] border-t border-b border-amber-500/40 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-gray-950 flex items-center justify-center font-black text-lg shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.4)]">
+                🇮🇳
               </div>
-              <p className="text-[11px] text-amber-200/90 mt-0.5 leading-relaxed">
-                {item.original_language === 'hi' ? (
-                  <>🇮🇳 <strong>Bollywood Original</strong>: Filmed natively in Hindi. Plays in full Hindi audio across all servers automatically!</>
-                ) : (
-                  <>🎧 <strong>How to listen in Hindi</strong>: Inside video player, tap <strong>⚙️ Settings (bottom right)</strong> ➔ <strong>Audio Track</strong> ➔ Select <strong>Hindi (हिन्दी)</strong>!</>
-                )}
-              </p>
+              <div>
+                <div className="font-extrabold text-white text-xs sm:text-sm flex items-center gap-2">
+                  <span>Hindi Dubbed & Dual-Audio (In-App)</span>
+                  <span className="text-[10px] bg-amber-500/25 text-amber-300 px-2 py-0.5 rounded font-bold border border-amber-500/40">
+                    {currentServer.id === 'vidlink_hindi' ? 'Active: Hindi Dub Stream' : 'Available In-App'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-amber-200/90 mt-0.5 leading-relaxed">
+                  {item.original_language === 'hi' ? (
+                    <>🇮🇳 <strong>Bollywood Original</strong>: Filmed natively in Hindi. Plays in full Hindi audio across all servers automatically!</>
+                  ) : (
+                    <>🎧 <strong>How to listen in Hindi</strong>: Inside video player, tap <strong>⚙️ Settings (bottom right)</strong> ➔ <strong>Audio Track</strong> ➔ Select <strong>Hindi (हिन्दी)</strong>!</>
+                  )}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap shrink-0 w-full md:w-auto">
+              <button
+                onClick={() => {
+                  const s = SERVERS.find((x) => x.id === 'vidlink_hindi') || SERVERS[0];
+                  setSelectedServer(s);
+                }}
+                className={`px-3.5 py-2 rounded-xl font-bold text-xs transition flex items-center gap-1.5 shadow-md ${
+                  selectedServer.id === 'vidlink_hindi'
+                    ? 'bg-amber-400 text-gray-950 shadow-[0_0_15px_rgba(245,158,11,0.6)] font-black scale-105 border border-amber-300'
+                    : 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40'
+                }`}
+              >
+                <span>🎙️</span>
+                <span>{selectedServer.id === 'vidlink_hindi' ? '✓ Hindi Dub Active' : 'Switch to Hindi Dub'}</span>
+              </button>
+              <button
+                onClick={() => {
+                  const s = SERVERS.find((x) => x.id === 'autoembed') || SERVERS[0];
+                  setSelectedServer(s);
+                }}
+                className={`px-3.5 py-2 rounded-xl font-bold text-xs transition flex items-center gap-1.5 border ${
+                  selectedServer.id === 'autoembed'
+                    ? 'bg-emerald-500 text-gray-950 shadow-[0_0_15px_rgba(16,185,129,0.6)] font-bold border-emerald-400'
+                    : 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40'
+                }`}
+              >
+                <Zap className="w-3.5 h-3.5" />
+                <span>⚡ Fast 1080p Server 1</span>
+              </button>
             </div>
           </div>
-          <div className="flex items-center gap-2 flex-wrap shrink-0 w-full md:w-auto">
-            <button
-              onClick={() => {
-                const s = SERVERS.find((x) => x.id === 'vidlink_hindi') || SERVERS[0];
-                setSelectedServer(s);
-              }}
-              className={`px-3.5 py-2 rounded-xl font-bold text-xs transition flex items-center gap-1.5 shadow-md ${
-                selectedServer.id === 'vidlink_hindi'
-                  ? 'bg-amber-400 text-gray-950 shadow-[0_0_15px_rgba(245,158,11,0.6)] font-black scale-105 border border-amber-300'
-                  : 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40'
-              }`}
-            >
-              <span>🎙️</span>
-              <span>{selectedServer.id === 'vidlink_hindi' ? '✓ Hindi Dubbed Active' : 'Switch to Hindi Dub Player'}</span>
-            </button>
-            <button
-              onClick={() => {
-                const s = SERVERS.find((x) => x.id === 'smashystream') || SERVERS[3];
-                setSelectedServer(s);
-              }}
-              className={`px-3 py-2 rounded-xl font-semibold text-xs transition flex items-center gap-1.5 border ${
-                selectedServer.id === 'smashystream'
-                  ? 'bg-indigo-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.6)] font-bold border-indigo-400'
-                  : 'bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border-indigo-500/40'
-              }`}
-            >
-              <span>🌐</span>
-              <span>Multi-Audio Mirror</span>
-            </button>
-          </div>
-        </div>
+        )}
 
         {/* Playback Guidance & Quick Server Fallback Bar */}
         <div className="px-4 py-3 bg-[#050b1b] border-t border-cyan-500/15 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">

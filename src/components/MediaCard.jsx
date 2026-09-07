@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Play, Star, Bookmark, Check, Sparkles } from 'lucide-react';
-import { IMG_BASE } from '../services/tmdb';
+import { IMG_BASE, isHindiAvailable } from '../services/tmdb';
 
 export default function MediaCard({ item, onPlay, isWatchlisted, onToggleWatchlist }) {
   if (!item) return null;
@@ -11,7 +11,7 @@ export default function MediaCard({ item, onPlay, isWatchlisted, onToggleWatchli
     ? item.vote_average.toFixed(1) 
     : (item.vote_average || '7.8');
   const isSeries = item.media_type === 'tv' || Boolean(item.first_air_date);
-  const isHindi = Boolean(item.isHindiDubbed || item.original_language === 'hi' || item.category === 'hindi');
+  const isHindi = Boolean(isHindiAvailable(item));
   
   const todayStr = new Date().toISOString().split('T')[0];
   const isUpcoming = Boolean(item.release_date && item.release_date > todayStr);

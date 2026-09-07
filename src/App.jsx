@@ -41,11 +41,11 @@ export default function App() {
     try {
       const saved = localStorage.getItem('furina_moviebox_server');
       const validIds = SERVERS.map((s) => s.id);
-      if (saved && validIds.includes(saved)) {
+      if (saved && validIds.includes(saved) && saved !== 'vidlink_hindi' && saved !== 'smashystream') {
         return saved;
       }
     } catch (e) {}
-    return SERVERS[0]?.id || 'vidlink_hindi';
+    return SERVERS[0]?.id || 'autoembed';
   });
 
   useEffect(() => {
@@ -335,9 +335,7 @@ export default function App() {
             preferredServerId={preferredServer}
             isHindiPreferred={
               activeCategory === 'hindi' ||
-              (searchQuery && searchQuery.toLowerCase().includes('hindi')) ||
-              Boolean(activeMedia?.isHindiDubbed) ||
-              activeMedia?.original_language === 'hi' ||
+              (Boolean(searchQuery) && searchQuery.toLowerCase().includes('hindi')) ||
               activeMedia?.category === 'hindi'
             }
             onClose={() => setActiveMedia(null)}
