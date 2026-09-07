@@ -19,12 +19,10 @@ export default function Navbar({
     { id: 'hindi', label: 'Bollywood & Hindi', icon: Sparkles },
     { id: 'kdrama', label: '🇰🇷 K-Drama', icon: Tv },
     { id: 'anime', label: '🌸 Anime', icon: Sparkles },
+    { id: 'ecchi_anime', label: '🔞 18+ Anime', icon: Flame, is18: true },
+    { id: 'mature', label: '🔞 18+ Cinema', icon: Flame, is18: true },
     { id: 'horror', label: '👻 Horror', icon: Skull },
     { id: 'series', label: 'Web Series', icon: Tv },
-    ...((isMasterMode || includeMature) ? [
-      { id: 'ecchi_anime', label: '🔞 18+ Anime', icon: Flame, is18: true },
-      { id: 'mature', label: '🔞 18+ Cinema', icon: Flame, is18: true }
-    ] : []),
     { id: 'watchlist', label: 'Watchlist', icon: Heart },
   ];
 
@@ -129,7 +127,7 @@ export default function Navbar({
 
           <button
             onClick={onOpenSettings}
-            title="Settings & Secret Vault (Passcode: 2030)"
+            title="Settings & VIP Controls"
             className={`p-2 rounded-full border transition flex items-center gap-1.5 ${
               isMasterMode
                 ? 'bg-emerald-500/20 border-emerald-400 text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.5)]'
@@ -138,7 +136,7 @@ export default function Navbar({
           >
             {isMasterMode ? <Shield className="w-4 h-4 text-emerald-400" /> : <Settings className="w-4 h-4 text-cyan-400" />}
             <span className="hidden sm:inline text-xs font-semibold">
-              {isMasterMode ? 'Master 2030' : 'Settings'}
+              {isMasterMode ? 'VIP Active' : 'Settings'}
             </span>
           </button>
         </div>

@@ -351,8 +351,8 @@ export default function SettingsModal({
                     <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold">
                       <ShieldCheck className="w-5 h-5 text-emerald-400" />
                       <div>
-                        <div>Master Mode Unlocked</div>
-                        <div className="text-[10px] text-emerald-300/70 font-normal">Passcode verified: 2030</div>
+                        <div>VIP Mode Unlocked</div>
+                        <div className="text-[10px] text-emerald-300/70 font-normal">VIP Access Activated</div>
                       </div>
                     </div>
                     <button
@@ -501,7 +501,7 @@ export default function SettingsModal({
         {/* Footer */}
         <div className="p-3.5 bg-[#060b1b] border-t border-cyan-500/20 flex items-center justify-between">
           <span className="text-[11px] text-cyan-300/50">
-            {isMasterMode ? 'Master Access Granted' : 'PIN Protected (2030)'}
+            {isMasterMode ? 'VIP Access Granted' : 'PIN Protected'}
           </span>
           <button
             onClick={onClose}

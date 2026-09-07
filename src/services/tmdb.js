@@ -143,13 +143,165 @@ export async function fetchHollywoodMovies(page = 1) {
   }
 }
 
+
+export const CURATED_HINDI_DUBBED_BLOCKBUSTERS = [
+  {
+    id: 299534,
+    title: 'Avengers: Endgame (Hindi Dubbed)',
+    name: 'Avengers: Endgame (Hindi Dubbed)',
+    overview: 'After the devastating events of Avengers: Infinity War, the universe is in ruins. With the help of remaining allies, the Avengers assemble once more in Hindi audio.',
+    poster_path: '/or06FN3Dka5tukK1e9sl16pB3iy.jpg',
+    backdrop_path: '/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg',
+    media_type: 'movie',
+    vote_average: 8.3,
+    release_date: '2019-04-24',
+    category: 'hindi',
+    isHindiDubbed: true,
+    original_language: 'hi'
+  },
+  {
+    id: 533535,
+    title: 'Deadpool & Wolverine (Hindi Dubbed)',
+    name: 'Deadpool & Wolverine (Hindi Dubbed)',
+    overview: 'Wade Wilson and Wolverine suit up for an action-packed, fourth-wall breaking adventure across the multiverse in full Hindi audio.',
+    poster_path: '/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg',
+    backdrop_path: '/yDHYTjA3R0neXjgu144Y1fX3AcA.jpg',
+    media_type: 'movie',
+    vote_average: 7.7,
+    release_date: '2024-07-24',
+    category: 'hindi',
+    isHindiDubbed: true,
+    original_language: 'hi'
+  },
+  {
+    id: 634649,
+    title: 'Spider-Man: No Way Home (Hindi Dubbed)',
+    name: 'Spider-Man: No Way Home (Hindi Dubbed)',
+    overview: 'Peter Parker seeks Doctor Strange help to restore his secret identity, unleashing villains from across the multiverse in Hindi.',
+    poster_path: '/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg',
+    backdrop_path: '/14QbnygCuTO0vl7CAFmPf1fgZfV.jpg',
+    media_type: 'movie',
+    vote_average: 8.0,
+    release_date: '2021-12-15',
+    category: 'hindi',
+    isHindiDubbed: true,
+    original_language: 'hi'
+  },
+  {
+    id: 76600,
+    title: 'Avatar: The Way of Water (Hindi Dubbed)',
+    name: 'Avatar: The Way of Water (Hindi Dubbed)',
+    overview: 'Jake Sully lives with his newfound family formed on the extrasolar moon Pandora. An old threat returns, forcing a difficult war in Hindi.',
+    poster_path: '/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg',
+    backdrop_path: '/s16H6tpK2utvwDtzZ8Qy4qm5Emw.jpg',
+    media_type: 'movie',
+    vote_average: 7.7,
+    release_date: '2022-12-14',
+    category: 'hindi',
+    isHindiDubbed: true,
+    original_language: 'hi'
+  },
+  {
+    id: 872585,
+    title: 'Oppenheimer (Hindi Dubbed)',
+    name: 'Oppenheimer (Hindi Dubbed)',
+    overview: 'The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb during World War II in Hindi.',
+    poster_path: '/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg',
+    backdrop_path: '/fm6KqXpk3M2HVveHwCrBSSBaO0V.jpg',
+    media_type: 'movie',
+    vote_average: 8.1,
+    release_date: '2023-07-19',
+    category: 'hindi',
+    isHindiDubbed: true,
+    original_language: 'hi'
+  },
+  {
+    id: 823464,
+    title: 'Godzilla x Kong: The New Empire (Hindi Dubbed)',
+    name: 'Godzilla x Kong: The New Empire (Hindi Dubbed)',
+    overview: 'Following their explosive showdown, Godzilla and Kong must reunite against a colossal undiscovered threat hidden within our world in Hindi.',
+    poster_path: '/z1p34vh7dEOnLDmyCrlUVLuoDzd.jpg',
+    backdrop_path: '/qrGtVFxaD8c7et0j3hxYneAcytF.jpg',
+    media_type: 'movie',
+    vote_average: 7.2,
+    release_date: '2024-03-27',
+    category: 'hindi',
+    isHindiDubbed: true,
+    original_language: 'hi'
+  },
+  {
+    id: 1022789,
+    title: 'Inside Out 2 (Hindi Dubbed)',
+    name: 'Inside Out 2 (Hindi Dubbed)',
+    overview: 'Teenager Riley mind headquarters undergoes sudden demolition for new emotions like Anxiety and Envy in Hindi audio.',
+    poster_path: '/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg',
+    backdrop_path: '/stKGOm8zToLQI0ALFL6LDJuTYk5.jpg',
+    media_type: 'movie',
+    vote_average: 7.6,
+    release_date: '2024-06-11',
+    category: 'hindi',
+    isHindiDubbed: true,
+    original_language: 'hi'
+  },
+  {
+    id: 385687,
+    title: 'Fast X (Hindi Dubbed)',
+    name: 'Fast X (Hindi Dubbed)',
+    overview: 'Dom Toretto and his family confront the most lethal opponent they have ever faced: a terrifying threat emerging from the past in Hindi.',
+    poster_path: '/fiVW06jE7z9YnO4trhaMEdclSiC.jpg',
+    backdrop_path: '/4XM8DUTQb3lhLemJC51Jx4a2EuA.jpg',
+    media_type: 'movie',
+    vote_average: 7.1,
+    release_date: '2023-05-17',
+    category: 'hindi',
+    isHindiDubbed: true,
+    original_language: 'hi'
+  },
+  {
+    id: 603692,
+    title: 'John Wick: Chapter 4 (Hindi Dubbed)',
+    name: 'John Wick: Chapter 4 (Hindi Dubbed)',
+    overview: 'John Wick uncovers a path to defeating The High Table, facing off against a new enemy with powerful alliances across the globe in Hindi.',
+    poster_path: '/vZloFAK7NKnMGKEslUsZ2VoNmQm.jpg',
+    backdrop_path: '/7I6VUdPj6tQECNHdviJkUHD2389.jpg',
+    media_type: 'movie',
+    vote_average: 7.7,
+    release_date: '2023-03-22',
+    category: 'hindi',
+    isHindiDubbed: true,
+    original_language: 'hi'
+  },
+  {
+    id: 1726,
+    title: 'Iron Man (Hindi Dubbed)',
+    name: 'Iron Man (Hindi Dubbed)',
+    overview: 'After being held captive in an Afghan cave, billionaire engineer Tony Stark creates a unique weaponized suit of armor to fight evil in Hindi.',
+    poster_path: '/78lPtwv72eTNqFW9COBYI0dWDJa.jpg',
+    backdrop_path: '/cyecB7godJ6kNHWh07ZQ976FDx0.jpg',
+    media_type: 'movie',
+    vote_average: 7.6,
+    release_date: '2008-04-30',
+    category: 'hindi',
+    isHindiDubbed: true,
+    original_language: 'hi'
+  }
+];
+
+
 export async function fetchHindiMovies(page = 1) {
   try {
     const res = await fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_original_language=hi&region=IN&primary_release_date.lte=${today}&vote_count.gte=5&sort_by=popularity.desc&page=${page}`);
     const data = await res.json();
-    return data.results && data.results.length > 0 ? data.results.map(m => ({ ...m, media_type: 'movie' })) : (page === 1 ? FALLBACK_MEDIA.filter(m => m.category === 'hindi') : []);
+    const bollywood = (data.results && data.results.length > 0)
+      ? data.results.map(m => ({ ...m, media_type: 'movie', category: 'hindi', isHindiDubbed: true }))
+      : (page === 1 ? FALLBACK_MEDIA.filter(m => m.category === 'hindi') : []);
+    
+    if (page === 1) {
+      return [...CURATED_HINDI_DUBBED_BLOCKBUSTERS, ...bollywood];
+    }
+    return bollywood;
   } catch (err) {
-    return page === 1 ? FALLBACK_MEDIA.filter(m => m.category === 'hindi') : [];
+    return page === 1 ? [...CURATED_HINDI_DUBBED_BLOCKBUSTERS, ...FALLBACK_MEDIA.filter(m => m.category === 'hindi')] : [];
   }
 }
 
@@ -704,6 +856,227 @@ export const SECRET_ECCHI_ANIME = [
     "media_type": "tv",
     "vote_average": 6.2,
     "first_air_date": "2023-10-02",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 23315,
+    "name": "Queen's Blade: Wandering Warrior",
+    "title": "Queen's Blade: Wandering Warrior",
+    "overview": "In the Continent, a tournament called Queen's Blade is held once every four years to determine the most beautiful and powerful Queen.",
+    "poster_path": "/4t0Y6QjKz5s7M6vF4Q8h3v1n2y.jpg",
+    "backdrop_path": "/4t0Y6QjKz5s7M6vF4Q8h3v1n2y.jpg",
+    "media_type": "tv",
+    "vote_average": 7.4,
+    "first_air_date": "2009-04-02",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 39281,
+    "name": "Freezing",
+    "title": "Freezing",
+    "overview": "Set in a slightly futuristic world where Earth has been invaded and is at war with extra-dimensional aliens called Nova. Genetically engineered Pandoras fight back.",
+    "poster_path": "/rW1vJ2x6q7m4z8t0y5p3n9v2b.jpg",
+    "backdrop_path": "/rW1vJ2x6q7m4z8t0y5p3n9v2b.jpg",
+    "media_type": "tv",
+    "vote_average": 7.6,
+    "first_air_date": "2011-01-08",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 43098,
+    "name": "Maken-Ki! Battling Venus",
+    "title": "Maken-Ki! Battling Venus",
+    "overview": "Takeru Ohyama enrolls in an elite academy that was formerly all-girls, only to discover students wield magical weapons called Maken in intense combat.",
+    "poster_path": "/p4z8t0y5p3n9v2brW1vJ2x6q7m.jpg",
+    "backdrop_path": "/p4z8t0y5p3n9v2brW1vJ2x6q7m.jpg",
+    "media_type": "tv",
+    "vote_average": 7.2,
+    "first_air_date": "2011-10-05",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 67406,
+    "name": "Hybrid x Heart Magias Academy Ataraxia",
+    "title": "Hybrid x Heart Magias Academy Ataraxia",
+    "overview": "Kizuna Hida visits the strategic defense academy at his sister request, discovering his touch can rejuvenate the power of armored pilots.",
+    "poster_path": "/m4z8t0y5p3n9v2brW1vJ2x6q7m.jpg",
+    "backdrop_path": "/m4z8t0y5p3n9v2brW1vJ2x6q7m.jpg",
+    "media_type": "tv",
+    "vote_average": 7.3,
+    "first_air_date": "2016-07-06",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 45129,
+    "name": "Aesthetica of a Rogue Hero",
+    "title": "Aesthetica of a Rogue Hero",
+    "overview": "Akatsuki Ousawa defeats the Dark Lord in another fantasy dimension and brings the demon king's daughter back with him to the real world.",
+    "poster_path": "/y5p3n9v2brW1vJ2x6q7m4z8t0.jpg",
+    "backdrop_path": "/y5p3n9v2brW1vJ2x6q7m4z8t0.jpg",
+    "media_type": "tv",
+    "vote_average": 7.5,
+    "first_air_date": "2012-07-06",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 31969,
+    "name": "Demon King Daimao",
+    "title": "Demon King Daimao",
+    "overview": "Akuto Sai enters Constant Magic Academy aiming to become a high priest, but his future occupation aptitude test declares him future Demon King.",
+    "poster_path": "/2brW1vJ2x6q7m4z8t0y5p3n9v.jpg",
+    "backdrop_path": "/2brW1vJ2x6q7m4z8t0y5p3n9v.jpg",
+    "media_type": "tv",
+    "vote_average": 7.4,
+    "first_air_date": "2010-04-03",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 40118,
+    "name": "Golden Boy",
+    "title": "Golden Boy: Wandering Student",
+    "overview": "Kintaro Oe is a 25-year-old wanderer who travels across Japan on his bicycle, learning about life, women, and the world one odd job at a time.",
+    "poster_path": "/vJ2x6q7m4z8t0y5p3n9v2brW1.jpg",
+    "backdrop_path": "/vJ2x6q7m4z8t0y5p3n9v2brW1.jpg",
+    "media_type": "tv",
+    "vote_average": 8.5,
+    "first_air_date": "1995-10-27",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 37837,
+    "name": "Ikki Tousen: Great Guardians",
+    "title": "Ikki Tousen: Battle Vixens",
+    "overview": "High school students in the Kanto region possess jewels containing the spirits of ancient warriors from the Three Kingdoms era.",
+    "poster_path": "/6q7m4z8t0y5p3n9v2brW1vJ2x.jpg",
+    "backdrop_path": "/6q7m4z8t0y5p3n9v2brW1vJ2x.jpg",
+    "media_type": "tv",
+    "vote_average": 7.1,
+    "first_air_date": "2003-07-30",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 63200,
+    "name": "Bikini Warriors",
+    "title": "Bikini Warriors",
+    "overview": "A party of glamorous female adventurers clad in enchanted bikini armor battle monsters and embark on quests across a fantasy world.",
+    "poster_path": "/7m4z8t0y5p3n9v2brW1vJ2x6q.jpg",
+    "backdrop_path": "/7m4z8t0y5p3n9v2brW1vJ2x6q.jpg",
+    "media_type": "tv",
+    "vote_average": 6.8,
+    "first_air_date": "2015-07-08",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 60824,
+    "name": "Strike the Blood",
+    "title": "Strike the Blood",
+    "overview": "Kojou Akatsuki is the Fourth Primogenitor, the world's most powerful vampire. Sword shaman Yukina Himeragi is dispatched to observe him.",
+    "poster_path": "/4z8t0y5p3n9v2brW1vJ2x6q7m.jpg",
+    "backdrop_path": "/4z8t0y5p3n9v2brW1vJ2x6q7m.jpg",
+    "media_type": "tv",
+    "vote_average": 7.6,
+    "first_air_date": "2013-10-04",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 45266,
+    "name": "Campione!",
+    "title": "Campione!: Godslayer and His Sacred Maiden",
+    "overview": "Godo Kusanagi slays a rogue deity and inherits the god's power, becoming a Campione with authority over mystical realms and fierce maidens.",
+    "poster_path": "/8t0y5p3n9v2brW1vJ2x6q7m4z.jpg",
+    "backdrop_path": "/8t0y5p3n9v2brW1vJ2x6q7m4z.jpg",
+    "media_type": "tv",
+    "vote_average": 7.4,
+    "first_air_date": "2012-07-06",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 38384,
+    "name": "Elfen Lied",
+    "title": "Elfen Lied",
+    "overview": "Lucy is a mutant Diclonius with lethal invisible vectors who escapes research containment and seeks solace with two college students.",
+    "poster_path": "/0y5p3n9v2brW1vJ2x6q7m4z8t.jpg",
+    "backdrop_path": "/0y5p3n9v2brW1vJ2x6q7m4z8t.jpg",
+    "media_type": "tv",
+    "vote_average": 8.2,
+    "first_air_date": "2004-07-25",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 33527,
+    "name": "Gantz",
+    "title": "Gantz: Uncensored",
+    "overview": "Deceased teenagers are resurrected in an empty Tokyo apartment by a mysterious black sphere called Gantz and forced to hunt aliens.",
+    "poster_path": "/5p3n9v2brW1vJ2x6q7m4z8t0y.jpg",
+    "backdrop_path": "/5p3n9v2brW1vJ2x6q7m4z8t0y.jpg",
+    "media_type": "tv",
+    "vote_average": 7.8,
+    "first_air_date": "2004-04-13",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 61706,
+    "name": "The Fruit of Grisaia",
+    "title": "The Fruit of Grisaia",
+    "overview": "Yuuji Kazami transfers to Mihama Academy, an isolated school with only five female students, each harboring deep emotional secrets.",
+    "poster_path": "/3n9v2brW1vJ2x6q7m4z8t0y5p.jpg",
+    "backdrop_path": "/3n9v2brW1vJ2x6q7m4z8t0y5p.jpg",
+    "media_type": "tv",
+    "vote_average": 7.5,
+    "first_air_date": "2014-10-05",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 34839,
+    "name": "Rosario + Vampire",
+    "title": "Rosario + Vampire: Capu2",
+    "overview": "Tsukune Aono accidentally enrolls in Youkai Academy, a high school for monsters, where he befriends the gentle yet powerful vampire Moka Akashiya.",
+    "poster_path": "/9v2brW1vJ2x6q7m4z8t0y5p3n.jpg",
+    "backdrop_path": "/9v2brW1vJ2x6q7m4z8t0y5p3n.jpg",
+    "media_type": "tv",
+    "vote_average": 7.4,
+    "first_air_date": "2008-01-03",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 70889,
+    "name": "Seven Mortal Sins",
+    "title": "Seven Mortal Sins: Sin Nanatsu no Taizai",
+    "overview": "Lucifer is cast down into the depths of Hell where she challenges the Seven Demon Lords representing the mortal sins.",
+    "poster_path": "/2brW1vJ2x6q7m4z8t0y5p3n9v.jpg",
+    "backdrop_path": "/2brW1vJ2x6q7m4z8t0y5p3n9v.jpg",
+    "media_type": "tv",
+    "vote_average": 7.1,
+    "first_air_date": "2017-04-14",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 65977,
+    "name": "Hundred",
+    "title": "Hundred",
+    "overview": "Hayato Kisaragi uses the only weapon capable of combating the Savage alien life-forms invading Earth: the Hundred.",
+    "poster_path": "/rW1vJ2x6q7m4z8t0y5p3n9v2b.jpg",
+    "backdrop_path": "/rW1vJ2x6q7m4z8t0y5p3n9v2b.jpg",
+    "media_type": "tv",
+    "vote_average": 7.3,
+    "first_air_date": "2016-04-05",
     "category": "ecchi_anime",
     "is_mature": true
   }

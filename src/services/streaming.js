@@ -73,13 +73,13 @@ export const SERVERS = [
     getTvUrl: (tmdbId, s = 1, e = 1) => `https://www.2embed.cc/embedtv/${tmdbId}&s=${s}&e=${e}`
   },
   {
-    id: 'vidlink_hindi',
-    name: 'Server 9: VidLink Multi-Audio (🎙️ Hindi Dubbed & Multi-Language)',
-    shortName: '🎙️ Hindi Dub (VidLink)',
-    badge: '🎙️ Hindi Dubbed',
-    color: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
-    getMovieUrl: (tmdbId) => `https://vidlink.pro/movie/${tmdbId}?multiLang=true`,
-    getTvUrl: (tmdbId, s = 1, e = 1) => `https://vidlink.pro/tv/${tmdbId}/${s}/${e}?multiLang=true`
+    id: 'vidlink_direct',
+    name: 'Server 9: VidLink Direct HD (Fast 1080p Mirror)',
+    shortName: 'Server 9 (VidLink HD)',
+    badge: '1080p Direct',
+    color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+    getMovieUrl: (tmdbId) => `https://vidlink.pro/movie/${tmdbId}`,
+    getTvUrl: (tmdbId, s = 1, e = 1) => `https://vidlink.pro/tv/${tmdbId}/${s}/${e}`
   }
 ];
 

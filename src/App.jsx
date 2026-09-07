@@ -260,6 +260,34 @@ export default function App() {
               </button>
             </div>
           )}
+
+          {/* Anime Quick Sub / Dub / 18+ Filter Chips */}
+          {activeCategory === 'anime' && !searchQuery && (
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 text-xs">
+              <span className="text-cyan-200/50 text-[11px] whitespace-nowrap font-medium">Anime Audio:</span>
+              <button
+                onClick={() => setSearchQuery('dubbed')}
+                className="px-3 py-1 rounded-full bg-blue-500/15 border border-blue-500/40 text-blue-300 font-bold whitespace-nowrap hover:bg-blue-500/25 transition flex items-center gap-1"
+              >
+                <span>🎙️</span>
+                <span>English Dubbed</span>
+              </button>
+              <button
+                onClick={() => setSearchQuery('hindi dubbed anime')}
+                className="px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-300 font-bold whitespace-nowrap hover:bg-amber-500/25 transition flex items-center gap-1"
+              >
+                <span>🇮🇳</span>
+                <span>Hindi Dubbed Anime</span>
+              </button>
+              <button
+                onClick={() => setActiveCategory('ecchi_anime')}
+                className="px-3 py-1 rounded-full bg-rose-500/15 border border-rose-500/40 text-rose-300 font-bold whitespace-nowrap hover:bg-rose-500/25 transition flex items-center gap-1"
+              >
+                <span>🔞</span>
+                <span>18+ Hanime Vault</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Skeleton Shimmer Loading Grid */}
@@ -367,15 +395,14 @@ export default function App() {
       />
 
       {/* Mobile iOS Style Bottom Navigation Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-[#070d1e]/90 backdrop-blur-xl border-t border-cyan-500/20 px-2 py-2 flex items-center justify-around">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-[#070d1e]/95 backdrop-blur-2xl border-t border-cyan-500/20 px-1 py-2 flex items-center justify-around shadow-[0_-5px_25px_rgba(0,0,0,0.7)]">
         {[
           { id: 'trending', label: 'Trending', icon: Flame },
           { id: 'hollywood', label: 'Movies', icon: Film },
           { id: 'hindi', label: 'Hindi', icon: Sparkles },
-          { id: 'series', label: 'Series', icon: Tv },
           { id: 'anime', label: 'Anime', icon: Sparkles },
-          ...((isMasterMode || includeMature) ? [{ id: 'ecchi_anime', label: '18+ Anime', icon: Flame }] : []),
-          ...(includeMature ? [{ id: 'mature', label: '18+ Cinema', icon: Flame }] : []),
+          { id: 'ecchi_anime', label: '18+ Anime', icon: Flame },
+          { id: 'mature', label: '18+ Cinema', icon: Flame },
           { id: 'watchlist', label: 'Saved', icon: Heart },
         ].map((tab) => {
           const Icon = tab.icon;
@@ -384,25 +411,25 @@ export default function App() {
             <button
               key={tab.id}
               onClick={() => { setActiveCategory(tab.id); setSearchQuery(''); }}
-              className={`flex flex-col items-center gap-1 transition ${
-                isActive ? 'text-cyan-400 font-bold scale-105' : 'text-cyan-200/50'
+              className={`flex flex-col items-center gap-1 transition active:scale-95 ${
+                isActive ? 'text-cyan-400 font-bold scale-105' : 'text-cyan-200/50 hover:text-white'
               }`}
             >
-              <Icon className="w-5 h-5" />
-              <span className="text-[10px] tracking-tight">{tab.label}</span>
+              <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="text-[9px] sm:text-[10px] tracking-tight">{tab.label}</span>
             </button>
           );
         })}
         
-        {/* Mobile Settings Button */}
+        {/* Mobile Settings Button - Secret code hidden */}
         <button
           onClick={() => setIsSettingsOpen(true)}
-          className={`flex flex-col items-center gap-1 transition ${
-            isMasterMode ? 'text-emerald-400 font-bold' : 'text-cyan-200/50'
+          className={`flex flex-col items-center gap-1 transition active:scale-95 ${
+            isMasterMode ? 'text-emerald-400 font-bold' : 'text-cyan-200/50 hover:text-white'
           }`}
         >
-          {isMasterMode ? <Shield className="w-5 h-5 text-emerald-400" /> : <Settings className="w-5 h-5" />}
-          <span className="text-[10px] tracking-tight">{isMasterMode ? '2030' : 'Settings'}</span>
+          {isMasterMode ? <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" /> : <Settings className="w-4 h-4 sm:w-5 sm:h-5" />}
+          <span className="text-[9px] sm:text-[10px] tracking-tight">{isMasterMode ? 'VIP' : 'Settings'}</span>
         </button>
       </nav>
     </div>
