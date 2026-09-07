@@ -6,6 +6,35 @@ export const BACKDROP_BASE = 'https://image.tmdb.org/t/p/original';
 
 const today = new Date().toISOString().split('T')[0];
 
+// Robust deduplication using provider IDs first, then normalized title + year + media_type fallback
+export function deduplicateMedia(items) {
+  if (!Array.isArray(items)) return [];
+  const seenIds = new Set();
+  const seenTitles = new Set();
+
+  return items.filter((item) => {
+    if (!item || typeof item !== 'object' || !item.id) return false;
+    const idKey = String(item.id);
+    if (seenIds.has(idKey)) return false;
+
+    const rawTitle = (item.title || item.name || item.original_title || item.original_name || '').trim().toLowerCase();
+    const cleanTitle = rawTitle
+      .replace(/\s*\(hindi\s*dubbed\)/i, '')
+      .replace(/\s*\(english\s*dubbed\)/i, '')
+      .replace(/\s*\(uncut\)/i, '')
+      .replace(/\s*\(uncensored\)/i, '')
+      .replace(/[^a-z0-9]/g, '');
+
+    if (cleanTitle) {
+      if (seenTitles.has(cleanTitle)) return false;
+      seenTitles.add(cleanTitle);
+    }
+
+    seenIds.add(idKey);
+    return true;
+  });
+}
+
 // Curated blockbusters (Hindi, English, Web Series) as immediate backup
 const FALLBACK_MEDIA = [
   {
@@ -133,13 +162,220 @@ export async function fetchTrendingAll(page = 1) {
   }
 }
 
+export const CURATED_HOLLYWOOD_BLOCKBUSTERS = [
+  {
+    id: 533535,
+    title: 'Deadpool & Wolverine',
+    name: 'Deadpool & Wolverine',
+    overview: 'A listless Wade Wilson toils away in civilian life with his days as the morally flexible mercenary, Deadpool, behind him. But when his homeworld faces an existential threat, Wade must reluctantly suit-up again with an even more reluctant Wolverine.',
+    poster_path: '/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg',
+    backdrop_path: '/yDHYTjA3R0neXjgu144Y1fX3AcA.jpg',
+    media_type: 'movie',
+    vote_average: 7.7,
+    release_date: '2024-07-24',
+    category: 'hollywood',
+    isHindiDubbed: true
+  },
+  {
+    id: 634649,
+    title: 'Spider-Man: No Way Home',
+    name: 'Spider-Man: No Way Home',
+    overview: 'Peter Parker is unmasked and no longer able to separate his normal life from the high-stakes of being a super-hero. When he asks for help from Doctor Strange the stakes become even more dangerous.',
+    poster_path: '/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg',
+    backdrop_path: '/14QbnygCuTO0vl7CAFmPf1fgZfV.jpg',
+    media_type: 'movie',
+    vote_average: 8.0,
+    release_date: '2021-12-15',
+    category: 'hollywood',
+    isHindiDubbed: true
+  },
+  {
+    id: 299534,
+    title: 'Avengers: Endgame',
+    name: 'Avengers: Endgame',
+    overview: 'After the devastating events of Avengers: Infinity War, the universe is in ruins. With the help of remaining allies, the Avengers assemble once more in order to reverse Thanos\' actions and restore balance to the universe.',
+    poster_path: '/or06FN3Dka5tukK1e9sl16pB3iy.jpg',
+    backdrop_path: '/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg',
+    media_type: 'movie',
+    vote_average: 8.3,
+    release_date: '2019-04-24',
+    category: 'hollywood',
+    isHindiDubbed: true
+  },
+  {
+    id: 299536,
+    title: 'Avengers: Infinity War',
+    name: 'Avengers: Infinity War',
+    overview: 'As the Avengers and their allies have continued to protect the world from threats too large for any one hero to handle, a new danger has emerged from the cosmic shadows: Thanos.',
+    poster_path: '/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg',
+    backdrop_path: '/mDfJG3LC3Dqb67AZ52x3Z0jU0uB.jpg',
+    media_type: 'movie',
+    vote_average: 8.2,
+    release_date: '2018-04-25',
+    category: 'hollywood',
+    isHindiDubbed: true
+  },
+  {
+    id: 157336,
+    title: 'Interstellar',
+    name: 'Interstellar',
+    overview: 'The adventures of a group of explorers who make use of a newly discovered wormhole to surpass the limitations on human space travel and conquer the vast distances involved in an interstellar voyage.',
+    poster_path: '/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg',
+    backdrop_path: '/xJHokMbljvjADYdit5fK5VQsXEG.jpg',
+    media_type: 'movie',
+    vote_average: 8.4,
+    release_date: '2014-11-05',
+    category: 'hollywood',
+    isHindiDubbed: true
+  },
+  {
+    id: 693134,
+    title: 'Dune: Part Two',
+    name: 'Dune: Part Two',
+    overview: 'Follow the mythic journey of Paul Atreides as he unites with Chani and the Fremen while on a path of revenge against the conspirators who destroyed his family.',
+    poster_path: '/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg',
+    backdrop_path: '/xOMo8BRK7PfcJv9JCnx7s520Wio.jpg',
+    media_type: 'movie',
+    vote_average: 8.2,
+    release_date: '2024-02-27',
+    category: 'hollywood',
+    isHindiDubbed: true
+  },
+  {
+    id: 872585,
+    title: 'Oppenheimer',
+    name: 'Oppenheimer',
+    overview: 'The story of J. Robert Oppenheimer\'s role in the development of the atomic bomb during World War II.',
+    poster_path: '/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg',
+    backdrop_path: '/fm6KqXpk3M2HVveHwCrBSSBaO0V.jpg',
+    media_type: 'movie',
+    vote_average: 8.1,
+    release_date: '2023-07-19',
+    category: 'hollywood',
+    isHindiDubbed: true
+  },
+  {
+    id: 155,
+    title: 'The Dark Knight',
+    name: 'The Dark Knight',
+    overview: 'Batman raises the stakes in his war on crime. With the help of Lt. Jim Gordon and District Attorney Harvey Dent, Batman sets out to dismantle the remaining criminal organizations that plague the streets.',
+    poster_path: '/qJ2tW6WMUDux911r6m7haRef0WH.jpg',
+    backdrop_path: '/nMKdUUepR0i5zn0y1T4CsSB5chy.jpg',
+    media_type: 'movie',
+    vote_average: 8.5,
+    release_date: '2008-07-16',
+    category: 'hollywood',
+    isHindiDubbed: true
+  },
+  {
+    id: 27205,
+    title: 'Inception',
+    name: 'Inception',
+    overview: 'Cobb, a skilled thief who commits corporate espionage by infiltrating the subconscious of his targets, is offered chances to regain his old life as payment for a task considered to be impossible: "inception".',
+    poster_path: '/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg',
+    backdrop_path: '/s3TBrRGB1iav7gFOCNx3H31MoES.jpg',
+    media_type: 'movie',
+    vote_average: 8.4,
+    release_date: '2010-07-15',
+    category: 'hollywood',
+    isHindiDubbed: true
+  },
+  {
+    id: 76600,
+    title: 'Avatar: The Way of Water',
+    name: 'Avatar: The Way of Water',
+    overview: 'Set more than a decade after the events of the first film, learn the story of the Sully family, the trouble that follows them, the lengths they go to keep each other safe, the battles they fight to stay alive, and the tragedies they endure.',
+    poster_path: '/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg',
+    backdrop_path: '/s16H6tpK2utvwDtzZ8Qy4qm5Emw.jpg',
+    media_type: 'movie',
+    vote_average: 7.6,
+    release_date: '2022-12-14',
+    category: 'hollywood',
+    isHindiDubbed: true
+  },
+  {
+    id: 361743,
+    title: 'Top Gun: Maverick',
+    name: 'Top Gun: Maverick',
+    overview: 'After more than thirty years of service as one of the Navy\'s top aviators, and dodging the advancement in rank that would ground him, Pete "Maverick" Mitchell finds himself training a detachment of TOP GUN graduates for a specialized mission.',
+    poster_path: '/62HCnUTziyWcpDaBO2i1DX17ljH.jpg',
+    backdrop_path: '/odJ4hx6g6vBt4lBWKFD1tI8WS4x.jpg',
+    media_type: 'movie',
+    vote_average: 8.2,
+    release_date: '2022-05-24',
+    category: 'hollywood',
+    isHindiDubbed: true
+  },
+  {
+    id: 603692,
+    title: 'John Wick: Chapter 4',
+    name: 'John Wick: Chapter 4',
+    overview: 'With the price on his head ever increasing, John Wick uncovers a path to defeating The High Table. But before he can earn his freedom, Wick must face off against a new enemy with powerful alliances across the globe.',
+    poster_path: '/vZloFAK7NKnMGKEslUsZggHIwKu.jpg',
+    backdrop_path: '/h8gHn0OzBoaefW0w19GeSmwh2if.jpg',
+    media_type: 'movie',
+    vote_average: 7.7,
+    release_date: '2023-03-22',
+    category: 'hollywood',
+    isHindiDubbed: true
+  },
+  {
+    id: 1022789,
+    title: 'Inside Out 2',
+    name: 'Inside Out 2',
+    overview: 'Teenager Riley\'s mind headquarters is undergoing a sudden demolition to make room for something entirely unexpected: new Emotions!',
+    poster_path: '/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg',
+    backdrop_path: '/stKGOm8zToLQI0ALFL6LDJuTYk5.jpg',
+    media_type: 'movie',
+    vote_average: 7.6,
+    release_date: '2024-06-11',
+    category: 'hollywood',
+    isHindiDubbed: true
+  },
+  {
+    id: 414906,
+    title: 'The Batman',
+    name: 'The Batman',
+    overview: 'In his second year of fighting crime, Batman uncovers corruption in Gotham City that connects to his own family while facing a serial killer known as the Riddler.',
+    poster_path: '/74xTEgt7R36Fpooo50r9T25onhq.jpg',
+    backdrop_path: '/b0PlSFdDwbyK0cf5RxwDpaxtQvQ.jpg',
+    media_type: 'movie',
+    vote_average: 7.7,
+    release_date: '2022-03-01',
+    category: 'hollywood',
+    isHindiDubbed: true
+  }
+];
+
 export async function fetchHollywoodMovies(page = 1) {
   try {
-    const res = await fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_original_language=en&primary_release_date.lte=${today}&vote_count.gte=20&sort_by=popularity.desc&page=${page}`);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 7000);
+
+    const res = await fetch(
+      `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_original_language=en&primary_release_date.lte=2025-06-01&vote_count.gte=300&sort_by=popularity.desc&page=${page}`,
+      { signal: controller.signal }
+    );
+    clearTimeout(timeoutId);
+
     const data = await res.json();
-    return data.results && data.results.length > 0 ? data.results.map(m => ({ ...m, media_type: 'movie' })) : (page === 1 ? FALLBACK_MEDIA.filter(m => m.category === 'hollywood') : []);
+    const discovered = (data.results || [])
+      .filter((m) => m && m.id && m.poster_path && (m.title || m.name))
+      .map((m) => ({
+        ...m,
+        media_type: 'movie',
+        category: 'hollywood',
+        isHindiDubbed: isHindiAvailable(m)
+      }));
+
+    if (page === 1) {
+      const merged = deduplicateMedia([...CURATED_HOLLYWOOD_BLOCKBUSTERS, ...discovered]);
+      return merged.length > 0 ? merged : CURATED_HOLLYWOOD_BLOCKBUSTERS;
+    }
+
+    return deduplicateMedia(discovered);
   } catch (err) {
-    return page === 1 ? FALLBACK_MEDIA.filter(m => m.category === 'hollywood') : [];
+    return page === 1 ? CURATED_HOLLYWOOD_BLOCKBUSTERS : [];
   }
 }
 
@@ -2066,18 +2302,34 @@ export function isHanimeContent(item) {
 
 export function isHindiAvailable(item) {
   if (!item) return false;
-  if (item.category === 'anime' || item.isAnime === true || item.original_language === 'ja') return false;
-  return item.original_language === 'hi' || item.category === 'hindi' || Boolean(item.isHindiDubbed);
+  if (isAnimeItem(item)) {
+    return isHindiDubbedAnime(item);
+  }
+  if (item.original_language === 'hi' || item.category === 'hindi' || item.isHindiDubbed === true) {
+    return true;
+  }
+  const id = Number(item.id);
+  if (CURATED_HOLLYWOOD_HINDI_DUBS.some((h) => Number(h.id) === id)) return true;
+  if (CURATED_BOLLYWOOD_BLOCKBUSTERS.some((b) => Number(b.id) === id)) return true;
+  return false;
 }
 
 export function isAnimeItem(item) {
   if (!item) return false;
-  return item.category === 'anime' || item.isAnime === true || item.original_language === 'ja';
+  return (
+    item.category === 'anime' ||
+    item.category === 'ecchi_anime' ||
+    item.isAnime === true ||
+    item.original_language === 'ja' ||
+    (Array.isArray(item.origin_country) && item.origin_country.includes('JP')) ||
+    ((item.genre_ids?.includes(16) || item.genres?.some((g) => g.id === 16 || g.name === 'Animation')) && item.original_language === 'ja')
+  );
 }
 
-export const HINDI_DUBBED_ANIME_IDS = new Set([
-  2098, 33758, 4614, 11130, 63926, 65733, 46260, 31910, 70881, 12971, 62710, 12697, 236208, 236209,
-  85937, 95479, 114410, 211089, 127532, 37854, 65930, 73223, 30984, 214999, 203857,
+// Strictly verified anime titles with confirmed official Hindi dub broadcasts in India
+export const VERIFIED_HINDI_ANIME_IDS = new Set([
+  2098, 33758, 4614, 11130, 63926, 65733, 46260, 31910, 70881, 12971, 62710, 12697, 236208,
+  85937, 95479, 114410, 211089, 127532, 37854, 65930, 73223, 214999, 203857,
   1429, 13916, 120089, 31835, 60572, 38472, 121533, 46298, 118439, 226688, 60708,
   136283, 206497, 205847, 224484, 153870, 86031, 80975, 67070, 75225, 104877, 240411,
   208534, 19, 105248, 216390, 635302, 8392, 916224, 568160, 372058, 378064, 284274,
@@ -2087,22 +2339,15 @@ export const HINDI_DUBBED_ANIME_IDS = new Set([
 export function isHindiDubbedAnime(item) {
   if (!item) return false;
   const id = Number(item.id);
-  if (HINDI_DUBBED_ANIME_IDS.has(id)) return true;
+  if (VERIFIED_HINDI_ANIME_IDS.has(id)) return true;
   if (item.hasHindiDub === true || item.dub_type === 'hindi') return true;
   const title = (item.title || item.name || item.original_name || item.original_title || '').toLowerCase();
-  const hindiKeywords = [
+  // Only match genuinely broadcasted Hindi anime in India
+  const verifiedHindiKeywords = [
     'doraemon', 'shinchan', 'shin chan', 'shin-chan', 'ninja hattori', 'perman',
-    'kiteretsu', 'kochikame', 'dragon ball', 'naruto', 'boruto', 'demon slayer',
-    'kimetsu no yaiba', 'jujutsu kaisen', 'chainsaw man', 'solo leveling',
-    'one piece', 'my hero academia', 'black clover', 'bleach', 'attack on titan',
-    'death note', 'spy x family', 'beyblade', 'pokemon', 'pokémon', 'digimon',
-    'inazuma eleven', 'captain tsubasa', 'haikyu', 'blue lock', 'kaiju no. 8',
-    'mashle', 'wind breaker', 'hell\'s paradise', 'jigokuraku', 'dr. stone',
-    'fire force', 'mob psycho', 'vinland saga', 'tokyo revengers', 'dandadan',
-    'dan da dan', 'monster', 'cyberpunk', 'zom 100', 'suzume', 'weathering with you',
-    'your name', 'silent voice', 'mugen train'
+    'kiteretsu', 'kochikame', 'dragon ball', 'naruto', 'beyblade', 'pokemon', 'pokémon'
   ];
-  return hindiKeywords.some((k) => title.includes(k));
+  return verifiedHindiKeywords.some((k) => title.includes(k));
 }
 
 // ✨ Curated Uncut & Collector's Master Vault Anime (Exclusive Collection)

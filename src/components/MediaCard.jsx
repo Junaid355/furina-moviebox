@@ -51,6 +51,11 @@ export default function MediaCard({ item, onPlay, isWatchlisted, onToggleWatchli
           alt={title}
           loading="lazy"
           onLoad={() => setImageLoaded(true)}
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = './icon-512.png';
+            setImageLoaded(true);
+          }}
           className={`w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105 ${
             imageLoaded ? 'opacity-100' : 'opacity-0'
           }`}

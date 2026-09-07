@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Navbar from './components/Navbar';
 import HeroBanner from './components/HeroBanner';
 import MediaCard from './components/MediaCard';
@@ -16,7 +16,8 @@ import {
   fetchHorrorMovies,
   fetchMatureMovies,
   fetchEcchiAnime,
-  searchContent 
+  searchContent,
+  deduplicateMedia
 } from './services/tmdb';
 import { SERVERS } from './services/streaming';
 import { Flame, Film, Tv, Sparkles, Heart, RefreshCw, Shield, Settings, ChevronDown } from 'lucide-react';
@@ -98,26 +99,8 @@ export default function App() {
     return watchlist.some((x) => x && x.id === id);
   };
 
-  // Strictly deduplicate media items by ID and normalized title
-  const dedupeMedia = (list) => {
-    if (!Array.isArray(list)) return [];
-    const seenIds = new Set();
-    const seenTitles = new Set();
-    return list.filter((item) => {
-      if (!item || !item.id) return false;
-      const idKey = String(item.id);
-      const rawTitle = (item.title || item.name || '').trim().toLowerCase()
-        .replace(/\s*\(hindi\s*dubbed\)/i, '')
-        .replace(/\s*\(uncut\)/i, '')
-        .replace(/\s*\(uncensored\)/i, '')
-        .replace(/[^a-z0-9]/g, '');
-      if (seenIds.has(idKey)) return false;
-      if (rawTitle && seenTitles.has(rawTitle)) return false;
-      seenIds.add(idKey);
-      if (rawTitle) seenTitles.add(rawTitle);
-      return true;
-    });
-  };
+  // Request sequence ref for stale-request protection
+  const requestSeqRef = useRef(0);
 
   // Helper function to fetch data for given category & page
   const fetchCategoryItems = async (cat, pageNum, query = '') => {
@@ -144,29 +127,37 @@ export default function App() {
     return [];
   };
 
-  // Initial load when category or search changes
+  // Initial load when category or search changes (with stale-request protection)
   useEffect(() => {
+    const currentSeq = ++requestSeqRef.current;
     setPage(1);
     setLoading(true);
 
     if (activeCategory === 'watchlist') {
-      const cleanWatchlist = dedupeMedia(watchlist);
+      const cleanWatchlist = deduplicateMedia(watchlist);
       setItems(cleanWatchlist);
       setHeroItem(cleanWatchlist[0] || null);
       setLoading(false);
       return;
     }
 
-    fetchCategoryItems(activeCategory, 1, searchQuery).then((results) => {
-      const uniqueResults = dedupeMedia(results);
-      setItems(uniqueResults);
-      if (uniqueResults && uniqueResults.length > 0) {
-        setHeroItem(uniqueResults[0]);
-      } else {
-        setHeroItem(null);
-      }
-      setLoading(false);
-    });
+    fetchCategoryItems(activeCategory, 1, searchQuery)
+      .then((results) => {
+        // Discard stale responses from previously triggered fetches
+        if (currentSeq !== requestSeqRef.current) return;
+        const uniqueResults = deduplicateMedia(results);
+        setItems(uniqueResults);
+        if (uniqueResults && uniqueResults.length > 0) {
+          setHeroItem(uniqueResults[0]);
+        } else {
+          setHeroItem(null);
+        }
+        setLoading(false);
+      })
+      .catch(() => {
+        if (currentSeq !== requestSeqRef.current) return;
+        setLoading(false);
+      });
   }, [activeCategory, searchQuery, animeAudioFilter, movieFilter, includeMature, isMasterMode, watchlist.length]);
 
   // Load More (Pagination) with strict dual deduplication
@@ -174,11 +165,13 @@ export default function App() {
     if (loadingMore || activeCategory === 'watchlist') return;
     setLoadingMore(true);
     const nextPage = page + 1;
-    const moreItems = await fetchCategoryItems(activeCategory, nextPage, searchQuery);
-    if (moreItems && moreItems.length > 0) {
-      setItems((prev) => dedupeMedia([...prev, ...moreItems]));
-      setPage(nextPage);
-    }
+    try {
+      const moreItems = await fetchCategoryItems(activeCategory, nextPage, searchQuery);
+      if (moreItems && moreItems.length > 0) {
+        setItems((prev) => deduplicateMedia([...prev, ...moreItems]));
+        setPage(nextPage);
+      }
+    } catch (e) {}
     setLoadingMore(false);
   };
 

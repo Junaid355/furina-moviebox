@@ -52,13 +52,22 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     return 'english';
   });
 
+  const hasWorkingHindiSource = Boolean(
+    isBollywoodHindi ||
+    Boolean(item?.isHindiDubbed) ||
+    (isAnime && hasHindiDubOption)
+  );
+
   // Filter servers for anime to prevent autoembed 404s
   const availableServers = isAnime 
     ? SERVERS.filter((s) => s.id !== 'autoembed') 
     : SERVERS;
 
-  // Determine initial server: VidLink Pro for English Dub Anime, VidSrc 4K otherwise
+  // Determine initial server: MultiEmbed for Hindi, VidLink Pro for English Dub Anime, preferredServer otherwise
   const getInitialServer = () => {
+    if (audioMode === 'hindi') {
+      return availableServers.find((s) => s.id === 'multiembed') || availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
+    }
     if (audioMode === 'english' && isAnime) {
       return availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
     }
@@ -66,6 +75,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   };
 
   const [selectedServer, setSelectedServer] = useState(getInitialServer);
+  const [iframeLoading, setIframeLoading] = useState(true);
 
   // Episodes & Season State
   const [season, setSeason] = useState(1);
@@ -135,6 +145,28 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     };
   }, []);
 
+  // Browser Back Button (popstate) navigation handling
+  useEffect(() => {
+    try {
+      window.history.pushState({ modal: 'player_active' }, '');
+    } catch (e) {}
+
+    const handlePopState = () => {
+      handleSafeClose();
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
+  // Iframe loading reset & safety timer
+  useEffect(() => {
+    setIframeLoading(true);
+    const timer = setTimeout(() => setIframeLoading(false), 6000);
+    return () => clearTimeout(timer);
+  }, [selectedServer?.id, season, episode, audioMode, reloadKey]);
+
   // Keyboard Escape and Fullscreen Key Listeners
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -161,7 +193,10 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   useEffect(() => {
     const handleFsChange = () => {
       const isFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
-      setIsFullscreen(isFs);
+      if (!isFs && isFullscreen) {
+        // Browser native fullscreen exited (e.g. Esc pressed natively)
+        setIsFullscreen(false);
+      }
     };
     document.addEventListener('fullscreenchange', handleFsChange);
     document.addEventListener('webkitfullscreenchange', handleFsChange);
@@ -169,7 +204,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       document.removeEventListener('fullscreenchange', handleFsChange);
       document.removeEventListener('webkitfullscreenchange', handleFsChange);
     };
-  }, []);
+  }, [isFullscreen]);
 
   // Auto-hide controls in fullscreen
   const handleUserActivity = () => {
@@ -183,7 +218,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   };
 
   const toggleFullscreen = () => {
-    if (!document.fullscreenElement && !isFullscreen) {
+    if (!isFullscreen) {
       setIsFullscreen(true);
       if (playerWrapperRef.current?.requestFullscreen) {
         playerWrapperRef.current.requestFullscreen().catch(() => {});
@@ -192,10 +227,12 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       }
     } else {
       setIsFullscreen(false);
-      if (document.exitFullscreen) {
-        document.exitFullscreen().catch(() => {});
-      } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
+      if (document.fullscreenElement || document.webkitFullscreenElement) {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
       }
     }
   };
@@ -231,7 +268,24 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     }
   }, [item?.id, season, isSeries]);
 
-  const currentServer = selectedServer || availableServers[0];
+  // Strict server resolution based on audioMode:
+  // English Dub Anime -> VidLink Pro (&sub_dub=dub)
+  // Hindi Audio -> MultiEmbed or VidLink Pro
+  // Japanese Sub -> Subbed mirrors (&sub_dub=sub)
+  const currentServer = (() => {
+    if (isAnime && audioMode === 'english') {
+      return (selectedServer?.id === 'vidlink')
+        ? selectedServer
+        : (availableServers.find((s) => s.id === 'vidlink') || availableServers[0]);
+    }
+    if (audioMode === 'hindi' && hasWorkingHindiSource) {
+      return (selectedServer?.id === 'multiembed' || selectedServer?.id === 'vidlink')
+        ? selectedServer
+        : (availableServers.find((s) => s.id === 'multiembed') || availableServers[0]);
+    }
+    return selectedServer || availableServers[0];
+  })();
+
   const streamUrl = getStreamUrl(currentServer, item?.id, isSeries ? 'tv' : 'movie', season, episode, audioMode);
   const downloadUrl = getDownloadUrl(item?.id, isSeries ? 'tv' : 'movie', season, episode);
 
@@ -497,12 +551,12 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   </button>
                 )}
 
-                {/* Hindi Dub Option (for Bollywood or Hindi dubbed anime) */}
+                {/* Hindi Dub Option (for Bollywood, Hindi dubbed Hollywood, or Hindi dubbed anime) */}
                 {(isBollywoodHindi || hasHindiDubOption) && (
                   <button
                     onClick={() => {
                       setAudioMode('hindi');
-                      const hindiServer = availableServers.find((s) => s.id === 'vidsrc_in') || availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
+                      const hindiServer = availableServers.find((s) => s.id === 'multiembed') || availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
                       setSelectedServer(hindiServer);
                     }}
                     className={`px-3 py-1 rounded-full text-xs font-extrabold transition flex items-center gap-1 border cursor-pointer ${
@@ -522,7 +576,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
             <div className="text-[11px] text-cyan-200/70">
               {audioMode === 'english' && (
                 <span className="text-cyan-300 font-medium">
-                  ✓ <strong>English Dub Active</strong> (VidLink Pro & Multi-Audio servers loaded with English audio)
+                  ✓ <strong>English Dub Active</strong> (VidLink Pro verified English stream • Never Japanese)
                 </span>
               )}
               {audioMode === 'sub' && (
@@ -530,9 +584,14 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   ✓ <strong>Japanese Subbed Active</strong> (Original Japanese Audio • Tap 💬 CC for subtitles)
                 </span>
               )}
-              {audioMode === 'hindi' && (
+              {audioMode === 'hindi' && hasWorkingHindiSource && (
                 <span className="text-amber-300 font-medium">
-                  ✓ <strong>Hindi Audio Track Active</strong> (RareAnimes format • Hindi broadcast)
+                  ✓ <strong>Hindi Audio Active</strong> (MultiEmbed / VidLink verified multi-audio stream)
+                </span>
+              )}
+              {audioMode === 'hindi' && !hasWorkingHindiSource && (
+                <span className="text-rose-400 font-bold">
+                  ⚠️ <strong>Hindi Audio Unavailable for this title</strong> (Select English Dub or Japanese Sub below)
                 </span>
               )}
             </div>
@@ -667,18 +726,72 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
             }`}
             style={AI_BOOST_STYLES[aiBoostMode] || {}}
           >
-            <iframe
-              key={`${currentServer.id}-${season}-${episode}-${audioMode}-${reloadKey}`}
-              src={streamUrl}
-              title={title}
-              className={`border-0 ${
-                isFullscreen 
-                  ? 'w-full h-full aspect-video max-w-[calc(100vh*16/9)] max-h-[calc(100vw*9/16)] shadow-2xl' 
-                  : 'w-full h-full'
-              }`}
-              allowFullScreen
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-            />
+            {audioMode === 'hindi' && !hasWorkingHindiSource ? (
+              <div className="w-full h-full min-h-[320px] bg-[#050b1d] flex flex-col items-center justify-center p-6 text-center border-y border-amber-500/20">
+                <div className="w-14 h-14 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-3xl mb-3 text-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.3)]">
+                  🇮🇳
+                </div>
+                <h3 className="text-base sm:text-lg font-black text-white mb-2 flex items-center gap-2">
+                  <span>Hindi Audio Unavailable</span>
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                    Not Produced
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-300 max-w-md mb-5 leading-relaxed">
+                  An official Hindi dubbed stream has not been produced or distributed for <strong>{title}</strong>. We never silently substitute Japanese or English audio when you selected Hindi.
+                </p>
+                <div className="flex items-center gap-2.5 flex-wrap justify-center">
+                  <button
+                    onClick={() => {
+                      setAudioMode('english');
+                      const engServer = availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
+                      setSelectedServer(engServer);
+                    }}
+                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-gray-950 font-black text-xs transition shadow-[0_0_15px_rgba(56,189,248,0.4)] transform hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-1.5"
+                  >
+                    <span>🎙️</span>
+                    <span>Watch in English Dub (VidLink Pro)</span>
+                  </button>
+                  {isAnime && (
+                    <button
+                      onClick={() => {
+                        setAudioMode('sub');
+                        const subServer = availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
+                        setSelectedServer(subServer);
+                      }}
+                      className="px-4 py-2 rounded-xl bg-purple-600/25 hover:bg-purple-600/40 text-purple-200 border border-purple-500/40 font-bold text-xs transition hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-1.5"
+                    >
+                      <span>🇯🇵</span>
+                      <span>Watch in Japanese Sub</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <>
+                {iframeLoading && (
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#050b1d]/90 backdrop-blur-sm pointer-events-none">
+                    <div className="w-10 h-10 border-3 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin mb-3" />
+                    <span className="text-xs font-bold text-cyan-300 tracking-wide">
+                      Connecting to {selectedServer.shortName}...
+                    </span>
+                  </div>
+                )}
+                <iframe
+                  key={`${currentServer.id}-${season}-${episode}-${audioMode}-${reloadKey}`}
+                  src={streamUrl}
+                  title={title}
+                  onLoad={() => setIframeLoading(false)}
+                  className={`border-0 ${
+                    isFullscreen 
+                      ? 'w-full h-full aspect-video max-w-[calc(100vh*16/9)] max-h-[calc(100vw*9/16)] shadow-2xl' 
+                      : 'w-full h-full'
+                  }`}
+                  allowFullScreen
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                />
+              </>
+            )}
           </div>
 
           {/* ========================================================================= */}
@@ -732,9 +845,11 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   </div>
                   <p className="text-[11px] text-purple-200/80 mt-1 leading-relaxed">
                     {audioMode === 'english' 
-                      ? 'English Dubbed audio stream is loaded via VidLink Pro (verified multi-audio). If the current mirror plays Japanese audio for this episode, switch to Server 1 (VidLink Pro) or Server 6 (MultiEmbed) above, or tap ⚙️ Settings inside the video player to select English Dub.'
+                      ? 'English Dubbed stream is strictly routed via VidLink Pro (verified multi-audio with forced English audio parameter).'
                       : audioMode === 'hindi'
-                      ? 'Official Hindi Dub audio broadcast (RareAnimes format). Server 1 and Server 2 provide direct 1080p playback.'
+                      ? (hasWorkingHindiSource 
+                          ? 'Official Hindi Audio stream loaded via MultiEmbed / VidLink Pro. Tap ⚙️ in player if multi-track switching is available.' 
+                          : 'Official Hindi dub has not been produced for this title. Please switch to English Dub or Japanese Sub.')
                       : 'Japanese original audio stream with subtitles. Tap 💬 CC inside the player to select subtitle languages.'}
                   </p>
                 </div>
