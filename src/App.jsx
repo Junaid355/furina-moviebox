@@ -292,17 +292,6 @@ export default function App() {
                 <span>English Dubbed</span>
               </button>
               <button
-                onClick={() => setAnimeAudioFilter('hindi')}
-                className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border ${
-                  animeAudioFilter === 'hindi'
-                    ? 'bg-amber-500 text-gray-950 border-amber-400 shadow'
-                    : 'bg-amber-500/15 border-amber-500/40 text-amber-300 hover:bg-amber-500/25'
-                }`}
-              >
-                <span>🇮🇳</span>
-                <span>Hindi Dubbed Anime</span>
-              </button>
-              <button
                 onClick={() => setAnimeAudioFilter('sub')}
                 className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border ${
                   animeAudioFilter === 'sub'

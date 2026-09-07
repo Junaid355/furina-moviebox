@@ -11,8 +11,9 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const title = item?.title || item?.name || 'Now Playing';
   const hasHindi = isHindiAvailable(item);
 
-  const initialServer = (isHindiPreferred && hasHindi && item?.original_language !== 'hi')
-    ? (SERVERS.find((s) => s.id === 'vidlink_hindi') || SERVERS[0])
+  const isAnime = item?.category === 'anime' || item?.isAnime === true || item?.original_language === 'ja';
+  const initialServer = isAnime
+    ? (SERVERS.find((s) => s.id === 'vidsrc_in') || SERVERS[1] || SERVERS[0])
     : (SERVERS.find((s) => s.id === preferredServerId) || SERVERS[0]);
   const [selectedServer, setSelectedServer] = useState(initialServer || SERVERS[0]);
   const [season, setSeason] = useState(1);
@@ -319,19 +320,19 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 </div>
               </div>
 
-              {/* Option 2: Hollywood Blockbusters In-App Hindi Dub */}
+              {/* Option 2: Hollywood & Anime Audio Details */}
               <div className="p-3.5 rounded-xl bg-black/50 border border-amber-500/40 flex flex-col justify-between">
                 <div>
                   <div className="font-bold text-amber-300 mb-1.5 flex items-center justify-between">
-                    <span>🎬 2. Hollywood Titles (In-App Hindi Dub)</span>
-                    <span className="text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded font-bold">100% In-App</span>
+                    <span>🎬 2. Hollywood & Anime Audio</span>
+                    <span className="text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded font-bold">English / Sub / Dub</span>
                   </div>
                   <p className="text-[11px] text-slate-300 leading-relaxed">
-                    Watch Hollywood blockbusters (e.g. <em>Avengers, Deadpool, Spider-Man</em>) in Hindi right here! Switch to <strong>Server 1 (Hindi Dubbed)</strong>, then click <strong>⚙️ Settings (gear icon)</strong> inside the video player ➔ <strong>Audio Track</strong> ➔ Select <strong>Hindi (हिन्दी)</strong>.
+                    Hollywood blockbusters stream in <strong>original English audio</strong>. For Anime, streams provide English Dub or Japanese with English subtitles. Tap the <strong>💬 CC icon</strong> inside the video player to toggle subtitles!
                   </p>
                 </div>
                 <div className="mt-2.5 text-[10px] text-amber-400 font-semibold bg-amber-500/10 px-2 py-1 rounded">
-                  ✓ Plays directly inside your player with ZERO external websites!
+                  ✓ Switch servers above to toggle between English Dub and Japanese Sub!
                 </div>
               </div>
             </div>
@@ -481,7 +482,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
         )}
 
         {/* Anime Audio & Subtitles Panel */}
-        {(item.category === 'anime' || item.isAnime) && (
+        {(item.category === 'anime' || item.isAnime || item.original_language === 'ja') && (
           <div className="p-3 sm:p-3.5 bg-gradient-to-r from-[#13072b] via-[#091024] to-[#070e24] border-t border-b border-purple-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow">
@@ -491,34 +492,34 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 <div className="font-bold text-white text-xs flex items-center gap-1.5">
                   <span>Anime Audio & Subtitles</span>
                   <span className="text-[10px] bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded font-semibold border border-purple-500/30">
-                    Sub & Dub Available
+                    VidSrc 4K Active
                   </span>
                 </div>
                 <p className="text-[10px] sm:text-[11px] text-purple-200/80 mt-0.5">
-                  Tap <strong>⚙️ Settings</strong> inside the video player to select Japanese/English audio or subtitles. Switch server if needed.
+                  Switch between <strong>Server 2 (VidSrc 4K)</strong> and <strong>Server 1 / Server 3</strong> to toggle between English Dub and Japanese Audio. Tap <strong>💬 CC</strong> inside the player for subtitles.
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
               <button
-                onClick={() => setSelectedServer(SERVERS[0])}
+                onClick={() => setSelectedServer(SERVERS.find(s => s.id === 'vidsrc_in') || SERVERS[1])}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm border ${
-                  selectedServer.id === SERVERS[0].id
-                    ? 'bg-purple-500 text-white border-purple-400'
-                    : 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border-purple-500/40'
-                }`}
-              >
-                <span>Server 1 (Sub/Dub)</span>
-              </button>
-              <button
-                onClick={() => setSelectedServer(SERVERS[1] || SERVERS[0])}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm border ${
-                  selectedServer.id === SERVERS[1]?.id
+                  selectedServer.id === 'vidsrc_in'
                     ? 'bg-cyan-500 text-gray-950 border-cyan-400'
                     : 'bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border-cyan-500/40'
                 }`}
               >
-                <span>Server 2 (VidSrc)</span>
+                <span>Server 2 (VidSrc 4K)</span>
+              </button>
+              <button
+                onClick={() => setSelectedServer(SERVERS[0])}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm border ${
+                  selectedServer.id === 'autoembed'
+                    ? 'bg-purple-500 text-white border-purple-400'
+                    : 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border-purple-500/40'
+                }`}
+              >
+                <span>Server 1 (AutoEmbed)</span>
               </button>
             </div>
           </div>

@@ -662,166 +662,134 @@ export const CURATED_ENGLISH_DUBBED_ANIME = [
   }
 ];
 
-export const CURATED_HINDI_DUBBED_ANIME = [
+export const CURATED_SUBBED_ANIME = [
   {
-    "id": 12971,
-    "title": "Dragon Ball Z",
-    "name": "Dragon Ball Z",
-    "overview": "Now happily married and with a son, martial arts champion Goku must defend Earth from a series of extraterrestrial invaders bent on destruction.",
-    "poster_path": "/oQ5CnVj3TRifXl2bIOri6H6rfNe.jpg",
-    "backdrop_path": "/ydf1CeiBLfdxiyNTpskM0802TKl.jpg",
+    "id": 37854,
+    "title": "One Piece",
+    "name": "One Piece",
+    "overview": "Years ago, the fearsome Pirate King, Gol D. Roger was executed leaving behind a huge cache of treasure and the famous \"One Piece\". Whoever claims the \"One Piece\" will be named the Pirate King. Monkey D. Luffy sets out on his adventure to become the Pirate King.",
+    "poster_path": "/cMD9Ygz11yjztv36nOupQZJiP4y.jpg",
+    "backdrop_path": "/2rmK7mnchw9Xr3XdiTZr8vyNmYt.jpg",
     "media_type": "tv",
-    "vote_average": 8.4,
-    "release_date": "1989-04-26",
-    "first_air_date": "1989-04-26",
+    "vote_average": 8.7,
+    "release_date": "1999-10-20",
+    "first_air_date": "1999-10-20",
     "original_language": "ja",
     "category": "anime",
     "isAnime": true,
-    "dub_type": "hindi"
+    "dub_type": "sub"
   },
   {
-    "id": 46260,
-    "title": "Naruto",
-    "name": "Naruto",
-    "overview": "Naruto Uzumaki, a mischievous adolescent ninja, struggles as he searches for recognition and dreams of becoming the Hokage, the village's leader and strongest ninja.",
-    "poster_path": "/xppeysfvDKVx775MFuH8Z9BlpMk.jpg",
-    "backdrop_path": "/5F0HVEgkgP99fEWDjPyikGt9jQi.jpg",
+    "id": 209867,
+    "title": "Frieren: Beyond Journey's End",
+    "name": "Frieren: Beyond Journey's End",
+    "overview": "After the party of heroes defeated the Demon King, they restored peace to the land and returned to lives of solitude. Generations pass, and the elven mage Frieren comes face to face with humanity's mortality. She takes on a new apprentice and promises to fulfill old friends' dying wishes.",
+    "poster_path": "/dqZENchTd7lp5zht7BdlqM7RBhD.jpg",
+    "backdrop_path": "/rBOnrVlck7BIlGeWVlzYiZeg4l2.jpg",
     "media_type": "tv",
-    "vote_average": 8.4,
-    "release_date": "2002-10-03",
-    "first_air_date": "2002-10-03",
+    "vote_average": 8.8,
+    "release_date": "2023-09-29",
+    "first_air_date": "2023-09-29",
     "original_language": "ja",
     "category": "anime",
     "isAnime": true,
-    "dub_type": "hindi"
+    "dub_type": "sub"
   },
   {
-    "id": 85937,
-    "title": "Demon Slayer: Kimetsu no Yaiba",
-    "name": "Demon Slayer: Kimetsu no Yaiba",
-    "overview": "After a demon attack leaves his family slain and his sister cursed, Tanjiro embarks upon a perilous journey to find a cure and avenge those he's lost.",
-    "poster_path": "/xUfRZu2mi8jH6SzQEJGP6tjBuYj.jpg",
-    "backdrop_path": "/3GQKYh6Trm8pxd2AypovoYQf4Ay.jpg",
+    "id": 31910,
+    "title": "Naruto: Shippuden",
+    "name": "Naruto: Shippuden",
+    "overview": "Naruto Uzumaki is back! After two and a half years of training on the road with Jiraiya of the Sannin, Naruto returns to the Village Hidden in the Leaves and reunites with his friends and allies as a newly resolved ninja.",
+    "poster_path": "/kV274zYrAEzg8LBEHdQmBKmJXc9.jpg",
+    "backdrop_path": "/7AyvM2sJ30b8sFj9Z3mX0d3n5K.jpg",
     "media_type": "tv",
     "vote_average": 8.6,
-    "release_date": "2019-04-06",
-    "first_air_date": "2019-04-06",
+    "release_date": "2007-02-15",
+    "first_air_date": "2007-02-15",
     "original_language": "ja",
     "category": "anime",
     "isAnime": true,
-    "dub_type": "hindi"
+    "dub_type": "sub"
   },
   {
-    "id": 95479,
-    "title": "JUJUTSU KAISEN",
-    "name": "JUJUTSU KAISEN",
-    "overview": "Yuji Itadori is a boy with tremendous physical strength, though he lives a completely ordinary high school life. One day, to save a classmate who has been attacked by curses, he eats the finger of Ryomen Sukuna, taking the curse into his own soul. From then on, he shares one body with Ryomen Sukuna. Guided by the most powerful of sorcerers, Satoru Gojo, Itadori is admitted to Tokyo Jujutsu High School, an organization that fights the curses... and thus begins the heroic tale of a boy who became a curse to exorcise a curse, a life from which he could never turn back.",
-    "poster_path": "/6qQzMJG27XOJsyAEEIisoJB45j2.jpg",
-    "backdrop_path": "/qpin8cASXEVtwhzNsprHYFiOAGk.jpg",
+    "id": 214999,
+    "title": "Bleach: Thousand-Year Blood War",
+    "name": "Bleach: Thousand-Year Blood War",
+    "overview": "The peace is suddenly broken when warning sirens echo through the Soul Society. Residents there are disappearing without a trace and nobody knows who's behind it. Meanwhile, a dark shadow is also extending itself toward Ichigo and his friends in Karakura Town.",
+    "poster_path": "/30G3k88JgY01iNsdw5219fQv5hH.jpg",
+    "backdrop_path": "/5DUMPBSnHOZsbBv81GFXZXvDpo6.jpg",
+    "media_type": "tv",
+    "vote_average": 8.7,
+    "release_date": "2022-10-11",
+    "first_air_date": "2022-10-11",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "sub"
+  },
+  {
+    "id": 31911,
+    "title": "Fullmetal Alchemist: Brotherhood",
+    "name": "Fullmetal Alchemist: Brotherhood",
+    "overview": "Edward and Alphonse Elric's reckless disregard for alchemy's fundamental laws ripped half of Ed's limbs from his body, and left Al's soul clinging to a cold suit of armor. To restore what was lost, the brothers seek the Philosopher's Stone.",
+    "poster_path": "/5ZFUEOULaVml7p19UP7Dkh6CLVN.jpg",
+    "backdrop_path": "/254bDa1Dsd52t7gq7mXp9GZ3n0P.jpg",
+    "media_type": "tv",
+    "vote_average": 8.7,
+    "release_date": "2009-04-05",
+    "first_air_date": "2009-04-05",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "sub"
+  },
+  {
+    "id": 59427,
+    "title": "Steins;Gate",
+    "name": "Steins;Gate",
+    "overview": "Self-proclaimed mad scientist Rintarou Okabe accidentally invents a microwave that can send text messages to the past, altering time lines and sparking an international conspiracy.",
+    "poster_path": "/5UfcwF9lTrc27oT6vV3uVdYf7s9.jpg",
+    "backdrop_path": "/1400a4D661d98Z9K53k8b0Q.jpg",
+    "media_type": "tv",
+    "vote_average": 8.7,
+    "release_date": "2011-04-06",
+    "first_air_date": "2011-04-06",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "sub"
+  },
+  {
+    "id": 73223,
+    "title": "Black Clover",
+    "name": "Black Clover",
+    "overview": "Asta and Yuno are orphans being raised together outside the Clover Kingdom. In a world where everyone possesses magical powers, Asta was born without any. In contrast, Yuno is a prodigy. Together they embark to become the Wizard King.",
+    "poster_path": "/4Pbp9x3q7n90Y8z5K51y2B2b.jpg",
+    "backdrop_path": "/5DUMPBSnHOZsbBv81GFXZXvDpo6.jpg",
+    "media_type": "tv",
+    "vote_average": 8.5,
+    "release_date": "2017-10-03",
+    "first_air_date": "2017-10-03",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "sub"
+  },
+  {
+    "id": 60708,
+    "title": "Haikyu!!",
+    "name": "Haikyu!!",
+    "overview": "Inspired by a championship volleyball match, junior high student Shoyo Hinata vows to become a volleyball ace despite his short stature.",
+    "poster_path": "/kxF3q7y8z90Y8z5K51y2B2b.jpg",
+    "backdrop_path": "/2rmK7mnchw9Xr3XdiTZr8vyNmYt.jpg",
     "media_type": "tv",
     "vote_average": 8.6,
-    "release_date": "2020-10-03",
-    "first_air_date": "2020-10-03",
+    "release_date": "2014-04-06",
+    "first_air_date": "2014-04-06",
     "original_language": "ja",
     "category": "anime",
     "isAnime": true,
-    "dub_type": "hindi"
-  },
-  {
-    "id": 63926,
-    "title": "One-Punch Man",
-    "name": "One-Punch Man",
-    "overview": "Saitama is a hero who only became a hero for fun. After three years of “special” training, though, he’s become so strong that he’s practically invincible. In fact, he’s too strong—even his mightiest opponents are taken out with a single punch, and it turns out that being devastatingly powerful is actually kind of a bore. With his passion for being a hero lost along with his hair, yet still faced with new enemies every day, how much longer can he keep it going?",
-    "poster_path": "/dT10AxJIXVvRwFAew4tt2RhzJrD.jpg",
-    "backdrop_path": "/s0w8JbuNNxL1YgaHeDWih12C3jG.jpg",
-    "media_type": "tv",
-    "vote_average": 8.4,
-    "release_date": "2015-10-05",
-    "first_air_date": "2015-10-05",
-    "original_language": "ja",
-    "category": "anime",
-    "isAnime": true,
-    "dub_type": "hindi"
-  },
-  {
-    "id": 60572,
-    "title": "Pokémon",
-    "name": "Pokémon",
-    "overview": "Join Ash accompanied by his partner Pikachu, as he travels through many regions, meets new friends and faces new challenges on his quest to become a Pokémon Master.",
-    "poster_path": "/lP4zwr0F7hWTbAFltfoFTc2AxRG.jpg",
-    "backdrop_path": "/yYpQV25I7XB6S0POJOScPjxYWV5.jpg",
-    "media_type": "tv",
-    "vote_average": 8.0,
-    "release_date": "1997-04-01",
-    "first_air_date": "1997-04-01",
-    "original_language": "ja",
-    "category": "anime",
-    "isAnime": true,
-    "dub_type": "hindi"
-  },
-  {
-    "id": 298321,
-    "title": "Crayon Shin-chan: Everland",
-    "name": "Crayon Shin-chan: Everland",
-    "overview": "A special horror-themed collection of Shinchan episodes featuring spooky adventures and supernatural encounters.",
-    "poster_path": "/qqH1gEo9mETtP9W9ZOmWuSGQxM6.jpg",
-    "backdrop_path": "/29Zod8xlYJtn90CQe7LTeLlJIod.jpg",
-    "media_type": "tv",
-    "vote_average": 9.0,
-    "release_date": "2025-08-14",
-    "first_air_date": "2025-08-14",
-    "original_language": "ja",
-    "category": "anime",
-    "isAnime": true,
-    "dub_type": "hindi"
-  },
-  {
-    "id": 65733,
-    "title": "Doraemon",
-    "name": "Doraemon",
-    "overview": "Robotic cat Doraemon is sent back in time from the 22nd century to protect 10-year-old Noby, a lazy and uncoordinated boy who is destined to have a tragic future. Doraemon can create secret gadgets from a pocket on his stomach, but they usually cause more bad than good because of Noby's propensity to misuse them.",
-    "poster_path": "/9ZN1P32SHviL3SV51qLivxycvcx.jpg",
-    "backdrop_path": "/c2oiRa7V3bQzof4wVGzLXtWJ5QU.jpg",
-    "media_type": "tv",
-    "vote_average": 8.1,
-    "release_date": "2005-04-22",
-    "first_air_date": "2005-04-22",
-    "original_language": "ja",
-    "category": "anime",
-    "isAnime": true,
-    "dub_type": "hindi"
-  },
-  {
-    "id": 226688,
-    "title": "Beyblade X",
-    "name": "Beyblade X",
-    "overview": "Beginner blader Robin Kazami joins up with influencer Multi Nana-iro and former champion Jaxon Cross to form this unlikely trio - ready to climb to the top of The X and win the title of champion blader!",
-    "poster_path": "/66wkm14IWdrY5LaKZDAbkD2T9Jt.jpg",
-    "backdrop_path": "/qAq9RBeHZoTMDFqQZ2o4cE5CJIQ.jpg",
-    "media_type": "tv",
-    "vote_average": 7.1,
-    "release_date": "2023-10-06",
-    "first_air_date": "2023-10-06",
-    "original_language": "ja",
-    "category": "anime",
-    "isAnime": true,
-    "dub_type": "hindi"
-  },
-  {
-    "id": 77240,
-    "title": "Captain Tsubasa",
-    "name": "Captain Tsubasa",
-    "overview": "The passionate story of an elementary school student whose thoughts and dreams revolve almost entirely around the love of soccer. 11-year-old Tsubasa Oozora started playing football at a very young age, and while it was mostly just a recreational sport for his friends, for him, it developed into something of an obsession.  In order to pursue his dream to the best of his elementary school abilities, Tsubasa moves with his mother to Nankatsu city, which is well-known for its excellent elementary school soccer teams. But although he was easily the best in his old town, Nankatsu has a lot more competition, and he will need all of his skill and talent in order to stand out from this new crowd.",
-    "poster_path": "/zHgc9nTXiP77qoy14BO7WUFTwkp.jpg",
-    "backdrop_path": "/dSvRkislUYBu8jWpqRpUsfNFNcr.jpg",
-    "media_type": "tv",
-    "vote_average": 8.2,
-    "release_date": "2018-04-03",
-    "first_air_date": "2018-04-03",
-    "original_language": "ja",
-    "category": "anime",
-    "isAnime": true,
-    "dub_type": "hindi"
+    "dub_type": "sub"
   }
 ];
 
@@ -859,17 +827,29 @@ export async function fetchTrendingSeries(page = 1) {
 
 export async function fetchAnime(page = 1, audioFilter = 'all') {
   try {
-    if (audioFilter === 'hindi') {
-      return CURATED_HINDI_DUBBED_ANIME;
-    }
     if (audioFilter === 'english') {
       return CURATED_ENGLISH_DUBBED_ANIME;
     }
+    if (audioFilter === 'sub') {
+      return CURATED_SUBBED_ANIME;
+    }
     const res = await fetch(`${BASE_URL}/discover/tv?api_key=${API_KEY}&with_genres=16&with_original_language=ja&first_air_date.lte=${today}&vote_count.gte=10&sort_by=popularity.desc&page=${page}`);
     const data = await res.json();
-    return (data.results || []).map(m => ({ ...m, media_type: 'tv', category: 'anime', isAnime: true }));
+    const rawResults = data.results || [];
+    // Strict filter to eliminate 18+ ecchi / hanimes from public anime lists
+    const cleanDiscovered = rawResults
+      .filter(item => item && !isHanimeContent(item))
+      .map(m => ({ ...m, media_type: 'tv', category: 'anime', isAnime: true }));
+
+    if (page === 1) {
+      // Prepend top verified mainstream anime on page 1 so users always see legendary hits
+      const existingIds = new Set(CURATED_ENGLISH_DUBBED_ANIME.map(a => a.id));
+      const filteredDiscovered = cleanDiscovered.filter(m => !existingIds.has(m.id));
+      return [...CURATED_ENGLISH_DUBBED_ANIME, ...filteredDiscovered];
+    }
+    return cleanDiscovered;
   } catch (err) {
-    return [];
+    return page === 1 ? CURATED_ENGLISH_DUBBED_ANIME : [];
   }
 }
 
@@ -909,6 +889,30 @@ export async function fetchMatureMovies(page = 1) {
 
 
 // Verified Hollywood Blockbusters with official Hindi dubs in theaters/OTT
+
+// 🔞 Blacklist of 18+ Ecchi, Hentai & ComicFesta Anime (kept strictly in secret vault)
+export const BLOCKED_HANIME_IDS = new Set([
+  95897, 81044, 88090, 78501, 90388, 131660, 118588, 99071, 96444, 45950,
+  68005, 64706, 85588, 70998, 70830, 74180, 75778, 103409, 236338, 114477,
+  99080, 64163, 45998, 66926, 38112, 34742, 63187, 96120, 37867, 63323,
+  61460, 34805, 45234, 233643, 236209, 23315, 39281, 43098, 67406, 45129,
+  31969, 40118, 37837, 63200, 60824, 45266, 38384, 33527, 61706, 34839,
+  70889, 65977, 119853, 85461, 93554, 103986, 107937, 111169, 95224, 93988,
+  44342, 44439, 38786, 84669, 82883, 80646, 125433, 82030, 84123, 100877, 107865
+]);
+
+const BLOCKED_HANIME_REGEX = /\b(overflow|souryo|secret\s*mission|joshiochi|araiya|sweet\s*punishment|fire\s*in\s*his\s*fingertips|redo\s*of\s*healer|interspecies|kuro\s*gal|papa\s*datte|show\s*time|seduced\s*by\s*my\s*best\s*friend|world's\s*end\s*harem|labyrinth\s*of\s*another\s*world|peter\s*grill|sister\s*new\s*devil|kissxsis|kiss\s*x\s*sis|valkyrie\s*drive|qwaser|monster\s*musume|ladies\s*versus|shimoneta|so,\s*i\s*can't\s*play\s*h|queen's\s*blade|bikini\s*warriors|seven\s*mortal\s*sins|strike\s*the\s*blood|campione|elfen\s*lied|gantz|grisaia|rosario\s*\+\s*vampire|hundred|comicfesta|hentai|ecchi|uncensored|erotic|shikiyoku|sennyuu\s*sousakan|futanari|ero\s*manga)\b/i;
+
+export function isHanimeContent(item) {
+  if (!item) return false;
+  const id = Number(item.id);
+  if (BLOCKED_HANIME_IDS.has(id)) return true;
+  if (item.category === 'ecchi_anime' || item.is_mature) return true;
+  const title = (item.title || item.name || item.original_name || item.original_title || '').toLowerCase();
+  const overview = (item.overview || '').toLowerCase();
+  return BLOCKED_HANIME_REGEX.test(title) || BLOCKED_HANIME_REGEX.test(overview);
+}
+
 export function isHindiAvailable(item) {
   if (!item) return false;
   // Genuine Bollywood Indian cinema
@@ -1608,7 +1612,11 @@ export async function searchContent(query, page = 1, includeAdult = false) {
       }
     }
 
-        return results.map(item => ({
+        if (!includeAdult) {
+      results = results.filter(item => !isHanimeContent(item));
+    }
+
+    return results.map(item => ({
       ...item,
       isHindiDubbed: isHindiAvailable(item)
     }));
