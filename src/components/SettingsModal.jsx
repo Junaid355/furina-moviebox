@@ -313,7 +313,7 @@ export default function SettingsModal({
                     </div>
                     <h3 className="text-base font-bold text-white mb-1">Enter Secret Master Passcode</h3>
                     <p className="text-xs text-cyan-200/60 max-w-sm mx-auto mb-4">
-                      Enter your secret 4-digit code to unlock the 18+ Mature Content Vault and full system controls.
+                      Enter your secret 4-digit code to unlock the Master Vault and system controls.
                     </p>
 
                     <div className="max-w-xs mx-auto">

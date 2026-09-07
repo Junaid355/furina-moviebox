@@ -10,8 +10,13 @@ export default function MediaCard({ item, onPlay, isWatchlisted, onToggleWatchli
   const rating = typeof item.vote_average === 'number' 
     ? item.vote_average.toFixed(1) 
     : (item.vote_average || '7.8');
-  const isSeries = item.media_type === 'tv' || Boolean(item.first_air_date);
-  const isHindi = Boolean(isHindiAvailable(item));
+  const isAnime = Boolean(
+    item.category === 'anime' ||
+    item.isAnime === true ||
+    item.original_language === 'ja' ||
+    item.genre_ids?.includes(16)
+  );
+  const isHindi = !isAnime && Boolean(isHindiAvailable(item));
   
   const todayStr = new Date().toISOString().split('T')[0];
   const isUpcoming = Boolean(item.release_date && item.release_date > todayStr);
@@ -52,7 +57,7 @@ export default function MediaCard({ item, onPlay, isWatchlisted, onToggleWatchli
               <span>HINDI</span>
             </span>
           )}
-          {(item.category === 'anime' || item.isAnime) && (
+          {isAnime && (
             <span className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-[9px] font-black tracking-wider px-2 py-0.5 rounded-md shadow flex items-center gap-1">
               <span>🇯🇵</span>
               <span>SUB / 🎙️ DUB</span>

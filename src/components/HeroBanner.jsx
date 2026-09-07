@@ -27,7 +27,13 @@ export default function HeroBanner({ items, item, onPlay, isWatchlisted, onToggl
     ? currentItem.vote_average.toFixed(1)
     : (currentItem.vote_average || '8.2');
   const isSeries = currentItem.media_type === 'tv' || Boolean(currentItem.first_air_date);
-  const isHindi = Boolean(isHindiAvailable(currentItem));
+  const isAnime = Boolean(
+    currentItem.category === 'anime' ||
+    currentItem.isAnime === true ||
+    currentItem.original_language === 'ja' ||
+    currentItem.genre_ids?.includes(16)
+  );
+  const isHindi = !isAnime && Boolean(isHindiAvailable(currentItem));
   const saved = (isWatchlisted && currentItem.id) ? isWatchlisted(currentItem.id) : false;
 
   return (
@@ -65,7 +71,7 @@ export default function HeroBanner({ items, item, onPlay, isWatchlisted, onToggl
               <span>Hindi Audio</span>
             </span>
           )}
-          {(currentItem.category === 'anime' || currentItem.isAnime) && (
+          {isAnime && (
             <span className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full shadow flex items-center gap-1">
               <span>🇯🇵</span>
               <span>SUB / 🎙️ DUB</span>

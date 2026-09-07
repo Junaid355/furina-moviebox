@@ -42,11 +42,11 @@ export default function App() {
     try {
       const saved = localStorage.getItem('furina_moviebox_server');
       const validIds = SERVERS.map((s) => s.id);
-      if (saved && validIds.includes(saved) && saved !== 'vidlink_hindi' && saved !== 'smashystream') {
+      if (saved && validIds.includes(saved) && saved !== 'vidlink_hindi' && saved !== 'smashystream' && saved !== 'autoembed') {
         return saved;
       }
     } catch (e) {}
-    return SERVERS[0]?.id || 'autoembed';
+    return 'vidsrc_in';
   });
 
   useEffect(() => {
@@ -97,6 +97,17 @@ export default function App() {
     return watchlist.some((x) => x && x.id === id);
   };
 
+  // Strictly deduplicate media items by ID
+  const dedupeMedia = (list) => {
+    if (!Array.isArray(list)) return [];
+    const seen = new Set();
+    return list.filter((item) => {
+      if (!item || !item.id || seen.has(item.id)) return false;
+      seen.add(item.id);
+      return true;
+    });
+  };
+
   // Helper function to fetch data for given category & page
   const fetchCategoryItems = async (cat, pageNum, query = '') => {
     if (query.trim()) {
@@ -124,16 +135,18 @@ export default function App() {
     setLoading(true);
 
     if (activeCategory === 'watchlist') {
-      setItems(watchlist);
-      setHeroItem(watchlist[0] || null);
+      const cleanWatchlist = dedupeMedia(watchlist);
+      setItems(cleanWatchlist);
+      setHeroItem(cleanWatchlist[0] || null);
       setLoading(false);
       return;
     }
 
     fetchCategoryItems(activeCategory, 1, searchQuery).then((results) => {
-      setItems(results);
-      if (results && results.length > 0) {
-        setHeroItem(results[0]);
+      const uniqueResults = dedupeMedia(results);
+      setItems(uniqueResults);
+      if (uniqueResults && uniqueResults.length > 0) {
+        setHeroItem(uniqueResults[0]);
       } else {
         setHeroItem(null);
       }
@@ -141,14 +154,18 @@ export default function App() {
     });
   }, [activeCategory, searchQuery, animeAudioFilter, includeMature, isMasterMode, watchlist.length]);
 
-  // Load More (Pagination)
+  // Load More (Pagination) with strict deduplication
   const handleLoadMore = async () => {
     if (loadingMore || activeCategory === 'watchlist') return;
     setLoadingMore(true);
     const nextPage = page + 1;
     const moreItems = await fetchCategoryItems(activeCategory, nextPage, searchQuery);
     if (moreItems && moreItems.length > 0) {
-      setItems((prev) => [...prev, ...moreItems]);
+      setItems((prev) => {
+        const existingIds = new Set(prev.map((x) => x && x.id).filter(Boolean));
+        const uniqueMore = moreItems.filter((x) => x && x.id && !existingIds.has(x.id));
+        return [...prev, ...uniqueMore];
+      });
       setPage(nextPage);
     }
     setLoadingMore(false);
@@ -301,6 +318,48 @@ export default function App() {
               >
                 <span>🇯🇵</span>
                 <span>Japanese Subbed</span>
+              </button>
+            </div>
+          )}
+
+          {/* Hindi Dubbed & Bollywood Quick Filters */}
+          {activeCategory === 'hindi' && !searchQuery && (
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 text-xs">
+              <span className="text-amber-300/70 text-[11px] whitespace-nowrap font-medium">Audio Collection:</span>
+              <button
+                onClick={() => { setSearchQuery(''); }}
+                className="px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border bg-amber-500 text-gray-950 border-amber-400 shadow"
+              >
+                <span>🇮🇳</span>
+                <span>All Bollywood & Hindi Dubbed</span>
+              </button>
+              <button
+                onClick={() => setSearchQuery('Hindi Dubbed')}
+                className="px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border bg-amber-500/15 border-amber-500/30 text-amber-300 hover:bg-amber-500/25"
+              >
+                <span>🎬</span>
+                <span>Hollywood in Hindi Dub</span>
+              </button>
+            </div>
+          )}
+
+          {/* Hollywood Cinema Quick Filters */}
+          {activeCategory === 'hollywood' && !searchQuery && (
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 text-xs">
+              <span className="text-cyan-200/50 text-[11px] whitespace-nowrap font-medium">Audio Options:</span>
+              <button
+                onClick={() => { setSearchQuery(''); }}
+                className="px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border bg-cyan-500 text-gray-950 border-cyan-400 shadow"
+              >
+                <span>🎬</span>
+                <span>Original English Audio</span>
+              </button>
+              <button
+                onClick={() => setSearchQuery('Hindi Dubbed')}
+                className="px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border bg-amber-500/15 border-amber-500/30 text-amber-300 hover:bg-amber-500/25"
+              >
+                <span>🇮🇳</span>
+                <span>Hollywood in Hindi Dub</span>
               </button>
             </div>
           )}

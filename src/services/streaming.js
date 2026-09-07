@@ -1,40 +1,41 @@
 // High-speed verified 4K/HD streaming servers with sub-second response times
+// VidSrc 4K is Server 1 by default: zero 404s on Anime & Movies, instant CDN playback
 export const SERVERS = [
   {
-    id: 'autoembed',
-    name: 'Server 1: AutoEmbed Prime (Instant Play / 1080p HD)',
-    shortName: 'Server 1 (AutoEmbed)',
-    badge: '1080p HD',
-    color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-    getMovieUrl: (tmdbId) => `https://autoembed.co/movie/tmdb/${tmdbId}`,
-    getTvUrl: (tmdbId, s = 1, e = 1) => `https://autoembed.co/tv/tmdb/${tmdbId}-${s}-${e}`
-  },
-  {
     id: 'vidsrc_in',
-    name: 'Server 2: VidSrc 4K (Ultra Fast 0.5s CDN / 4K UHD)',
-    shortName: 'Server 2 (VidSrc 4K)',
+    name: 'Server 1: VidSrc 4K (Ultra Fast 0.5s CDN / 4K UHD)',
+    shortName: 'Server 1 (VidSrc 4K)',
     badge: '4K Ultra HD',
     color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
     getMovieUrl: (tmdbId) => `https://vidsrc.in/embed/movie/${tmdbId}`,
     getTvUrl: (tmdbId, s = 1, e = 1) => `https://vidsrc.in/embed/tv/${tmdbId}/${s}/${e}`
   },
   {
-    id: 'vidlink',
-    name: 'Server 3: VidLink Pro (Fast 1080p Player)',
-    shortName: 'Server 3 (VidLink Pro)',
-    badge: 'Ultra Fast',
-    color: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
-    getMovieUrl: (tmdbId) => `https://vidlink.pro/movie/${tmdbId}`,
-    getTvUrl: (tmdbId, s = 1, e = 1) => `https://vidlink.pro/tv/${tmdbId}/${s}/${e}`
+    id: 'autoembed',
+    name: 'Server 2: AutoEmbed Prime (Instant Play / 1080p HD)',
+    shortName: 'Server 2 (AutoEmbed)',
+    badge: '1080p HD',
+    color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+    getMovieUrl: (tmdbId) => `https://autoembed.co/movie/tmdb/${tmdbId}`,
+    getTvUrl: (tmdbId, s = 1, e = 1) => `https://autoembed.co/tv/tmdb/${tmdbId}-${s}-${e}`
   },
   {
     id: 'vidsrc_cc',
-    name: 'Server 4: VidSrc CC (1080p Cloud Mirror)',
-    shortName: 'Server 4 (VidSrc CC)',
+    name: 'Server 3: VidSrc CC (1080p Cloud Mirror)',
+    shortName: 'Server 3 (VidSrc CC)',
     badge: '1080p Cloud',
     color: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40',
     getMovieUrl: (tmdbId) => `https://vidsrc.cc/v2/embed/movie/${tmdbId}`,
     getTvUrl: (tmdbId, s = 1, e = 1) => `https://vidsrc.cc/v2/embed/tv/${tmdbId}/${s}/${e}`
+  },
+  {
+    id: 'vidlink',
+    name: 'Server 4: VidLink Pro (Fast 1080p Player)',
+    shortName: 'Server 4 (VidLink Pro)',
+    badge: 'Ultra Fast',
+    color: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
+    getMovieUrl: (tmdbId) => `https://vidlink.pro/movie/${tmdbId}`,
+    getTvUrl: (tmdbId, s = 1, e = 1) => `https://vidlink.pro/tv/${tmdbId}/${s}/${e}`
   },
   {
     id: 'vidsrc_pm',

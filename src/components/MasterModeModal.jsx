@@ -58,7 +58,7 @@ export default function MasterModeModal({
             <div className="bg-[#0c1938] border border-cyan-500/20 rounded-xl p-4 text-center">
               <Lock className="w-10 h-10 text-cyan-400/80 mx-auto mb-2" />
               <p className="text-xs text-cyan-200/70">
-                Enter your secret 4-digit code to unlock Master Mode and 18+ content.
+                Enter your secret 4-digit code to unlock the Master Vault and system controls.
               </p>
             </div>
 

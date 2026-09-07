@@ -9,12 +9,24 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
   const isSeries = item?.media_type === 'tv' || Boolean(item?.first_air_date);
   const title = item?.title || item?.name || 'Now Playing';
-  const hasHindi = isHindiAvailable(item);
 
-  const isAnime = item?.category === 'anime' || item?.isAnime === true || item?.original_language === 'ja';
+  // Accurate classification: Anime vs Bollywood Hindi vs Hollywood English
+  const isAnime = Boolean(
+    item?.category === 'anime' ||
+    item?.isAnime === true ||
+    item?.original_language === 'ja' ||
+    item?.genre_ids?.includes(16) ||
+    item?.genres?.some((g) => g.id === 16 || g.name === 'Animation')
+  );
+
+  const isBollywoodHindi = Boolean(
+    !isAnime && (item?.original_language === 'hi' || item?.category === 'hindi' || item?.isHindiDubbed)
+  );
+
   const initialServer = isAnime
-    ? (SERVERS.find((s) => s.id === 'vidsrc_in') || SERVERS[1] || SERVERS[0])
+    ? (SERVERS.find((s) => s.id === 'vidsrc_in') || SERVERS[0])
     : (SERVERS.find((s) => s.id === preferredServerId) || SERVERS[0]);
+
   const [selectedServer, setSelectedServer] = useState(initialServer || SERVERS[0]);
   const [season, setSeason] = useState(1);
   const [episode, setEpisode] = useState(1);
@@ -49,6 +61,15 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const todayStr = new Date().toISOString().split('T')[0];
   const releaseDate = item.release_date || item.first_air_date;
   const isUpcoming = (releaseDate && releaseDate > todayStr) || (item.vote_count === 0 && !isSeries);
+
+  // Keyboard Escape listener to close modal seamlessly
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   // Listen to blocked ad popup events
   useEffect(() => {
@@ -97,32 +118,39 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-2xl p-2 sm:p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-2xl p-2 sm:p-4">
       {/* Ambient background glow */}
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-900/20 via-transparent to-transparent" />
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-900/25 via-transparent to-transparent" />
 
-      <div className="relative w-full max-w-5xl bg-[#081026] border border-cyan-500/30 rounded-2xl overflow-hidden shadow-[0_0_60px_rgba(56,189,248,0.28)] flex flex-col z-10 animate-fade-in">
+      {/* Modal Card with Strict max-h Containment and Flex Column */}
+      <div className="relative w-full max-w-5xl max-h-[96vh] sm:max-h-[92vh] bg-[#081026] border border-cyan-500/35 rounded-2xl shadow-[0_0_65px_rgba(56,189,248,0.3)] flex flex-col z-10 animate-fade-in overflow-hidden">
         
-        {/* Header Bar */}
-        <div className="flex items-center justify-between p-3.5 sm:p-4 border-b border-cyan-500/20 bg-[#050b1d]">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-cyan-400/50 shadow-[0_0_12px_rgba(56,189,248,0.4)] shrink-0">
+        {/* STICKY TOP HEADER BAR - ALWAYS VISIBLE, NEVER SCROLLED AWAY */}
+        <div className="sticky top-0 z-50 flex items-center justify-between p-3 sm:p-4 border-b border-cyan-500/25 bg-[#050b1d]/98 backdrop-blur-xl shrink-0 shadow-md">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden border-2 border-cyan-400/60 shadow-[0_0_12px_rgba(56,189,248,0.45)] shrink-0">
               <img src="./favicon.png" alt="Furina" className="w-full h-full object-cover" />
             </div>
             <div className="min-w-0">
               <h2 className="font-extrabold text-sm sm:text-base text-white truncate flex items-center gap-2">
                 <span>{title}</span>
-                {isSeries && <span className="text-cyan-400 font-normal text-xs bg-cyan-500/15 px-2 py-0.5 rounded-full border border-cyan-500/30">S{season} E{episode}</span>}
+                {isSeries && (
+                  <span className="text-cyan-300 font-bold text-[11px] bg-cyan-500/20 px-2 py-0.5 rounded-full border border-cyan-500/40 shrink-0">
+                    S{season} E{episode}
+                  </span>
+                )}
               </h2>
-              <div className="flex items-center gap-2 text-[11px] text-cyan-200/60">
+              <div className="flex items-center gap-2 text-[10px] sm:text-[11px] text-cyan-200/70">
                 <span>4K Ultra HD Multi-Mirror</span>
                 <span>•</span>
-                <span className="text-emerald-400 font-semibold">{selectedServer.badge}</span>
+                <span className="text-emerald-400 font-bold">{selectedServer.badge}</span>
+                <span>•</span>
+                <span className="text-cyan-400/80 font-mono hidden xs:inline">{selectedServer.shortName}</span>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {/* 1-Click Download Option */}
             <a
               href={downloadUrl}
@@ -130,17 +158,17 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
               rel="noopener noreferrer"
               onClick={permitPopupOnce}
               title="Download movie or episode in HD / 4K"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 hover:from-emerald-500/30 hover:to-teal-500/30 border border-emerald-400/40 text-emerald-300 hover:text-white text-xs font-bold transition shadow-sm"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 hover:from-emerald-500/30 hover:to-teal-500/30 border border-emerald-400/40 text-emerald-300 hover:text-white text-xs font-bold transition shadow-sm"
             >
               <Download className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Download</span>
+              <span className="hidden md:inline">Download</span>
             </a>
 
             {/* Auto-Switch Next Working Server button */}
             <button
               onClick={handleNextServer}
-              title="Auto-switch to next working mirror if stream stalls"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-300 hover:text-white text-xs font-bold transition shadow-sm"
+              title="Auto-switch to next working mirror if stream buffers"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-300 hover:text-white text-xs font-bold transition shadow-sm"
             >
               <Zap className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
               <span className="hidden sm:inline">Auto-Switch</span>
@@ -150,29 +178,29 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
             <button
               onClick={() => setShowUBlockGuide(!showUBlockGuide)}
               title="uBlock Origin Lite - Zero Ad Playback Guide"
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition shadow-sm ${
+              className={`flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-xl border text-xs font-bold transition shadow-sm ${
                 showUBlockGuide
                   ? 'bg-emerald-500 text-gray-950 border-emerald-400 shadow-[0_0_14px_rgba(16,185,129,0.6)] scale-105'
                   : 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/25'
               }`}
             >
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0 animate-pulse" />
-              <span className="hidden md:inline">🛡️ uBlock Origin Lite</span>
+              <span className="hidden lg:inline">🛡️ Ad-Free Guide</span>
             </button>
 
             {/* Hindi Dubbed Audio Switcher Guide Toggle */}
-            {hasHindi && (
+            {(isBollywoodHindi || isAnime) && (
               <button
                 onClick={() => setShowHindiGuide(!showHindiGuide)}
-                title="Hindi Audio Information"
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition shadow-sm ${
+                title="Audio Information & Dub Details"
+                className={`flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-xl border text-xs font-bold transition shadow-sm ${
                   showHindiGuide
                     ? 'bg-amber-500 text-gray-950 border-amber-400 shadow-[0_0_14px_rgba(251,191,36,0.6)] scale-105'
                     : 'bg-amber-500/15 border-amber-500/40 text-amber-300 hover:bg-amber-500/25'
                 }`}
               >
-                <span className="hidden md:inline">🎙️ Hindi Info</span>
-                <span className="md:hidden">🎙️ Hindi</span>
+                <span>🎙️</span>
+                <span className="hidden sm:inline">{isAnime ? 'Dub Info' : 'Hindi Audio'}</span>
               </button>
             )}
 
@@ -189,445 +217,490 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
             <button
               onClick={openInNewWindow}
               title="Open full stream in new clean tab"
-              className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-300 hover:text-white text-xs font-bold transition shadow-sm"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-300 hover:text-white text-xs font-bold transition shadow-sm"
             >
               <ExternalLink className="w-3.5 h-3.5" />
               <span>Full Player ↗</span>
             </button>
 
-            {/* Close Modal */}
+            {/* CLOSE MODAL BUTTON - ALWAYS VISIBLE, HIGH CONTRAST & CLICKABLE */}
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 flex items-center justify-center text-cyan-300 hover:text-white transition"
+              aria-label="Close modal"
+              title="Close Player (Esc)"
+              className="w-9 h-9 rounded-full bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/40 hover:border-rose-400 flex items-center justify-center transition shadow-[0_0_12px_rgba(244,63,94,0.3)] hover:shadow-[0_0_20px_rgba(244,63,94,0.7)] shrink-0 ml-1 transform hover:scale-105 active:scale-95"
             >
-              <X className="w-4 h-4" />
+              <X className="w-5 h-5 font-black stroke-[2.5]" />
             </button>
           </div>
         </div>
 
-        {/* Expandable uBlock Origin Lite Protection Drawer */}
-        {showUBlockGuide && (
-          <div className="p-4 bg-gradient-to-r from-[#061e19] via-[#081b29] to-[#04121d] border-b border-emerald-500/30 text-xs">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2 text-emerald-300 font-bold text-xs sm:text-sm">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                <span>🛡️ How to Block 100% of Ads Across Every Streaming Server:</span>
+        {/* SCROLLABLE INNER CONTAINER - Player, Controls & Episodes scroll smoothly while header remains anchored */}
+        <div className="overflow-y-auto flex-1 overscroll-contain">
+          
+          {/* Expandable uBlock Origin Lite Protection Drawer */}
+          {showUBlockGuide && (
+            <div className="p-4 bg-gradient-to-r from-[#061e19] via-[#081b29] to-[#04121d] border-b border-emerald-500/30 text-xs">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2 text-emerald-300 font-bold text-xs sm:text-sm">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                  <span>🛡️ How to Block 100% of Ads Across Every Streaming Server:</span>
+                </div>
+                <button 
+                  onClick={() => setShowUBlockGuide(false)} 
+                  className="text-emerald-200/60 hover:text-white p-1"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
-              <button 
-                onClick={() => setShowUBlockGuide(false)} 
-                className="text-emerald-200/60 hover:text-white p-1"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            
-            <p className="text-[11px] text-slate-300 leading-relaxed mb-3">
-              Free streaming embed providers inject popups and anti-sandbox blockers into cross-origin iframes. Webpages cannot block external iframe scripts directly due to browser security. <strong>Installing the official free uBlock Origin Lite extension</strong> blocks 100% of ads at the browser level with zero configuration:
-            </p>
+              
+              <p className="text-[11px] text-slate-300 leading-relaxed mb-3">
+                External embed servers inject popups directly inside cross-origin iframes. Webpages cannot block external iframe popups due to browser security sandbox rules. <strong>Installing the official free uBlock Origin Lite extension</strong> blocks 100% of all ads and popups at the browser level automatically:
+              </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-              {/* Chrome / Edge / Opera / Brave */}
-              <a
-                href="https://chromewebstore.google.com/detail/ublock-origin-lite/ddkjiahejlhfcafbddmgiahcphecmpfh"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={permitPopupOnce}
-                className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/40 hover:bg-emerald-500/25 transition flex flex-col justify-between group"
-              >
-                <div>
-                  <div className="font-bold text-emerald-300 text-xs flex items-center justify-between">
-                    <span>Chrome / Edge / Opera</span>
-                    <ExternalLink className="w-3 h-3 text-emerald-400 group-hover:scale-110 transition" />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                {/* Chrome / Edge / Opera / Brave */}
+                <a
+                  href="https://chromewebstore.google.com/detail/ublock-origin-lite/ddkjiahejlhfcafbddmgiahcphecmpfh"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={permitPopupOnce}
+                  className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/40 hover:bg-emerald-500/25 transition flex flex-col justify-between group"
+                >
+                  <div>
+                    <div className="font-bold text-emerald-300 text-xs flex items-center justify-between">
+                      <span>Chrome / Edge / Opera</span>
+                      <ExternalLink className="w-3 h-3 text-emerald-400 group-hover:scale-110 transition" />
+                    </div>
+                    <p className="text-[10px] text-slate-300 mt-1">
+                      Official Chrome Web Store. 1-Click Install, 0 configuration needed.
+                    </p>
                   </div>
-                  <p className="text-[10px] text-slate-300 mt-1">
-                    Official Chrome Web Store. 1-Click Install, 0 configuration needed.
-                  </p>
-                </div>
-                <div className="mt-2 text-[10px] font-bold text-emerald-400 bg-emerald-500/20 py-1 text-center rounded">
-                  Install uBlock Origin Lite ↗
-                </div>
-              </a>
+                  <div className="mt-2 text-[10px] font-bold text-emerald-400 bg-emerald-500/20 py-1 text-center rounded">
+                    Install uBlock Origin Lite ↗
+                  </div>
+                </a>
 
-              {/* Firefox */}
-              <a
-                href="https://addons.mozilla.org/en-US/firefox/addon/ublock-origin/"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={permitPopupOnce}
-                className="p-3 rounded-xl bg-cyan-500/15 border border-cyan-500/40 hover:bg-cyan-500/25 transition flex flex-col justify-between group"
-              >
-                <div>
-                  <div className="font-bold text-cyan-300 text-xs flex items-center justify-between">
-                    <span>Firefox Browser</span>
-                    <ExternalLink className="w-3 h-3 text-cyan-400 group-hover:scale-110 transition" />
+                {/* Firefox */}
+                <a
+                  href="https://addons.mozilla.org/en-US/firefox/addon/ublock-origin/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={permitPopupOnce}
+                  className="p-3 rounded-xl bg-cyan-500/15 border border-cyan-500/40 hover:bg-cyan-500/25 transition flex flex-col justify-between group"
+                >
+                  <div>
+                    <div className="font-bold text-cyan-300 text-xs flex items-center justify-between">
+                      <span>Firefox Browser</span>
+                      <ExternalLink className="w-3 h-3 text-cyan-400 group-hover:scale-110 transition" />
+                    </div>
+                    <p className="text-[10px] text-slate-300 mt-1">
+                      Official Mozilla Add-ons. Maximum protection against all popups.
+                    </p>
                   </div>
-                  <p className="text-[10px] text-slate-300 mt-1">
-                    Official Mozilla Add-ons. Maximum protection against all popups.
-                  </p>
-                </div>
-                <div className="mt-2 text-[10px] font-bold text-cyan-400 bg-cyan-500/20 py-1 text-center rounded">
-                  Install uBlock Origin ↗
-                </div>
-              </a>
+                  <div className="mt-2 text-[10px] font-bold text-cyan-400 bg-cyan-500/20 py-1 text-center rounded">
+                    Install uBlock Origin ↗
+                  </div>
+                </a>
 
-              {/* Mobile / iOS */}
-              <div className="p-3 rounded-xl bg-purple-500/15 border border-purple-500/40 flex flex-col justify-between">
-                <div>
-                  <div className="font-bold text-purple-300 text-xs">
-                    <span>iPhone / Android / Mac</span>
+                {/* Mobile / iOS */}
+                <div className="p-3 rounded-xl bg-purple-500/15 border border-purple-500/40 flex flex-col justify-between">
+                  <div>
+                    <div className="font-bold text-purple-300 text-xs">
+                      <span>iPhone / Android / Mac</span>
+                    </div>
+                    <p className="text-[10px] text-slate-300 mt-1">
+                      Use <strong>Brave Browser</strong> (has built-in uBlock shield) or Safari with <strong>AdGuard iOS</strong> for zero ads.
+                    </p>
                   </div>
-                  <p className="text-[10px] text-slate-300 mt-1">
-                    Use <strong>Brave Browser</strong> (has built-in uBlock shield) or Safari with <strong>AdGuard iOS</strong> for zero ads.
-                  </p>
-                </div>
-                <div className="mt-2 text-[10px] font-semibold text-purple-300 bg-purple-500/20 py-1 text-center rounded">
-                  Built-in Mobile Shield
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Expandable Hindi Audio Information Drawer */}
-        {showHindiGuide && (
-          <div className="p-4 bg-gradient-to-r from-[#0d1e3d] via-[#09152b] to-[#171408] border-b border-amber-500/30 text-xs">
-            <div className="flex items-center justify-between mb-2.5">
-              <div className="flex items-center gap-2 text-amber-300 font-bold text-xs sm:text-sm">
-                <span>🎙️ Audio Track & Hindi Dubbing Details:</span>
-              </div>
-              <button 
-                onClick={() => setShowHindiGuide(false)} 
-                className="text-amber-200/60 hover:text-white p-1"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
-              {/* Option 1: Bollywood & Indian Cinema */}
-              <div className="p-3.5 rounded-xl bg-black/50 border border-emerald-500/40 flex flex-col justify-between">
-                <div>
-                  <div className="font-bold text-emerald-300 mb-1.5 flex items-center justify-between">
-                    <span>🇮🇳 1. Bollywood & Indian Cinema</span>
-                    <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-bold">100% Hindi Audio</span>
+                  <div className="mt-2 text-[10px] font-semibold text-purple-300 bg-purple-500/20 py-1 text-center rounded">
+                    Built-in Mobile Shield
                   </div>
-                  <p className="text-[11px] text-slate-300 leading-relaxed">
-                    All Indian titles (e.g. <em>Kalki 2898 AD, Stree 2, Jawan, Pathaan, Animal, Salaar, RRR</em>) play in <strong>full native Hindi audio</strong> automatically on Server 1 and Server 2! No settings changes needed.
-                  </p>
-                </div>
-                <div className="mt-2.5 text-[10px] text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-1 rounded">
-                  ✓ Explore our "🇮🇳 Bollywood & Hindi Dubbed" tab on the homepage!
-                </div>
-              </div>
-
-              {/* Option 2: Hollywood & Anime Audio Details */}
-              <div className="p-3.5 rounded-xl bg-black/50 border border-amber-500/40 flex flex-col justify-between">
-                <div>
-                  <div className="font-bold text-amber-300 mb-1.5 flex items-center justify-between">
-                    <span>🎬 2. Hollywood & Anime Audio</span>
-                    <span className="text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded font-bold">English / Sub / Dub</span>
-                  </div>
-                  <p className="text-[11px] text-slate-300 leading-relaxed">
-                    Hollywood blockbusters stream in <strong>original English audio</strong>. For Anime, streams provide English Dub or Japanese with English subtitles. Tap the <strong>💬 CC icon</strong> inside the video player to toggle subtitles!
-                  </p>
-                </div>
-                <div className="mt-2.5 text-[10px] text-amber-400 font-semibold bg-amber-500/10 px-2 py-1 rounded">
-                  ✓ Switch servers above to toggle between English Dub and Japanese Sub!
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Server Switcher Bar */}
-        <div className="p-3 bg-[#070e24] border-b border-cyan-500/15 flex items-center gap-2 overflow-x-auto no-scrollbar">
-          <span className="text-[11px] font-bold text-cyan-300/80 flex items-center gap-1.5 whitespace-nowrap px-2">
-            <Zap className="w-3.5 h-3.5 text-amber-400" />
-            Active Server:
-          </span>
-          {SERVERS.map((srv) => {
-            const isSelected = currentServer.id === srv.id;
-            return (
-              <button
-                key={srv.id}
-                onClick={() => setSelectedServer(srv)}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition border ${
-                  isSelected
-                    ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 border-cyan-300 shadow-[0_0_15px_rgba(56,189,248,0.5)] font-bold scale-105'
-                    : `${srv.color} hover:bg-white/10`
-                }`}
-              >
-                {srv.shortName || srv.name}
-              </button>
-            );
-          })}
-        </div>
+          {/* Expandable Audio Information Drawer */}
+          {showHindiGuide && (
+            <div className="p-4 bg-gradient-to-r from-[#0d1e3d] via-[#09152b] to-[#171408] border-b border-amber-500/30 text-xs">
+              <div className="flex items-center justify-between mb-2.5">
+                <div className="flex items-center gap-2 text-amber-300 font-bold text-xs sm:text-sm">
+                  <span>🎙️ Audio Track & Dubbing Architecture:</span>
+                </div>
+                <button 
+                  onClick={() => setShowHindiGuide(false)} 
+                  className="text-amber-200/60 hover:text-white p-1"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+                {/* Bollywood & Indian Cinema */}
+                <div className="p-3.5 rounded-xl bg-black/50 border border-emerald-500/40 flex flex-col justify-between">
+                  <div>
+                    <div className="font-bold text-emerald-300 mb-1.5 flex items-center justify-between">
+                      <span>🇮🇳 1. Bollywood & Hollywood Hindi Dubs</span>
+                      <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-bold">100% Hindi Audio</span>
+                    </div>
+                    <p className="text-[11px] text-slate-300 leading-relaxed">
+                      All Indian blockbusters (e.g. <em>Kalki 2898 AD, Stree 2, Jawan, Pathaan, Animal, Salaar, RRR</em>) play in <strong>full native Hindi audio</strong> automatically on Server 1 and Server 2!
+                    </p>
+                  </div>
+                  <div className="mt-2.5 text-[10px] text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-1 rounded">
+                    ✓ Explore our "🇮🇳 Bollywood & Hindi Dubbed" tab on the homepage!
+                  </div>
+                </div>
 
-        {/* Theatrical / Upcoming Release Notice */}
-        {isUpcoming && (
-          <div className="p-3 bg-gradient-to-r from-amber-950/90 via-[#221302] to-amber-950/90 border-b border-amber-500/40 text-xs flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <span className="text-lg">🎬</span>
-              <div>
-                <span className="font-extrabold text-amber-300">Theatrical / Upcoming Release Notice:</span>
-                <p className="text-[11px] text-amber-200/90 mt-0.5">
-                  This title is currently in pre-release or in theaters and not yet distributed on digital OTT streaming. If servers display <strong>"404 Content not found"</strong> or <strong>"Unavailable"</strong>, check back once the digital streaming release premieres!
-                </p>
+                {/* Anime Audio Tracks */}
+                <div className="p-3.5 rounded-xl bg-black/50 border border-amber-500/40 flex flex-col justify-between">
+                  <div>
+                    <div className="font-bold text-amber-300 mb-1.5 flex items-center justify-between">
+                      <span>🌸 2. Anime Audio (Japanese Sub / English Dub)</span>
+                      <span className="text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded font-bold">4K Fast CDN</span>
+                    </div>
+                    <p className="text-[11px] text-slate-300 leading-relaxed">
+                      Official digital anime CDNs stream in <strong>Japanese Audio with English/Multi subtitles</strong> or official <strong>English Dub</strong>. Tap the <strong>💬 CC icon</strong> inside the video player to switch subtitles or toggle servers above for alternate dub tracks.
+                    </p>
+                  </div>
+                  <div className="mt-2.5 text-[10px] text-amber-400 font-semibold bg-amber-500/10 px-2 py-1 rounded">
+                    ✓ RareAnimes uses third-party file uploads; our direct VidSrc 4K CDN delivers zero-lag instant streaming!
+                  </div>
+                </div>
               </div>
             </div>
-            {releaseDate && (
-              <span className="shrink-0 bg-amber-500/20 text-amber-300 border border-amber-400/40 px-2.5 py-1 rounded-lg text-[10px] font-bold">
-                Premiere: {releaseDate}
-              </span>
-            )}
-          </div>
-        )}
+          )}
 
-        {/* AI Video Boost & 4K Clarity Control Bar */}
-        <div className="px-4 py-2 bg-gradient-to-r from-[#061127] via-[#0a1b3f] to-[#061127] border-b border-cyan-500/25 flex flex-wrap items-center justify-between gap-2.5 text-xs">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 font-extrabold text-[11px] shadow-[0_0_12px_rgba(56,189,248,0.35)]">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-              <span>AI Video Boost:</span>
+          {/* Active Server Switcher Bar */}
+          <div className="p-2.5 sm:p-3 bg-[#070e24] border-b border-cyan-500/15 flex items-center gap-2 overflow-x-auto no-scrollbar">
+            <span className="text-[11px] font-bold text-cyan-300/80 flex items-center gap-1.5 whitespace-nowrap px-2">
+              <Zap className="w-3.5 h-3.5 text-amber-400" />
+              Active Server:
             </span>
-            <div className="flex items-center gap-1 bg-black/50 p-1 rounded-xl border border-cyan-500/30">
-              {[
-                { id: 'off', label: 'Off', desc: 'Natural raw stream' },
-                { id: '4k', label: '💎 4K Clarity', desc: 'AI edge sharpening & micro-contrast' },
-                { id: 'hdr', label: '🌈 HDR Cinema', desc: 'Dolby-grade dynamic range & rich vibrance' },
-                { id: 'night', label: '🌙 Dark Scene', desc: 'Deep shadow visibility booster' },
-              ].map((mode) => (
+            {SERVERS.map((srv) => {
+              const isSelected = currentServer.id === srv.id;
+              return (
                 <button
-                  key={mode.id}
-                  onClick={() => {
-                    setAiBoostMode(mode.id);
-                    localStorage.setItem('furina_ai_boost', mode.id);
-                  }}
-                  title={mode.desc}
-                  className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold transition ${
-                    aiBoostMode === mode.id
-                      ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 shadow-[0_0_12px_rgba(56,189,248,0.6)] scale-105'
-                      : 'text-slate-300 hover:text-white hover:bg-white/10'
+                  key={srv.id}
+                  onClick={() => setSelectedServer(srv)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition border ${
+                    isSelected
+                      ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 border-cyan-300 shadow-[0_0_15px_rgba(56,189,248,0.5)] font-black scale-105'
+                      : `${srv.color} hover:bg-white/10`
                   }`}
                 >
-                  {mode.label}
+                  {srv.shortName || srv.name}
                 </button>
-              ))}
-            </div>
+              );
+            })}
           </div>
 
-          <div className="flex items-center gap-2 text-[10px] text-cyan-200/90 font-medium">
-            <span className="hidden sm:inline">⚙️ Blurry? Tap <strong>Settings</strong> inside player ➔ select <strong>1080p / 4K</strong></span>
-          </div>
-        </div>
-
-        {/* Video Player IFrame Container with AI Boost Visual Filter Pipeline */}
-        <div 
-          className="relative w-full aspect-video bg-black overflow-hidden"
-          style={AI_BOOST_STYLES[aiBoostMode] || {}}
-        >
-          <iframe
-            key={`${currentServer.id}-${season}-${episode}-${reloadKey}`}
-            src={streamUrl}
-            title={title}
-            className="w-full h-full border-0"
-            allowFullScreen
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-          />
-        </div>
-
-        {/* Dedicated Bollywood Hindi Audio Panel (Only for authentic Hindi titles) */}
-        {hasHindi && (
-          <div className="p-3 sm:p-3.5 bg-gradient-to-r from-[#171004] via-[#0b0e1b] to-[#070e24] border-t border-b border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 text-gray-950 flex items-center justify-center font-black text-sm shrink-0 shadow">
-                🇮🇳
-              </div>
-              <div>
-                <div className="font-bold text-white text-xs flex items-center gap-1.5">
-                  <span>Native Bollywood Hindi Audio</span>
-                  <span className="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-semibold border border-amber-500/30">
-                    Original Hindi
-                  </span>
+          {/* Theatrical / Upcoming Release Notice */}
+          {isUpcoming && (
+            <div className="p-3 bg-gradient-to-r from-amber-950/90 via-[#221302] to-amber-950/90 border-b border-amber-500/40 text-xs flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <span className="text-lg">🎬</span>
+                <div>
+                  <span className="font-extrabold text-amber-300">Theatrical / Upcoming Release Notice:</span>
+                  <p className="text-[11px] text-amber-200/90 mt-0.5">
+                    This title is currently in pre-release or in theaters and not yet distributed on digital OTT streaming. If servers display <strong>"404 Content not found"</strong>, check back once the digital streaming release premieres!
+                  </p>
                 </div>
-                <p className="text-[10px] sm:text-[11px] text-amber-200/80 mt-0.5">
-                  Full original Hindi audio stream in 1080p HD / 4K.
-                </p>
+              </div>
+              {releaseDate && (
+                <span className="shrink-0 bg-amber-500/20 text-amber-300 border border-amber-400/40 px-2.5 py-1 rounded-lg text-[10px] font-bold">
+                  Premiere: {releaseDate}
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* AI Video Boost & 4K Clarity Control Bar */}
+          <div className="px-4 py-2 bg-gradient-to-r from-[#061127] via-[#0a1b3f] to-[#061127] border-b border-cyan-500/25 flex flex-wrap items-center justify-between gap-2.5 text-xs">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 font-extrabold text-[11px] shadow-[0_0_12px_rgba(56,189,248,0.35)]">
+                <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                <span>AI Video Boost:</span>
+              </span>
+              <div className="flex items-center gap-1 bg-black/50 p-1 rounded-xl border border-cyan-500/30">
+                {[
+                  { id: 'off', label: 'Off', desc: 'Natural raw stream' },
+                  { id: '4k', label: '💎 4K Clarity', desc: 'AI edge sharpening & micro-contrast' },
+                  { id: 'hdr', label: '🌈 HDR Cinema', desc: 'Dolby-grade dynamic range & rich vibrance' },
+                  { id: 'night', label: '🌙 Dark Scene', desc: 'Deep shadow visibility booster' },
+                ].map((mode) => (
+                  <button
+                    key={mode.id}
+                    onClick={() => {
+                      setAiBoostMode(mode.id);
+                      localStorage.setItem('furina_ai_boost', mode.id);
+                    }}
+                    title={mode.desc}
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold transition ${
+                      aiBoostMode === mode.id
+                        ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 shadow-[0_0_12px_rgba(56,189,248,0.6)] scale-105'
+                        : 'text-slate-300 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    {mode.label}
+                  </button>
+                ))}
               </div>
             </div>
-            <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
-              <button
-                onClick={() => setSelectedServer(SERVERS[0])}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm border ${
-                  selectedServer.id === SERVERS[0].id
-                    ? 'bg-emerald-500 text-gray-950 border-emerald-400'
-                    : 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border-emerald-500/40'
-                }`}
-              >
-                <Zap className="w-3.5 h-3.5" />
-                <span>AutoEmbed 1080p</span>
-              </button>
-              <button
-                onClick={() => setSelectedServer(SERVERS[1] || SERVERS[0])}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm border ${
-                  selectedServer.id === SERVERS[1]?.id
-                    ? 'bg-cyan-500 text-gray-950 border-cyan-400'
-                    : 'bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border-cyan-500/40'
-                }`}
-              >
-                <span>VidSrc 4K</span>
-              </button>
+
+            <div className="flex items-center gap-2 text-[10px] text-cyan-200/90 font-medium">
+              <span className="hidden sm:inline">⚙️ Blurry? Tap <strong>Settings</strong> inside player ➔ select <strong>1080p / 4K</strong></span>
             </div>
           </div>
-        )}
 
-        {/* Anime Audio & Subtitles Panel */}
-        {(item.category === 'anime' || item.isAnime || item.original_language === 'ja') && (
-          <div className="p-3 sm:p-3.5 bg-gradient-to-r from-[#13072b] via-[#091024] to-[#070e24] border-t border-b border-purple-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow">
-                🇯🇵
-              </div>
-              <div>
-                <div className="font-bold text-white text-xs flex items-center gap-1.5">
-                  <span>Anime Audio & Subtitles</span>
-                  <span className="text-[10px] bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded font-semibold border border-purple-500/30">
-                    VidSrc 4K Active
-                  </span>
-                </div>
-                <p className="text-[10px] sm:text-[11px] text-purple-200/80 mt-0.5">
-                  Switch between <strong>Server 2 (VidSrc 4K)</strong> and <strong>Server 1 / Server 3</strong> to toggle between English Dub and Japanese Audio. Tap <strong>💬 CC</strong> inside the player for subtitles.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
-              <button
-                onClick={() => setSelectedServer(SERVERS.find(s => s.id === 'vidsrc_in') || SERVERS[1])}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm border ${
-                  selectedServer.id === 'vidsrc_in'
-                    ? 'bg-cyan-500 text-gray-950 border-cyan-400'
-                    : 'bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border-cyan-500/40'
-                }`}
-              >
-                <span>Server 2 (VidSrc 4K)</span>
-              </button>
-              <button
-                onClick={() => setSelectedServer(SERVERS[0])}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm border ${
-                  selectedServer.id === 'autoembed'
-                    ? 'bg-purple-500 text-white border-purple-400'
-                    : 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border-purple-500/40'
-                }`}
-              >
-                <span>Server 1 (AutoEmbed)</span>
-              </button>
-            </div>
+          {/* Video Player IFrame Container with AI Boost Visual Filter Pipeline */}
+          <div 
+            className="relative w-full aspect-video bg-black overflow-hidden"
+            style={AI_BOOST_STYLES[aiBoostMode] || {}}
+          >
+            <iframe
+              key={`${currentServer.id}-${season}-${episode}-${reloadKey}`}
+              src={streamUrl}
+              title={title}
+              className="w-full h-full border-0"
+              allowFullScreen
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+            />
           </div>
-        )}
 
-        {/* Hollywood / Standard English Audio & Multi-Subtitles Panel */}
-        {!hasHindi && !(item.category === 'anime' || item.isAnime) && (
-          <div className="p-3 sm:p-3.5 bg-[#070e24] border-t border-b border-cyan-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs">
-            <div className="flex items-center gap-2.5">
-              <span className="text-lg">🔊</span>
-              <div>
-                <div className="font-bold text-cyan-300 text-xs flex items-center gap-1.5">
-                  <span>English Original Audio • Multi-Language Subtitles</span>
-                </div>
-                <p className="text-[10px] sm:text-[11px] text-cyan-200/70 mt-0.5">
-                  English audio active. Turn on subtitles (English, Hindi, Spanish, etc.) via <strong>⚙️ Settings ➔ Subtitles</strong> inside player.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="text-[10px] bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 px-2 py-1 rounded-md font-semibold">
-                Use ⚙️ gear for CC
+          {/* 404 Rescue & Smart Mirror Quick Switcher Bar */}
+          <div className="px-4 py-2 bg-[#040918] border-b border-cyan-500/20 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div className="flex items-center gap-2 text-cyan-300/80">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+              <span className="text-[11px] font-medium">
+                Stream 404 or Buffering? Tap another instant mirror:
               </span>
             </div>
-          </div>
-        )}
-
-        {/* TV Series Episode & Season Navigation */}
-        {isSeries && (
-          <div className="p-4 bg-[#070d1f] border-t border-cyan-500/20">
-            <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-              <div className="flex items-center gap-2">
-                <Tv className="w-4 h-4 text-cyan-400" />
-                <span className="text-xs font-bold text-white uppercase tracking-wider">Select Season & Episode</span>
-              </div>
-
-              {/* Season Tabs */}
-              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-                {Array.from({ length: totalSeasons }, (_, i) => i + 1).map((sNum) => (
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {SERVERS.slice(0, 5).map((srv) => {
+                const isActive = selectedServer.id === srv.id;
+                return (
                   <button
-                    key={sNum}
-                    onClick={() => { setSeason(sNum); setEpisode(1); }}
-                    className={`px-2.5 py-1 rounded text-xs font-semibold transition ${
-                      season === sNum
-                        ? 'bg-cyan-500 text-gray-950 font-bold shadow'
-                        : 'bg-[#0f1d40] text-cyan-200/60 hover:text-white'
+                    key={srv.id}
+                    onClick={() => setSelectedServer(srv)}
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition border ${
+                      isActive
+                        ? 'bg-cyan-500 text-gray-950 border-cyan-300 font-black shadow'
+                        : 'bg-[#09132e] text-cyan-300/70 border-cyan-500/20 hover:text-white hover:border-cyan-400/50'
                     }`}
                   >
-                    Season {sNum}
+                    {srv.shortName}
                   </button>
-                ))}
+                );
+              })}
+            </div>
+          </div>
+
+          {/* MUTUALLY EXCLUSIVE AUDIO BADGE & INFORMATION PANEL */}
+          {isAnime ? (
+            /* 🌸 ANIME ONLY PANEL - Plays in Japanese Sub or English Dub with VidSrc 4K */
+            <div className="p-3 sm:p-3.5 bg-gradient-to-r from-[#13072b] via-[#091024] to-[#070e24] border-t border-b border-purple-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow">
+                  🇯🇵
+                </div>
+                <div>
+                  <div className="font-bold text-white text-xs flex items-center gap-1.5 flex-wrap">
+                    <span>Anime Audio & Multi-Language Subtitles</span>
+                    <span className="text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded font-semibold border border-purple-500/30">
+                      {selectedServer?.shortName || 'VidSrc 4K Active'}
+                    </span>
+                    <span className="text-[10px] bg-emerald-500/15 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30 font-semibold">
+                      Sub / English Dub
+                    </span>
+                  </div>
+                  <p className="text-[10px] sm:text-[11px] text-purple-200/80 mt-0.5">
+                    Stream plays in Japanese with Subtitles or English Dub. Tap <strong>💬 CC</strong> inside the player for subtitles. Switch servers if you want alternate dub tracks.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto flex-wrap">
+                <button
+                  onClick={() => setSelectedServer(SERVERS[0])}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm border ${
+                    selectedServer.id === SERVERS[0].id
+                      ? 'bg-cyan-500 text-gray-950 border-cyan-400 font-black'
+                      : 'bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border-cyan-500/40'
+                  }`}
+                >
+                  <span>Server 1 (VidSrc 4K)</span>
+                </button>
+                <button
+                  onClick={() => setSelectedServer(SERVERS[1] || SERVERS[0])}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm border ${
+                    selectedServer.id === SERVERS[1]?.id
+                      ? 'bg-purple-500 text-white border-purple-400 font-black'
+                      : 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border-purple-500/40'
+                  }`}
+                >
+                  <span>Server 2 (AutoEmbed)</span>
+                </button>
+                <button
+                  onClick={() => setSelectedServer(SERVERS[2] || SERVERS[0])}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm border ${
+                    selectedServer.id === SERVERS[2]?.id
+                      ? 'bg-indigo-500 text-white border-indigo-400 font-black'
+                      : 'bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border-indigo-500/40'
+                  }`}
+                >
+                  <span>Server 3 (VidSrc CC)</span>
+                </button>
               </div>
             </div>
-
-            {/* Episode Grid */}
-            {isLoadingEpisodes ? (
-              <div className="py-8 text-center text-xs text-cyan-300/60 flex items-center justify-center gap-2">
-                <RefreshCw className="w-4 h-4 animate-spin" />
-                Loading episodes...
+          ) : isBollywoodHindi ? (
+            /* 🇮🇳 BOLLYWOOD & HINDI DUBBED ONLY PANEL */
+            <div className="p-3 sm:p-3.5 bg-gradient-to-r from-[#171004] via-[#0b0e1b] to-[#070e24] border-t border-b border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 text-gray-950 flex items-center justify-center font-black text-sm shrink-0 shadow">
+                  🇮🇳
+                </div>
+                <div>
+                  <div className="font-bold text-white text-xs flex items-center gap-1.5">
+                    <span>Authentic Hindi Audio Stream</span>
+                    <span className="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded font-semibold border border-amber-500/30">
+                      100% Hindi Track
+                    </span>
+                  </div>
+                  <p className="text-[10px] sm:text-[11px] text-amber-200/80 mt-0.5">
+                    Full Hindi audio stream in 1080p HD / 4K. Plays automatically on Server 1 and Server 2.
+                  </p>
+                </div>
               </div>
-            ) : episodesList.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2 max-h-48 overflow-y-auto pr-1">
-                {episodesList.map((ep) => {
-                  const isCurrent = episode === ep.episode_number;
-                  return (
+              <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+                <button
+                  onClick={() => setSelectedServer(SERVERS[0])}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm border ${
+                    selectedServer.id === SERVERS[0].id
+                      ? 'bg-cyan-500 text-gray-950 border-cyan-400'
+                      : 'bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border-cyan-500/40'
+                  }`}
+                >
+                  <Zap className="w-3.5 h-3.5" />
+                  <span>VidSrc 4K</span>
+                </button>
+                <button
+                  onClick={() => setSelectedServer(SERVERS[1] || SERVERS[0])}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm border ${
+                    selectedServer.id === SERVERS[1]?.id
+                      ? 'bg-emerald-500 text-gray-950 border-emerald-400'
+                      : 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border-emerald-500/40'
+                  }`}
+                >
+                  <span>AutoEmbed HD</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* 🎬 HOLLYWOOD / GLOBAL ENGLISH ONLY PANEL */
+            <div className="p-3 sm:p-3.5 bg-[#070e24] border-t border-b border-cyan-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs">
+              <div className="flex items-center gap-2.5">
+                <span className="text-lg">🔊</span>
+                <div>
+                  <div className="font-bold text-cyan-300 text-xs flex items-center gap-1.5">
+                    <span>English Original Audio • Multi-Language Subtitles</span>
+                  </div>
+                  <p className="text-[10px] sm:text-[11px] text-cyan-200/70 mt-0.5">
+                    English audio active. Turn on subtitles (English, Hindi, Spanish, etc.) via <strong>⚙️ Settings ➔ Subtitles</strong> inside player.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-[10px] bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 px-2 py-1 rounded-md font-semibold">
+                  Use ⚙️ gear for CC
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* TV Series Episode & Season Navigation */}
+          {isSeries && (
+            <div className="p-4 bg-[#070d1f] border-t border-cyan-500/20">
+              <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <Tv className="w-4 h-4 text-cyan-400" />
+                  <span className="text-xs font-bold text-white uppercase tracking-wider">Select Season & Episode</span>
+                </div>
+
+                {/* Season Tabs */}
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+                  {Array.from({ length: totalSeasons }, (_, i) => i + 1).map((sNum) => (
                     <button
-                      key={ep.episode_number}
-                      onClick={() => setEpisode(ep.episode_number)}
-                      className={`p-2 rounded-lg text-left transition border ${
-                        isCurrent
-                          ? 'bg-cyan-500/25 border-cyan-400 text-cyan-300 font-bold shadow'
-                          : 'bg-[#0a132b] border-cyan-500/15 text-cyan-200/70 hover:bg-white/5'
+                      key={sNum}
+                      onClick={() => { setSeason(sNum); setEpisode(1); }}
+                      className={`px-2.5 py-1 rounded text-xs font-semibold transition ${
+                        season === sNum
+                          ? 'bg-cyan-500 text-gray-950 font-bold shadow'
+                          : 'bg-[#0f1d40] text-cyan-200/60 hover:text-white'
                       }`}
                     >
-                      <div className="text-[10px] text-cyan-400/80 font-mono">EP {ep.episode_number}</div>
-                      <div className="text-xs font-medium text-white line-clamp-1">{ep.name || `Episode ${ep.episode_number}`}</div>
+                      Season {sNum}
                     </button>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
-            ) : (
-              /* Fallback episode numbers */
-              <div className="flex flex-wrap gap-2">
-                {Array.from({ length: 12 }, (_, i) => i + 1).map((epNum) => (
-                  <button
-                    key={epNum}
-                    onClick={() => setEpisode(epNum)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                      episode === epNum
-                        ? 'bg-cyan-500 text-gray-950 font-bold shadow'
-                        : 'bg-[#0a132b] text-cyan-200/70 hover:text-white'
-                    }`}
-                  >
-                    Episode {epNum}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
 
-        {/* Footer Info */}
-        <div className="p-3 bg-[#050917] border-t border-cyan-500/15 flex items-center justify-between flex-wrap gap-2 text-[11px] text-cyan-200/60">
-          <span className="flex items-center gap-1.5">
-            <Info className="w-3.5 h-3.5 text-cyan-400" />
-            High-speed multi-server engine active. If one stream buffers, tap Server 1-4 above.
-          </span>
-          <span className="font-semibold text-cyan-400">4K Ultra HD</span>
+              {/* Episode Grid */}
+              {isLoadingEpisodes ? (
+                <div className="py-8 text-center text-xs text-cyan-300/60 flex items-center justify-center gap-2">
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Loading episodes...
+                </div>
+              ) : episodesList.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2 max-h-48 overflow-y-auto pr-1">
+                  {episodesList.map((ep) => {
+                    const isCurrent = episode === ep.episode_number;
+                    return (
+                      <button
+                        key={ep.episode_number}
+                        onClick={() => setEpisode(ep.episode_number)}
+                        className={`p-2 rounded-lg text-left transition border ${
+                          isCurrent
+                            ? 'bg-cyan-500/25 border-cyan-400 text-cyan-300 font-bold shadow'
+                            : 'bg-[#0a132b] border-cyan-500/15 text-cyan-200/70 hover:bg-white/5'
+                        }`}
+                      >
+                        <div className="text-[10px] text-cyan-400/80 font-mono">EP {ep.episode_number}</div>
+                        <div className="text-xs font-medium text-white line-clamp-1">{ep.name || `Episode ${ep.episode_number}`}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                /* Fallback episode numbers */
+                <div className="flex flex-wrap gap-2">
+                  {Array.from({ length: 12 }, (_, i) => i + 1).map((epNum) => (
+                    <button
+                      key={epNum}
+                      onClick={() => setEpisode(epNum)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                        episode === epNum
+                          ? 'bg-cyan-500 text-gray-950 font-bold shadow'
+                          : 'bg-[#0a132b] text-cyan-200/70 hover:text-white'
+                      }`}
+                    >
+                      Episode {epNum}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Footer Info */}
+          <div className="p-3 bg-[#050917] border-t border-cyan-500/15 flex items-center justify-between flex-wrap gap-2 text-[11px] text-cyan-200/60">
+            <span className="flex items-center gap-1.5">
+              <Info className="w-3.5 h-3.5 text-cyan-400" />
+              Ultra-fast multi-server CDN engine active. Switch servers above if stream stalls or buffers.
+            </span>
+            <span className="font-semibold text-cyan-400">4K Ultra HD</span>
+          </div>
+
         </div>
 
       </div>

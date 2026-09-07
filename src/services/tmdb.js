@@ -659,6 +659,134 @@ export const CURATED_ENGLISH_DUBBED_ANIME = [
     "category": "anime",
     "isAnime": true,
     "dub_type": "english"
+  },
+  {
+    "id": 63926,
+    "title": "One-Punch Man",
+    "name": "One-Punch Man",
+    "overview": "Saitama is a hero who only became a hero for fun. After three years of \"special\" training, he's become so strong that he can defeat the opponents with a single punch. Now, alongside Genos, his faithful cyborg disciple, Saitama is ready to begin his official duties as a professional hero.",
+    "poster_path": "/1T5udgm0d5gDknpYVpmUjZ6n4y9.jpg",
+    "backdrop_path": "/5DUMPBSnHOZsbBv81GFXZXvDpo6.jpg",
+    "media_type": "tv",
+    "vote_average": 8.4,
+    "release_date": "2015-10-05",
+    "first_air_date": "2015-10-05",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "english"
+  },
+  {
+    "id": 67070,
+    "title": "Mob Psycho 100",
+    "name": "Mob Psycho 100",
+    "overview": "Shigeo Kageyama, nicknamed \"Mob,\" is a boy with immense psychic powers. He wants to live a normal life and keeps his growing emotional gauge suppressed, but when his emotions reach 100%, an overpowering force takes over.",
+    "poster_path": "/h8hE0wGq4V5kQJ8tM1mF6l4h9xL.jpg",
+    "backdrop_path": "/lysUnU6V0VfcthDbviuVlIqgHOR.jpg",
+    "media_type": "tv",
+    "vote_average": 8.6,
+    "release_date": "2016-07-12",
+    "first_air_date": "2016-07-12",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "english"
+  },
+  {
+    "id": 45790,
+    "title": "JoJo's Bizarre Adventure",
+    "name": "JoJo's Bizarre Adventure",
+    "overview": "Follow the multi-generational conflicts of the heroic Joestar family, each equipped with supernatural abilities, across centuries of bizarre adventures against ancient evil.",
+    "poster_path": "/pSLuy0OfN1QblifDVoEhAvst4et.jpg",
+    "backdrop_path": "/A4PHx94G7mvM3b8vsDJ5HEaQ6uv.jpg",
+    "media_type": "tv",
+    "vote_average": 8.4,
+    "release_date": "2012-10-06",
+    "first_air_date": "2012-10-06",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "english"
+  },
+  {
+    "id": 207572,
+    "title": "Kaiju No. 8",
+    "name": "Kaiju No. 8",
+    "overview": "In a monster-ravaged Japan, Kafka Hibino aspires to join the Defense Force. After a mysterious parasite grants him the ability to transform into a Kaiju, he gains a second chance at his lifelong dream.",
+    "poster_path": "/2EewmxXe72ogD0EaWM8gqa0ccIw.jpg",
+    "backdrop_path": "/o0NsbcIvsllg6CJX0FBFY8wWbsn.jpg",
+    "media_type": "tv",
+    "vote_average": 8.6,
+    "release_date": "2024-04-13",
+    "first_air_date": "2024-04-13",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "english"
+  },
+  {
+    "id": 240411,
+    "title": "Dandadan",
+    "name": "Dandadan",
+    "overview": "Momo Ayase believes in ghosts but denies aliens, while her classmate Okarun believes in aliens but denies ghosts. To prove each other wrong, they visit paranormal hotspots and awaken extraordinary supernatural powers.",
+    "poster_path": "/blWCPEqDGLBuLB9u89CxP9ORQP4.jpg",
+    "backdrop_path": "/qD211Hb5XwFxrszzBBe5EUYJerh.jpg",
+    "media_type": "tv",
+    "vote_average": 8.7,
+    "release_date": "2024-10-04",
+    "first_air_date": "2024-10-04",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "english"
+  },
+  {
+    "id": 136283,
+    "title": "Blue Lock",
+    "name": "Blue Lock",
+    "overview": "Following a disastrous 2018 World Cup finish, Japan creates a revolutionary soccer prison called Blue Lock, gathering 300 elite high school strikers to forge the world's most egotistical forward.",
+    "poster_path": "/iFM1dyFi0rByvEomEkmm7NpQeeb.jpg",
+    "backdrop_path": "/5DUMPBSnHOZsbBv81GFXZXvDpo6.jpg",
+    "media_type": "tv",
+    "vote_average": 8.3,
+    "release_date": "2022-10-09",
+    "first_air_date": "2022-10-09",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "english"
+  },
+  {
+    "id": 72636,
+    "title": "Classroom of the Elite",
+    "name": "Classroom of the Elite",
+    "overview": "Tokyo Metropolitan Advanced Nurturing High School is a state-of-the-art paradise where students enjoy total freedom. In Class D, Kiyotaka Ayanokouji quietly manipulates events from the shadows.",
+    "poster_path": "/xUfRZu2mi8jH6SzQEJGP6tjBuYj.jpg",
+    "backdrop_path": "/3GQKYh6Trm8pxd2AypovoYQf4Ay.jpg",
+    "media_type": "tv",
+    "vote_average": 8.4,
+    "release_date": "2017-07-12",
+    "first_air_date": "2017-07-12",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "english"
+  },
+  {
+    "id": 65942,
+    "title": "Re:ZERO - Starting Life in Another World",
+    "name": "Re:ZERO - Starting Life in Another World",
+    "overview": "Subaru Natsuki is suddenly summoned to a fantasy world. Armed with only the ability 'Return by Death,' which reverses time upon his demise, he must endure harrowing trials to save the half-elf Emilia.",
+    "poster_path": "/7NAvPYPAu7MeHwP8E9sn81PqsRh.jpg",
+    "backdrop_path": "/lysUnU6V0VfcthDbviuVlIqgHOR.jpg",
+    "media_type": "tv",
+    "vote_average": 8.3,
+    "release_date": "2016-04-04",
+    "first_air_date": "2016-04-04",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "english"
   }
 ];
 
@@ -800,18 +928,19 @@ export async function fetchHindiMovies(page = 1) {
     const res = await fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_original_language=hi&region=IN&primary_release_date.lte=${today}&vote_count.gte=5&sort_by=popularity.desc&page=${page}`);
     const data = await res.json();
     const bollywood = (data.results && data.results.length > 0)
-      ? data.results.map(m => ({ ...m, media_type: 'movie', category: 'hindi', original_language: 'hi' }))
+      ? data.results.map(m => ({ ...m, media_type: 'movie', category: 'hindi', original_language: 'hi', isHindiDubbed: true }))
       : (page === 1 ? FALLBACK_MEDIA.filter(m => m.category === 'hindi') : []);
     
     if (page === 1) {
-      // Return authentic Bollywood classics & blockbusters first
-      const existingIds = new Set(CURATED_BOLLYWOOD_BLOCKBUSTERS.map(b => b.id));
+      // Return authentic Bollywood blockbusters + Hollywood Hindi dubbed blockbusters first
+      const curatedAll = [...CURATED_BOLLYWOOD_BLOCKBUSTERS, ...CURATED_HOLLYWOOD_HINDI_DUBS];
+      const existingIds = new Set(curatedAll.map(b => b.id));
       const filtered = bollywood.filter(m => !existingIds.has(m.id));
-      return [...CURATED_BOLLYWOOD_BLOCKBUSTERS, ...filtered];
+      return [...curatedAll, ...filtered];
     }
     return bollywood;
   } catch (err) {
-    return page === 1 ? [...CURATED_BOLLYWOOD_BLOCKBUSTERS, ...FALLBACK_MEDIA.filter(m => m.category === 'hindi')] : [];
+    return page === 1 ? [...CURATED_BOLLYWOOD_BLOCKBUSTERS, ...CURATED_HOLLYWOOD_HINDI_DUBS, ...FALLBACK_MEDIA.filter(m => m.category === 'hindi')] : [];
   }
 }
 
@@ -827,25 +956,43 @@ export async function fetchTrendingSeries(page = 1) {
 
 export async function fetchAnime(page = 1, audioFilter = 'all') {
   try {
-    if (audioFilter === 'english') {
-      return CURATED_ENGLISH_DUBBED_ANIME;
-    }
+    let sortParam = 'popularity.desc';
     if (audioFilter === 'sub') {
-      return CURATED_SUBBED_ANIME;
+      sortParam = 'vote_count.desc';
     }
-    const res = await fetch(`${BASE_URL}/discover/tv?api_key=${API_KEY}&with_genres=16&with_original_language=ja&first_air_date.lte=${today}&vote_count.gte=10&sort_by=popularity.desc&page=${page}`);
+    // Infinite anime TV series discovery from TMDB
+    const res = await fetch(`${BASE_URL}/discover/tv?api_key=${API_KEY}&with_genres=16&with_original_language=ja&first_air_date.lte=${today}&vote_count.gte=8&sort_by=${sortParam}&page=${page}`);
     const data = await res.json();
     const rawResults = data.results || [];
+    
     // Strict filter to eliminate 18+ ecchi / hanimes from public anime lists
     const cleanDiscovered = rawResults
-      .filter(item => item && !isHanimeContent(item))
-      .map(m => ({ ...m, media_type: 'tv', category: 'anime', isAnime: true }));
+      .filter(item => item && item.id && !isHanimeContent(item))
+      .map(m => ({ 
+        ...m, 
+        media_type: 'tv', 
+        category: 'anime', 
+        isAnime: true,
+        dub_type: audioFilter === 'sub' ? 'sub' : 'english'
+      }));
 
     if (page === 1) {
-      // Prepend top verified mainstream anime on page 1 so users always see legendary hits
-      const existingIds = new Set(CURATED_ENGLISH_DUBBED_ANIME.map(a => a.id));
+      let curatedBase = [];
+      if (audioFilter === 'english') {
+        curatedBase = CURATED_ENGLISH_DUBBED_ANIME;
+      } else if (audioFilter === 'sub') {
+        curatedBase = CURATED_SUBBED_ANIME;
+      } else {
+        const seenIds = new Set();
+        curatedBase = [...CURATED_ENGLISH_DUBBED_ANIME, ...CURATED_SUBBED_ANIME].filter(item => {
+          if (!item || seenIds.has(item.id)) return false;
+          seenIds.add(item.id);
+          return true;
+        });
+      }
+      const existingIds = new Set(curatedBase.map(a => a.id));
       const filteredDiscovered = cleanDiscovered.filter(m => !existingIds.has(m.id));
-      return [...CURATED_ENGLISH_DUBBED_ANIME, ...filteredDiscovered];
+      return [...curatedBase, ...filteredDiscovered];
     }
     return cleanDiscovered;
   } catch (err) {
@@ -889,6 +1036,216 @@ export async function fetchMatureMovies(page = 1) {
 
 
 // Verified Hollywood Blockbusters with official Hindi dubs in theaters/OTT
+export const CURATED_HOLLYWOOD_HINDI_DUBS = [
+  {
+    id: 533535,
+    title: "Deadpool & Wolverine (Hindi Dubbed)",
+    name: "Deadpool & Wolverine",
+    overview: "A listless Wade Wilson toils away in civilian life with his days as the morally flexible mercenary, Deadpool, behind him. When his homeworld faces an existential threat, Wade must reluctantly suit-up again with an even more reluctant Wolverine. Full official Hindi audio track.",
+    poster_path: "/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg",
+    backdrop_path: "/yDHYTjA3R0neXjgu144Y1fX3AcA.jpg",
+    media_type: "movie",
+    vote_average: 7.7,
+    release_date: "2024-07-24",
+    category: "hindi",
+    isHindiDubbed: true
+  },
+  {
+    id: 299534,
+    title: "Avengers: Endgame (Hindi Dubbed)",
+    name: "Avengers: Endgame",
+    overview: "After the devastating events of Avengers: Infinity War, the universe is in ruins. With the help of remaining allies, the Avengers assemble once more in order to reverse Thanos' actions and restore balance to the universe. Full Hindi theatrical dub.",
+    poster_path: "/or06FN3Dka5tukK1e9sl16pB3iy.jpg",
+    backdrop_path: "/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg",
+    media_type: "movie",
+    vote_average: 8.3,
+    release_date: "2019-04-24",
+    category: "hindi",
+    isHindiDubbed: true
+  },
+  {
+    id: 299536,
+    title: "Avengers: Infinity War (Hindi Dubbed)",
+    name: "Avengers: Infinity War",
+    overview: "As the Avengers and their allies have continued to protect the world from threats too large for any one hero to handle, a new danger has emerged from the cosmic shadows: Thanos. Full Hindi dub audio track.",
+    poster_path: "/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg",
+    backdrop_path: "/bOGkgRGdhrBYJSLpXaxhXVstddV.jpg",
+    media_type: "movie",
+    vote_average: 8.2,
+    release_date: "2018-04-25",
+    category: "hindi",
+    isHindiDubbed: true
+  },
+  {
+    id: 634649,
+    title: "Spider-Man: No Way Home (Hindi Dubbed)",
+    name: "Spider-Man: No Way Home",
+    overview: "Peter Parker is unmasked and no longer able to separate his normal life from the high-stakes of being a super-hero. When he asks for help from Doctor Strange the stakes become even more dangerous. Full official Hindi dub.",
+    poster_path: "/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg",
+    backdrop_path: "/iQFcwSGbZXMkeyKrxbPnwnRo5fl.jpg",
+    media_type: "movie",
+    vote_average: 8.0,
+    release_date: "2021-12-15",
+    category: "hindi",
+    isHindiDubbed: true
+  },
+  {
+    id: 76600,
+    title: "Avatar: The Way of Water (Hindi Dubbed)",
+    name: "Avatar: The Way of Water",
+    overview: "Set more than a decade after the events of the first film, learn the story of the Sully family, the trouble that follows them, the lengths they go to keep each other safe, the battles they fight to stay alive, and the tragedies they endure. Full Hindi audio.",
+    poster_path: "/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg",
+    backdrop_path: "/s16H6tpK2utvwDtzZ8Qy4qm5Emw.jpg",
+    media_type: "movie",
+    vote_average: 7.6,
+    release_date: "2022-12-14",
+    category: "hindi",
+    isHindiDubbed: true
+  },
+  {
+    id: 872585,
+    title: "Oppenheimer (Hindi Dubbed)",
+    name: "Oppenheimer",
+    overview: "The story of J. Robert Oppenheimer’s role in the development of the atomic bomb during World War II. Full official Hindi dub release.",
+    poster_path: "/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
+    backdrop_path: "/fm6KqXpk3M2HVveHwCrBSSBaO0V.jpg",
+    media_type: "movie",
+    vote_average: 8.1,
+    release_date: "2023-07-19",
+    category: "hindi",
+    isHindiDubbed: true
+  },
+  {
+    id: 693134,
+    title: "Dune: Part Two (Hindi Dubbed)",
+    name: "Dune: Part Two",
+    overview: "Follow the mythic journey of Paul Atreides as he unites with Chani and the Fremen while on a path of revenge against the conspirators who destroyed his family. Facing a choice between the love of his life and the fate of the universe. Full Hindi dub.",
+    poster_path: "/czembW0Rk1Ke7lCJGahbOhdCuhV.jpg",
+    backdrop_path: "/xOMo8BRK7PfcJv9JCnx7s5200z3.jpg",
+    media_type: "movie",
+    vote_average: 8.2,
+    release_date: "2024-02-27",
+    category: "hindi",
+    isHindiDubbed: true
+  },
+  {
+    id: 823464,
+    title: "Godzilla x Kong: The New Empire (Hindi Dubbed)",
+    name: "Godzilla x Kong: The New Empire",
+    overview: "Following their explosive showdown, Godzilla and Kong must reunite against a colossal undiscovered threat hidden within our world, challenging their very existence – and our own. Full Hindi dubbed track.",
+    poster_path: "/bQ2ywAy0ScayUZBh29haG2x89RB.jpg",
+    backdrop_path: "/qrGtwwWBua7drvdBkQjZ44mQ4tL.jpg",
+    media_type: "movie",
+    vote_average: 7.2,
+    release_date: "2024-03-27",
+    category: "hindi",
+    isHindiDubbed: true
+  },
+  {
+    id: 385687,
+    title: "Fast X (Hindi Dubbed)",
+    name: "Fast X",
+    overview: "Over many missions and against impossible odds, Dom Toretto and his family have outsmarted, out-nerved and outdriven every foe in their path. Now, they confront the most lethal opponent they've ever faced: Dante Reyes. Full Hindi theatrical dub.",
+    poster_path: "/fiVW06jE7z9YnO4trhaMEdclSiC.jpg",
+    backdrop_path: "/4HodYYKEIsGOdinkGi2Ucz6X9i0.jpg",
+    media_type: "movie",
+    vote_average: 7.1,
+    release_date: "2023-05-17",
+    category: "hindi",
+    isHindiDubbed: true
+  },
+  {
+    id: 603692,
+    title: "John Wick: Chapter 4 (Hindi Dubbed)",
+    name: "John Wick: Chapter 4",
+    overview: "With the price on his head ever increasing, John Wick uncovers a path to defeating The High Table. But before he can earn his freedom, Wick must face off against a new enemy with powerful alliances across the globe. Full Hindi dub.",
+    poster_path: "/vZloFAK7NmvMGKE7VkF5UHaz0I.jpg",
+    backdrop_path: "/h8gHn0OzRogL0GayNX0afrqaZqD.jpg",
+    media_type: "movie",
+    vote_average: 7.7,
+    release_date: "2023-03-22",
+    category: "hindi",
+    isHindiDubbed: true
+  },
+  {
+    id: 575264,
+    title: "Mission: Impossible - Dead Reckoning Part One (Hindi Dubbed)",
+    name: "Mission: Impossible - Dead Reckoning Part One",
+    overview: "Ethan Hunt and his IMF team embark on their most dangerous mission yet: To track down a terrifying new weapon that threatens all of humanity before it falls into the wrong hands. Full Hindi theatrical audio.",
+    poster_path: "/NNxYkU70HPurnNCSiCjYAmacwm.jpg",
+    backdrop_path: "/628Dep6AxEtDxjZoGP78TsOxYbK.jpg",
+    media_type: "movie",
+    vote_average: 7.6,
+    release_date: "2023-07-08",
+    category: "hindi",
+    isHindiDubbed: true
+  },
+  {
+    id: 667538,
+    title: "Transformers: Rise of the Beasts (Hindi Dubbed)",
+    name: "Transformers: Rise of the Beasts",
+    overview: "When a new threat capable of destroying the entire planet emerges, Optimus Prime and the Autobots must team up with a powerful faction known as the Maximals. Full Hindi audio.",
+    poster_path: "/gPbM0ljFeZFDVOv0uSQVGCT5xwh.jpg",
+    backdrop_path: "/2vFuG6bWcuSDuqvoJQDuMych2CB.jpg",
+    media_type: "movie",
+    vote_average: 7.3,
+    release_date: "2023-06-06",
+    category: "hindi",
+    isHindiDubbed: true
+  },
+  {
+    id: 414906,
+    title: "The Batman (Hindi Dubbed)",
+    name: "The Batman",
+    overview: "In his second year of fighting crime, Batman uncovers corruption in Gotham City that connects to his own family while facing a serial killer known as the Riddler. Full Hindi dub.",
+    poster_path: "/74xTEgt7R36Fpooo50r9T25onhq.jpg",
+    backdrop_path: "/b0PlSFdDwbyK0cf5RxwDpaOJQvQ.jpg",
+    media_type: "movie",
+    vote_average: 7.7,
+    release_date: "2022-03-01",
+    category: "hindi",
+    isHindiDubbed: true
+  },
+  {
+    id: 157336,
+    title: "Interstellar (Hindi Dubbed)",
+    name: "Interstellar",
+    overview: "The adventures of a group of explorers who make use of a newly discovered wormhole to surpass the limitations on human space travel and conquer the vast distances involved in an interstellar voyage. Full Hindi audio track.",
+    poster_path: "/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+    backdrop_path: "/xJHokMbljvjADYdit5fK5VQsXEG.jpg",
+    media_type: "movie",
+    vote_average: 8.4,
+    release_date: "2014-11-05",
+    category: "hindi",
+    isHindiDubbed: true
+  },
+  {
+    id: 27205,
+    title: "Inception (Hindi Dubbed)",
+    name: "Inception",
+    overview: "Cobb, a skilled thief who commits corporate espionage by infiltrating the subconscious of his targets is offered a chance to regain his old life as payment for a task considered to be impossible: \"inception\". Full Hindi audio.",
+    poster_path: "/edv5CZvWj09upOsy2Y6IwDhK8bt.jpg",
+    backdrop_path: "/8ZTVqvKDQ8emSGUEMjsS4yHAwrp.jpg",
+    media_type: "movie",
+    vote_average: 8.4,
+    release_date: "2010-07-15",
+    category: "hindi",
+    isHindiDubbed: true
+  },
+  {
+    id: 155,
+    title: "The Dark Knight (Hindi Dubbed)",
+    name: "The Dark Knight",
+    overview: "Batman raises the stakes in his war on crime. With the help of Lt. Jim Gordon and District Attorney Harvey Dent, Batman sets out to dismantle the remaining criminal organizations that plague the streets. Full Hindi audio.",
+    poster_path: "/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+    backdrop_path: "/dqK9Hag1054tghRQSqLSfrkvQnA.jpg",
+    media_type: "movie",
+    vote_average: 8.5,
+    release_date: "2008-07-16",
+    category: "hindi",
+    isHindiDubbed: true
+  }
+];
 
 // 🔞 Blacklist of 18+ Ecchi, Hentai & ComicFesta Anime (kept strictly in secret vault)
 export const BLOCKED_HANIME_IDS = new Set([
@@ -898,7 +1255,10 @@ export const BLOCKED_HANIME_IDS = new Set([
   61460, 34805, 45234, 233643, 236209, 23315, 39281, 43098, 67406, 45129,
   31969, 40118, 37837, 63200, 60824, 45266, 38384, 33527, 61706, 34839,
   70889, 65977, 119853, 85461, 93554, 103986, 107937, 111169, 95224, 93988,
-  44342, 44439, 38786, 84669, 82883, 80646, 125433, 82030, 84123, 100877, 107865
+  44342, 44439, 38786, 84669, 82883, 80646, 125433, 82030, 84123, 100877, 107865,
+  138757, 204124, 221856, 138760, 34484, 38338, 45749, 61793, 46518, 38622,
+  32085, 42371, 45963, 42354, 42416, 34524, 75677, 68205, 70588, 154504,
+  34571, 38450, 34739, 38260, 45511, 42512, 38053, 68846, 31804
 ]);
 
 const BLOCKED_HANIME_REGEX = /\b(overflow|souryo|secret\s*mission|joshiochi|araiya|sweet\s*punishment|fire\s*in\s*his\s*fingertips|redo\s*of\s*healer|interspecies|kuro\s*gal|papa\s*datte|show\s*time|seduced\s*by\s*my\s*best\s*friend|world's\s*end\s*harem|labyrinth\s*of\s*another\s*world|peter\s*grill|sister\s*new\s*devil|kissxsis|kiss\s*x\s*sis|valkyrie\s*drive|qwaser|monster\s*musume|ladies\s*versus|shimoneta|so,\s*i\s*can't\s*play\s*h|queen's\s*blade|bikini\s*warriors|seven\s*mortal\s*sins|strike\s*the\s*blood|campione|elfen\s*lied|gantz|grisaia|rosario\s*\+\s*vampire|hundred|comicfesta|hentai|ecchi|uncensored|erotic|shikiyoku|sennyuu\s*sousakan|futanari|ero\s*manga)\b/i;
@@ -915,8 +1275,8 @@ export function isHanimeContent(item) {
 
 export function isHindiAvailable(item) {
   if (!item) return false;
-  // Genuine Bollywood Indian cinema
-  return item.original_language === 'hi' || item.category === 'hindi';
+  if (item.category === 'anime' || item.isAnime === true || item.original_language === 'ja') return false;
+  return item.original_language === 'hi' || item.category === 'hindi' || Boolean(item.isHindiDubbed);
 }
 
 export function isAnimeItem(item) {
@@ -1580,6 +1940,188 @@ export const SECRET_ECCHI_ANIME = [
     "media_type": "tv",
     "vote_average": 7.3,
     "first_air_date": "2016-04-05",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 119853,
+    "name": "Harem in the Labyrinth of Another World",
+    "title": "Harem in the Labyrinth of Another World: Uncensored",
+    "overview": "Michio Kaga is transported into a fantasy video-game world where he uses bonus powers to conquer labyrinths and build a devoted harem.",
+    "poster_path": "/rBOnrVlck7BIlGeWVlzYiZeg4l2.jpg",
+    "backdrop_path": "/rBOnrVlck7BIlGeWVlzYiZeg4l2.jpg",
+    "media_type": "tv",
+    "vote_average": 7.6,
+    "first_air_date": "2022-07-06",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 85461,
+    "name": "Why the Hell Are You Here, Teacher!?",
+    "title": "Why the Hell Are You Here, Teacher!? (Uncensored)",
+    "overview": "Ichirou Satou is an average high schooler who continually finds himself in shockingly erotic situations with his feared teacher Kana Kojima.",
+    "poster_path": "/xJZwaZAXoon6wxkgXiWQNEeyW4C.jpg",
+    "backdrop_path": "/xJZwaZAXoon6wxkgXiWQNEeyW4C.jpg",
+    "media_type": "tv",
+    "vote_average": 7.3,
+    "first_air_date": "2019-04-08",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 93554,
+    "name": "SUPER HXEROS",
+    "title": "SUPER HXEROS: Uncut",
+    "overview": "An alien parasite invades Earth to siphon human libido. Reto Enjou and the HxEros team harness erotic energy to defend the planet.",
+    "poster_path": "/y5p3n9v2brW1vJ2x6q7m4z8t0.jpg",
+    "backdrop_path": "/y5p3n9v2brW1vJ2x6q7m4z8t0.jpg",
+    "media_type": "tv",
+    "vote_average": 7.1,
+    "first_air_date": "2020-07-04",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 138757,
+    "name": "Ayakashi Triangle",
+    "title": "Ayakashi Triangle: Uncensored",
+    "overview": "Exorcist ninja Matsuri Kazamaki battles spirits to protect his childhood friend Suzu, but an encounter with a cat god transforms him into a girl.",
+    "poster_path": "/8RtwL5gxUvh9YViqjhNlVRvJpum.jpg",
+    "backdrop_path": "/8RtwL5gxUvh9YViqjhNlVRvJpum.jpg",
+    "media_type": "tv",
+    "vote_average": 7.2,
+    "first_air_date": "2023-01-10",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 204124,
+    "name": "Immoral Guild",
+    "title": "Immoral Guild: Futoku no Guild (Uncut)",
+    "overview": "Ace guard Kikuru Madan wishes to retire, but must train an eccentric group of female rookies who constantly find themselves tangled up by monsters.",
+    "poster_path": "/AgTy5IsOv1FAx02gunir8ZSiUxG.jpg",
+    "backdrop_path": "/AgTy5IsOv1FAx02gunir8ZSiUxG.jpg",
+    "media_type": "tv",
+    "vote_average": 7.5,
+    "first_air_date": "2022-10-05",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 221856,
+    "name": "Gushing over Magical Girls",
+    "title": "Gushing over Magical Girls (Uncut)",
+    "overview": "Hiiragi Utena is a shy middle-school girl who adores magical girls, but is unexpectedly transformed into a villainess with sadistic dominance powers.",
+    "poster_path": "/dqZENchTd7lp5zht7BdlqM7RBhD.jpg",
+    "backdrop_path": "/dqZENchTd7lp5zht7BdlqM7RBhD.jpg",
+    "media_type": "tv",
+    "vote_average": 8.1,
+    "first_air_date": "2024-01-03",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 138760,
+    "name": "Chained Soldier",
+    "title": "Chained Soldier: Mato Seihei no Slave",
+    "overview": "Mysterious portals reveal the demon realm Mato where peaches grant supernatural abilities exclusively to women. Yuuki becomes the servant slave of Captain Kyouka.",
+    "poster_path": "/5a9vaaLDAZTYjgfWIw7ZYhL1m1A.jpg",
+    "backdrop_path": "/5a9vaaLDAZTYjgfWIw7ZYhL1m1A.jpg",
+    "media_type": "tv",
+    "vote_average": 7.7,
+    "first_air_date": "2024-01-04",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 34484,
+    "name": "To Love Ru",
+    "title": "To Love Ru: Complete Uncut",
+    "overview": "Rito Yuuki is a high school student whose ordinary life is upended when Lala Satalin Deviluke, a glamorous alien princess, teleports directly into his bathtub.",
+    "poster_path": "/upxgNd7JdqbxUXDuEkgba18iG8F.jpg",
+    "backdrop_path": "/upxgNd7JdqbxUXDuEkgba18iG8F.jpg",
+    "media_type": "tv",
+    "vote_average": 7.6,
+    "first_air_date": "2008-04-04",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 45749,
+    "name": "To Love Ru Darkness",
+    "title": "To Love Ru Darkness: Uncensored",
+    "overview": "Lala's younger sister Momo initiates 'Operation Harem' to make Rito happy with an ensemble of alluring maidens while assassin Golden Darkness faces her past.",
+    "poster_path": "/7x8x6dl4leOSw6KGUcOrQew7Eua.jpg",
+    "backdrop_path": "/7x8x6dl4leOSw6KGUcOrQew7Eua.jpg",
+    "media_type": "tv",
+    "vote_average": 7.8,
+    "first_air_date": "2012-10-06",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 61793,
+    "name": "Trinity Seven",
+    "title": "Trinity Seven: The Seven Magicians",
+    "overview": "A mysterious phenomenon causes the sun to turn black and destroys Kasuga Arata's town. To rescue his cousin, Arata enrolls in the Royal Biblia Academy.",
+    "poster_path": "/rbETzzJLGIB2Bg6NwNekWTKfM6d.jpg",
+    "backdrop_path": "/rbETzzJLGIB2Bg6NwNekWTKfM6d.jpg",
+    "media_type": "tv",
+    "vote_average": 7.4,
+    "first_air_date": "2014-10-08",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 46518,
+    "name": "Date A Live",
+    "title": "Date A Live: Uncut",
+    "overview": "Spatial quakes ravage Eurasia caused by extra-dimensional Spirits. Shido Itsuka discovers the only way to neutralize their destructive powers is to make them fall in love with him.",
+    "poster_path": "/yHUDRf2e9FGeWXPsT5lVF3iCUwc.jpg",
+    "backdrop_path": "/yHUDRf2e9FGeWXPsT5lVF3iCUwc.jpg",
+    "media_type": "tv",
+    "vote_average": 7.8,
+    "first_air_date": "2013-04-06",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 34524,
+    "name": "Highschool of the Dead",
+    "title": "Highschool of the Dead: Drifters of the Dead",
+    "overview": "A sudden worldwide zombie pandemic erupts. Takashi Komuro and fellow high school survivors battle their way through hordes of infected across Japan.",
+    "poster_path": "/tqtd72674k19IfGYJ2wdGJGvXX.jpg",
+    "backdrop_path": "/tqtd72674k19IfGYJ2wdGJGvXX.jpg",
+    "media_type": "tv",
+    "vote_average": 7.7,
+    "first_air_date": "2010-07-05",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 68205,
+    "name": "Keijo!!!!!!!!",
+    "title": "Keijo!!!!!!!! (Uncensored)",
+    "overview": "Keijo is an exhilarating competitive sport where female athletes stand on floating water platforms and compete using only their hips and chest.",
+    "poster_path": "/9T7TT0w92RbeRP5QSnNq81HHxde.jpg",
+    "backdrop_path": "/9T7TT0w92RbeRP5QSnNq81HHxde.jpg",
+    "media_type": "tv",
+    "vote_average": 7.3,
+    "first_air_date": "2016-10-06",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+  {
+    "id": 82883,
+    "name": "Domestic Girlfriend",
+    "title": "Domestic Girlfriend: Uncut",
+    "overview": "Natsuo Fujii is secretly in love with his cheerful high school teacher Hina. After an unexpected encounter with Rui, his father remarries, bringing both sisters into his home.",
+    "poster_path": "/7S86pkMfatspJmXENcPZfgaKB33.jpg",
+    "backdrop_path": "/7S86pkMfatspJmXENcPZfgaKB33.jpg",
+    "media_type": "tv",
+    "vote_average": 7.4,
+    "first_air_date": "2019-01-12",
     "category": "ecchi_anime",
     "is_mature": true
   }
