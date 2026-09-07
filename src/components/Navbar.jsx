@@ -13,18 +13,26 @@ export default function Navbar({
   onOpenSettings,
   onOpenIPhoneModal
 }) {
-  const categories = [
+  const baseCategories = [
     { id: 'trending', label: 'Trending', icon: Flame },
     { id: 'hollywood', label: 'Hollywood', icon: Film },
     { id: 'hindi', label: 'Bollywood & Hindi', icon: Sparkles },
     { id: 'kdrama', label: '🇰🇷 K-Drama', icon: Tv },
     { id: 'anime', label: '🌸 Anime', icon: Sparkles },
-    { id: 'ecchi_anime', label: '🔞 18+ Anime', icon: Flame, is18: true },
     { id: 'mature', label: '🔞 18+ Cinema', icon: Flame, is18: true },
     { id: 'horror', label: '👻 Horror', icon: Skull },
     { id: 'series', label: 'Web Series', icon: Tv },
     { id: 'watchlist', label: 'Watchlist', icon: Heart },
   ];
+
+  const categories = isMasterMode
+    ? [
+        ...baseCategories.slice(0, 5),
+        { id: 'ecchi_anime', label: '🔞 Secret Hanime', icon: Flame, is18: true },
+        ...baseCategories.slice(5)
+      ]
+    : baseCategories;
+
 
   return (
     <header className="sticky top-0 z-40 glass-nav px-4 py-3 sm:px-8">

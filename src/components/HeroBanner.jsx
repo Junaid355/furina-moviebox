@@ -62,7 +62,13 @@ export default function HeroBanner({ items, item, onPlay, isWatchlisted, onToggl
           {isHindi && (
             <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-gray-950 text-[10px] font-black px-2.5 py-0.5 rounded-full shadow flex items-center gap-1">
               <span>🇮🇳</span>
-              <span>Hindi Dub Available</span>
+              <span>Hindi Audio</span>
+            </span>
+          )}
+          {(currentItem.category === 'anime' || currentItem.isAnime) && (
+            <span className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full shadow flex items-center gap-1">
+              <span>🇯🇵</span>
+              <span>SUB / 🎙️ DUB</span>
             </span>
           )}
           {isSeries ? (

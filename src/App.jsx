@@ -23,6 +23,7 @@ import { Flame, Film, Tv, Sparkles, Heart, RefreshCw, Shield, Settings, ChevronD
 
 export default function App() {
   const [activeCategory, setActiveCategory] = useState('trending');
+  const [animeAudioFilter, setAnimeAudioFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [items, setItems] = useState([]);
   const [heroItem, setHeroItem] = useState(null);
@@ -107,8 +108,11 @@ export default function App() {
     if (cat === 'series') return await fetchTrendingSeries(pageNum);
     if (cat === 'kdrama') return await fetchKDramas(pageNum);
     if (cat === 'horror') return await fetchHorrorMovies(pageNum);
-    if (cat === 'anime') return await fetchAnime(pageNum);
-    if (cat === 'ecchi_anime' || cat === 'mature_anime') return await fetchEcchiAnime(pageNum);
+    if (cat === 'anime') return await fetchAnime(pageNum, animeAudioFilter);
+    if (cat === 'ecchi_anime' || cat === 'mature_anime') {
+      if (!isMasterMode) return await fetchTrendingAll(pageNum);
+      return await fetchEcchiAnime(pageNum);
+    }
     if (cat === 'mature') return await fetchMatureMovies(pageNum);
     if (cat === 'watchlist') return watchlist;
     return [];
@@ -135,7 +139,7 @@ export default function App() {
       }
       setLoading(false);
     });
-  }, [activeCategory, searchQuery, includeMature, watchlist.length]);
+  }, [activeCategory, searchQuery, animeAudioFilter, includeMature, isMasterMode, watchlist.length]);
 
   // Load More (Pagination)
   const handleLoadMore = async () => {
@@ -261,30 +265,53 @@ export default function App() {
             </div>
           )}
 
-          {/* Anime Quick Sub / Dub / 18+ Filter Chips */}
+          {/* Anime Quick Sub / Dub Filter Chips (Zero 18+ Hanime in normal anime) */}
           {activeCategory === 'anime' && !searchQuery && (
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 text-xs">
               <span className="text-cyan-200/50 text-[11px] whitespace-nowrap font-medium">Anime Audio:</span>
               <button
-                onClick={() => setSearchQuery('dubbed')}
-                className="px-3 py-1 rounded-full bg-blue-500/15 border border-blue-500/40 text-blue-300 font-bold whitespace-nowrap hover:bg-blue-500/25 transition flex items-center gap-1"
+                onClick={() => setAnimeAudioFilter('all')}
+                className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border ${
+                  animeAudioFilter === 'all'
+                    ? 'bg-cyan-500 text-gray-950 border-cyan-400 shadow'
+                    : 'bg-cyan-500/15 border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/25'
+                }`}
+              >
+                <span>⭐</span>
+                <span>All Popular Anime</span>
+              </button>
+              <button
+                onClick={() => setAnimeAudioFilter('english')}
+                className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border ${
+                  animeAudioFilter === 'english'
+                    ? 'bg-blue-500 text-white border-blue-400 shadow'
+                    : 'bg-blue-500/15 border-blue-500/40 text-blue-300 hover:bg-blue-500/25'
+                }`}
               >
                 <span>🎙️</span>
                 <span>English Dubbed</span>
               </button>
               <button
-                onClick={() => setSearchQuery('hindi dubbed anime')}
-                className="px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-300 font-bold whitespace-nowrap hover:bg-amber-500/25 transition flex items-center gap-1"
+                onClick={() => setAnimeAudioFilter('hindi')}
+                className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border ${
+                  animeAudioFilter === 'hindi'
+                    ? 'bg-amber-500 text-gray-950 border-amber-400 shadow'
+                    : 'bg-amber-500/15 border-amber-500/40 text-amber-300 hover:bg-amber-500/25'
+                }`}
               >
                 <span>🇮🇳</span>
                 <span>Hindi Dubbed Anime</span>
               </button>
               <button
-                onClick={() => setActiveCategory('ecchi_anime')}
-                className="px-3 py-1 rounded-full bg-rose-500/15 border border-rose-500/40 text-rose-300 font-bold whitespace-nowrap hover:bg-rose-500/25 transition flex items-center gap-1"
+                onClick={() => setAnimeAudioFilter('sub')}
+                className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border ${
+                  animeAudioFilter === 'sub'
+                    ? 'bg-purple-500 text-white border-purple-400 shadow'
+                    : 'bg-purple-500/15 border-purple-500/40 text-purple-300 hover:bg-purple-500/25'
+                }`}
               >
-                <span>🔞</span>
-                <span>18+ Hanime Vault</span>
+                <span>🇯🇵</span>
+                <span>Japanese Subbed</span>
               </button>
             </div>
           )}
@@ -401,8 +428,8 @@ export default function App() {
           { id: 'hollywood', label: 'Movies', icon: Film },
           { id: 'hindi', label: 'Hindi', icon: Sparkles },
           { id: 'anime', label: 'Anime', icon: Sparkles },
-          { id: 'ecchi_anime', label: '18+ Anime', icon: Flame },
           { id: 'mature', label: '18+ Cinema', icon: Flame },
+          ...(isMasterMode ? [{ id: 'ecchi_anime', label: '18+ Hanime', icon: Flame }] : []),
           { id: 'watchlist', label: 'Saved', icon: Heart },
         ].map((tab) => {
           const Icon = tab.icon;

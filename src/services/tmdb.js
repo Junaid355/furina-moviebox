@@ -144,148 +144,687 @@ export async function fetchHollywoodMovies(page = 1) {
 }
 
 
-export const CURATED_HINDI_DUBBED_BLOCKBUSTERS = [
+export const CURATED_BOLLYWOOD_BLOCKBUSTERS = [
   {
-    id: 299534,
-    title: 'Avengers: Endgame (Hindi Dubbed)',
-    name: 'Avengers: Endgame (Hindi Dubbed)',
-    overview: 'After the devastating events of Avengers: Infinity War, the universe is in ruins. With the help of remaining allies, the Avengers assemble once more in Hindi audio.',
-    poster_path: '/or06FN3Dka5tukK1e9sl16pB3iy.jpg',
-    backdrop_path: '/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg',
-    media_type: 'movie',
-    vote_average: 8.3,
-    release_date: '2019-04-24',
-    category: 'hindi',
-    isHindiDubbed: true,
-    original_language: 'hi'
+    "id": 20453,
+    "title": "3 Idiots",
+    "name": "3 Idiots",
+    "overview": "Rascal. Joker. Dreamer. Genius... You've never met a college student quite like \"Rancho.\" From the moment he arrives at India's most prestigious university, Rancho's outlandish schemes turn the campus upside down—along with the lives of his two newfound best friends. Together, they make life miserable for \"Virus,\" the school’s uptight and heartless dean. But when Rancho catches the eye of the dean's daughter, Virus sets his sights on flunking out the \"3 idiots\" once and for all.",
+    "poster_path": "/66A9MqXOyVFCssoloscw79z8Tew.jpg",
+    "backdrop_path": "/8gT3UKtglLVpu0YfccwbmXZ5Eis.jpg",
+    "media_type": "movie",
+    "vote_average": 8.0,
+    "release_date": "2009-12-23",
+    "first_air_date": "",
+    "original_language": "hi",
+    "category": "hindi"
   },
   {
-    id: 533535,
-    title: 'Deadpool & Wolverine (Hindi Dubbed)',
-    name: 'Deadpool & Wolverine (Hindi Dubbed)',
-    overview: 'Wade Wilson and Wolverine suit up for an action-packed, fourth-wall breaking adventure across the multiverse in full Hindi audio.',
-    poster_path: '/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg',
-    backdrop_path: '/yDHYTjA3R0neXjgu144Y1fX3AcA.jpg',
-    media_type: 'movie',
-    vote_average: 7.7,
-    release_date: '2024-07-24',
-    category: 'hindi',
-    isHindiDubbed: true,
-    original_language: 'hi'
+    "id": 360814,
+    "title": "Dangal",
+    "name": "Dangal",
+    "overview": "Dangal is an extraordinary true story based on the life of Mahavir Singh and his two daughters, Geeta and Babita Phogat. The film traces the inspirational journey of a father who trains his daughters to become world class wrestlers.",
+    "poster_path": "/cJRPOLEexI7qp2DKtFfCh7YaaUG.jpg",
+    "backdrop_path": "/l0fNAHLOFReQJsxCOmGWvJDnimn.jpg",
+    "media_type": "movie",
+    "vote_average": 7.9,
+    "release_date": "2016-12-21",
+    "first_air_date": "",
+    "original_language": "hi",
+    "category": "hindi"
   },
   {
-    id: 634649,
-    title: 'Spider-Man: No Way Home (Hindi Dubbed)',
-    name: 'Spider-Man: No Way Home (Hindi Dubbed)',
-    overview: 'Peter Parker seeks Doctor Strange help to restore his secret identity, unleashing villains from across the multiverse in Hindi.',
-    poster_path: '/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg',
-    backdrop_path: '/14QbnygCuTO0vl7CAFmPf1fgZfV.jpg',
-    media_type: 'movie',
-    vote_average: 8.0,
-    release_date: '2021-12-15',
-    category: 'hindi',
-    isHindiDubbed: true,
-    original_language: 'hi'
+    "id": 1112426,
+    "title": "Stree 2",
+    "name": "Stree 2",
+    "overview": "Following the events of 'Stree', the town of Chanderi is being haunted again. This time, women are mysteriously abducted by a terrifying headless entity. Once again, it's up to Vicky and friends to save their town and loved ones.",
+    "poster_path": "/nfnhwfUEFuSOxxf4jDdBlY6Lccw.jpg",
+    "backdrop_path": "/fVV0A67kDjTTQ4CvUn8LoletRmI.jpg",
+    "media_type": "movie",
+    "vote_average": 6.7,
+    "release_date": "2024-08-15",
+    "first_air_date": "",
+    "original_language": "hi",
+    "category": "hindi"
   },
   {
-    id: 76600,
-    title: 'Avatar: The Way of Water (Hindi Dubbed)',
-    name: 'Avatar: The Way of Water (Hindi Dubbed)',
-    overview: 'Jake Sully lives with his newfound family formed on the extrasolar moon Pandora. An old threat returns, forcing a difficult war in Hindi.',
-    poster_path: '/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg',
-    backdrop_path: '/s16H6tpK2utvwDtzZ8Qy4qm5Emw.jpg',
-    media_type: 'movie',
-    vote_average: 7.7,
-    release_date: '2022-12-14',
-    category: 'hindi',
-    isHindiDubbed: true,
-    original_language: 'hi'
+    "id": 872906,
+    "title": "Jawan",
+    "name": "Jawan",
+    "overview": "An emotional journey of a prison warden, driven by a personal vendetta while keeping up to a promise made years ago, recruits inmates to commit outrageous crimes that shed light on corruption and injustice, in an attempt to get even with his past,  and that leads him to an unexpected reunion.",
+    "poster_path": "/jFt1gS4BGHlK8xt76Y81Alp4dbt.jpg",
+    "backdrop_path": "/5LtSjMNw6j3LkG29Oa4O0iY5U8.jpg",
+    "media_type": "movie",
+    "vote_average": 7.0,
+    "release_date": "2023-09-07",
+    "first_air_date": "",
+    "original_language": "hi",
+    "category": "hindi"
   },
   {
-    id: 872585,
-    title: 'Oppenheimer (Hindi Dubbed)',
-    name: 'Oppenheimer (Hindi Dubbed)',
-    overview: 'The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb during World War II in Hindi.',
-    poster_path: '/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg',
-    backdrop_path: '/fm6KqXpk3M2HVveHwCrBSSBaO0V.jpg',
-    media_type: 'movie',
-    vote_average: 8.1,
-    release_date: '2023-07-19',
-    category: 'hindi',
-    isHindiDubbed: true,
-    original_language: 'hi'
+    "id": 864692,
+    "title": "Pathaan",
+    "name": "Pathaan",
+    "overview": "A soldier caught by enemies and presumed dead comes back to complete his mission, accompanied by old companions and foes.",
+    "poster_path": "/arf00BkwvXo0CFKbaD9OpqdE4Nu.jpg",
+    "backdrop_path": "/9wRAIQeOv2qzcgpfvA4dYZKeezl.jpg",
+    "media_type": "movie",
+    "vote_average": 6.4,
+    "release_date": "2023-01-25",
+    "first_air_date": "",
+    "original_language": "hi",
+    "category": "hindi"
   },
   {
-    id: 823464,
-    title: 'Godzilla x Kong: The New Empire (Hindi Dubbed)',
-    name: 'Godzilla x Kong: The New Empire (Hindi Dubbed)',
-    overview: 'Following their explosive showdown, Godzilla and Kong must reunite against a colossal undiscovered threat hidden within our world in Hindi.',
-    poster_path: '/z1p34vh7dEOnLDmyCrlUVLuoDzd.jpg',
-    backdrop_path: '/qrGtVFxaD8c7et0j3hxYneAcytF.jpg',
-    media_type: 'movie',
-    vote_average: 7.2,
-    release_date: '2024-03-27',
-    category: 'hindi',
-    isHindiDubbed: true,
-    original_language: 'hi'
+    "id": 801688,
+    "title": "Kalki 2898-AD",
+    "name": "Kalki 2898-AD",
+    "overview": "In the year 2898 AD, around 6000 years after Kurukshetra war, Ashwatthama gears up for his final battle of redemption at the sign of hope in a dystopian world and Bhairava, a wisecracking and self-interested bounty hunter, tired of the perilous life becomes the hurdle in the process.",
+    "poster_path": "/rstcAnBeCkxNQjNp3YXrF6IP1tW.jpg",
+    "backdrop_path": "/o8XSR1SONnjcsv84NRu6Mwsl5io.jpg",
+    "media_type": "movie",
+    "vote_average": 6.4,
+    "release_date": "2024-06-26",
+    "first_air_date": "",
+    "original_language": "te",
+    "category": "hindi"
   },
   {
-    id: 1022789,
-    title: 'Inside Out 2 (Hindi Dubbed)',
-    name: 'Inside Out 2 (Hindi Dubbed)',
-    overview: 'Teenager Riley mind headquarters undergoes sudden demolition for new emotions like Anxiety and Envy in Hindi audio.',
-    poster_path: '/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg',
-    backdrop_path: '/stKGOm8zToLQI0ALFL6LDJuTYk5.jpg',
-    media_type: 'movie',
-    vote_average: 7.6,
-    release_date: '2024-06-11',
-    category: 'hindi',
-    isHindiDubbed: true,
-    original_language: 'hi'
+    "id": 12259,
+    "title": "Sholay",
+    "name": "Sholay",
+    "overview": "After his family is slain by notorious bandit Gabbar Singh, former Inspector Thakur Baldev Singh enlists low-level outlaws Jai and Veeru to capture Gabbar and seek revenge.",
+    "poster_path": "/ya9bwgqA4eNl5bQ9QqS0jcmRoBS.jpg",
+    "backdrop_path": "/8aYAfAPolsRFrHbP1rafeSgg2Ew.jpg",
+    "media_type": "movie",
+    "vote_average": 7.1,
+    "release_date": "1975-08-15",
+    "first_air_date": "",
+    "original_language": "hi",
+    "category": "hindi"
   },
   {
-    id: 385687,
-    title: 'Fast X (Hindi Dubbed)',
-    name: 'Fast X (Hindi Dubbed)',
-    overview: 'Dom Toretto and his family confront the most lethal opponent they have ever faced: a terrifying threat emerging from the past in Hindi.',
-    poster_path: '/fiVW06jE7z9YnO4trhaMEdclSiC.jpg',
-    backdrop_path: '/4XM8DUTQb3lhLemJC51Jx4a2EuA.jpg',
-    media_type: 'movie',
-    vote_average: 7.1,
-    release_date: '2023-05-17',
-    category: 'hindi',
-    isHindiDubbed: true,
-    original_language: 'hi'
+    "id": 1029827,
+    "title": "Drishyam 2",
+    "name": "Drishyam 2",
+    "overview": "7 years after the case related to Vijay Salgaonkar and his family was closed, a series of unexpected events bring truth to light that threatens to change everything for the Salgaonkars. Can Vijay save his family this time?",
+    "poster_path": "/wk8Vu0DI0MiNLaXXiVqAwjLRKL5.jpg",
+    "backdrop_path": "/498aYGlnvjvoiqXYhCNHrZERi4l.jpg",
+    "media_type": "movie",
+    "vote_average": 8.0,
+    "release_date": "2022-11-18",
+    "first_air_date": "",
+    "original_language": "hi",
+    "category": "hindi"
   },
   {
-    id: 603692,
-    title: 'John Wick: Chapter 4 (Hindi Dubbed)',
-    name: 'John Wick: Chapter 4 (Hindi Dubbed)',
-    overview: 'John Wick uncovers a path to defeating The High Table, facing off against a new enemy with powerful alliances across the globe in Hindi.',
-    poster_path: '/vZloFAK7NKnMGKEslUsZ2VoNmQm.jpg',
-    backdrop_path: '/7I6VUdPj6tQECNHdviJkUHD2389.jpg',
-    media_type: 'movie',
-    vote_average: 7.7,
-    release_date: '2023-03-22',
-    category: 'hindi',
-    isHindiDubbed: true,
-    original_language: 'hi'
+    "id": 348892,
+    "title": "Bajrangi Bhaijaan",
+    "name": "Bajrangi Bhaijaan",
+    "overview": "A young mute girl from Pakistan loses herself in India with no way to head back. A devoted man with a magnanimous spirit undertakes the task to get her back to her motherland and unite her with her family.",
+    "poster_path": "/vhlliI7HZZlWfo5d6CiyfBAGLrW.jpg",
+    "backdrop_path": "/n9QCm8uagvmXH476u5qFQsW8HkU.jpg",
+    "media_type": "movie",
+    "vote_average": 7.8,
+    "release_date": "2015-07-17",
+    "first_air_date": "",
+    "original_language": "hi",
+    "category": "hindi"
   },
   {
-    id: 1726,
-    title: 'Iron Man (Hindi Dubbed)',
-    name: 'Iron Man (Hindi Dubbed)',
-    overview: 'After being held captive in an Afghan cave, billionaire engineer Tony Stark creates a unique weaponized suit of armor to fight evil in Hindi.',
-    poster_path: '/78lPtwv72eTNqFW9COBYI0dWDJa.jpg',
-    backdrop_path: '/cyecB7godJ6kNHWh07ZQ976FDx0.jpg',
-    media_type: 'movie',
-    vote_average: 7.6,
-    release_date: '2008-04-30',
-    category: 'hindi',
-    isHindiDubbed: true,
-    original_language: 'hi'
+    "id": 297222,
+    "title": "PK",
+    "name": "PK",
+    "overview": "A stranger in the city asks questions no one has asked before. Known only by his initials, the man's innocent questions and childlike curiosity take him on a journey of love, laughter and letting go.",
+    "poster_path": "/z2x2Y4tncefsIU7h82gmUM5vnBJ.jpg",
+    "backdrop_path": "/gxfvtq5eYiClS2X7hxAAPBNrbWA.jpg",
+    "media_type": "movie",
+    "vote_average": 7.7,
+    "release_date": "2014-12-18",
+    "first_air_date": "",
+    "original_language": "hi",
+    "category": "hindi"
+  },
+  {
+    "id": 596650,
+    "title": "Chhichhore",
+    "name": "Chhichhore",
+    "overview": "Following a group of friends from university as they progress into middle-age life and go their own separate ways.",
+    "poster_path": "/cGDPQtQ5igtPMt3oJ6BCAor6dFp.jpg",
+    "backdrop_path": "/32RgjX5oniUvL9UpU8TiYlmaydC.jpg",
+    "media_type": "movie",
+    "vote_average": 7.7,
+    "release_date": "2019-09-05",
+    "first_air_date": "",
+    "original_language": "hi",
+    "category": "hindi"
+  },
+  {
+    "id": 538858,
+    "title": "Tumbbad",
+    "name": "Tumbbad",
+    "overview": "India, 1918. On the outskirts of Tumbbad, a cursed village where it always rains, Vinayak, along with his mother and his brother, care of a mysterious old woman who keeps the secret of an ancestral treasure that Vinayak gets obsessed with.",
+    "poster_path": "/vzjZAKozbDplHWcQXbXo0APKxst.jpg",
+    "backdrop_path": "/l0YKBu3LaehIFzBNjseLjx7MbaN.jpg",
+    "media_type": "movie",
+    "vote_average": 7.6,
+    "release_date": "2018-10-12",
+    "first_air_date": "",
+    "original_language": "hi",
+    "category": "hindi"
+  },
+  {
+    "id": 117691,
+    "title": "Gangs of Wasseypur - Part 1",
+    "name": "Gangs of Wasseypur - Part 1",
+    "overview": "In 1970s India, Sardar Khan vows to take revenge on the man who killed his father decades earlier.",
+    "poster_path": "/4nbvLoPDftqXV14w5Mv14iqgVrt.jpg",
+    "backdrop_path": "/eByyqLrrdYySwYjus5RVCgbCNOD.jpg",
+    "media_type": "movie",
+    "vote_average": 7.1,
+    "release_date": "2012-06-22",
+    "first_air_date": "",
+    "original_language": "hi",
+    "category": "hindi"
+  },
+  {
+    "id": 1233531,
+    "title": "Article 370",
+    "name": "Article 370",
+    "overview": "Ahead of a major constitutional decision which rendered the Article 370 of the Indian state ineffective, special agent Zooni Haksar is tasked with a secret mission to quell violence in the conflict-ridden region.",
+    "poster_path": "/9VTemjHMpyxzfC3JsG2aFy8Bf9Y.jpg",
+    "backdrop_path": "/qYXnMDuwaApMRtV8JunFmieZo8R.jpg",
+    "media_type": "movie",
+    "vote_average": 7.1,
+    "release_date": "2024-02-23",
+    "first_air_date": "",
+    "original_language": "hi",
+    "category": "hindi"
+  },
+  {
+    "id": 781732,
+    "title": "Animal",
+    "name": "Animal",
+    "overview": "A son undergoes a remarkable transformation as the bond with his father begins to fracture, and he becomes consumed by a quest for vengeance.",
+    "poster_path": "/hr9rjR4JWoZvq7872t2k64u08bT.jpg",
+    "backdrop_path": "/2meovGzM9K0nS6zU9yJtU6q9p9G.jpg",
+    "media_type": "movie",
+    "vote_average": 6.8,
+    "release_date": "2023-12-01",
+    "first_air_date": "",
+    "original_language": "hi",
+    "category": "hindi"
+  },
+  {
+    "id": 496331,
+    "title": "Brahmāstra: Part One – Shiva",
+    "name": "Brahmāstra: Part One – Shiva",
+    "overview": "Shiva discovers he has a divine connection to the element of fire and holds the power to awaken the Brahmāstra, a supernatural weapon of enormous power.",
+    "poster_path": "/x61qauH8g10vV2wZgB1K45l2C3.jpg",
+    "backdrop_path": "/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg",
+    "media_type": "movie",
+    "vote_average": 6.6,
+    "release_date": "2022-09-09",
+    "first_air_date": "",
+    "original_language": "hi",
+    "category": "hindi"
   }
 ];
+
+export const CURATED_ENGLISH_DUBBED_ANIME = [
+  {
+    "id": 1429,
+    "title": "Attack on Titan",
+    "name": "Attack on Titan",
+    "overview": "100 years ago, the last remnants of humanity were forced to retreat behind the towering walls of a fortified city to escape the massive, man-eating Titans that roamed the land outside their fortress. Only the members of the Scouting Legion dared to stray beyond the safety of the walls – but even those brave warriors seldom returned alive. Those within the city clung to the illusion of a peaceful existence until the day that dream was shattered, and their slim chance at survival was reduced to one horrifying choice: kill – or be devoured!",
+    "poster_path": "/hTP1DtLGFamjfu8WqjnuQdP1n4i.jpg",
+    "backdrop_path": "/rqbCbjB19amtOtFQbb3K2lgm2zv.jpg",
+    "media_type": "tv",
+    "vote_average": 8.7,
+    "release_date": "2013-04-07",
+    "first_air_date": "2013-04-07",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "english"
+  },
+  {
+    "id": 13916,
+    "title": "Death Note",
+    "name": "Death Note",
+    "overview": "Light Yagami is an ace student with great prospects—and he’s bored out of his mind. But all that changes when he finds the Death Note, a notebook dropped by a rogue Shinigami death god. Any human whose name is written in the notebook dies, and Light has vowed to use the power of the Death Note to rid the world of evil. But will Light succeed in his noble goal, or will the Death Note turn him into the very thing he fights against?",
+    "poster_path": "/tCZFfYTIwrR7n94J6G14Y4hAFU6.jpg",
+    "backdrop_path": "/z8IPicmEKXUO4I2UDdMEqw7RqOE.jpg",
+    "media_type": "tv",
+    "vote_average": 8.6,
+    "release_date": "2006-10-04",
+    "first_air_date": "2006-10-04",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "english"
+  },
+  {
+    "id": 85937,
+    "title": "Demon Slayer: Kimetsu no Yaiba",
+    "name": "Demon Slayer: Kimetsu no Yaiba",
+    "overview": "After a demon attack leaves his family slain and his sister cursed, Tanjiro embarks upon a perilous journey to find a cure and avenge those he's lost.",
+    "poster_path": "/xUfRZu2mi8jH6SzQEJGP6tjBuYj.jpg",
+    "backdrop_path": "/3GQKYh6Trm8pxd2AypovoYQf4Ay.jpg",
+    "media_type": "tv",
+    "vote_average": 8.6,
+    "release_date": "2019-04-06",
+    "first_air_date": "2019-04-06",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "english"
+  },
+  {
+    "id": 95479,
+    "title": "JUJUTSU KAISEN",
+    "name": "JUJUTSU KAISEN",
+    "overview": "Yuji Itadori is a boy with tremendous physical strength, though he lives a completely ordinary high school life. One day, to save a classmate who has been attacked by curses, he eats the finger of Ryomen Sukuna, taking the curse into his own soul. From then on, he shares one body with Ryomen Sukuna. Guided by the most powerful of sorcerers, Satoru Gojo, Itadori is admitted to Tokyo Jujutsu High School, an organization that fights the curses... and thus begins the heroic tale of a boy who became a curse to exorcise a curse, a life from which he could never turn back.",
+    "poster_path": "/6qQzMJG27XOJsyAEEIisoJB45j2.jpg",
+    "backdrop_path": "/qpin8cASXEVtwhzNsprHYFiOAGk.jpg",
+    "media_type": "tv",
+    "vote_average": 8.6,
+    "release_date": "2020-10-03",
+    "first_air_date": "2020-10-03",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "english"
+  },
+  {
+    "id": 65930,
+    "title": "My Hero Academia",
+    "name": "My Hero Academia",
+    "overview": "Izuku has dreamt of being a hero all his life—a lofty goal for anyone, but especially challenging for a kid with no superpowers. That’s right, in a world where eighty percent of the population has some kind of super-powered \"quirk,\" Izuku was unlucky enough to be born completely normal. But that’s not enough to stop him from enrolling in one of the world’s most prestigious hero academies.",
+    "poster_path": "/phuYuzqWW9ru8EA3HVjE9W2Rr3M.jpg",
+    "backdrop_path": "/ol0H2DGp4ifBHA4JDlCpwJWxnY2.jpg",
+    "media_type": "tv",
+    "vote_average": 8.6,
+    "release_date": "2016-04-03",
+    "first_air_date": "2016-04-03",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "english"
+  },
+  {
+    "id": 127532,
+    "title": "Solo Leveling",
+    "name": "Solo Leveling",
+    "overview": "They say whatever doesn’t kill you makes you stronger, but that’s not the case for the world’s weakest hunter Sung Jinwoo. After being brutally slaughtered by monsters in a high-ranking dungeon, Jinwoo came back with the System, a program only he could see, that’s leveling him up in every way. Now, he’s inspired to discover the secrets behind his powers and the dungeon that spawned them.",
+    "poster_path": "/geCRueV3ElhRTr0xtJuEWJt6dJ1.jpg",
+    "backdrop_path": "/xMNH87maNLt9n2bMDYeI6db5VFm.jpg",
+    "media_type": "tv",
+    "vote_average": 8.7,
+    "release_date": "2024-01-07",
+    "first_air_date": "2024-01-07",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "english"
+  },
+  {
+    "id": 114410,
+    "title": "Chainsaw Man",
+    "name": "Chainsaw Man",
+    "overview": "Denji has a simple dream—to live a happy and peaceful life, spending time with a girl he likes. This is a far cry from reality, however, as Denji is forced by the yakuza into killing devils in order to pay off his crushing debts. Using his pet devil Pochita as a weapon, he is ready to do anything for a bit of cash.",
+    "poster_path": "/iFM1dyFi0rByvEomEkmm7NpQeeb.jpg",
+    "backdrop_path": "/5DUMPBSnHOZsbBv81GFXZXvDpo6.jpg",
+    "media_type": "tv",
+    "vote_average": 8.5,
+    "release_date": "2022-10-12",
+    "first_air_date": "2022-10-12",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "english"
+  },
+  {
+    "id": 30991,
+    "title": "Cowboy Bebop",
+    "name": "Cowboy Bebop",
+    "overview": "In 2071, roughly fifty years after an accident with a hyperspace gateway made the Earth almost uninhabitable, humanity has colonized most of the rocky planets and moons of the Solar System. Amid a rising crime rate, the Inter Solar System Police (ISSP) set up a legalized contract system, in which registered bounty hunters, also referred to as \"Cowboys\", chase criminals and bring them in alive in return for a reward.",
+    "poster_path": "/xDiXDfZwC6XYC6fxHI1jl3A3Ill.jpg",
+    "backdrop_path": "/A4PHx94G7mvM3b8vsDJ5HEaQ6uv.jpg",
+    "media_type": "tv",
+    "vote_average": 8.5,
+    "release_date": "1998-04-03",
+    "first_air_date": "1998-04-03",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "english"
+  },
+  {
+    "id": 46260,
+    "title": "Naruto",
+    "name": "Naruto",
+    "overview": "Naruto Uzumaki, a mischievous adolescent ninja, struggles as he searches for recognition and dreams of becoming the Hokage, the village's leader and strongest ninja.",
+    "poster_path": "/xppeysfvDKVx775MFuH8Z9BlpMk.jpg",
+    "backdrop_path": "/5F0HVEgkgP99fEWDjPyikGt9jQi.jpg",
+    "media_type": "tv",
+    "vote_average": 8.4,
+    "release_date": "2002-10-03",
+    "first_air_date": "2002-10-03",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "english"
+  },
+  {
+    "id": 30984,
+    "title": "Bleach",
+    "name": "Bleach",
+    "overview": "For as long as he can remember, Ichigo Kurosaki has been able to see ghosts. But when he meets Rukia, a Soul Reaper who battles evil spirits known as Hollows, he finds his life is changed forever. Now, with a newfound wealth of spiritual energy, Ichigo discovers his true calling: to protect the living and the dead from evil.",
+    "poster_path": "/2EewmxXe72ogD0EaWM8gqa0ccIw.jpg",
+    "backdrop_path": "/o0NsbcIvsllg6CJX0FBFY8wWbsn.jpg",
+    "media_type": "tv",
+    "vote_average": 8.4,
+    "release_date": "2004-10-05",
+    "first_air_date": "2004-10-05",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "english"
+  },
+  {
+    "id": 111110,
+    "title": "ONE PIECE",
+    "name": "ONE PIECE",
+    "overview": "With his straw hat and ragtag crew, young pirate Monkey D. Luffy goes on an epic voyage for treasure.",
+    "poster_path": "/blWCPEqDGLBuLB9u89CxP9ORQP4.jpg",
+    "backdrop_path": "/qD211Hb5XwFxrszzBBe5EUYJerh.jpg",
+    "media_type": "tv",
+    "vote_average": 8.1,
+    "release_date": "2023-08-31",
+    "first_air_date": "2023-08-31",
+    "original_language": "en",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "english"
+  },
+  {
+    "id": 105248,
+    "title": "Cyberpunk: Edgerunners",
+    "name": "Cyberpunk: Edgerunners",
+    "overview": "In a dystopia riddled with corruption and cybernetic implants, a talented but reckless street kid strives to become a mercenary outlaw — an edgerunner.",
+    "poster_path": "/lqcDVZ8pyk08AVftMBildDR3QUK.jpg",
+    "backdrop_path": "/w0lU7U89Fm4K8BQD4hJQpQthxu9.jpg",
+    "media_type": "tv",
+    "vote_average": 8.5,
+    "release_date": "2022-09-13",
+    "first_air_date": "2022-09-13",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "english"
+  },
+  {
+    "id": 120089,
+    "title": "SPY x FAMILY",
+    "name": "SPY x FAMILY",
+    "overview": "A spy, an assassin and a telepath come together to pose as a family, each for their own reasons, while hiding their true identities from each other.",
+    "poster_path": "/7NAvPYPAu7MeHwP8E9sn81PqsRh.jpg",
+    "backdrop_path": "/lysUnU6V0VfcthDbviuVlIqgHOR.jpg",
+    "media_type": "tv",
+    "vote_average": 8.5,
+    "release_date": "2022-04-09",
+    "first_air_date": "2022-04-09",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "english"
+  },
+  {
+    "id": 12971,
+    "title": "Dragon Ball Z",
+    "name": "Dragon Ball Z",
+    "overview": "Now happily married and with a son, martial arts champion Goku must defend Earth from a series of extraterrestrial invaders bent on destruction.",
+    "poster_path": "/oQ5CnVj3TRifXl2bIOri6H6rfNe.jpg",
+    "backdrop_path": "/ydf1CeiBLfdxiyNTpskM0802TKl.jpg",
+    "media_type": "tv",
+    "vote_average": 8.4,
+    "release_date": "1989-04-26",
+    "first_air_date": "1989-04-26",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "english"
+  },
+  {
+    "id": 88803,
+    "title": "Vinland Saga",
+    "name": "Vinland Saga",
+    "overview": "For a thousand years, the Vikings have made quite a name and reputation for themselves as the strongest families with a thirst for violence. Thorfinn, the son of one of the Vikings' greatest warriors, spends his boyhood in a battlefield enhancing his skills in his adventure to redeem his most-desired revenge after his father was murdered.",
+    "poster_path": "/vUHlpA5c1NXkds59reY3HMb4Abs.jpg",
+    "backdrop_path": "/pSLuy0OfN1QblifDVoEhAvst4et.jpg",
+    "media_type": "tv",
+    "vote_average": 8.5,
+    "release_date": "2019-07-08",
+    "first_air_date": "2019-07-08",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "english"
+  },
+  {
+    "id": 61374,
+    "title": "Tokyo Ghoul",
+    "name": "Tokyo Ghoul",
+    "overview": "Ken Kaneki, a bookworm college student, meets Rize, a girl his own age with whom he shares many interests.",
+    "poster_path": "/1m4RlC9BTCbyY549TOdVQ5NRPcR.jpg",
+    "backdrop_path": "/jnwRlthXIgJB75Mt9GEl93Dczki.jpg",
+    "media_type": "tv",
+    "vote_average": 8.3,
+    "release_date": "2014-07-04",
+    "first_air_date": "2014-07-04",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "english"
+  },
+  {
+    "id": 45952,
+    "title": "Hunter x Hunter",
+    "name": "Hunter x Hunter",
+    "overview": "Gon Freecss discovers that the father he had always been told was dead was actually alive the whole time. Ging is a famous Hunter: an individual who has proven themself an elite member of humanity. Gon becomes determined to follow in his father's footsteps, pass the rigorous Hunter Examination.",
+    "poster_path": "/eobAuhCJA8oRp814V67WhezVXtQ.jpg",
+    "backdrop_path": "/575sxZXNNulSlIz7DvtWH5r4lkC.jpg",
+    "media_type": "tv",
+    "vote_average": 8.4,
+    "release_date": "1999-10-16",
+    "first_air_date": "1999-10-16",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "english"
+  },
+  {
+    "id": 31724,
+    "title": "Code Geass: Lelouch of the Rebellion",
+    "name": "Code Geass: Lelouch of the Rebellion",
+    "overview": "Japan has been invaded and conquered by the Britannian Empire. Japan is now known as Area 11 and its citizens known as Elevens. The Britannian Empire takes away Japan's autonomous power and imposes its rule through the use of Knightmares. The Empire's rule has never faltered, but cracks have begun to show...",
+    "poster_path": "/x316WCogkeIwNY4JR8zTCHbI2nQ.jpg",
+    "backdrop_path": "/5hS2OIuZSKGkR8R5l3bY5zh04Ce.jpg",
+    "media_type": "tv",
+    "vote_average": 8.3,
+    "release_date": "2006-10-05",
+    "first_air_date": "2006-10-05",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "english"
+  }
+];
+
+export const CURATED_HINDI_DUBBED_ANIME = [
+  {
+    "id": 12971,
+    "title": "Dragon Ball Z",
+    "name": "Dragon Ball Z",
+    "overview": "Now happily married and with a son, martial arts champion Goku must defend Earth from a series of extraterrestrial invaders bent on destruction.",
+    "poster_path": "/oQ5CnVj3TRifXl2bIOri6H6rfNe.jpg",
+    "backdrop_path": "/ydf1CeiBLfdxiyNTpskM0802TKl.jpg",
+    "media_type": "tv",
+    "vote_average": 8.4,
+    "release_date": "1989-04-26",
+    "first_air_date": "1989-04-26",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 46260,
+    "title": "Naruto",
+    "name": "Naruto",
+    "overview": "Naruto Uzumaki, a mischievous adolescent ninja, struggles as he searches for recognition and dreams of becoming the Hokage, the village's leader and strongest ninja.",
+    "poster_path": "/xppeysfvDKVx775MFuH8Z9BlpMk.jpg",
+    "backdrop_path": "/5F0HVEgkgP99fEWDjPyikGt9jQi.jpg",
+    "media_type": "tv",
+    "vote_average": 8.4,
+    "release_date": "2002-10-03",
+    "first_air_date": "2002-10-03",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 85937,
+    "title": "Demon Slayer: Kimetsu no Yaiba",
+    "name": "Demon Slayer: Kimetsu no Yaiba",
+    "overview": "After a demon attack leaves his family slain and his sister cursed, Tanjiro embarks upon a perilous journey to find a cure and avenge those he's lost.",
+    "poster_path": "/xUfRZu2mi8jH6SzQEJGP6tjBuYj.jpg",
+    "backdrop_path": "/3GQKYh6Trm8pxd2AypovoYQf4Ay.jpg",
+    "media_type": "tv",
+    "vote_average": 8.6,
+    "release_date": "2019-04-06",
+    "first_air_date": "2019-04-06",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 95479,
+    "title": "JUJUTSU KAISEN",
+    "name": "JUJUTSU KAISEN",
+    "overview": "Yuji Itadori is a boy with tremendous physical strength, though he lives a completely ordinary high school life. One day, to save a classmate who has been attacked by curses, he eats the finger of Ryomen Sukuna, taking the curse into his own soul. From then on, he shares one body with Ryomen Sukuna. Guided by the most powerful of sorcerers, Satoru Gojo, Itadori is admitted to Tokyo Jujutsu High School, an organization that fights the curses... and thus begins the heroic tale of a boy who became a curse to exorcise a curse, a life from which he could never turn back.",
+    "poster_path": "/6qQzMJG27XOJsyAEEIisoJB45j2.jpg",
+    "backdrop_path": "/qpin8cASXEVtwhzNsprHYFiOAGk.jpg",
+    "media_type": "tv",
+    "vote_average": 8.6,
+    "release_date": "2020-10-03",
+    "first_air_date": "2020-10-03",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 63926,
+    "title": "One-Punch Man",
+    "name": "One-Punch Man",
+    "overview": "Saitama is a hero who only became a hero for fun. After three years of “special” training, though, he’s become so strong that he’s practically invincible. In fact, he’s too strong—even his mightiest opponents are taken out with a single punch, and it turns out that being devastatingly powerful is actually kind of a bore. With his passion for being a hero lost along with his hair, yet still faced with new enemies every day, how much longer can he keep it going?",
+    "poster_path": "/dT10AxJIXVvRwFAew4tt2RhzJrD.jpg",
+    "backdrop_path": "/s0w8JbuNNxL1YgaHeDWih12C3jG.jpg",
+    "media_type": "tv",
+    "vote_average": 8.4,
+    "release_date": "2015-10-05",
+    "first_air_date": "2015-10-05",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 60572,
+    "title": "Pokémon",
+    "name": "Pokémon",
+    "overview": "Join Ash accompanied by his partner Pikachu, as he travels through many regions, meets new friends and faces new challenges on his quest to become a Pokémon Master.",
+    "poster_path": "/lP4zwr0F7hWTbAFltfoFTc2AxRG.jpg",
+    "backdrop_path": "/yYpQV25I7XB6S0POJOScPjxYWV5.jpg",
+    "media_type": "tv",
+    "vote_average": 8.0,
+    "release_date": "1997-04-01",
+    "first_air_date": "1997-04-01",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 298321,
+    "title": "Crayon Shin-chan: Everland",
+    "name": "Crayon Shin-chan: Everland",
+    "overview": "A special horror-themed collection of Shinchan episodes featuring spooky adventures and supernatural encounters.",
+    "poster_path": "/qqH1gEo9mETtP9W9ZOmWuSGQxM6.jpg",
+    "backdrop_path": "/29Zod8xlYJtn90CQe7LTeLlJIod.jpg",
+    "media_type": "tv",
+    "vote_average": 9.0,
+    "release_date": "2025-08-14",
+    "first_air_date": "2025-08-14",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 65733,
+    "title": "Doraemon",
+    "name": "Doraemon",
+    "overview": "Robotic cat Doraemon is sent back in time from the 22nd century to protect 10-year-old Noby, a lazy and uncoordinated boy who is destined to have a tragic future. Doraemon can create secret gadgets from a pocket on his stomach, but they usually cause more bad than good because of Noby's propensity to misuse them.",
+    "poster_path": "/9ZN1P32SHviL3SV51qLivxycvcx.jpg",
+    "backdrop_path": "/c2oiRa7V3bQzof4wVGzLXtWJ5QU.jpg",
+    "media_type": "tv",
+    "vote_average": 8.1,
+    "release_date": "2005-04-22",
+    "first_air_date": "2005-04-22",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 226688,
+    "title": "Beyblade X",
+    "name": "Beyblade X",
+    "overview": "Beginner blader Robin Kazami joins up with influencer Multi Nana-iro and former champion Jaxon Cross to form this unlikely trio - ready to climb to the top of The X and win the title of champion blader!",
+    "poster_path": "/66wkm14IWdrY5LaKZDAbkD2T9Jt.jpg",
+    "backdrop_path": "/qAq9RBeHZoTMDFqQZ2o4cE5CJIQ.jpg",
+    "media_type": "tv",
+    "vote_average": 7.1,
+    "release_date": "2023-10-06",
+    "first_air_date": "2023-10-06",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "hindi"
+  },
+  {
+    "id": 77240,
+    "title": "Captain Tsubasa",
+    "name": "Captain Tsubasa",
+    "overview": "The passionate story of an elementary school student whose thoughts and dreams revolve almost entirely around the love of soccer. 11-year-old Tsubasa Oozora started playing football at a very young age, and while it was mostly just a recreational sport for his friends, for him, it developed into something of an obsession.  In order to pursue his dream to the best of his elementary school abilities, Tsubasa moves with his mother to Nankatsu city, which is well-known for its excellent elementary school soccer teams. But although he was easily the best in his old town, Nankatsu has a lot more competition, and he will need all of his skill and talent in order to stand out from this new crowd.",
+    "poster_path": "/zHgc9nTXiP77qoy14BO7WUFTwkp.jpg",
+    "backdrop_path": "/dSvRkislUYBu8jWpqRpUsfNFNcr.jpg",
+    "media_type": "tv",
+    "vote_average": 8.2,
+    "release_date": "2018-04-03",
+    "first_air_date": "2018-04-03",
+    "original_language": "ja",
+    "category": "anime",
+    "isAnime": true,
+    "dub_type": "hindi"
+  }
+];
+
 
 
 export async function fetchHindiMovies(page = 1) {
@@ -293,15 +832,18 @@ export async function fetchHindiMovies(page = 1) {
     const res = await fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_original_language=hi&region=IN&primary_release_date.lte=${today}&vote_count.gte=5&sort_by=popularity.desc&page=${page}`);
     const data = await res.json();
     const bollywood = (data.results && data.results.length > 0)
-      ? data.results.map(m => ({ ...m, media_type: 'movie', category: 'hindi', isHindiDubbed: true }))
+      ? data.results.map(m => ({ ...m, media_type: 'movie', category: 'hindi', original_language: 'hi' }))
       : (page === 1 ? FALLBACK_MEDIA.filter(m => m.category === 'hindi') : []);
     
     if (page === 1) {
-      return [...CURATED_HINDI_DUBBED_BLOCKBUSTERS, ...bollywood];
+      // Return authentic Bollywood classics & blockbusters first
+      const existingIds = new Set(CURATED_BOLLYWOOD_BLOCKBUSTERS.map(b => b.id));
+      const filtered = bollywood.filter(m => !existingIds.has(m.id));
+      return [...CURATED_BOLLYWOOD_BLOCKBUSTERS, ...filtered];
     }
     return bollywood;
   } catch (err) {
-    return page === 1 ? [...CURATED_HINDI_DUBBED_BLOCKBUSTERS, ...FALLBACK_MEDIA.filter(m => m.category === 'hindi')] : [];
+    return page === 1 ? [...CURATED_BOLLYWOOD_BLOCKBUSTERS, ...FALLBACK_MEDIA.filter(m => m.category === 'hindi')] : [];
   }
 }
 
@@ -315,8 +857,14 @@ export async function fetchTrendingSeries(page = 1) {
   }
 }
 
-export async function fetchAnime(page = 1) {
+export async function fetchAnime(page = 1, audioFilter = 'all') {
   try {
+    if (audioFilter === 'hindi') {
+      return CURATED_HINDI_DUBBED_ANIME;
+    }
+    if (audioFilter === 'english') {
+      return CURATED_ENGLISH_DUBBED_ANIME;
+    }
     const res = await fetch(`${BASE_URL}/discover/tv?api_key=${API_KEY}&with_genres=16&with_original_language=ja&first_air_date.lte=${today}&vote_count.gte=10&sort_by=popularity.desc&page=${page}`);
     const data = await res.json();
     return (data.results || []).map(m => ({ ...m, media_type: 'tv', category: 'anime', isAnime: true }));
@@ -361,70 +909,21 @@ export async function fetchMatureMovies(page = 1) {
 
 
 // Verified Hollywood Blockbusters with official Hindi dubs in theaters/OTT
-export const VERIFIED_HINDI_DUBBED_IDS = new Set([
-  533535, // Deadpool & Wolverine
-  299534, // Avengers: Endgame
-  299536, // Avengers: Infinity War
-  24428,  // The Avengers
-  99861,  // Avengers: Age of Ultron
-  293660, // Deadpool
-  383498, // Deadpool 2
-  634649, // Spider-Man: No Way Home
-  429617, // Spider-Man: Far From Home
-  315635, // Spider-Man: Homecoming
-  1726,   // Iron Man
-  10138,  // Iron Man 2
-  68721,  // Iron Man 3
-  76600,  // Avatar: The Way of Water
-  19995,  // Avatar
-  872585, // Oppenheimer
-  157336, // Interstellar
-  155,    // The Dark Knight
-  385687, // Fast X
-  385128, // F9
-  337339, // The Fate of the Furious
-  168259, // Furious 7
-  823464, // Godzilla x Kong: The New Empire
-  399566, // Godzilla vs. Kong
-  507086, // Jurassic World Dominion
-  135397, // Jurassic World
-  361743, // Top Gun: Maverick
-  572802, // Aquaman and the Lost Kingdom
-  297802, // Aquaman
-  505642, // Black Panther: Wakanda Forever
-  284054, // Black Panther
-  453395, // Doctor Strange in the Multiverse of Madness
-  284052, // Doctor Strange
-  616037, // Thor: Love and Thunder
-  284053, // Thor: Ragnarok
-  447365, // Guardians of the Galaxy Vol. 3
-  414906, // The Batman
-  603692, // John Wick: Chapter 4
-  458156, // John Wick: Chapter 3
-  693134, // Dune: Part Two
-  438631, // Dune
-  1022789,// Inside Out 2
-  1011985,// Kung Fu Panda 4
-  912649, // Venom: The Last Dance
-  580489, // Venom: Let There Be Carnage
-  335983, // Venom
-  575264, // Mission: Impossible - Dead Reckoning Part One
-  667538, // Transformers: Rise of the Beasts
-  1858,   // Transformers
-  558449, // Gladiator II
-  1241982,// Moana 2
-  271110, // Captain America: Civil War
-  822119, // Captain America: Brave New World
-  420818, // The Lion King
-  277834, // The Jungle Book
-  597     // Titanic
-]);
-
 export function isHindiAvailable(item) {
   if (!item) return false;
-  if (item.original_language === 'hi' || item.category === 'hindi') return true;
-  if (VERIFIED_HINDI_DUBBED_IDS.has(Number(item.id))) return true;
-  return false;
+  // Genuine Bollywood Indian cinema
+  return item.original_language === 'hi' || item.category === 'hindi';
+}
+
+export function isAnimeItem(item) {
+  if (!item) return false;
+  return item.category === 'anime' || item.isAnime === true || item.original_language === 'ja';
+}
+
+export function isHindiDubbedAnime(item) {
+  if (!item) return false;
+  const hindiAnimeIds = new Set([12971, 46260, 85937, 95479, 63926, 60572, 298321, 65733, 226688, 77240]);
+  return hindiAnimeIds.has(Number(item.id));
 }
 
 

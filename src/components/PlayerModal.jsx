@@ -435,24 +435,22 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
           />
         </div>
 
-        {/* Dedicated In-App Hindi Audio & Subtitles Panel (Only for titles with Hindi audio) */}
+        {/* Dedicated Bollywood Hindi Audio Panel (Only for authentic Hindi titles) */}
         {hasHindi && (
-          <div className="p-3 sm:p-4 bg-gradient-to-r from-[#171004] via-[#0b0e1b] to-[#070e24] border-t border-b border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs">
+          <div className="p-3 sm:p-3.5 bg-gradient-to-r from-[#171004] via-[#0b0e1b] to-[#070e24] border-t border-b border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 text-gray-950 flex items-center justify-center font-black text-sm shrink-0 shadow">
                 🇮🇳
               </div>
               <div>
                 <div className="font-bold text-white text-xs flex items-center gap-1.5">
-                  <span>Hindi Audio & Dual-Language</span>
-                  <span className="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.2 rounded font-semibold border border-amber-500/30">
-                    {item.original_language === 'hi' ? 'Bollywood Native Hindi' : 'Hindi Dubbed Cinema'}
+                  <span>Native Bollywood Hindi Audio</span>
+                  <span className="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-semibold border border-amber-500/30">
+                    Original Hindi
                   </span>
                 </div>
                 <p className="text-[10px] sm:text-[11px] text-amber-200/80 mt-0.5">
-                  {item.original_language === 'hi'
-                    ? 'Plays full Hindi audio natively on all servers in 1080p.'
-                    : 'Tap CC inside player for subtitles or switch server mirror below.'}
+                  Full original Hindi audio stream in 1080p HD / 4K.
                 </p>
               </div>
             </div>
@@ -482,30 +480,71 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
           </div>
         )}
 
-        {/* Playback Guidance & Quick Server Fallback Bar */}
-        <div className="px-4 py-3 bg-[#050b1b] border-t border-cyan-500/15 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2 text-cyan-200/90 text-xs">
-            <Zap className="w-4 h-4 text-amber-400 shrink-0 animate-pulse" />
-            <span>
-              <strong>Tip:</strong> Tap inside player to start sound/video. If loading persists, switch mirror:
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
-            {SERVERS.map((s) => (
+        {/* Anime Audio & Subtitles Panel */}
+        {(item.category === 'anime' || item.isAnime) && (
+          <div className="p-3 sm:p-3.5 bg-gradient-to-r from-[#13072b] via-[#091024] to-[#070e24] border-t border-b border-purple-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow">
+                🇯🇵
+              </div>
+              <div>
+                <div className="font-bold text-white text-xs flex items-center gap-1.5">
+                  <span>Anime Audio & Subtitles</span>
+                  <span className="text-[10px] bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded font-semibold border border-purple-500/30">
+                    Sub & Dub Available
+                  </span>
+                </div>
+                <p className="text-[10px] sm:text-[11px] text-purple-200/80 mt-0.5">
+                  Tap <strong>⚙️ Settings</strong> inside the video player to select Japanese/English audio or subtitles. Switch server if needed.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
               <button
-                key={s.id}
-                onClick={() => setSelectedServer(s)}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition border ${
-                  selectedServer.id === s.id
-                    ? 'bg-cyan-500 text-gray-950 border-cyan-400 font-bold shadow'
-                    : 'bg-[#0d1c44] border-cyan-500/20 text-cyan-300 hover:text-white hover:bg-white/10'
+                onClick={() => setSelectedServer(SERVERS[0])}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm border ${
+                  selectedServer.id === SERVERS[0].id
+                    ? 'bg-purple-500 text-white border-purple-400'
+                    : 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border-purple-500/40'
                 }`}
               >
-                {s.shortName}
+                <span>Server 1 (Sub/Dub)</span>
               </button>
-            ))}
+              <button
+                onClick={() => setSelectedServer(SERVERS[1] || SERVERS[0])}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm border ${
+                  selectedServer.id === SERVERS[1]?.id
+                    ? 'bg-cyan-500 text-gray-950 border-cyan-400'
+                    : 'bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border-cyan-500/40'
+                }`}
+              >
+                <span>Server 2 (VidSrc)</span>
+              </button>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Hollywood / Standard English Audio & Multi-Subtitles Panel */}
+        {!hasHindi && !(item.category === 'anime' || item.isAnime) && (
+          <div className="p-3 sm:p-3.5 bg-[#070e24] border-t border-b border-cyan-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs">
+            <div className="flex items-center gap-2.5">
+              <span className="text-lg">🔊</span>
+              <div>
+                <div className="font-bold text-cyan-300 text-xs flex items-center gap-1.5">
+                  <span>English Original Audio • Multi-Language Subtitles</span>
+                </div>
+                <p className="text-[10px] sm:text-[11px] text-cyan-200/70 mt-0.5">
+                  English audio active. Turn on subtitles (English, Hindi, Spanish, etc.) via <strong>⚙️ Settings ➔ Subtitles</strong> inside player.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="text-[10px] bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 px-2 py-1 rounded-md font-semibold">
+                Use ⚙️ gear for CC
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* TV Series Episode & Season Navigation */}
         {isSeries && (

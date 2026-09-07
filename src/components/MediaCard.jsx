@@ -52,6 +52,12 @@ export default function MediaCard({ item, onPlay, isWatchlisted, onToggleWatchli
               <span>HINDI</span>
             </span>
           )}
+          {(item.category === 'anime' || item.isAnime) && (
+            <span className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-[9px] font-black tracking-wider px-2 py-0.5 rounded-md shadow flex items-center gap-1">
+              <span>🇯🇵</span>
+              <span>SUB / 🎙️ DUB</span>
+            </span>
+          )}
           {isUpcoming ? (
             <span className="bg-amber-600/90 text-white text-[9px] font-bold px-2 py-0.5 rounded-md shadow">
               UPCOMING
