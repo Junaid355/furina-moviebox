@@ -1509,21 +1509,34 @@ export async function fetchAnime(page = 1, audioFilter = 'all') {
       ...CURATED_ENGLISH_DUBBED_ANIME,
       ...CURATED_SUBBED_ANIME
     ];
-    const allCuratedIds = new Set(allCurated.map((a) => a.id));
+    const allCuratedIds = new Set(allCurated.map((a) => Number(a.id)));
 
-    // Infinite anime TV series discovery from TMDB
-    const res = await fetch(`${BASE_URL}/discover/tv?api_key=${API_KEY}&with_genres=16&with_original_language=ja&first_air_date.lte=${today}&vote_count.gte=8&sort_by=${sortParam}&page=${page}`);
-    const data = await res.json();
-    const rawResults = data.results || [];
-    
-    // Strict filter to eliminate 18+ ecchi / hanimes and duplicate curated items
-    const cleanDiscovered = rawResults
-      .filter((item) => item && item.id && !isHanimeContent(item) && !allCuratedIds.has(item.id))
+    // Fetch both TV anime series AND anime cinema movies for massive catalog
+    const tvPromise = fetch(`${BASE_URL}/discover/tv?api_key=${API_KEY}&with_genres=16&with_original_language=ja&first_air_date.lte=${today}&vote_count.gte=8&sort_by=${sortParam}&page=${page}`)
+      .then((r) => r.json()).catch(() => ({ results: [] }));
+    const moviePromise = fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=16&with_original_language=ja&primary_release_date.lte=${today}&vote_count.gte=10&sort_by=${sortParam}&page=${page}`)
+      .then((r) => r.json()).catch(() => ({ results: [] }));
+
+    const [tvData, movieData] = await Promise.all([tvPromise, moviePromise]);
+    const rawTv = (tvData.results || []).map((m) => ({ ...m, media_type: 'tv' }));
+    const rawMovies = (movieData.results || []).map((m) => ({ ...m, media_type: 'movie' }));
+
+    // Interleave series and cinema movies
+    const interleaved = [];
+    const maxLen = Math.max(rawTv.length, rawMovies.length);
+    for (let i = 0; i < maxLen; i++) {
+      if (rawTv[i]) interleaved.push(rawTv[i]);
+      if (rawMovies[i]) interleaved.push(rawMovies[i]);
+    }
+
+    // Filter out restricted content and duplicate curated items
+    const cleanDiscovered = interleaved
+      .filter((item) => item && item.id && !isHanimeContent(item) && !allCuratedIds.has(Number(item.id)))
       .map((m) => {
         const hasHindi = isHindiDubbedAnime(m);
         return { 
           ...m, 
-          media_type: 'tv', 
+          media_type: m.media_type || (m.first_air_date ? 'tv' : 'movie'), 
           category: 'anime', 
           isAnime: true,
           hasHindiDub: hasHindi,
@@ -1542,17 +1555,51 @@ export async function fetchAnime(page = 1, audioFilter = 'all') {
       } else {
         const seenIds = new Set();
         curatedBase = [
-          ...CURATED_HINDI_DUBBED_ANIME.slice(0, 10),
-          ...CURATED_ENGLISH_DUBBED_ANIME,
-          ...CURATED_SUBBED_ANIME
+          ...CURATED_HINDI_DUBBED_ANIME.slice(0, 15),
+          ...CURATED_ENGLISH_DUBBED_ANIME.slice(0, 15),
+          ...CURATED_SUBBED_ANIME.slice(0, 10)
         ].filter((item) => {
-          if (!item || seenIds.has(item.id)) return false;
-          seenIds.add(item.id);
+          if (!item || seenIds.has(Number(item.id))) return false;
+          seenIds.add(Number(item.id));
           return true;
         });
       }
+
+      if (audioFilter === 'hindi') {
+        const combined = [...curatedBase, ...cleanDiscovered.filter((m) => isHindiDubbedAnime(m))];
+        return combined;
+      }
       return [...curatedBase, ...cleanDiscovered];
     }
+
+    // Page > 1
+    if (audioFilter === 'hindi') {
+      const filteredHindi = cleanDiscovered.filter((m) => isHindiDubbedAnime(m));
+      if (filteredHindi.length < 12) {
+        // Query specific iconic Hindi dubbed anime series/movies for infinite Hindi pagination
+        const hindiSearchTerms = ['Dragon Ball', 'Naruto', 'Doraemon', 'Shinchan', 'Demon Slayer', 'One Piece', 'Jujutsu Kaisen', 'Beyblade', 'Bleach', 'Pokemon', 'Inazuma Eleven', 'Perman', 'Hattori'];
+        const queryTerm = hindiSearchTerms[(page - 2) % hindiSearchTerms.length];
+        try {
+          const sRes = await fetch(`${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(queryTerm)}&page=1`);
+          const sData = await sRes.json();
+          const extra = (sData.results || [])
+            .filter((it) => it && it.id && (it.poster_path || it.backdrop_path) && !allCuratedIds.has(Number(it.id)) && !isHanimeContent(it))
+            .map((it) => ({
+              ...it,
+              media_type: it.media_type || (it.first_air_date ? 'tv' : 'movie'),
+              category: 'anime',
+              isAnime: true,
+              hasHindiDub: true,
+              dub_type: 'hindi'
+            }));
+          return [...filteredHindi, ...extra];
+        } catch {
+          return filteredHindi;
+        }
+      }
+      return filteredHindi;
+    }
+
     return cleanDiscovered;
   } catch (err) {
     if (audioFilter === 'hindi') return page === 1 ? CURATED_HINDI_DUBBED_ANIME : [];
@@ -2028,19 +2075,36 @@ export function isAnimeItem(item) {
 }
 
 export const HINDI_DUBBED_ANIME_IDS = new Set([
-  2098, 33758, 46260, 31910, 12971, 62710, 12697, 60572, 77240, 31835,
-  95479, 85937, 114410, 211089, 37854, 1429, 65930, 120089, 73223, 206497,
-  30984, 13916, 46298, 118439, 121533, 226688, 205847, 153870, 80975, 75225,
-  81216, 4614, 11130, 63926, 65733, 298321
+  2098, 33758, 4614, 11130, 63926, 65733, 46260, 31910, 70881, 12971, 62710, 12697, 236208, 236209,
+  85937, 95479, 114410, 211089, 127532, 37854, 65930, 73223, 30984, 214999, 203857,
+  1429, 13916, 120089, 31835, 60572, 38472, 121533, 46298, 118439, 226688, 60708,
+  136283, 206497, 205847, 224484, 153870, 86031, 80975, 67070, 75225, 104877, 240411,
+  208534, 19, 105248, 216390, 635302, 8392, 916224, 568160, 372058, 378064, 284274,
+  610150, 503314, 900667, 81216, 65733, 298321
 ]);
 
 export function isHindiDubbedAnime(item) {
   if (!item) return false;
-  return HINDI_DUBBED_ANIME_IDS.has(Number(item.id)) || item.hasHindiDub === true || item.dub_type === 'hindi';
+  const id = Number(item.id);
+  if (HINDI_DUBBED_ANIME_IDS.has(id)) return true;
+  if (item.hasHindiDub === true || item.dub_type === 'hindi') return true;
+  const title = (item.title || item.name || item.original_name || item.original_title || '').toLowerCase();
+  const hindiKeywords = [
+    'doraemon', 'shinchan', 'shin chan', 'shin-chan', 'ninja hattori', 'perman',
+    'kiteretsu', 'kochikame', 'dragon ball', 'naruto', 'boruto', 'demon slayer',
+    'kimetsu no yaiba', 'jujutsu kaisen', 'chainsaw man', 'solo leveling',
+    'one piece', 'my hero academia', 'black clover', 'bleach', 'attack on titan',
+    'death note', 'spy x family', 'beyblade', 'pokemon', 'pokémon', 'digimon',
+    'inazuma eleven', 'captain tsubasa', 'haikyu', 'blue lock', 'kaiju no. 8',
+    'mashle', 'wind breaker', 'hell\'s paradise', 'jigokuraku', 'dr. stone',
+    'fire force', 'mob psycho', 'vinland saga', 'tokyo revengers', 'dandadan',
+    'dan da dan', 'monster', 'cyberpunk', 'zom 100', 'suzume', 'weathering with you',
+    'your name', 'silent voice', 'mugen train'
+  ];
+  return hindiKeywords.some((k) => title.includes(k));
 }
 
-
-// 🔞 Curated 18+ Ecchi & ComicFesta Anime (Overflow, Joshiochi, Araiya-san, etc.)
+// ✨ Curated Uncut & Collector's Master Vault Anime (Exclusive Collection)
 export const SECRET_ECCHI_ANIME = [
   {
     "id": 95897,

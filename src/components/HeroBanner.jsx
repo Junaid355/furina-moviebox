@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Plus, Check, Star, ChevronLeft, ChevronRight } from 'lucide-react';
-import { BACKDROP_BASE, isHindiAvailable } from '../services/tmdb';
+import { BACKDROP_BASE, isHindiAvailable, isHindiDubbedAnime } from '../services/tmdb';
 
 export default function HeroBanner({ items, item, onPlay, isWatchlisted, onToggleWatchlist }) {
   // Support both items array or single item prop
@@ -21,22 +21,33 @@ export default function HeroBanner({ items, item, onPlay, isWatchlisted, onToggl
   if (list.length === 0) return null;
   const currentItem = list[currentIndex] || list[0] || {};
 
-  const title = currentItem.title || currentItem.name || 'Featured Blockbuster';
-  const year = String(currentItem.release_date || currentItem.first_air_date || '').substring(0, 4);
-  const rating = typeof currentItem.vote_average === 'number'
+  const title = currentItem?.title || currentItem?.name || 'Featured Blockbuster';
+  const year = String(currentItem?.release_date || currentItem?.first_air_date || '').substring(0, 4);
+  const rating = typeof currentItem?.vote_average === 'number'
     ? currentItem.vote_average.toFixed(1)
-    : (currentItem.vote_average || '8.2');
-  const isSeries = currentItem.media_type === 'tv' || Boolean(currentItem.first_air_date);
-  const isAnime = Boolean(
-    currentItem.category === 'anime' ||
-    currentItem.category === 'ecchi_anime' ||
-    currentItem.isAnime === true ||
-    currentItem.original_language === 'ja' ||
-    (Array.isArray(currentItem.origin_country) && currentItem.origin_country.includes('JP')) ||
-    ((currentItem.genre_ids?.includes(16) || currentItem.genres?.some((g) => g.id === 16 || g.name === 'Animation')) && currentItem.original_language === 'ja')
+    : (currentItem?.vote_average || '8.2');
+
+  const isSeries = Boolean(
+    currentItem?.media_type === 'tv' || 
+    Boolean(currentItem?.first_air_date) || 
+    currentItem?.category === 'series' || 
+    currentItem?.category === 'kdrama'
   );
-  const isHindi = !isAnime && Boolean(isHindiAvailable(currentItem));
-  const saved = (isWatchlisted && currentItem.id) ? isWatchlisted(currentItem.id) : false;
+
+  const isAnime = Boolean(
+    currentItem?.category === 'anime' ||
+    currentItem?.category === 'ecchi_anime' ||
+    currentItem?.isAnime === true ||
+    currentItem?.original_language === 'ja' ||
+    (Array.isArray(currentItem?.origin_country) && currentItem.origin_country.includes('JP')) ||
+    ((currentItem?.genre_ids?.includes(16) || currentItem?.genres?.some((g) => g.id === 16 || g.name === 'Animation')) && currentItem?.original_language === 'ja')
+  );
+
+  const isHindi = Boolean(
+    isAnime ? isHindiDubbedAnime(currentItem) : isHindiAvailable(currentItem)
+  );
+
+  const saved = (isWatchlisted && currentItem?.id) ? isWatchlisted(currentItem.id) : false;
 
   return (
     <div 
@@ -47,8 +58,8 @@ export default function HeroBanner({ items, item, onPlay, isWatchlisted, onToggl
       {/* Background Poster Image with smooth crossfade */}
       <div className="absolute inset-0 bg-[#030712]">
         <img
-          key={currentItem.id}
-          src={currentItem.backdrop_path ? `${BACKDROP_BASE}${currentItem.backdrop_path}` : './icon-512.png'}
+          key={currentItem?.id}
+          src={currentItem?.backdrop_path ? `${BACKDROP_BASE}${currentItem.backdrop_path}` : './icon-512.png'}
           alt={title}
           className="w-full h-full object-cover object-center scale-105 transition-all duration-1000 group-hover:scale-100 filter brightness-95 animate-fade-in"
         />
@@ -62,7 +73,7 @@ export default function HeroBanner({ items, item, onPlay, isWatchlisted, onToggl
       <div className="absolute top-1/4 left-10 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Content */}
-      <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-12 max-w-3xl z-10 animate-fade-in" key={`content-${currentItem.id}`}>
+      <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-12 max-w-3xl z-10 animate-fade-in" key={`content-${currentItem?.id}`}>
         <div className="flex items-center gap-2 mb-3 flex-wrap">
           <span className="bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-600 text-gray-950 font-black text-[10px] px-3 py-0.5 rounded-full shadow-lg tracking-wider uppercase">
             4K Ultra HD
@@ -100,7 +111,7 @@ export default function HeroBanner({ items, item, onPlay, isWatchlisted, onToggl
         </h1>
 
         <p className="text-xs sm:text-sm text-cyan-100/80 line-clamp-2 sm:line-clamp-3 mb-6 max-w-xl font-medium leading-relaxed drop-shadow">
-          {currentItem.overview}
+          {currentItem?.overview}
         </p>
 
         <div className="flex items-center gap-3">
@@ -133,7 +144,7 @@ export default function HeroBanner({ items, item, onPlay, isWatchlisted, onToggl
           <button
             onClick={() => setCurrentIndex((prev) => (prev - 1 + list.length) % list.length)}
             aria-label="Previous Featured Slide"
-            className="w-8 h-8 rounded-full bg-black/50 hover:bg-black/80 border border-white/10 text-white flex items-center justify-center backdrop-blur-md transition hover:scale-110 active:scale-95"
+            className="w-8 h-8 rounded-full bg-black/50 hover:bg-black/80 border border-white/10 text-white flex items-center justify-center backdrop-blur-md transition hover:scale-110 active:scale-95 cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -156,7 +167,7 @@ export default function HeroBanner({ items, item, onPlay, isWatchlisted, onToggl
           <button
             onClick={() => setCurrentIndex((prev) => (prev + 1) % list.length)}
             aria-label="Next Featured Slide"
-            className="w-8 h-8 rounded-full bg-black/50 hover:bg-black/80 border border-white/10 text-white flex items-center justify-center backdrop-blur-md transition hover:scale-110 active:scale-95"
+            className="w-8 h-8 rounded-full bg-black/50 hover:bg-black/80 border border-white/10 text-white flex items-center justify-center backdrop-blur-md transition hover:scale-110 active:scale-95 cursor-pointer"
           >
             <ChevronRight className="w-4 h-4" />
           </button>

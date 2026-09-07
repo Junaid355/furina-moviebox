@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Play, Star, Bookmark, Check, Sparkles } from 'lucide-react';
-import { IMG_BASE, isHindiAvailable } from '../services/tmdb';
+import { Play, Star, Bookmark, Check, Sparkles, Volume2 } from 'lucide-react';
+import { IMG_BASE, isHindiAvailable, isHindiDubbedAnime } from '../services/tmdb';
 
 export default function MediaCard({ item, onPlay, isWatchlisted, onToggleWatchlist }) {
   if (!item) return null;
@@ -10,12 +10,14 @@ export default function MediaCard({ item, onPlay, isWatchlisted, onToggleWatchli
   const rating = typeof item.vote_average === 'number' 
     ? item.vote_average.toFixed(1) 
     : (item.vote_average || '7.8');
+
   const isSeries = Boolean(
     item.media_type === 'tv' || 
     Boolean(item.first_air_date) || 
     item.category === 'series' || 
     item.category === 'kdrama'
   );
+
   const isAnime = Boolean(
     item.category === 'anime' ||
     item.category === 'ecchi_anime' ||
@@ -24,15 +26,18 @@ export default function MediaCard({ item, onPlay, isWatchlisted, onToggleWatchli
     (Array.isArray(item.origin_country) && item.origin_country.includes('JP')) ||
     ((item.genre_ids?.includes(16) || item.genres?.some((g) => g.id === 16 || g.name === 'Animation')) && item.original_language === 'ja')
   );
-  const isHindi = !isAnime && Boolean(isHindiAvailable(item));
-  
+
+  const isHindi = Boolean(
+    isAnime ? isHindiDubbedAnime(item) : isHindiAvailable(item)
+  );
+
   const todayStr = new Date().toISOString().split('T')[0];
   const isUpcoming = Boolean(item.release_date && item.release_date > todayStr);
 
   return (
     <div 
       onClick={() => onPlay(item)}
-      className="group relative rounded-2xl overflow-hidden glass-card cursor-pointer flex flex-col transition-all duration-300 transform hover:-translate-y-1.5"
+      className="group relative rounded-2xl overflow-hidden glass-card cursor-pointer flex flex-col transition-all duration-300 transform hover:-translate-y-1.5 hover:shadow-[0_12px_30px_rgba(56,189,248,0.25)]"
     >
       {/* Poster Image Container */}
       <div className="relative aspect-[2/3] w-full overflow-hidden bg-[#060c1d]">

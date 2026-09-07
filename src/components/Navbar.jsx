@@ -27,12 +27,11 @@ export default function Navbar({
   const categories = isMasterMode
     ? [
         ...baseCategories.slice(0, 5),
-        { id: 'mature', label: '🔞 Uncut Cinema', icon: Flame, is18: true },
-        { id: 'ecchi_anime', label: '🔞 Secret Vault', icon: Flame, is18: true },
+        { id: 'mature', label: '🎬 Uncut Cinema', icon: Flame, isVault: true },
+        { id: 'ecchi_anime', label: '✨ Master Vault', icon: Sparkles, isVault: true },
         ...baseCategories.slice(5)
       ]
     : baseCategories;
-
 
   return (
     <header className="sticky top-0 z-40 glass-nav px-4 py-3 sm:px-8">
@@ -106,7 +105,7 @@ export default function Navbar({
                 key={cat.id}
                 onClick={() => { setActiveCategory(cat.id); setSearchQuery(''); }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition ${
-                  cat.is18
+                  cat.isVault
                     ? isActive
                       ? 'bg-amber-500 text-gray-950 font-bold shadow'
                       : 'text-amber-400 hover:bg-amber-500/10'
@@ -135,7 +134,7 @@ export default function Navbar({
 
           <button
             onClick={onOpenSettings}
-            title="Settings & VIP Controls"
+            title="Settings & Master Vault"
             className={`p-2 rounded-full border transition flex items-center gap-1.5 ${
               isMasterMode
                 ? 'bg-emerald-500/20 border-emerald-400 text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.5)]'
@@ -161,7 +160,7 @@ export default function Navbar({
               key={cat.id}
               onClick={() => { setActiveCategory(cat.id); setSearchQuery(''); }}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition border ${
-                cat.is18
+                cat.isVault
                   ? isActive
                     ? 'bg-amber-500 text-gray-950 border-amber-400 font-bold shadow'
                     : 'bg-amber-500/10 border-amber-500/30 text-amber-400'

@@ -102,15 +102,15 @@ export default function MasterModeModal({
               </button>
             </div>
 
-            {/* Feature 1: 18+ Mature Content Vault */}
+            {/* Feature 1: Uncut Cinema Vault */}
             <div className="bg-[#0c1836] border border-cyan-500/20 rounded-xl p-3.5 flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-1.5 font-bold text-sm text-white">
                   <Flame className="w-4 h-4 text-amber-400" />
-                  Mature / Uncut Cinema Vault
+                  Uncut Cinema Vault
                 </div>
                 <p className="text-[11px] text-cyan-200/50 mt-0.5">
-                  Includes R-rated, NC-17, and unfiltered releases.
+                  Unlocks exclusive uncut films in search and navigation.
                 </p>
               </div>
               <button

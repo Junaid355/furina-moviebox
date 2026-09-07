@@ -97,13 +97,23 @@ export default function App() {
     return watchlist.some((x) => x && x.id === id);
   };
 
-  // Strictly deduplicate media items by ID
+  // Strictly deduplicate media items by ID and normalized title
   const dedupeMedia = (list) => {
     if (!Array.isArray(list)) return [];
-    const seen = new Set();
+    const seenIds = new Set();
+    const seenTitles = new Set();
     return list.filter((item) => {
-      if (!item || !item.id || seen.has(item.id)) return false;
-      seen.add(item.id);
+      if (!item || !item.id) return false;
+      const idKey = String(item.id);
+      const rawTitle = (item.title || item.name || '').trim().toLowerCase()
+        .replace(/\s*\(hindi\s*dubbed\)/i, '')
+        .replace(/\s*\(uncut\)/i, '')
+        .replace(/\s*\(uncensored\)/i, '')
+        .replace(/[^a-z0-9]/g, '');
+      if (seenIds.has(idKey)) return false;
+      if (rawTitle && seenTitles.has(rawTitle)) return false;
+      seenIds.add(idKey);
+      if (rawTitle) seenTitles.add(rawTitle);
       return true;
     });
   };
@@ -154,18 +164,14 @@ export default function App() {
     });
   }, [activeCategory, searchQuery, animeAudioFilter, includeMature, isMasterMode, watchlist.length]);
 
-  // Load More (Pagination) with strict deduplication
+  // Load More (Pagination) with strict dual deduplication
   const handleLoadMore = async () => {
     if (loadingMore || activeCategory === 'watchlist') return;
     setLoadingMore(true);
     const nextPage = page + 1;
     const moreItems = await fetchCategoryItems(activeCategory, nextPage, searchQuery);
     if (moreItems && moreItems.length > 0) {
-      setItems((prev) => {
-        const existingIds = new Set(prev.map((x) => x && x.id).filter(Boolean));
-        const uniqueMore = moreItems.filter((x) => x && x.id && !existingIds.has(x.id));
-        return [...prev, ...uniqueMore];
-      });
+      setItems((prev) => dedupeMedia([...prev, ...moreItems]));
       setPage(nextPage);
     }
     setLoadingMore(false);
@@ -245,9 +251,9 @@ export default function App() {
                   : activeCategory === 'anime'
                   ? '🌸 Anime & Japanese Animations (Sub/Dub)'
                   : activeCategory === 'ecchi_anime'
-                  ? '🔞 Secret Uncut Anime Vault (Overflow & Ecchi Uncut)'
+                  ? '✨ Secret Master Vault (Exclusive Uncut Collection)'
                   : activeCategory === 'mature'
-                  ? '🔞 Master Cinema Vault (Uncut Cinema)'
+                  ? '🎬 Master Cinema Vault (Uncut Cinema)'
                   : '❤️ My Saved Watchlist'}
               </h2>
             </div>
