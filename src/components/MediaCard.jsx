@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Play, Star, Bookmark, Check, Sparkles, Volume2 } from 'lucide-react';
-import { IMG_BASE, isHindiAvailable, isHindiDubbedAnime } from '../services/tmdb';
+import { POSTER_THUMB_BASE, isHindiAvailable } from '../services/tmdb';
 
-export default function MediaCard({ item, onPlay, isWatchlisted, onToggleWatchlist }) {
+const MediaCard = React.memo(function MediaCard({ item, onPlay, isWatchlisted, onToggleWatchlist }) {
   if (!item) return null;
   const [imageLoaded, setImageLoaded] = useState(false);
   const title = item.title || item.name || 'Untitled';
@@ -29,7 +29,7 @@ export default function MediaCard({ item, onPlay, isWatchlisted, onToggleWatchli
 
   const isHindi = Boolean(
     item.languages?.hi?.url ||
-    (isAnime ? isHindiDubbedAnime(item) : isHindiAvailable(item))
+    (!isAnime && isHindiAvailable(item))
   );
 
   const savedProgress = (() => {
@@ -64,7 +64,7 @@ export default function MediaCard({ item, onPlay, isWatchlisted, onToggleWatchli
         )}
 
         <img
-          src={item.poster_path ? (item.poster_path.startsWith('http') ? item.poster_path : `${IMG_BASE}${item.poster_path}`) : './icon-512.png'}
+          src={item.poster_path ? (item.poster_path.startsWith('http') ? item.poster_path : `${POSTER_THUMB_BASE}${item.poster_path}`) : './icon-512.png'}
           alt={title}
           loading="lazy"
           onLoad={() => setImageLoaded(true)}
@@ -162,4 +162,6 @@ export default function MediaCard({ item, onPlay, isWatchlisted, onToggleWatchli
       </div>
     </div>
   );
-}
+});
+
+export default MediaCard;

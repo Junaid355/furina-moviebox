@@ -24,18 +24,18 @@ export const DEFAULT_SAMPLE_MOVIES = [
     isAnime: true,
     languages: {
       hi: {
-        label: 'Hindi (Studio Multi-Audio)',
-        url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        label: 'Hindi (Studio Master Audio)',
+        url: 'https://media.w3.org/2010/05/sintel/trailer.mp4',
         type: 'video/mp4'
       },
       en: {
         label: 'English Dub (Official Master)',
-        url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+        url: 'https://raw.githubusercontent.com/mdn/learning-area/master/html/multimedia-and-embedding/video-and-audio-content/rabbit320.mp4',
         type: 'video/mp4'
       },
       ja: {
         label: 'Japanese Original Audio',
-        url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+        url: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
         type: 'video/mp4'
       }
     },
@@ -54,7 +54,30 @@ export function getStoredStudioMovies() {
       return DEFAULT_SAMPLE_MOVIES;
     }
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_SAMPLE_MOVIES;
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      // Migrate legacy 403 Google Storage sample links to verified working assets
+      let changed = false;
+      const migrated = parsed.map((m) => {
+        if (m.languages?.hi?.url?.includes('gtv-videos-bucket') || m.languages?.hi?.url?.includes('BigBuckBunny')) {
+          changed = true;
+          return {
+            ...m,
+            languages: {
+              ...m.languages,
+              hi: { ...m.languages.hi, label: 'Hindi (Studio Master Audio)', url: 'https://media.w3.org/2010/05/sintel/trailer.mp4' },
+              en: { ...m.languages.en, label: 'English Dub (Official Master)', url: 'https://raw.githubusercontent.com/mdn/learning-area/master/html/multimedia-and-embedding/video-and-audio-content/rabbit320.mp4' },
+              ja: { ...m.languages.ja, label: 'Japanese Original Audio', url: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4' }
+            }
+          };
+        }
+        return m;
+      });
+      if (changed) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+      }
+      return migrated;
+    }
+    return DEFAULT_SAMPLE_MOVIES;
   } catch (e) {
     return DEFAULT_SAMPLE_MOVIES;
   }
@@ -162,9 +185,9 @@ export default function MovieStudioModal({ isOpen, onClose, onPlayMovie, onMovie
       return;
     }
 
-    const sampleHi = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
-    const sampleEn = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4';
-    const sampleJa = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4';
+    const sampleHi = 'https://media.w3.org/2010/05/sintel/trailer.mp4';
+    const sampleEn = 'https://raw.githubusercontent.com/mdn/learning-area/master/html/multimedia-and-embedding/video-and-audio-content/rabbit320.mp4';
+    const sampleJa = 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4';
 
     const movieObj = {
       id: editingId || `studio_${Date.now()}`,

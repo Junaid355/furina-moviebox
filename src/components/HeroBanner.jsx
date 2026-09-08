@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Plus, Check, Star, ChevronLeft, ChevronRight } from 'lucide-react';
-import { BACKDROP_BASE, isHindiAvailable, isHindiDubbedAnime } from '../services/tmdb';
+import { BACKDROP_BASE, isHindiAvailable } from '../services/tmdb';
 
 export default function HeroBanner({ items, item, onPlay, isWatchlisted, onToggleWatchlist }) {
   // Support both items array or single item prop
@@ -45,7 +45,7 @@ export default function HeroBanner({ items, item, onPlay, isWatchlisted, onToggl
 
   const isHindi = Boolean(
     currentItem?.languages?.hi?.url ||
-    (isAnime ? isHindiDubbedAnime(currentItem) : isHindiAvailable(currentItem))
+    (!isAnime && isHindiAvailable(currentItem))
   );
 
   const saved = (isWatchlisted && currentItem?.id) ? isWatchlisted(currentItem.id) : false;

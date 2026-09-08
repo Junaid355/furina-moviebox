@@ -6,11 +6,46 @@ const BASE_URL = 'https://api.themoviedb.org/3';
 
 export const IMG_BASE = 'https://image.tmdb.org/t/p/w500';
 
+export const POSTER_THUMB_BASE = 'https://image.tmdb.org/t/p/w342';
+
 export const BACKDROP_BASE = 'https://image.tmdb.org/t/p/original';
 
 
 
 const today = new Date().toISOString().split('T')[0];
+
+// High-speed in-memory LRU API cache and concurrent request deduplication
+const apiCache = new Map();
+const inFlightRequests = new Map();
+
+export async function cachedFetchJson(url, ttlMs = 300000) {
+  const now = Date.now();
+  if (apiCache.has(url)) {
+    const entry = apiCache.get(url);
+    if (now - entry.timestamp < ttlMs) {
+      return entry.data;
+    }
+    apiCache.delete(url);
+  }
+  if (inFlightRequests.has(url)) {
+    return await inFlightRequests.get(url);
+  }
+
+  const promise = (async () => {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      apiCache.set(url, { timestamp: Date.now(), data });
+      return data;
+    } finally {
+      inFlightRequests.delete(url);
+    }
+  })();
+
+  inFlightRequests.set(url, promise);
+  return await promise;
+}
 
 
 
@@ -265,8 +300,7 @@ const FALLBACK_MEDIA = [
 
 export async function fetchTrendingAll(page = 1) {
   try {
-    const res = await fetch(`${BASE_URL}/trending/all/week?api_key=${API_KEY}&page=${page}`);
-    const data = await res.json();
+    const data = await cachedFetchJson(`${BASE_URL}/trending/all/week?api_key=${API_KEY}&page=${page}`);
     if (!data.results || data.results.length === 0) return page === 1 ? FALLBACK_MEDIA : [];
 
     const filtered = data.results.filter(item => {
@@ -1942,265 +1976,105 @@ export async function fetchHindiMovies(page = 1) {
 
 
 
-    const res = await fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_original_language=hi&region=IN&primary_release_date.lte=${today}&vote_count.gte=5&sort_by=popularity.desc&page=${page}`);
-
-    const data = await res.json();
+    const data = await cachedFetchJson(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_original_language=hi&region=IN&primary_release_date.lte=${today}&vote_count.gte=5&sort_by=popularity.desc&page=${page}`);
 
     const bollywood = (data.results && data.results.length > 0)
-
       ? data.results
-
           .filter((m) => m && m.id && !curatedIds.has(m.id))
-
           .map((m) => ({ ...m, media_type: 'movie', category: 'hindi', original_language: 'hi', isHindiDubbed: true }))
-
       : (page === 1 ? FALLBACK_MEDIA.filter((m) => m.category === 'hindi') : []);
-
     
-
     if (page === 1) {
-
       return [...curatedAll, ...bollywood];
-
     }
-
     return bollywood;
-
   } catch (err) {
-
     return page === 1 ? [...CURATED_BOLLYWOOD_BLOCKBUSTERS, ...CURATED_HOLLYWOOD_HINDI_DUBS, ...FALLBACK_MEDIA.filter((m) => m.category === 'hindi')] : [];
-
   }
-
 }
-
-
 
 export async function fetchTrendingSeries(page = 1) {
-
   try {
-
-    const res = await fetch(`${BASE_URL}/discover/tv?api_key=${API_KEY}&first_air_date.lte=${today}&vote_count.gte=15&sort_by=popularity.desc&page=${page}`);
-
-    const data = await res.json();
-
+    const data = await cachedFetchJson(`${BASE_URL}/discover/tv?api_key=${API_KEY}&first_air_date.lte=${today}&vote_count.gte=15&sort_by=popularity.desc&page=${page}`);
     return data.results && data.results.length > 0 ? data.results.map((m) => ({ ...m, media_type: 'tv' })) : (page === 1 ? FALLBACK_MEDIA.filter((m) => m.media_type === 'tv') : []);
-
   } catch (err) {
-
     return page === 1 ? FALLBACK_MEDIA.filter((m) => m.media_type === 'tv') : [];
-
   }
-
 }
 
-
-
 export async function fetchAnime(page = 1, audioFilter = 'all') {
-
   try {
-
     let sortParam = 'popularity.desc';
-
     if (audioFilter === 'sub') {
-
       sortParam = 'vote_count.desc';
-
     }
-
-
 
     const allCurated = [
-
       ...CURATED_HINDI_DUBBED_ANIME,
-
       ...CURATED_ENGLISH_DUBBED_ANIME,
-
       ...CURATED_SUBBED_ANIME
-
     ];
-
     const allCuratedIds = new Set(allCurated.map((a) => Number(a.id)));
 
-
-
-    // Fetch both TV anime series AND anime cinema movies for massive catalog
-
-    const tvPromise = fetch(`${BASE_URL}/discover/tv?api_key=${API_KEY}&with_genres=16&with_original_language=ja&first_air_date.lte=${today}&vote_count.gte=8&sort_by=${sortParam}&page=${page}`)
-
-      .then((r) => r.json()).catch(() => ({ results: [] }));
-
-    const moviePromise = fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=16&with_original_language=ja&primary_release_date.lte=${today}&vote_count.gte=10&sort_by=${sortParam}&page=${page}`)
-
-      .then((r) => r.json()).catch(() => ({ results: [] }));
-
-
+    // Fetch both TV anime series AND anime cinema movies with cache
+    const tvPromise = cachedFetchJson(`${BASE_URL}/discover/tv?api_key=${API_KEY}&with_genres=16&with_original_language=ja&first_air_date.lte=${today}&vote_count.gte=8&sort_by=${sortParam}&page=${page}`)
+      .catch(() => ({ results: [] }));
+    const moviePromise = cachedFetchJson(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=16&with_original_language=ja&primary_release_date.lte=${today}&vote_count.gte=10&sort_by=${sortParam}&page=${page}`)
+      .catch(() => ({ results: [] }));
 
     const [tvData, movieData] = await Promise.all([tvPromise, moviePromise]);
-
     const rawTv = (tvData.results || []).map((m) => ({ ...m, media_type: 'tv' }));
-
     const rawMovies = (movieData.results || []).map((m) => ({ ...m, media_type: 'movie' }));
 
-
-
     // Interleave series and cinema movies
-
     const interleaved = [];
-
     const maxLen = Math.max(rawTv.length, rawMovies.length);
-
     for (let i = 0; i < maxLen; i++) {
-
       if (rawTv[i]) interleaved.push(rawTv[i]);
-
       if (rawMovies[i]) interleaved.push(rawMovies[i]);
-
     }
 
-
-
     // Filter out restricted content and duplicate curated items
-
+    // External anime streaming embeds provide Japanese audio & English Dub (never fake Hindi)
     const cleanDiscovered = interleaved
-
       .filter((item) => item && item.id && !isHanimeContent(item) && !allCuratedIds.has(Number(item.id)))
-
       .map((m) => {
-
-        const hasHindi = isHindiDubbedAnime(m);
-
         return { 
-
           ...m, 
-
           media_type: m.media_type || (m.first_air_date ? 'tv' : 'movie'), 
-
           category: 'anime', 
-
           isAnime: true,
-
-          hasHindiDub: hasHindi,
-
-          dub_type: audioFilter === 'sub' ? 'sub' : (audioFilter === 'hindi' || hasHindi) ? 'hindi' : 'english'
-
+          hasHindiDub: false, // External anime streams do NOT have authorized Hindi dubs
+          dub_type: audioFilter === 'sub' ? 'sub' : (audioFilter === 'english' ? 'english' : 'sub')
         };
-
       });
 
-
-
     if (page === 1) {
-
       let curatedBase = [];
-
       if (audioFilter === 'hindi') {
-
-        curatedBase = CURATED_HINDI_DUBBED_ANIME;
-
+        curatedBase = CURATED_HINDI_DUBBED_ANIME.map((a) => ({ ...a, hasHindiDub: false, dub_type: 'sub' }));
       } else if (audioFilter === 'english') {
-
         curatedBase = CURATED_ENGLISH_DUBBED_ANIME;
-
       } else if (audioFilter === 'sub') {
-
         curatedBase = CURATED_SUBBED_ANIME;
-
       } else {
-
         const seenIds = new Set();
-
         curatedBase = [
-
           ...CURATED_HINDI_DUBBED_ANIME.slice(0, 15),
-
           ...CURATED_ENGLISH_DUBBED_ANIME.slice(0, 15),
-
           ...CURATED_SUBBED_ANIME.slice(0, 10)
-
-        ].filter((item) => {
-
+        ].map((a) => ({ ...a, hasHindiDub: false }))
+        .filter((item) => {
           if (!item || seenIds.has(Number(item.id))) return false;
-
           seenIds.add(Number(item.id));
-
           return true;
-
         });
-
-      }
-
-
-
-      if (audioFilter === 'hindi') {
-
-        const combined = [...curatedBase, ...cleanDiscovered.filter((m) => isHindiDubbedAnime(m))];
-
-        return combined;
-
       }
 
       return [...curatedBase, ...cleanDiscovered];
-
     }
 
-
-
-    // Page > 1
-
-    if (audioFilter === 'hindi') {
-
-      const filteredHindi = cleanDiscovered.filter((m) => isHindiDubbedAnime(m));
-
-      if (filteredHindi.length < 12) {
-
-        // Query specific iconic Hindi dubbed anime series/movies for infinite Hindi pagination
-
-        const hindiSearchTerms = ['Dragon Ball', 'Naruto', 'Doraemon', 'Shinchan', 'Demon Slayer', 'One Piece', 'Jujutsu Kaisen', 'Beyblade', 'Bleach', 'Pokemon', 'Inazuma Eleven', 'Perman', 'Hattori', 'Slime', 'Solo Leveling'];
-
-        const queryTerm = hindiSearchTerms[(page - 2) % hindiSearchTerms.length];
-
-        const subPage = Math.floor((page - 2) / hindiSearchTerms.length) + 1;
-
-        try {
-
-          const sRes = await fetch(`${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(queryTerm)}&page=${subPage}`);
-
-          const sData = await sRes.json();
-
-          const extra = (sData.results || [])
-
-            .filter((it) => it && it.id && it.media_type !== 'person' && (it.poster_path || it.backdrop_path) && !allCuratedIds.has(Number(it.id)) && !isHanimeContent(it))
-
-            .map((it) => ({
-
-              ...it,
-
-              media_type: it.media_type || (it.first_air_date ? 'tv' : 'movie'),
-
-              category: 'anime',
-
-              isAnime: true,
-
-              hasHindiDub: true,
-
-              dub_type: 'hindi'
-
-            }));
-
-          return [...filteredHindi, ...extra];
-
-        } catch {
-
-          return filteredHindi;
-
-        }
-
-      }
-
-      return filteredHindi;
-
-    }
+    return cleanDiscovered;
 
 
 
@@ -2225,63 +2099,31 @@ export async function fetchAnime(page = 1, audioFilter = 'all') {
 export async function fetchHorrorMovies(page = 1) {
 
   try {
-
-    const res = await fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=27&primary_release_date.lte=${today}&vote_count.gte=25&sort_by=popularity.desc&page=${page}`);
-
-    const data = await res.json();
-
+    const data = await cachedFetchJson(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=27&primary_release_date.lte=${today}&vote_count.gte=25&sort_by=popularity.desc&page=${page}`);
     return (data.results || []).map(m => ({ ...m, media_type: 'movie', category: 'horror' }));
-
   } catch (err) {
-
     return [];
-
   }
-
 }
-
-
 
 // 🇰🇷 K-Drama (Korean Dramas)
-
 export async function fetchKDramas(page = 1) {
-
   try {
-
-    const res = await fetch(`${BASE_URL}/discover/tv?api_key=${API_KEY}&with_original_language=ko&with_genres=18|10759|9648&first_air_date.lte=${today}&vote_count.gte=8&sort_by=popularity.desc&page=${page}`);
-
-    const data = await res.json();
-
+    const data = await cachedFetchJson(`${BASE_URL}/discover/tv?api_key=${API_KEY}&with_original_language=ko&with_genres=18|10759|9648&first_air_date.lte=${today}&vote_count.gte=8&sort_by=popularity.desc&page=${page}`);
     return (data.results || []).map(m => ({ ...m, media_type: 'tv', category: 'kdrama' }));
-
   } catch (err) {
-
     return [];
-
   }
-
 }
 
-
-
 // Master Vault Uncut Cinema
-
 export async function fetchMatureMovies(page = 1) {
-
   try {
-
-    const res = await fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&include_adult=true&certification_country=US&certification=R|NC-17&sort_by=popularity.desc&page=${page}`);
-
-    const data = await res.json();
-
+    const data = await cachedFetchJson(`${BASE_URL}/discover/movie?api_key=${API_KEY}&include_adult=true&certification_country=US&certification=R|NC-17&sort_by=popularity.desc&page=${page}`);
     return data.results && data.results.length > 0 ? data.results.map(m => ({ ...m, media_type: 'movie', is_mature: true })) : (page === 1 ? FALLBACK_MEDIA.filter(m => m.category === 'mature') : []);
-
   } catch (err) {
-
     return page === 1 ? FALLBACK_MEDIA.filter(m => m.category === 'mature') : [];
-
   }
-
 }
 
 
@@ -3131,107 +2973,67 @@ export function isHanimeContent(item) {
 
 
 export function isHindiAvailable(item) {
-
   if (!item) return false;
 
+  // Studio/Custom uploaded content with explicit Hindi audio asset
   if (item.languages?.hi?.url || item.audio_hi_url) {
-
     return true;
-
   }
 
+  // Japanese anime from external streaming providers does NOT have authorized Hindi audio
   if (isAnimeItem(item)) {
-
-    return isHindiDubbedAnime(item);
-
+    return false;
   }
 
-  if (item.original_language === 'hi' || item.category === 'hindi' || item.isHindiDubbed === true) {
-
+  // Authentic Bollywood / Indian cinema whose native spoken audio is Hindi
+  if (item.original_language === 'hi' || item.category === 'hindi') {
     return true;
-
   }
 
   const id = Number(item.id);
-
-  if (CURATED_HOLLYWOOD_HINDI_DUBS.some((h) => Number(h.id) === id)) return true;
-
   if (CURATED_BOLLYWOOD_BLOCKBUSTERS.some((b) => Number(b.id) === id)) return true;
+  if (item.isHindiDubbed === true && item.category !== 'anime') {
+    return true;
+  }
 
   return false;
-
 }
 
 
 
 export function isAnimeItem(item) {
-
   if (!item) return false;
 
   return (
-
     item.category === 'anime' ||
-
     item.category === 'ecchi_anime' ||
-
     item.isAnime === true ||
-
     item.original_language === 'ja' ||
-
     (Array.isArray(item.origin_country) && item.origin_country.includes('JP')) ||
-
     ((item.genre_ids?.includes(16) || item.genres?.some((g) => g.id === 16 || g.name === 'Animation')) && item.original_language === 'ja')
-
   );
-
 }
 
 
 
-// Strictly verified anime titles with confirmed official Hindi dub broadcasts in India
-
+// Strictly verified anime titles with confirmed historical TV broadcasts in India
 export const VERIFIED_HINDI_ANIME_IDS = new Set([
-
   2098, 33758, 4614, 11130, 63926, 65733, 46260, 31910, 70881, 12971, 62710, 12697, 236208,
-
   85937, 95479, 114410, 211089, 127532, 37854, 65930, 73223, 214999, 203857,
-
   1429, 13916, 120089, 31835, 60572, 38472, 121533, 46298, 118439, 226688, 60708,
-
   136283, 206497, 205847, 224484, 153870, 86031, 80975, 67070, 75225, 104877, 240411,
-
   208534, 19, 105248, 216390, 635302, 8392, 916224, 568160, 372058, 378064, 284274,
-
   610150, 503314, 900667, 81216, 65733, 298321
-
 ]);
 
 
 
+// Truth in audio routing: External anime streaming embeds DO NOT supply authorized Hindi audio.
+// Return false so the player and UI never falsely promise Hindi audio that falls back to Japanese.
 export function isHindiDubbedAnime(item) {
-
   if (!item) return false;
-
-  const id = Number(item.id);
-
-  if (VERIFIED_HINDI_ANIME_IDS.has(id)) return true;
-
-  if (item.hasHindiDub === true || item.dub_type === 'hindi') return true;
-
-  const title = (item.title || item.name || item.original_name || item.original_title || '').toLowerCase();
-
-  // Only match genuinely broadcasted Hindi anime in India
-
-  const verifiedHindiKeywords = [
-
-    'doraemon', 'shinchan', 'shin chan', 'shin-chan', 'ninja hattori', 'perman',
-
-    'kiteretsu', 'kochikame', 'dragon ball', 'naruto', 'beyblade', 'pokemon', 'pokémon'
-
-  ];
-
-  return verifiedHindiKeywords.some((k) => title.includes(k));
-
+  if (item.languages?.hi?.url || item.audio_hi_url) return true;
+  return false;
 }
 
 
@@ -5029,16 +4831,14 @@ export async function searchContent(query, page = 1, includeAdult = false) {
   }
 
   try {
-    let res = await fetch(`${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(query.trim())}&page=${page}&include_adult=${includeAdult}`);
-    let data = await res.json();
+    let data = await cachedFetchJson(`${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(query.trim())}&page=${page}&include_adult=${includeAdult}`);
     let results = (data.results || []).filter(item => item && item.id && item.media_type !== 'person' && (item.poster_path || item.backdrop_path));
 
     // If no results, try stripping modifiers like 'hindi dubbed', 'hindi', 'dubbed', 'full movie', 'movie', etc.
     if (results.length === 0) {
       const cleaned = query.replace(/\b(hindi\s*dubbed|hindi\s*dub|hindi|dubbed|dub|full\s*movie|movie|series)\b/gi, '').trim();
       if (cleaned && cleaned.toLowerCase() !== query.trim().toLowerCase()) {
-        res = await fetch(`${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(cleaned)}&page=${page}&include_adult=${includeAdult}`);
-        data = await res.json();
+        data = await cachedFetchJson(`${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(cleaned)}&page=${page}&include_adult=${includeAdult}`);
         results = (data.results || []).filter(item => item && item.id && item.media_type !== 'person' && (item.poster_path || item.backdrop_path));
       }
     }
@@ -5070,38 +4870,19 @@ export async function searchContent(query, page = 1, includeAdult = false) {
   }
 }
 
-
-
 export async function fetchTvDetails(tvId) {
-
   try {
-
-    const res = await fetch(`${BASE_URL}/tv/${tvId}?api_key=${API_KEY}`);
-
-    return await res.json();
-
+    return await cachedFetchJson(`${BASE_URL}/tv/${tvId}?api_key=${API_KEY}`);
   } catch (err) {
-
     return null;
-
   }
-
 }
 
-
-
 export async function fetchSeasonEpisodes(tvId, seasonNum) {
-
   try {
-
-    const res = await fetch(`${BASE_URL}/tv/${tvId}/season/${seasonNum}?api_key=${API_KEY}`);
-
-    const data = await res.json();
-
+    const data = await cachedFetchJson(`${BASE_URL}/tv/${tvId}/season/${seasonNum}?api_key=${API_KEY}`);
     if (data.episodes && data.episodes.length > 0) {
-
       return data.episodes;
-
     }
 
     // Fallback: generate default episodes if empty so user is never stuck

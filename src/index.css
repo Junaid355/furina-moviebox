@@ -45,20 +45,21 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
 }
 
-/* Ultra-Smooth Glass Media Card */
+/* Ultra-Smooth Glass Media Card (GPU Optimized - No heavy backdrop filter on grid) */
 .glass-card {
-  background: linear-gradient(180deg, rgba(12, 21, 46, 0.7) 0%, rgba(5, 10, 24, 0.9) 100%);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: linear-gradient(180deg, #0c1633 0%, #060d24 100%);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.35s ease;
-  will-change: transform, box-shadow;
+  contain: content;
+  content-visibility: auto;
+  contain-intrinsic-size: 320px;
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.25s ease;
+  will-change: transform;
 }
 
 .glass-card:hover {
-  transform: translateY(-6px) scale(1.02);
+  transform: translateY(-4px) scale(1.015);
   border-color: rgba(56, 189, 248, 0.45);
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.9), 0 0 25px -2px rgba(56, 189, 248, 0.28);
+  box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.8), 0 0 20px -2px rgba(56, 189, 248, 0.25);
 }
 
 /* Skeleton Shimmer Loading Effect */

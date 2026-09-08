@@ -340,9 +340,9 @@ async function runQA() {
     await sleep(1000);
 
     const hindiVideoSrc = await client.eval('document.querySelector("video")?.src || ""');
-    const isBigBuckBunny = hindiVideoSrc.includes('BigBuckBunny.mp4');
+    const isTrailer = hindiVideoSrc.includes('trailer.mp4');
     recordTest(6, 'Select Hindi Audio Track', Boolean(hindiVideoSrc), `Video Src: ${hindiVideoSrc}`);
-    recordTest(7, 'Verify Actual Hindi Audio Media Asset', isBigBuckBunny, `Resolved asset strictly to: ${hindiVideoSrc}`);
+    recordTest(7, 'Verify Actual Hindi Audio Media Asset', isTrailer, `Resolved asset strictly to: ${hindiVideoSrc}`);
 
     console.log('\n--- Running TEST 8 & 9: English Audio Test ---');
     await client.eval(`
@@ -354,9 +354,9 @@ async function runQA() {
     await sleep(1000);
 
     const engVideoSrc = await client.eval('document.querySelector("video")?.src || ""');
-    const isElephantsDream = engVideoSrc.includes('ElephantsDream.mp4');
+    const isRabbit = engVideoSrc.includes('rabbit320.mp4');
     recordTest(8, 'Select English Audio Track', Boolean(engVideoSrc), `Video Src: ${engVideoSrc}`);
-    recordTest(9, 'Verify Actual English Audio Media Asset', isElephantsDream, `Resolved asset strictly to: ${engVideoSrc}`);
+    recordTest(9, 'Verify Actual English Audio Media Asset', isRabbit, `Resolved asset strictly to: ${engVideoSrc}`);
 
     console.log('\n--- Running TEST 10 & 11: Japanese Audio Test ---');
     await client.eval(`
@@ -368,9 +368,9 @@ async function runQA() {
     await sleep(1000);
 
     const jaVideoSrc = await client.eval('document.querySelector("video")?.src || ""');
-    const isTearsOfSteel = jaVideoSrc.includes('TearsOfSteel.mp4');
+    const isFlower = jaVideoSrc.includes('flower.mp4');
     recordTest(10, 'Select Japanese Audio Track', Boolean(jaVideoSrc), `Video Src: ${jaVideoSrc}`);
-    recordTest(11, 'Verify Actual Japanese Audio Media Asset', isTearsOfSteel, `Resolved asset strictly to: ${jaVideoSrc}`);
+    recordTest(11, 'Verify Actual Japanese Audio Media Asset', isFlower, `Resolved asset strictly to: ${jaVideoSrc}`);
 
     console.log('\n--- Running TEST 12: Unavailable Language Policy ---');
     await client.eval('document.querySelector("button[title*=\'Close Player\']").click()');
@@ -402,6 +402,38 @@ async function runQA() {
     } else {
       recordTest(12, 'Strict Hindi Safeguard', true, 'Hindi option cleanly hidden when unavailable');
     }
+
+    await client.eval('document.querySelector("button[title*=\'Close Player\']").click()');
+    await sleep(1000);
+
+    console.log('\n--- Running TEST 12b: Anime Strict Hindi Dub Safeguard ---');
+    await client.eval(`
+      (() => {
+        const buttons = Array.from(document.querySelectorAll('nav button'));
+        const animeBtn = buttons.find(b => b.textContent.includes('Anime'));
+        if (animeBtn) animeBtn.click();
+      })();
+    `);
+    await sleep(1500);
+
+    await client.eval(`
+      (() => {
+        const card = document.querySelector('.glass-card');
+        if (card) card.click();
+      })();
+    `);
+    await sleep(1500);
+
+    await client.eval(`
+      (() => {
+        const hindiBtn = document.querySelector('button[data-testid="audio-btn-hindi"]') || Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('Hindi Audio'));
+        if (hindiBtn) hindiBtn.click();
+      })();
+    `);
+    await sleep(1000);
+
+    const animeHindiSafeguard = await client.eval('document.body.innerText.includes("Strict Audio Policy") || document.body.innerText.includes("Hindi audio unavailable for this anime title")');
+    recordTest('12b', 'Anime Hindi Dub Safeguard (Strict Policy)', animeHindiSafeguard, 'Anime strictly shows safeguard instead of Japanese audio');
 
     console.log('\n--- Running TEST 13: Fullscreen Test ---');
     await client.eval(`
@@ -509,9 +541,9 @@ async function runQA() {
       (() => {
         window.__setReactInput('form input[placeholder*="Matrix"]', 'Furina E2E Blockbuster');
         window.__setReactTextarea('form textarea', 'An epic automated E2E test movie with full Hindi, English, and Japanese multi-audio verified tracks.');
-        window.__setReactInput('form input[placeholder*="hindi-audio"]', 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4');
-        window.__setReactInput('form input[placeholder*="english-dub"]', 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4');
-        window.__setReactInput('form input[placeholder*="japanese-sub"]', 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4');
+        window.__setReactInput('form input[placeholder*="hindi-audio"]', 'https://media.w3.org/2010/05/sintel/trailer.mp4');
+        window.__setReactInput('form input[placeholder*="english-dub"]', 'https://raw.githubusercontent.com/mdn/learning-area/master/html/multimedia-and-embedding/video-and-audio-content/rabbit320.mp4');
+        window.__setReactInput('form input[placeholder*="japanese-sub"]', 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4');
       })();
     `);
     await sleep(800);
@@ -588,7 +620,7 @@ async function runQA() {
     `);
     await sleep(1000);
     const postReloadVideoSrc = await client.eval('document.querySelector("video")?.src || ""');
-    recordTest(21, 'Language Selection After Reload', postReloadVideoSrc.includes('TearsOfSteel.mp4'), `Src: ${postReloadVideoSrc}`);
+    recordTest(21, 'Language Selection After Reload', postReloadVideoSrc.includes('flower.mp4'), `Src: ${postReloadVideoSrc}`);
 
     await client.eval('document.querySelector("button[title*=\'Close Player\']").click()');
     await sleep(1000);

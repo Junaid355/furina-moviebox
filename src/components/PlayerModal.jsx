@@ -42,12 +42,12 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     )
   );
 
-  // Determine working audio tracks strictly
+  // Determine working audio tracks strictly - never claim Hindi exists if source cannot provide it
   const hasWorkingHindiSource = isCustom
     ? Boolean(item?.languages?.hi?.url)
     : (isAnime 
-        ? Boolean(item?.hasHindiDub || item?.dub_type === 'hindi' || isHindiDubbedAnime(item))
-        : Boolean(isBollywoodHindi || item?.isHindiDubbed || isHindiAvailable(item)));
+        ? false // External anime providers do not have authorized Hindi audio. Never fake Hindi.
+        : Boolean(isBollywoodHindi || item?.original_language === 'hi' || item?.category === 'hindi' || (item?.isHindiDubbed && isHindiAvailable(item))));
 
   const hasWorkingEnglishSource = isCustom
     ? Boolean(item?.languages?.en?.url)
@@ -66,8 +66,8 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       return 'english';
     }
     if (isBollywoodHindi) return 'hindi';
+    if (isAnime) return 'sub'; // Anime defaults to Japanese sub or English dub, NEVER Hindi
     if (isHindiPreferred && hasWorkingHindiSource) return 'hindi';
-    if (item?.dub_type === 'hindi' && hasWorkingHindiSource) return 'hindi';
     if (item?.dub_type === 'sub') return 'sub';
     return 'english';
   });
@@ -775,8 +775,10 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   data-testid="audio-btn-hindi"
                   onClick={() => {
                     setAudioMode('hindi');
-                    const hindiServer = availableServers.find((s) => s.id === 'multiembed') || availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
-                    setSelectedServer(hindiServer);
+                    if (hasWorkingHindiSource && !isCustom) {
+                      const hindiServer = availableServers.find((s) => s.id === 'multiembed') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
+                      setSelectedServer(hindiServer);
+                    }
                   }}
                   className={`px-3 py-1 rounded-full text-xs font-extrabold transition flex items-center gap-1 border cursor-pointer ${
                     audioMode === 'hindi'
@@ -804,12 +806,12 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
               )}
               {audioMode === 'hindi' && hasWorkingHindiSource && (
                 <span className="text-amber-300 font-medium">
-                  ✓ <strong>Hindi Audio Active</strong> ({isCustom ? 'Studio Master Track' : isBollywoodHindi ? 'Original Hindi Audio Track' : 'Verified Hindi Dubbed Stream'})
+                  ✓ <strong>Hindi Audio Active</strong> ({isCustom ? 'Studio Master Track' : isBollywoodHindi ? 'Original Hindi Audio Track' : 'Verified Hindi Stream'})
                 </span>
               )}
               {audioMode === 'hindi' && !hasWorkingHindiSource && (
                 <span className="text-rose-400 font-bold">
-                  ⚠️ <strong>{isSeries ? 'Hindi audio unavailable for this episode.' : 'Hindi audio unavailable for this title.'}</strong> (Select English Dub or Japanese Sub below)
+                  ⚠️ <strong>{isAnime ? 'Hindi audio unavailable for this anime title.' : isSeries ? 'Hindi audio unavailable for this episode.' : 'Hindi audio unavailable for this title.'}</strong> (Select English Dub or Japanese Sub below)
                 </span>
               )}
             </div>
@@ -919,13 +921,13 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   🇮🇳
                 </div>
                 <h3 className="text-base sm:text-lg font-black text-white mb-2 flex items-center gap-2">
-                  <span>{isSeries ? 'Hindi audio unavailable for this episode.' : 'Hindi audio unavailable for this movie.'}</span>
+                  <span>{isAnime ? 'Hindi audio unavailable for this anime title.' : isSeries ? 'Hindi audio unavailable for this episode.' : 'Hindi audio unavailable for this movie.'}</span>
                   <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40">
                     Strict Audio Policy
                   </span>
                 </h3>
                 <p className="text-xs text-slate-300 max-w-md mb-5 leading-relaxed">
-                  An official Hindi dubbed stream has not been distributed for <strong>{title}</strong>. We never silently substitute Japanese or English audio when you selected Hindi.
+                  An authorized Hindi dubbed stream is not available from the configured streaming providers for <strong>{title}</strong>. We never silently substitute Japanese or English audio when you selected Hindi.
                 </p>
                 <div className="flex items-center gap-2.5 flex-wrap justify-center">
                   {hasWorkingEnglishSource && (
