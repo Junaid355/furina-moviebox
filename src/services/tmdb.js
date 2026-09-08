@@ -33,9 +33,14 @@ export async function cachedFetchJson(url, ttlMs = 300000) {
 
   const promise = (async () => {
     try {
-      const res = await fetch(url);
+      const signal = typeof AbortSignal !== 'undefined' && AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined;
+      const res = await fetch(url, { signal });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
+      if (apiCache.size > 150) {
+        const firstKey = apiCache.keys().next().value;
+        apiCache.delete(firstKey);
+      }
       apiCache.set(url, { timestamp: Date.now(), data });
       return data;
     } finally {

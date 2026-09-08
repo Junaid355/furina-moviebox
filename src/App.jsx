@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Navbar from './components/Navbar';
 import HeroBanner from './components/HeroBanner';
 import MediaCard from './components/MediaCard';
@@ -123,7 +123,7 @@ export default function App() {
     } catch (e) {}
   }, [watchlist]);
 
-  const toggleWatchlist = (item) => {
+  const toggleWatchlist = useCallback((item) => {
     if (!item || !item.id) return;
     setWatchlist((prev) => {
       const arr = Array.isArray(prev) ? prev : [];
@@ -133,20 +133,24 @@ export default function App() {
       }
       return [item, ...arr];
     });
-  };
+  }, []);
 
-  const clearWatchlist = () => {
+  const clearWatchlist = useCallback(() => {
     setWatchlist([]);
     if (activeCategory === 'watchlist') {
       setItems([]);
       setHeroItem(null);
     }
-  };
+  }, [activeCategory]);
 
-  const isWatchlisted = (id) => {
-    if (!id || !Array.isArray(watchlist)) return false;
-    return watchlist.some((x) => x && x.id === id);
-  };
+  const watchlistIdSet = useMemo(() => {
+    return new Set((Array.isArray(watchlist) ? watchlist : []).map((x) => x && x.id).filter(Boolean));
+  }, [watchlist]);
+
+  const isWatchlisted = useCallback((id) => {
+    if (!id) return false;
+    return watchlistIdSet.has(id);
+  }, [watchlistIdSet]);
 
   // Request sequence ref for stale-request protection
   const requestSeqRef = useRef(0);
@@ -438,7 +442,7 @@ export default function App() {
                 }`}
               >
                 <span>🇮🇳</span>
-                <span>Hindi Dubbed (RareAnimes format)</span>
+                <span>Studio Hindi Dubs</span>
               </button>
               <button
                 onClick={() => setAnimeAudioFilter('sub')}

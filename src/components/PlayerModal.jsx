@@ -36,18 +36,18 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const isBollywoodHindi = Boolean(
     !isAnime && (
       item?.original_language === 'hi' ||
-      item?.category === 'hindi' ||
-      Boolean(item?.isHindiDubbed) ||
-      (Array.isArray(item?.origin_country) && item?.origin_country.includes('IN'))
+      (Array.isArray(item?.origin_country) && item?.origin_country.includes('IN') && item?.original_language !== 'en')
     )
   );
 
   // Determine working audio tracks strictly - never claim Hindi exists if source cannot provide it
+  // Authentic Hindi audio is strictly available from:
+  // 1. Studio/Custom owned content with a real Hindi asset (item?.languages?.hi?.url)
+  // 2. Authentic Bollywood / Indian cinema whose native spoken audio is Hindi (isBollywoodHindi)
+  // External providers DO NOT provide authorized Hindi audio tracks for Hollywood movies or Anime.
   const hasWorkingHindiSource = isCustom
     ? Boolean(item?.languages?.hi?.url)
-    : (isAnime 
-        ? false // External anime providers do not have authorized Hindi audio. Never fake Hindi.
-        : Boolean(isBollywoodHindi || item?.original_language === 'hi' || item?.category === 'hindi' || (item?.isHindiDubbed && isHindiAvailable(item))));
+    : isBollywoodHindi;
 
   const hasWorkingEnglishSource = isCustom
     ? Boolean(item?.languages?.en?.url)
@@ -478,7 +478,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
   return (
     <div 
-      className="fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl flex items-center justify-center p-0 sm:p-3 md:p-4 overflow-hidden select-none"
+      className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm flex items-center justify-center p-0 sm:p-3 md:p-4 overflow-hidden select-none"
       onClick={(e) => { if (e.target === e.currentTarget && !isFullscreen) handleSafeClose(); }}
     >
       {/* Ambient background glow */}
@@ -969,7 +969,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   <div className="relative w-full h-full group/player flex items-center justify-center">
                     <video
                       ref={videoRef}
-                      key={`${item.id}-${audioMode}`}
+                      key={item.id}
                       src={activeCustomVideoUrl}
                       controls
                       autoPlay
@@ -1020,7 +1020,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   </div>
                 )}
                 <iframe
-                  key={`${currentServer.id}-${season}-${episode}-${audioMode}-${reloadKey}`}
+                  key={`${currentServer.id}-${season}-${episode}-${reloadKey}`}
                   src={streamUrl}
                   title={title}
                   onLoad={() => setIframeLoading(false)}

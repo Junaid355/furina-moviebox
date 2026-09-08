@@ -24,19 +24,19 @@ export const DEFAULT_SAMPLE_MOVIES = [
     isAnime: true,
     languages: {
       hi: {
-        label: 'Hindi (Studio Master Audio)',
-        url: 'https://media.w3.org/2010/05/sintel/trailer.mp4',
-        type: 'video/mp4'
+        label: 'Hindi (Authentic Spoken Hindi Dialogue)',
+        url: './media/hindi_audio.wav',
+        type: 'audio/wav'
       },
       en: {
-        label: 'English Dub (Official Master)',
-        url: 'https://raw.githubusercontent.com/mdn/learning-area/master/html/multimedia-and-embedding/video-and-audio-content/rabbit320.mp4',
+        label: 'English Dub (Official Master Audio)',
+        url: './media/english_audio.mp4',
         type: 'video/mp4'
       },
       ja: {
-        label: 'Japanese Original Audio',
-        url: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
-        type: 'video/mp4'
+        label: 'Japanese Original Audio (Spoken Dialogue)',
+        url: './media/japanese_audio.wav',
+        type: 'audio/wav'
       }
     },
     subtitles: [
@@ -55,18 +55,23 @@ export function getStoredStudioMovies() {
     }
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed) && parsed.length > 0) {
-      // Migrate legacy 403 Google Storage sample links to verified working assets
+      // Migrate legacy 403 Google Storage or non-authentic sample links to authentic local assets
       let changed = false;
       const migrated = parsed.map((m) => {
-        if (m.languages?.hi?.url?.includes('gtv-videos-bucket') || m.languages?.hi?.url?.includes('BigBuckBunny')) {
+        if (
+          m.languages?.hi?.url?.includes('gtv-videos-bucket') || 
+          m.languages?.hi?.url?.includes('BigBuckBunny') ||
+          m.languages?.hi?.url?.includes('trailer.mp4') ||
+          m.languages?.ja?.url?.includes('flower.mp4')
+        ) {
           changed = true;
           return {
             ...m,
             languages: {
               ...m.languages,
-              hi: { ...m.languages.hi, label: 'Hindi (Studio Master Audio)', url: 'https://media.w3.org/2010/05/sintel/trailer.mp4' },
-              en: { ...m.languages.en, label: 'English Dub (Official Master)', url: 'https://raw.githubusercontent.com/mdn/learning-area/master/html/multimedia-and-embedding/video-and-audio-content/rabbit320.mp4' },
-              ja: { ...m.languages.ja, label: 'Japanese Original Audio', url: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4' }
+              hi: { ...m.languages.hi, label: 'Hindi (Authentic Spoken Hindi Dialogue)', url: './media/hindi_audio.wav', type: 'audio/wav' },
+              en: { ...m.languages.en, label: 'English Dub (Official Master Audio)', url: './media/english_audio.mp4', type: 'video/mp4' },
+              ja: { ...m.languages.ja, label: 'Japanese Original Audio (Spoken Dialogue)', url: './media/japanese_audio.wav', type: 'audio/wav' }
             }
           };
         }
@@ -185,9 +190,9 @@ export default function MovieStudioModal({ isOpen, onClose, onPlayMovie, onMovie
       return;
     }
 
-    const sampleHi = 'https://media.w3.org/2010/05/sintel/trailer.mp4';
-    const sampleEn = 'https://raw.githubusercontent.com/mdn/learning-area/master/html/multimedia-and-embedding/video-and-audio-content/rabbit320.mp4';
-    const sampleJa = 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4';
+    const sampleHi = './media/hindi_audio.wav';
+    const sampleEn = './media/english_audio.mp4';
+    const sampleJa = './media/japanese_audio.wav';
 
     const movieObj = {
       id: editingId || `studio_${Date.now()}`,
@@ -658,7 +663,8 @@ export default function MovieStudioModal({ isOpen, onClose, onPlayMovie, onMovie
                   Cancel
                 </button>
                 <button
-                  type="submit"
+                  type="button"
+                  onClick={handleSaveMovie}
                   className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-gray-950 font-black text-xs transition shadow-[0_0_20px_rgba(56,189,248,0.5)] transform hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-2"
                 >
                   <Save className="w-4 h-4" />
