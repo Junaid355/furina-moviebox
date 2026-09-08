@@ -14,60 +14,37 @@ const today = new Date().toISOString().split('T')[0];
 
 
 
-// Robust deduplication using provider IDs first, then normalized title + year + media_type fallback
-
+// Robust deduplication using provider IDs first, then normalized title + media_type + release year
 export function deduplicateMedia(items) {
-
   if (!Array.isArray(items)) return [];
-
   const seenIds = new Set();
-
-  const seenTitles = new Set();
-
-
+  const seenCompositeKeys = new Set();
 
   return items.filter((item) => {
-
     if (!item || typeof item !== 'object' || !item.id) return false;
-
     const idKey = String(item.id);
-
     if (seenIds.has(idKey)) return false;
 
-
-
     const rawTitle = (item.title || item.name || item.original_title || item.original_name || '').trim().toLowerCase();
-
     const cleanTitle = rawTitle
-
       .replace(/\s*\(hindi\s*dubbed\)/i, '')
-
       .replace(/\s*\(english\s*dubbed\)/i, '')
-
       .replace(/\s*\(uncut\)/i, '')
-
       .replace(/\s*\(uncensored\)/i, '')
-
       .replace(/[^a-z0-9]/g, '');
 
+    const mediaType = item.media_type || (item.first_air_date ? 'tv' : 'movie');
+    const year = String(item.release_date || item.first_air_date || '').substring(0, 4);
+    const compositeKey = cleanTitle ? `${cleanTitle}__${mediaType}__${year}` : '';
 
-
-    if (cleanTitle) {
-
-      if (seenTitles.has(cleanTitle)) return false;
-
-      seenTitles.add(cleanTitle);
-
+    if (compositeKey) {
+      if (seenCompositeKeys.has(compositeKey)) return false;
+      seenCompositeKeys.add(compositeKey);
     }
 
-
-
     seenIds.add(idKey);
-
     return true;
-
   });
-
 }
 
 
@@ -287,41 +264,22 @@ const FALLBACK_MEDIA = [
 
 
 export async function fetchTrendingAll(page = 1) {
-
   try {
-
     const res = await fetch(`${BASE_URL}/trending/all/week?api_key=${API_KEY}&page=${page}`);
-
     const data = await res.json();
-
     if (!data.results || data.results.length === 0) return page === 1 ? FALLBACK_MEDIA : [];
 
     const filtered = data.results.filter(item => {
-
       if (!item || typeof item !== 'object' || !item.id) return false;
-
       if (item.media_type === 'person') return false;
-
-      const releaseDate = item.release_date || item.first_air_date;
-
-      const votes = item.vote_count || 0;
-
-      if (releaseDate && releaseDate > today && votes < 5) return false;
-
+      if (item.media_type === 'movie' && item.release_date && item.release_date > today) return false;
       return true;
-
     });
 
-    const validResults = (data.results || []).filter(item => item && item.media_type !== 'person' && item.id);
-
-    return filtered.length > 0 ? filtered : validResults;
-
+    return filtered.length > 0 ? filtered : (page === 1 ? FALLBACK_MEDIA : []);
   } catch (err) {
-
     return page === 1 ? FALLBACK_MEDIA : [];
-
   }
-
 }
 
 
@@ -707,11 +665,8 @@ export async function fetchHollywoodMovies(page = 1) {
 
 
     const res = await fetch(
-
-      `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_original_language=en&primary_release_date.lte=2025-06-01&vote_count.gte=300&sort_by=popularity.desc&page=${page}`,
-
+      `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_original_language=en&primary_release_date.lte=${today}&vote_count.gte=100&sort_by=popularity.desc&page=${page}`,
       { signal: controller.signal }
-
     );
 
     clearTimeout(timeoutId);
@@ -5010,63 +4965,74 @@ export async function fetchEcchiAnime(page = 1) {
 
 
 export async function searchContent(query, page = 1, includeAdult = false) {
-
   if (!query || query.trim() === '') return [];
 
-  const isHindiQuery = /\b(hindi|dubbed|dub)\b/i.test(query);
+  const norm = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, ' ').replace(/\s+/g, ' ').trim();
+  const qNorm = norm(query);
+
+  // Search local custom Studio movies
+  let studioMatches = [];
+  try {
+    const rawStudio = localStorage.getItem('furina_studio_movies');
+    if (rawStudio) {
+      const parsedStudio = JSON.parse(rawStudio);
+      if (Array.isArray(parsedStudio)) {
+        studioMatches = parsedStudio.filter((m) => {
+          if (!m) return false;
+          const tNorm = norm(m.title || m.name || '');
+          return tNorm.includes(qNorm) || (qNorm.length > 2 && tNorm.split(' ').some((w) => w.startsWith(qNorm) || qNorm.startsWith(w)));
+        });
+      }
+    }
+  } catch (e) {}
+
+  // Search curated catalog (Anime & Blockbusters)
+  const allCurated = [
+    ...CURATED_HINDI_DUBBED_ANIME,
+    ...CURATED_ENGLISH_DUBBED_ANIME,
+    ...CURATED_SUBBED_ANIME,
+    ...CURATED_HOLLYWOOD_BLOCKBUSTERS,
+    ...CURATED_BOLLYWOOD_BLOCKBUSTERS,
+    ...CURATED_HOLLYWOOD_HINDI_DUBS,
+    ...FALLBACK_MEDIA
+  ];
+  const curatedMatches = allCurated.filter((item) => {
+    if (!item) return false;
+    const tNorm = norm(item.title || item.name || item.original_title || item.original_name || '');
+    return tNorm.includes(qNorm) || (qNorm.length > 2 && tNorm.split(' ').some((w) => w === qNorm || w.startsWith(qNorm)));
+  });
 
   try {
-
     let res = await fetch(`${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(query.trim())}&page=${page}&include_adult=${includeAdult}`);
-
     let data = await res.json();
-
     let results = (data.results || []).filter(item => item && item.id && item.media_type !== 'person' && (item.poster_path || item.backdrop_path));
 
-
-
     // If no results, try stripping modifiers like 'hindi dubbed', 'hindi', 'dubbed', 'full movie', 'movie', etc.
-
     if (results.length === 0) {
-
       const cleaned = query.replace(/\b(hindi\s*dubbed|hindi\s*dub|hindi|dubbed|dub|full\s*movie|movie|series)\b/gi, '').trim();
-
       if (cleaned && cleaned.toLowerCase() !== query.trim().toLowerCase()) {
-
         res = await fetch(`${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(cleaned)}&page=${page}&include_adult=${includeAdult}`);
-
         data = await res.json();
-
         results = (data.results || []).filter(item => item && item.id && item.media_type !== 'person' && (item.poster_path || item.backdrop_path));
-
       }
-
     }
 
-
-
-        if (!includeAdult) {
-
+    if (!includeAdult) {
       results = results.filter(item => !isHanimeContent(item));
-
     }
 
-
-
-    return results.map(item => ({
-
+    const merged = [...studioMatches, ...curatedMatches, ...results];
+    return deduplicateMedia(merged.map(item => ({
       ...item,
-
       isHindiDubbed: isHindiAvailable(item)
-
-    }));
-
+    })));
   } catch (err) {
-
-    return FALLBACK_MEDIA.filter(m => (m.title || m.name || '').toLowerCase().includes(query.toLowerCase()));
-
+    const offlineMerged = [...studioMatches, ...curatedMatches];
+    return deduplicateMedia(offlineMerged.map(item => ({
+      ...item,
+      isHindiDubbed: isHindiAvailable(item)
+    })));
   }
-
 }
 
 

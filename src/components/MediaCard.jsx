@@ -31,12 +31,28 @@ export default function MediaCard({ item, onPlay, isWatchlisted, onToggleWatchli
     isAnime ? isHindiDubbedAnime(item) : isHindiAvailable(item)
   );
 
+  const savedProgress = (() => {
+    try {
+      if (item?.id && isSeries) {
+        const raw = localStorage.getItem(`furina_progress_${item.id}`);
+        if (raw) {
+          const p = JSON.parse(raw);
+          if (p && typeof p.season === 'number' && typeof p.episode === 'number') {
+            return `S${p.season}:E${p.episode}`;
+          }
+        }
+      }
+    } catch (e) {}
+    return null;
+  })();
+
   const todayStr = new Date().toISOString().split('T')[0];
   const isUpcoming = Boolean(item.release_date && item.release_date > todayStr);
 
   return (
     <div 
       onClick={() => onPlay(item)}
+      data-media-id={item.id}
       className="group relative rounded-2xl overflow-hidden glass-card cursor-pointer flex flex-col transition-all duration-300 transform hover:-translate-y-1.5 hover:shadow-[0_12px_30px_rgba(56,189,248,0.25)]"
     >
       {/* Poster Image Container */}
@@ -47,7 +63,7 @@ export default function MediaCard({ item, onPlay, isWatchlisted, onToggleWatchli
         )}
 
         <img
-          src={item.poster_path ? `${IMG_BASE}${item.poster_path}` : './icon-512.png'}
+          src={item.poster_path ? (item.poster_path.startsWith('http') ? item.poster_path : `${IMG_BASE}${item.poster_path}`) : './icon-512.png'}
           alt={title}
           loading="lazy"
           onLoad={() => setImageLoaded(true)}
@@ -79,6 +95,12 @@ export default function MediaCard({ item, onPlay, isWatchlisted, onToggleWatchli
             <span className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-[9px] font-black tracking-wider px-2 py-0.5 rounded-md shadow flex items-center gap-1">
               <span>🇯🇵</span>
               <span>SUB / 🎙️ DUB</span>
+            </span>
+          )}
+          {savedProgress && (
+            <span className="bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 text-[9px] font-black tracking-wider px-2 py-0.5 rounded-md shadow flex items-center gap-1">
+              <span>▶</span>
+              <span>RESUME {savedProgress}</span>
             </span>
           )}
           {isUpcoming ? (

@@ -67,7 +67,7 @@ export function saveStoredStudioMovies(movies) {
   }
 }
 
-export default function MovieStudioModal({ isOpen, onClose, onPlayMovie }) {
+export default function MovieStudioModal({ isOpen, onClose, onPlayMovie, onMoviesChanged }) {
   if (!isOpen) return null;
 
   const [movies, setMovies] = useState(getStoredStudioMovies);
@@ -143,6 +143,7 @@ export default function MovieStudioModal({ isOpen, onClose, onPlayMovie }) {
     const updated = movies.filter((m) => m.id !== id);
     setMovies(updated);
     saveStoredStudioMovies(updated);
+    if (onMoviesChanged) onMoviesChanged();
     showNotify('Movie deleted from your studio catalog');
   };
 
@@ -200,6 +201,7 @@ export default function MovieStudioModal({ isOpen, onClose, onPlayMovie }) {
 
     setMovies(updatedList);
     saveStoredStudioMovies(updatedList);
+    if (onMoviesChanged) onMoviesChanged();
     setActiveTab('list');
   };
 

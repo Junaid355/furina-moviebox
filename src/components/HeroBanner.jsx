@@ -59,8 +59,12 @@ export default function HeroBanner({ items, item, onPlay, isWatchlisted, onToggl
       <div className="absolute inset-0 bg-[#030712]">
         <img
           key={currentItem?.id}
-          src={currentItem?.backdrop_path ? `${BACKDROP_BASE}${currentItem.backdrop_path}` : './icon-512.png'}
+          src={currentItem?.backdrop_path ? (currentItem.backdrop_path.startsWith('http') ? currentItem.backdrop_path : `${BACKDROP_BASE}${currentItem.backdrop_path}`) : './icon-512.png'}
           alt={title}
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = './icon-512.png';
+          }}
           className="w-full h-full object-cover object-center scale-105 transition-all duration-1000 group-hover:scale-100 filter brightness-95 animate-fade-in"
         />
       </div>

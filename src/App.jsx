@@ -39,6 +39,7 @@ export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isIPhoneModalOpen, setIsIPhoneModalOpen] = useState(false);
   const [isStudioOpen, setIsStudioOpen] = useState(false);
+  const [studioVersion, setStudioVersion] = useState(0);
   const [isMasterMode, setIsMasterMode] = useState(false);
   const [isStealthMode, setIsStealthMode] = useState(false);
   const [includeMature, setIncludeMature] = useState(false);
@@ -107,7 +108,15 @@ export default function App() {
   // Helper function to fetch data for given category & page
   const fetchCategoryItems = async (cat, pageNum, query = '') => {
     if (query.trim()) {
-      return await searchContent(query, pageNum, includeMature);
+      const q = query.trim().toLowerCase();
+      const studioList = getStoredStudioMovies();
+      const studioMatches = studioList.filter((m) => {
+        const t = (m.title || m.name || '').toLowerCase();
+        const o = (m.overview || '').toLowerCase();
+        return t.includes(q) || o.includes(q);
+      });
+      const tmdbResults = await searchContent(query, pageNum, includeMature);
+      return pageNum === 1 ? [...studioMatches, ...tmdbResults] : tmdbResults;
     }
     if (cat === 'trending') return await fetchTrendingAll(pageNum);
     if (cat === 'hollywood') {
@@ -169,7 +178,7 @@ export default function App() {
         if (currentSeq !== requestSeqRef.current) return;
         setLoading(false);
       });
-  }, [activeCategory, searchQuery, animeAudioFilter, movieFilter, includeMature, isMasterMode, watchlist.length]);
+  }, [activeCategory, searchQuery, animeAudioFilter, movieFilter, includeMature, isMasterMode, watchlist.length, studioVersion]);
 
   // Load More (Pagination) with strict dual deduplication
   const handleLoadMore = async () => {
@@ -527,6 +536,7 @@ export default function App() {
         isOpen={isStudioOpen}
         onClose={() => setIsStudioOpen(false)}
         onPlayMovie={(movie) => setActiveMedia(movie)}
+        onMoviesChanged={() => setStudioVersion((v) => v + 1)}
       />
 
       {/* Mobile iOS Style Bottom Navigation Bar */}
