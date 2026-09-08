@@ -19,6 +19,7 @@ export const DEFAULT_SAMPLE_MOVIES = [
     vote_average: 8.9,
     release_date: '2025-01-15',
     category: 'studio',
+    genres: ['Sci-Fi', 'Action', 'Anime', 'Cyberpunk'],
     isCustom: true,
     isAnime: true,
     languages: {
@@ -78,6 +79,7 @@ export default function MovieStudioModal({ isOpen, onClose, onPlayMovie, onMovie
   const [formData, setFormData] = useState({
     title: '',
     overview: '',
+    genres: 'Sci-Fi, Action',
     poster_path: '',
     backdrop_path: '',
     media_type: 'movie',
@@ -103,6 +105,7 @@ export default function MovieStudioModal({ isOpen, onClose, onPlayMovie, onMovie
     setFormData({
       title: '',
       overview: '',
+      genres: 'Sci-Fi, Action',
       poster_path: '',
       backdrop_path: '',
       media_type: 'movie',
@@ -120,9 +123,14 @@ export default function MovieStudioModal({ isOpen, onClose, onPlayMovie, onMovie
 
   const handleStartEdit = (m) => {
     setEditingId(m.id);
+    const genreStr = Array.isArray(m.genres)
+      ? m.genres.map((g) => (typeof g === 'string' ? g : g?.name)).filter(Boolean).join(', ')
+      : (m.genres || 'Sci-Fi, Action');
+
     setFormData({
       title: m.title || m.name || '',
       overview: m.overview || '',
+      genres: genreStr,
       poster_path: m.poster_path || '',
       backdrop_path: m.backdrop_path || '',
       media_type: m.media_type || 'movie',
@@ -154,6 +162,10 @@ export default function MovieStudioModal({ isOpen, onClose, onPlayMovie, onMovie
       return;
     }
 
+    const sampleHi = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+    const sampleEn = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4';
+    const sampleJa = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4';
+
     const movieObj = {
       id: editingId || `studio_${Date.now()}`,
       title: formData.title.trim(),
@@ -165,29 +177,34 @@ export default function MovieStudioModal({ isOpen, onClose, onPlayMovie, onMovie
       vote_average: Number(formData.vote_average) || 8.5,
       release_date: formData.release_date,
       category: 'studio',
+      genres: (formData.genres || 'Studio Master').split(',').map((s) => s.trim()).filter(Boolean),
+      thumbnail: formData.backdrop_path.trim() || formData.poster_path.trim(),
       isCustom: true,
       isAnime: formData.isAnime,
-      download_url: formData.download_url || formData.audio_hi_url || formData.audio_en_url || '',
+      download_url: formData.download_url.trim() || formData.audio_hi_url.trim() || formData.audio_en_url.trim() || sampleHi,
       languages: {
-        hi: formData.audio_hi_url.trim() ? {
+        hi: {
           label: 'Hindi Dub (Studio Master)',
-          url: formData.audio_hi_url.trim(),
+          url: formData.audio_hi_url.trim() || sampleHi,
           type: 'video/mp4'
-        } : null,
-        en: formData.audio_en_url.trim() ? {
+        },
+        en: {
           label: 'English Audio (Studio Master)',
-          url: formData.audio_en_url.trim(),
+          url: formData.audio_en_url.trim() || sampleEn,
           type: 'video/mp4'
-        } : null,
-        ja: formData.audio_ja_url.trim() ? {
+        },
+        ja: {
           label: 'Japanese Audio (Studio Master)',
-          url: formData.audio_ja_url.trim(),
+          url: formData.audio_ja_url.trim() || sampleJa,
           type: 'video/mp4'
-        } : null,
+        },
       },
       subtitles: formData.subtitle_url.trim() ? [
         { lang: 'en', label: 'English Subtitles', src: formData.subtitle_url.trim() }
-      ] : []
+      ] : [
+        { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+        { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' }
+      ]
     };
 
     let updatedList;
@@ -448,6 +465,17 @@ export default function MovieStudioModal({ isOpen, onClose, onPlayMovie, onMovie
                       <option value="movie">Movie</option>
                       <option value="tv">TV / Web Series</option>
                     </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-cyan-200/80 font-bold mb-1 text-xs">Genres (comma separated)</label>
+                    <input 
+                      type="text" 
+                      value={formData.genres}
+                      onChange={(e) => setFormData({ ...formData, genres: e.target.value })}
+                      placeholder="e.g. Action, Sci-Fi, Thriller, Anime"
+                      className="w-full bg-[#050c20] border border-cyan-500/30 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                    />
                   </div>
 
                   <div className="flex items-center gap-4 pt-6">

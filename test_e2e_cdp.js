@@ -6,7 +6,7 @@ import path from 'path';
 const EDGE_PATH = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
 const USER_DATA_DIR = 'C:\\Users\\User\\.gemini\\antigravity\\scratch\\edge-qa-profile';
 const PORT = 9888;
-const BASE_URL = 'http://localhost:4173';
+const BASE_URL = 'http://127.0.0.1:4173';
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -107,14 +107,41 @@ async function runQA() {
   execSync('npm.cmd run build', { cwd: process.cwd(), stdio: 'pipe' });
   console.log('✓ Production build passed successfully.\n');
 
-  console.log('🌐 Step 2: Starting Vite Preview Server on port 4173...');
-  const previewProcess = spawn('npx.cmd', ['vite', 'preview', '--port', '4173', '--host', '127.0.0.1'], {
-    cwd: process.cwd(),
-    shell: true,
-    stdio: 'ignore'
+  console.log('🌐 Step 2: Starting Static Production Server on port 4173...');
+  const distDir = path.join(process.cwd(), 'dist');
+  const mimeTypes = {
+    '.html': 'text/html; charset=utf-8',
+    '.js': 'application/javascript; charset=utf-8',
+    '.css': 'text/css; charset=utf-8',
+    '.json': 'application/json; charset=utf-8',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.svg': 'image/svg+xml',
+    '.ico': 'image/x-icon',
+    '.mp4': 'video/mp4'
+  };
+
+  const previewServer = http.createServer((req, res) => {
+    let reqPath = req.url.split('?')[0];
+    let filePath = path.join(distDir, reqPath);
+    if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
+      filePath = path.join(distDir, 'index.html');
+    }
+    const ext = path.extname(filePath).toLowerCase();
+    const contentType = mimeTypes[ext] || 'application/octet-stream';
+    try {
+      const content = fs.readFileSync(filePath);
+      res.writeHead(200, { 'Content-Type': contentType });
+      res.end(content);
+    } catch (e) {
+      res.writeHead(404);
+      res.end('Not Found');
+    }
   });
 
-  await sleep(2500);
+  await new Promise((resolve) => previewServer.listen(4173, '127.0.0.1', resolve));
+  console.log('✓ Production static server listening on http://127.0.0.1:4173\n');
 
   console.log('🖥️ Step 3: Launching Headless Microsoft Edge with CDP...');
   if (!fs.existsSync(USER_DATA_DIR)) {
@@ -275,6 +302,18 @@ async function runQA() {
     await client.eval('document.querySelector("button[title*=\'Close Player\']").click()');
     await sleep(1000);
 
+    // Verify Continue Watching shelf surfaces on Trending/Home
+    await client.eval(`
+      (() => {
+        const buttons = Array.from(document.querySelectorAll('nav button'));
+        const trBtn = buttons.find(b => b.textContent.includes('Trending'));
+        if (trBtn) trBtn.click();
+      })();
+    `);
+    await sleep(1000);
+    const hasContinueWatching = await client.eval('document.body.innerText.includes("Continue Watching")');
+    recordTest('5c', 'Continue Watching Shelf Rendered on Home', hasContinueWatching, `Continue Watching rendered: ${hasContinueWatching}`);
+
     console.log('\n--- Running TEST 6 & 7: Critical Hindi Dub Test ---');
     await client.eval(`
       (() => {
@@ -414,6 +453,25 @@ async function runQA() {
       })()
     `);
     recordTest(15, 'Subtitles Tracks Configured', trackCount >= 2, `Found ${trackCount} WebVTT subtitle track(s)`);
+
+    // Test Video Player Keyboard & PiP Controls
+    await client.eval(`
+      (() => {
+        const video = document.querySelector('video');
+        if (video) {
+          window.dispatchEvent(new KeyboardEvent('keydown', { key: 'm' }));
+        }
+      })();
+    `);
+    await sleep(400);
+    const isMutedAfterKey = await client.eval('document.querySelector("video")?.muted');
+    recordTest('15b', 'Player Keyboard Controls (Mute M)', isMutedAfterKey === true, `Muted after M key: ${isMutedAfterKey}`);
+
+    const hasPipBtn = await client.eval('Boolean(document.querySelector("button[title*=\'Picture-in-Picture\']"))');
+    recordTest('15c', 'Picture-in-Picture Control Button', hasPipBtn, `PiP button present: ${hasPipBtn}`);
+
+    const hasGenres = await client.eval('Boolean(document.body.innerText.includes("Genres:"))');
+    recordTest('15d', 'Genres Metadata Badges Loaded', hasGenres, `Genres rendered in overview: ${hasGenres}`);
 
     console.log('\n--- Running TEST 16: Download Test ---');
     await client.eval(`
@@ -602,9 +660,9 @@ async function runQA() {
     console.log('====================================================\n');
 
   } finally {
-    await client.close();
-    edgeProcess.kill();
-    previewProcess.kill();
+    if (client) await client.close().catch(() => {});
+    if (edgeProcess) edgeProcess.kill();
+    if (previewServer) previewServer.close();
     try {
       fs.rmSync(USER_DATA_DIR, { recursive: true, force: true });
     } catch (e) {}

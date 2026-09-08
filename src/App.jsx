@@ -21,20 +21,66 @@ import {
   deduplicateMedia
 } from './services/tmdb';
 import { SERVERS } from './services/streaming';
-import { Flame, Film, Tv, Sparkles, Heart, RefreshCw, Shield, Settings, ChevronDown } from 'lucide-react';
+import { Flame, Film, Tv, Sparkles, Heart, RefreshCw, Shield, Settings, ChevronDown, Clock, Play, X } from 'lucide-react';
+
+function getContinueWatchingList() {
+  const items = [];
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('furina_progress_')) {
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && (parsed.id || key.replace('furina_progress_', ''))) {
+            items.push(parsed);
+          }
+        }
+      }
+    }
+  } catch (e) {}
+  return items.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+}
 
 export default function App() {
   const [activeCategory, setActiveCategory] = useState('trending');
   const [animeAudioFilter, setAnimeAudioFilter] = useState('all');
   const [movieFilter, setMovieFilter] = useState('hollywood');
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [items, setItems] = useState([]);
   const [heroItem, setHeroItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
   const [activeMedia, setActiveMedia] = useState(null);
+
+  // Debounce search query changes (immediate when cleared, 250ms when typing)
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setDebouncedQuery('');
+      return;
+    }
+    const timer = setTimeout(() => {
+      setDebouncedQuery(searchQuery.trim());
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
   
+  const [continueWatching, setContinueWatching] = useState(getContinueWatchingList);
+
+  useEffect(() => {
+    setContinueWatching(getContinueWatchingList());
+  }, [activeMedia]);
+
+  const removeContinueWatching = (id, e) => {
+    if (e) e.stopPropagation();
+    try {
+      localStorage.removeItem(`furina_progress_${id}`);
+      setContinueWatching((prev) => prev.filter((x) => x.id !== id));
+    } catch (err) {}
+  };
+
   // Settings & Secret Master Mode (Passcode: 2030)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isIPhoneModalOpen, setIsIPhoneModalOpen] = useState(false);
@@ -107,16 +153,8 @@ export default function App() {
 
   // Helper function to fetch data for given category & page
   const fetchCategoryItems = async (cat, pageNum, query = '') => {
-    if (query.trim()) {
-      const q = query.trim().toLowerCase();
-      const studioList = getStoredStudioMovies();
-      const studioMatches = studioList.filter((m) => {
-        const t = (m.title || m.name || '').toLowerCase();
-        const o = (m.overview || '').toLowerCase();
-        return t.includes(q) || o.includes(q);
-      });
-      const tmdbResults = await searchContent(query, pageNum, includeMature);
-      return pageNum === 1 ? [...studioMatches, ...tmdbResults] : tmdbResults;
+    if (query && query.trim()) {
+      return await searchContent(query.trim(), pageNum, includeMature);
     }
     if (cat === 'trending') return await fetchTrendingAll(pageNum);
     if (cat === 'hollywood') {
@@ -161,7 +199,7 @@ export default function App() {
       return;
     }
 
-    fetchCategoryItems(activeCategory, 1, searchQuery)
+    fetchCategoryItems(activeCategory, 1, debouncedQuery)
       .then((results) => {
         // Discard stale responses from previously triggered fetches
         if (currentSeq !== requestSeqRef.current) return;
@@ -178,7 +216,7 @@ export default function App() {
         if (currentSeq !== requestSeqRef.current) return;
         setLoading(false);
       });
-  }, [activeCategory, searchQuery, animeAudioFilter, movieFilter, includeMature, isMasterMode, watchlist.length, studioVersion]);
+  }, [activeCategory, debouncedQuery, animeAudioFilter, movieFilter, includeMature, isMasterMode, watchlist.length, studioVersion]);
 
   // Load More (Pagination) with strict dual deduplication
   const handleLoadMore = async () => {
@@ -186,7 +224,7 @@ export default function App() {
     setLoadingMore(true);
     const nextPage = page + 1;
     try {
-      const moreItems = await fetchCategoryItems(activeCategory, nextPage, searchQuery);
+      const moreItems = await fetchCategoryItems(activeCategory, nextPage, debouncedQuery);
       if (moreItems && moreItems.length > 0) {
         setItems((prev) => deduplicateMedia([...prev, ...moreItems]));
         setPage(nextPage);
@@ -235,7 +273,7 @@ export default function App() {
         )}
 
         {/* Featured Hero Carousel Banner */}
-        {!searchQuery && activeCategory !== 'watchlist' && items && items.length > 0 && (
+        {!searchQuery.trim() && activeCategory !== 'watchlist' && items && items.length > 0 && (
           <ErrorBoundary inline>
             <HeroBanner
               items={items}
@@ -247,14 +285,72 @@ export default function App() {
           </ErrorBoundary>
         )}
 
+        {/* Continue Watching Section */}
+        {!searchQuery.trim() && activeCategory === 'trending' && continueWatching && continueWatching.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-cyan-400" />
+                <h3 className="text-base sm:text-lg font-black text-white">Continue Watching</h3>
+              </div>
+              <span className="text-[11px] text-cyan-200/60 font-medium">
+                {continueWatching.length} in progress
+              </span>
+            </div>
+            <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
+              {continueWatching.map((cw) => {
+                const cwTitle = cw.title || cw.name || 'Untitled';
+                const poster = cw.poster_path ? (cw.poster_path.startsWith('http') ? cw.poster_path : `https://image.tmdb.org/t/p/w500${cw.poster_path}`) : './icon-512.png';
+                return (
+                  <div
+                    key={cw.id}
+                    onClick={() => setActiveMedia(cw)}
+                    className="relative flex-shrink-0 w-36 sm:w-44 bg-[#081534] border border-cyan-500/30 hover:border-cyan-400 rounded-xl overflow-hidden cursor-pointer group transition shadow-md"
+                  >
+                    <div className="aspect-[16/10] w-full bg-[#050c20] relative overflow-hidden">
+                      <img
+                        src={cw.backdrop_path ? (cw.backdrop_path.startsWith('http') ? cw.backdrop_path : `https://image.tmdb.org/t/p/w500${cw.backdrop_path}`) : poster}
+                        alt={cwTitle}
+                        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                        onError={(e) => { e.currentTarget.src = poster; }}
+                      />
+                      <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-full bg-cyan-400 text-gray-950 flex items-center justify-center shadow-md transform scale-90 group-hover:scale-100 transition">
+                          <Play className="w-4 h-4 fill-gray-950 ml-0.5" />
+                        </div>
+                      </div>
+                      <button
+                        onClick={(e) => removeContinueWatching(cw.id, e)}
+                        title="Remove from Continue Watching"
+                        className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-black/70 hover:bg-rose-600 text-white flex items-center justify-center text-xs transition"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                    <div className="p-2">
+                      <h4 className="font-bold text-xs text-white truncate">{cwTitle}</h4>
+                      <div className="flex items-center justify-between text-[10px] text-cyan-300/80 mt-1">
+                        <span className="font-bold bg-cyan-500/20 px-1.5 py-0.5 rounded text-cyan-300">
+                          S{cw.season || 1}:E{cw.episode || 1}
+                        </span>
+                        <span className="text-slate-400">Resume ▶</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Section Header & Quick Filter Pills */}
         <div className="mb-6 space-y-3">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2.5">
               <span className={`w-3 h-3 rounded-full ${activeCategory === 'mature' ? 'bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.9)]' : 'bg-cyan-400 shadow-[0_0_12px_rgba(56,189,248,0.9)]'}`} />
               <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white capitalize drop-shadow-sm">
-                {searchQuery
-                  ? `Results for "${searchQuery}"`
+                {searchQuery.trim()
+                  ? `Results for "${searchQuery.trim()}"`
                   : activeCategory === 'trending'
                   ? '🔥 Trending Worldwide (Movies & Series)'
                   : activeCategory === 'hollywood'
@@ -282,7 +378,7 @@ export default function App() {
           </div>
 
           {/* Quick Search & Filter Suggestions Chips */}
-          {searchQuery && (
+          {searchQuery.trim() && (
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 text-xs">
               <span className="text-cyan-200/50 text-[11px] whitespace-nowrap font-medium">Quick Filters:</span>
               <button
@@ -308,7 +404,7 @@ export default function App() {
           )}
 
           {/* Anime Quick Sub / Dub Filter Chips (Zero Hanime in normal anime) */}
-          {activeCategory === 'anime' && !searchQuery && (
+          {activeCategory === 'anime' && !searchQuery.trim() && (
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 text-xs">
               <span className="text-cyan-200/50 text-[11px] whitespace-nowrap font-medium">Anime Audio:</span>
               <button
@@ -359,7 +455,7 @@ export default function App() {
           )}
 
           {/* Hindi Dubbed & Bollywood Quick Filters */}
-          {activeCategory === 'hindi' && !searchQuery && (
+          {activeCategory === 'hindi' && !searchQuery.trim() && (
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 text-xs">
               <span className="text-amber-300/70 text-[11px] whitespace-nowrap font-medium">Audio Collection:</span>
               <button
@@ -387,7 +483,7 @@ export default function App() {
           )}
 
           {/* Hollywood & Movies Dedicated Tabs */}
-          {activeCategory === 'hollywood' && !searchQuery && (
+          {activeCategory === 'hollywood' && !searchQuery.trim() && (
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 text-xs">
               <span className="text-cyan-200/50 text-[11px] whitespace-nowrap font-medium">Movie Curation:</span>
               <button
@@ -554,7 +650,7 @@ export default function App() {
           { id: 'watchlist', label: 'Saved', icon: Heart },
         ].map((tab) => {
           const Icon = tab.icon;
-          const isActive = activeCategory === tab.id && !searchQuery;
+          const isActive = activeCategory === tab.id && !searchQuery.trim();
           return (
             <button
               key={tab.id}

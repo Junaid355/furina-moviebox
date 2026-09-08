@@ -31,14 +31,26 @@ export const SERVERS = [
     getMovieUrl: (tmdbId, audioMode = 'english', isAnime = false) => {
       let url = `https://vidlink.pro/movie/${tmdbId}?primaryColor=06b6d4`;
       if (isAnime) {
-        url += audioMode === 'sub' ? '&sub_dub=sub' : '&sub_dub=dub';
+        if (audioMode === 'sub') {
+          url += '&sub_dub=sub';
+        } else if (audioMode === 'hindi') {
+          url += '&sub_dub=hindi';
+        } else {
+          url += '&sub_dub=dub';
+        }
       }
       return url;
     },
     getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'english', isAnime = false) => {
       let url = `https://vidlink.pro/tv/${tmdbId}/${s}/${e}?primaryColor=06b6d4`;
       if (isAnime) {
-        url += audioMode === 'sub' ? '&sub_dub=sub' : '&sub_dub=dub';
+        if (audioMode === 'sub') {
+          url += '&sub_dub=sub';
+        } else if (audioMode === 'hindi') {
+          url += '&sub_dub=hindi';
+        } else {
+          url += '&sub_dub=dub';
+        }
       }
       return url;
     }
@@ -70,8 +82,16 @@ export const SERVERS = [
     badge: 'Multi-Audio Mirror',
     color: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
     supportedAudios: ['hindi', 'english', 'sub'],
-    getMovieUrl: (tmdbId) => `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1`,
-    getTvUrl: (tmdbId, s = 1, e = 1) => `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${s}&e=${e}`
+    getMovieUrl: (tmdbId, audioMode = 'english') => {
+      let url = `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1`;
+      if (audioMode === 'hindi') url += '&audio=hi';
+      return url;
+    },
+    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'english') => {
+      let url = `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${s}&e=${e}`;
+      if (audioMode === 'hindi') url += '&audio=hi';
+      return url;
+    }
   }
 ];
 

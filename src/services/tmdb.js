@@ -37,7 +37,7 @@ export function deduplicateMedia(items) {
     const year = String(item.release_date || item.first_air_date || '').substring(0, 4);
     const compositeKey = cleanTitle ? `${cleanTitle}__${mediaType}__${year}` : '';
 
-    if (compositeKey) {
+    if (!item.isCustom && compositeKey) {
       if (seenCompositeKeys.has(compositeKey)) return false;
       seenCompositeKeys.add(compositeKey);
     }
@@ -3134,6 +3134,12 @@ export function isHindiAvailable(item) {
 
   if (!item) return false;
 
+  if (item.languages?.hi?.url || item.audio_hi_url) {
+
+    return true;
+
+  }
+
   if (isAnimeItem(item)) {
 
     return isHindiDubbedAnime(item);
@@ -4964,43 +4970,63 @@ export async function fetchEcchiAnime(page = 1) {
 
 
 
+const searchCache = new Map();
+
 export async function searchContent(query, page = 1, includeAdult = false) {
   if (!query || query.trim() === '') return [];
 
   const norm = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, ' ').replace(/\s+/g, ' ').trim();
   const qNorm = norm(query);
+  const qWords = qNorm.split(' ').filter((w) => w.length > 0);
 
-  // Search local custom Studio movies
+  const cacheKey = `${qNorm}__${page}__${includeAdult}`;
+  if (searchCache.has(cacheKey)) {
+    return searchCache.get(cacheKey);
+  }
+
+  const isMatch = (rawTitle) => {
+    const tNorm = norm(rawTitle);
+    if (!tNorm) return false;
+    if (tNorm.includes(qNorm)) return true;
+    if (qWords.length > 1 && qWords.every((w) => tNorm.includes(w))) return true;
+    if (qNorm.length > 2 && tNorm.split(' ').some((w) => w.startsWith(qNorm) || qNorm.startsWith(w))) return true;
+    return false;
+  };
+
+  // Search local custom Studio movies (page 1 only)
   let studioMatches = [];
-  try {
-    const rawStudio = localStorage.getItem('furina_studio_movies');
-    if (rawStudio) {
-      const parsedStudio = JSON.parse(rawStudio);
-      if (Array.isArray(parsedStudio)) {
-        studioMatches = parsedStudio.filter((m) => {
-          if (!m) return false;
-          const tNorm = norm(m.title || m.name || '');
-          return tNorm.includes(qNorm) || (qNorm.length > 2 && tNorm.split(' ').some((w) => w.startsWith(qNorm) || qNorm.startsWith(w)));
-        });
+  if (page === 1) {
+    try {
+      const rawStudio = localStorage.getItem('furina_studio_movies');
+      if (rawStudio) {
+        const parsedStudio = JSON.parse(rawStudio);
+        if (Array.isArray(parsedStudio)) {
+          studioMatches = parsedStudio.filter((m) => {
+            if (!m) return false;
+            return isMatch(m.title || m.name || '');
+          });
+        }
       }
-    }
-  } catch (e) {}
+    } catch (e) {}
+  }
 
-  // Search curated catalog (Anime & Blockbusters)
-  const allCurated = [
-    ...CURATED_HINDI_DUBBED_ANIME,
-    ...CURATED_ENGLISH_DUBBED_ANIME,
-    ...CURATED_SUBBED_ANIME,
-    ...CURATED_HOLLYWOOD_BLOCKBUSTERS,
-    ...CURATED_BOLLYWOOD_BLOCKBUSTERS,
-    ...CURATED_HOLLYWOOD_HINDI_DUBS,
-    ...FALLBACK_MEDIA
-  ];
-  const curatedMatches = allCurated.filter((item) => {
-    if (!item) return false;
-    const tNorm = norm(item.title || item.name || item.original_title || item.original_name || '');
-    return tNorm.includes(qNorm) || (qNorm.length > 2 && tNorm.split(' ').some((w) => w === qNorm || w.startsWith(qNorm)));
-  });
+  // Search curated catalog (Anime & Blockbusters) (page 1 only)
+  let curatedMatches = [];
+  if (page === 1) {
+    const allCurated = [
+      ...CURATED_HINDI_DUBBED_ANIME,
+      ...CURATED_ENGLISH_DUBBED_ANIME,
+      ...CURATED_SUBBED_ANIME,
+      ...CURATED_HOLLYWOOD_BLOCKBUSTERS,
+      ...CURATED_BOLLYWOOD_BLOCKBUSTERS,
+      ...CURATED_HOLLYWOOD_HINDI_DUBS,
+      ...FALLBACK_MEDIA
+    ];
+    curatedMatches = allCurated.filter((item) => {
+      if (!item) return false;
+      return isMatch(item.title || item.name || item.original_title || item.original_name || '');
+    });
+  }
 
   try {
     let res = await fetch(`${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(query.trim())}&page=${page}&include_adult=${includeAdult}`);
@@ -5021,17 +5047,26 @@ export async function searchContent(query, page = 1, includeAdult = false) {
       results = results.filter(item => !isHanimeContent(item));
     }
 
-    const merged = [...studioMatches, ...curatedMatches, ...results];
-    return deduplicateMedia(merged.map(item => ({
+    const merged = page === 1 ? [...studioMatches, ...curatedMatches, ...results] : results;
+    const finalResults = deduplicateMedia(merged.map(item => ({
       ...item,
       isHindiDubbed: isHindiAvailable(item)
     })));
+
+    if (searchCache.size > 100) {
+      const firstKey = searchCache.keys().next().value;
+      searchCache.delete(firstKey);
+    }
+    searchCache.set(cacheKey, finalResults);
+    return finalResults;
   } catch (err) {
-    const offlineMerged = [...studioMatches, ...curatedMatches];
-    return deduplicateMedia(offlineMerged.map(item => ({
+    const offlineMerged = page === 1 ? [...studioMatches, ...curatedMatches] : [];
+    const finalOffline = deduplicateMedia(offlineMerged.map(item => ({
       ...item,
       isHindiDubbed: isHindiAvailable(item)
     })));
+    searchCache.set(cacheKey, finalOffline);
+    return finalOffline;
   }
 }
 
@@ -5084,12 +5119,61 @@ export async function fetchSeasonEpisodes(tvId, seasonNum) {
     return Array.from({ length: 12 }, (_, i) => ({
 
       episode_number: i + 1,
-
       name: `Episode ${i + 1}`
-
     }));
-
   }
+}
 
+export const TMDB_GENRE_MAP = {
+  28: 'Action',
+  12: 'Adventure',
+  16: 'Animation',
+  35: 'Comedy',
+  80: 'Crime',
+  99: 'Documentary',
+  18: 'Drama',
+  10751: 'Family',
+  14: 'Fantasy',
+  36: 'History',
+  27: 'Horror',
+  10402: 'Music',
+  9648: 'Mystery',
+  10749: 'Romance',
+  878: 'Sci-Fi',
+  10770: 'TV Movie',
+  53: 'Thriller',
+  10752: 'War',
+  37: 'Western',
+  10759: 'Action & Adventure',
+  10762: 'Kids',
+  10763: 'News',
+  10764: 'Reality',
+  10765: 'Sci-Fi & Fantasy',
+  10766: 'Soap',
+  10767: 'Talk',
+  10768: 'War & Politics'
+};
+
+export function getGenreNames(item) {
+  if (!item) return [];
+  if (Array.isArray(item.genres) && item.genres.length > 0) {
+    return item.genres.map((g) => (typeof g === 'string' ? g : g?.name)).filter(Boolean);
+  }
+  if (Array.isArray(item.genre_ids) && item.genre_ids.length > 0) {
+    return item.genre_ids.map((id) => TMDB_GENRE_MAP[id]).filter(Boolean);
+  }
+  if (item.category) {
+    const catLabels = {
+      anime: 'Anime',
+      hollywood: 'Hollywood',
+      hindi: 'Bollywood',
+      series: 'Series',
+      kdrama: 'K-Drama',
+      horror: 'Horror',
+      studio: 'Studio Master'
+    };
+    return [catLabels[item.category] || item.category];
+  }
+  return [];
 }
 

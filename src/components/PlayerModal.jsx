@@ -2,10 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, Server, Film, Tv, RefreshCw, ExternalLink, Info, Zap, Play, Pause,
   Sparkles, ShieldCheck, Download, Maximize2, Minimize2, Volume2, VolumeX,
-  CheckCircle2, AlertTriangle, ArrowRight, Loader2, ChevronLeft, ChevronRight
+  CheckCircle2, AlertTriangle, ArrowRight, Loader2, ChevronLeft, ChevronRight,
+  PictureInPicture
 } from 'lucide-react';
 import { SERVERS, getStreamUrl, getDownloadUrl } from '../services/streaming';
-import { fetchSeasonEpisodes, fetchTvDetails, isHindiAvailable, isHindiDubbedAnime } from '../services/tmdb';
+import { fetchSeasonEpisodes, fetchTvDetails, isHindiAvailable, isHindiDubbedAnime, getGenreNames } from '../services/tmdb';
 import { permitPopupOnce, getBlockedCount } from '../services/adblocker';
 
 export default function PlayerModal({ item, onClose, preferredServerId, isHindiPreferred }) {
@@ -125,6 +126,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     if (isSeries && item?.id) {
       try {
         localStorage.setItem(`furina_progress_${item.id}`, JSON.stringify({
+          ...item,
           season,
           episode,
           title,
@@ -146,10 +148,6 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const playerWrapperRef = useRef(null);
   const videoRef = useRef(null);
   const controlsTimeoutRef = useRef(null);
-
-  // Custom Video Player State (for owned/custom studio movies)
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [isMuted, setIsMuted] = useState(false);
 
   // Download Manager State (0% -> 100% progress)
   const [downloadState, setDownloadState] = useState({
@@ -221,9 +219,26 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     return () => clearTimeout(timer);
   }, [selectedServer?.id, season, episode, audioMode, reloadKey]);
 
-  // Keyboard Escape and Fullscreen Key Listeners
+  // Sync isFullscreen with native document fullscreen changes
+  useEffect(() => {
+    const handleFsChange = () => {
+      const isNativeFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+      setIsFullscreen(isNativeFs);
+    };
+    document.addEventListener('fullscreenchange', handleFsChange);
+    document.addEventListener('webkitfullscreenchange', handleFsChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFsChange);
+      document.removeEventListener('webkitfullscreenchange', handleFsChange);
+    };
+  }, []);
+
+  // Keyboard Escape, Fullscreen, and Video Playback Key Listeners
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
+        return;
+      }
       if (e.key === 'Escape') {
         if (document.fullscreenElement || isFullscreen) {
           if (document.exitFullscreen) {
@@ -234,14 +249,58 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
           handleSafeClose();
         }
       } else if (e.key === 'f' || e.key === 'F') {
-        if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
-          toggleFullscreen();
+        toggleFullscreen();
+      } else if (e.key === ' ' || e.code === 'Space') {
+        if (videoRef.current) {
+          e.preventDefault();
+          if (videoRef.current.paused) {
+            videoRef.current.play().catch(() => {});
+          } else {
+            videoRef.current.pause();
+          }
+        }
+      } else if (e.key === 'm' || e.key === 'M') {
+        if (videoRef.current) {
+          e.preventDefault();
+          videoRef.current.muted = !videoRef.current.muted;
+        }
+      } else if (e.key === 'ArrowLeft') {
+        if (videoRef.current) {
+          e.preventDefault();
+          videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 5);
+        }
+      } else if (e.key === 'ArrowRight') {
+        if (videoRef.current) {
+          e.preventDefault();
+          videoRef.current.currentTime = Math.min(videoRef.current.duration || 9999, videoRef.current.currentTime + 5);
+        }
+      } else if (e.key === 'p' || e.key === 'P') {
+        togglePictureInPicture();
+      } else if (e.key === 'ArrowUp') {
+        if (videoRef.current) {
+          e.preventDefault();
+          videoRef.current.volume = Math.min(1, Math.round((videoRef.current.volume + 0.1) * 10) / 10);
+        }
+      } else if (e.key === 'ArrowDown') {
+        if (videoRef.current) {
+          e.preventDefault();
+          videoRef.current.volume = Math.max(0, Math.round((videoRef.current.volume - 0.1) * 10) / 10);
         }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isFullscreen, onClose]);
+
+  const togglePictureInPicture = async () => {
+    try {
+      if (document.pictureInPictureElement) {
+        await document.exitPictureInPicture();
+      } else if (videoRef.current && document.pictureInPictureEnabled) {
+        await videoRef.current.requestPictureInPicture();
+      }
+    } catch (e) {}
+  };
 
   // Auto-hide controls in fullscreen
   const handleUserActivity = () => {
@@ -611,8 +670,8 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   {downloadState.status === 'preparing' && `Preparing ${downloadState.progress}%`}
                   {downloadState.status === 'downloading' && `Downloading ${downloadState.progress}%`}
                   {downloadState.status === 'completed' && 'Downloaded ✓'}
-                  {downloadState.status === 'idle' && 'Download'}
-                  {downloadState.status === 'error' && 'Retry Download'}
+                  {downloadState.status === 'idle' && <span>Download</span>}
+                  {downloadState.status === 'error' && 'Retry'}
                 </span>
               </button>
 
@@ -750,7 +809,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
               )}
               {audioMode === 'hindi' && !hasWorkingHindiSource && (
                 <span className="text-rose-400 font-bold">
-                  ⚠️ <strong>Hindi Audio Unavailable for this title</strong> (Select English Dub or Japanese Sub below)
+                  ⚠️ <strong>{isSeries ? 'Hindi audio unavailable for this episode.' : 'Hindi audio unavailable for this title.'}</strong> (Select English Dub or Japanese Sub below)
                 </span>
               )}
             </div>
@@ -860,7 +919,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   🇮🇳
                 </div>
                 <h3 className="text-base sm:text-lg font-black text-white mb-2 flex items-center gap-2">
-                  <span>Hindi Audio Unavailable for this Title</span>
+                  <span>{isSeries ? 'Hindi audio unavailable for this episode.' : 'Hindi audio unavailable for this movie.'}</span>
                   <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40">
                     Strict Audio Policy
                   </span>
@@ -869,28 +928,34 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   An official Hindi dubbed stream has not been distributed for <strong>{title}</strong>. We never silently substitute Japanese or English audio when you selected Hindi.
                 </p>
                 <div className="flex items-center gap-2.5 flex-wrap justify-center">
-                  <button
-                    onClick={() => {
-                      setAudioMode('english');
-                      const engServer = availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
-                      setSelectedServer(engServer);
-                    }}
-                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-gray-950 font-black text-xs transition shadow-[0_0_15px_rgba(56,189,248,0.4)] transform hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-1.5"
-                  >
-                    <span>🎙️</span>
-                    <span>Watch in English Dub (VidLink Pro)</span>
-                  </button>
-                  {isAnime && (
+                  {hasWorkingEnglishSource && (
+                    <button
+                      onClick={() => {
+                        setAudioMode('english');
+                        if (!isCustom) {
+                          const engServer = availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
+                          setSelectedServer(engServer);
+                        }
+                      }}
+                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-gray-950 font-black text-xs transition shadow-[0_0_15px_rgba(56,189,248,0.4)] transform hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-1.5"
+                    >
+                      <span>🎙️</span>
+                      <span>Watch in English {isCustom ? 'Audio (Studio Master)' : 'Dub (VidLink Pro)'}</span>
+                    </button>
+                  )}
+                  {(isAnime || hasWorkingJapaneseSource) && (
                     <button
                       onClick={() => {
                         setAudioMode('sub');
-                        const subServer = availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
-                        setSelectedServer(subServer);
+                        if (!isCustom) {
+                          const subServer = availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
+                          setSelectedServer(subServer);
+                        }
                       }}
                       className="px-4 py-2 rounded-xl bg-purple-600/25 hover:bg-purple-600/40 text-purple-200 border border-purple-500/40 font-bold text-xs transition hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-1.5"
                     >
                       <span>🇯🇵</span>
-                      <span>Watch in Japanese Sub</span>
+                      <span>Watch in Japanese {isCustom ? 'Audio (Studio Master)' : 'Sub'}</span>
                     </button>
                   )}
                 </div>
@@ -899,30 +964,42 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
               /* CASE B: OWNED / STUDIO CREATED MOVIE (HTML5 Custom Video Player) */
               <div className="relative w-full h-full flex items-center justify-center bg-black">
                 {activeCustomVideoUrl ? (
-                  <video
-                    ref={videoRef}
-                    key={`${item.id}-${audioMode}`}
-                    src={activeCustomVideoUrl}
-                    controls
-                    autoPlay
-                    playsInline
-                    className="w-full h-full object-contain"
-                  >
-                    {(item.subtitles && item.subtitles.length > 0 ? item.subtitles : [
-                      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
-                      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' }
-                    ]).map((sub, i) => (
-                      <track 
-                        key={i} 
-                        kind="subtitles" 
-                        src={sub.src && sub.src.trim().length > 0 ? sub.src : (sub.lang === 'hi' ? 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' : 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions')} 
-                        srcLang={sub.lang || 'en'} 
-                        label={sub.label || (sub.lang === 'hi' ? 'Hindi CC' : 'English CC')} 
-                        default={i === 0} 
-                      />
-                    ))}
-                    Your browser does not support HTML5 video.
-                  </video>
+                  <div className="relative w-full h-full group/player flex items-center justify-center">
+                    <video
+                      ref={videoRef}
+                      key={`${item.id}-${audioMode}`}
+                      src={activeCustomVideoUrl}
+                      controls
+                      autoPlay
+                      playsInline
+                      className="w-full h-full object-contain"
+                    >
+                      {(item.subtitles && item.subtitles.length > 0 ? item.subtitles : [
+                        { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+                        { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' }
+                      ]).map((sub, i) => (
+                        <track 
+                          key={i} 
+                          kind="subtitles" 
+                          src={sub.src && sub.src.trim().length > 0 ? sub.src : (sub.lang === 'hi' ? 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' : 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions')} 
+                          srcLang={sub.lang || 'en'} 
+                          label={sub.label || (sub.lang === 'hi' ? 'Hindi CC' : 'English CC')} 
+                          default={i === 0} 
+                        />
+                      ))}
+                      Your browser does not support HTML5 video.
+                    </video>
+                    {typeof document !== 'undefined' && document.pictureInPictureEnabled && (
+                      <button
+                        onClick={togglePictureInPicture}
+                        title="Picture-in-Picture (P)"
+                        className="absolute top-3 right-3 p-2 rounded-xl bg-black/70 hover:bg-black/90 border border-cyan-500/30 text-cyan-300 hover:text-white transition opacity-0 group-hover/player:opacity-100 backdrop-blur-md cursor-pointer z-20 flex items-center gap-1.5 text-xs font-bold"
+                      >
+                        <PictureInPicture className="w-4 h-4" />
+                        <span className="hidden sm:inline">PiP</span>
+                      </button>
+                    )}
+                  </div>
                 ) : (
                   <div className="p-6 text-center text-xs text-rose-300">
                     No video media asset available for the selected {audioMode} language track.
@@ -1087,6 +1164,23 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                     <span className="capitalize">{item.media_type || 'Movie'}</span>
                     {isAnime && <span className="bg-purple-500/20 text-purple-300 px-1.5 py-0.2 rounded font-bold">Anime</span>}
                   </div>
+                  {(() => {
+                    const genres = getGenreNames(item);
+                    if (!genres || genres.length === 0) return null;
+                    return (
+                      <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                        <span className="text-[11px] text-cyan-200/60 font-semibold">Genres:</span>
+                        {genres.map((g, idx) => (
+                          <span 
+                            key={idx}
+                            className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/25 text-cyan-300 text-[10px] font-bold"
+                          >
+                            {g}
+                          </span>
+                        ))}
+                      </div>
+                    );
+                  })()}
                   <p className="text-xs text-slate-300 mt-2 leading-relaxed">
                     {item.overview || 'No synopsis available.'}
                   </p>

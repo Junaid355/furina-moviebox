@@ -28,7 +28,8 @@ export default function MediaCard({ item, onPlay, isWatchlisted, onToggleWatchli
   );
 
   const isHindi = Boolean(
-    isAnime ? isHindiDubbedAnime(item) : isHindiAvailable(item)
+    item.languages?.hi?.url ||
+    (isAnime ? isHindiDubbedAnime(item) : isHindiAvailable(item))
   );
 
   const savedProgress = (() => {
