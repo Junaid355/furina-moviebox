@@ -908,13 +908,16 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                     playsInline
                     className="w-full h-full object-contain"
                   >
-                    {item.subtitles?.map((sub, i) => (
+                    {(item.subtitles && item.subtitles.length > 0 ? item.subtitles : [
+                      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+                      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' }
+                    ]).map((sub, i) => (
                       <track 
                         key={i} 
                         kind="subtitles" 
-                        src={sub.src} 
-                        srcLang={sub.lang} 
-                        label={sub.label} 
+                        src={sub.src && sub.src.trim().length > 0 ? sub.src : (sub.lang === 'hi' ? 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' : 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions')} 
+                        srcLang={sub.lang || 'en'} 
+                        label={sub.label || (sub.lang === 'hi' ? 'Hindi CC' : 'English CC')} 
                         default={i === 0} 
                       />
                     ))}

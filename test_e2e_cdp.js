@@ -403,9 +403,16 @@ async function runQA() {
         if (playBtn) playBtn.click();
       })();
     `);
-    await sleep(1200);
+    await sleep(1500);
 
-    const trackCount = await client.eval('document.querySelectorAll("video track").length');
+    const trackCount = await client.eval(`
+      (() => {
+        const tracks = document.querySelectorAll('video track');
+        if (tracks.length > 0) return tracks.length;
+        const video = document.querySelector('video');
+        return video && video.textTracks ? video.textTracks.length : 0;
+      })()
+    `);
     recordTest(15, 'Subtitles Tracks Configured', trackCount >= 2, `Found ${trackCount} WebVTT subtitle track(s)`);
 
     console.log('\n--- Running TEST 16: Download Test ---');

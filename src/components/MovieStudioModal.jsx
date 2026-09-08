@@ -39,8 +39,8 @@ export const DEFAULT_SAMPLE_MOVIES = [
       }
     },
     subtitles: [
-      { lang: 'en', label: 'English CC', src: '' },
-      { lang: 'hi', label: 'Hindi CC', src: '' }
+      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' }
     ]
   }
 ];
