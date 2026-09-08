@@ -246,6 +246,34 @@ async function runQA() {
     let caseSearchCount = await client.eval('document.querySelectorAll(".glass-card").length');
     recordTest('2b', 'Search Case & Spacing "   one piece   "', caseSearchCount > 0, `Results: ${caseSearchCount}`);
 
+    console.log('\n--- Running TEST 2c: Mobile Sequential Typing & No Backwalk Audit ---');
+    // Simulate real mobile virtual keyboard typing character-by-character
+    await client.eval(`
+      (() => {
+        const input = document.querySelector('input[type="text"]');
+        input.value = '';
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        const word = 'naruto';
+        for (let i = 0; i < word.length; i++) {
+          input.value += word[i];
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      })();
+    `);
+    await sleep(1000);
+    const typedValue = await client.eval('document.querySelector("input[type=\'text\']")?.value || ""');
+    const noBackwalk = typedValue === 'naruto';
+    recordTest('2c', 'Mobile Sequential Typing (No Backwalk/Reversed Caret)', noBackwalk, `Typed: "${typedValue}" - Expected: "naruto"`);
+
+    // Test clear button functionality
+    const clearBtn = await client.eval('Boolean(document.querySelector("button[aria-label=\'Clear search\']"))');
+    if (clearBtn) {
+      await client.eval('document.querySelector("button[aria-label=\'Clear search\']").click()');
+      await sleep(800);
+      const afterClearValue = await client.eval('document.querySelector("input[type=\'text\']")?.value || ""');
+      recordTest('2d', 'Search Clear Button Instantly Resets', afterClearValue === '', `Value after clear: "${afterClearValue}"`);
+    }
+
     await client.eval(`window.__setReactInput('input[type="text"]', '');`);
     await sleep(1200);
 

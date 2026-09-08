@@ -67,6 +67,7 @@ const MediaCard = React.memo(function MediaCard({ item, onPlay, isWatchlisted, o
           src={item.poster_path ? (item.poster_path.startsWith('http') ? item.poster_path : `${POSTER_THUMB_BASE}${item.poster_path}`) : './icon-512.png'}
           alt={title}
           loading="lazy"
+          decoding="async"
           onLoad={() => setImageLoaded(true)}
           onError={(e) => {
             e.currentTarget.onerror = null;

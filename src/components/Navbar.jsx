@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Search, Film, Tv, Flame, Heart, Sparkles, X, Shield, Lock, Settings, Smartphone, Skull } from 'lucide-react';
 
 export default function Navbar({ 
@@ -34,6 +34,55 @@ export default function Navbar({
         ...baseCategories.slice(5)
       ]
     : baseCategories;
+
+  // Local state buffering to prevent mobile IME / keyboard cursor reset ("backwalk")
+  const [localSearch, setLocalSearch] = useState(searchQuery || '');
+  const isComposingRef = useRef(false);
+  const debounceTimerRef = useRef(null);
+
+  // Synchronize local search with external parent changes (e.g. category pill click, clear button)
+  useEffect(() => {
+    setLocalSearch(searchQuery || '');
+  }, [searchQuery]);
+
+  const handleInputChange = (e) => {
+    const nextVal = e.target.value;
+    setLocalSearch(nextVal);
+
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    if (!nextVal.trim()) {
+      onSearch('');
+      return;
+    }
+
+    // Debounce notifying parent so that mobile keyboards (Gboard/iOS) never suffer cursor reset or backwalk
+    debounceTimerRef.current = setTimeout(() => {
+      if (!isComposingRef.current) {
+        onSearch(nextVal);
+      }
+    }, 280);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      onSearch(localSearch);
+      e.target.blur();
+    }
+  };
+
+  const handleClear = () => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    setLocalSearch('');
+    onSearch('');
+  };
 
   return (
     <header className="sticky top-0 z-40 glass-nav px-4 py-3 sm:px-8">
@@ -81,15 +130,28 @@ export default function Navbar({
             <Search className="absolute left-3.5 w-4 h-4 text-cyan-400/70 pointer-events-none" />
             <input
               type="text"
-              value={searchQuery}
-              onChange={(e) => onSearch(e.target.value)}
+              value={localSearch}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              onCompositionStart={() => { isComposingRef.current = true; }}
+              onCompositionEnd={(e) => {
+                isComposingRef.current = false;
+                handleInputChange(e);
+              }}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="none"
+              spellCheck="false"
+              enterKeyHint="search"
               placeholder="Search movies, Hindi dubbed, series worldwide..."
               className="w-full bg-[#0b1633]/90 border border-cyan-500/25 rounded-full pl-10 pr-9 py-2 text-sm text-white placeholder-cyan-200/40 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 transition shadow-inner"
             />
-            {searchQuery && (
+            {localSearch && (
               <button 
-                onClick={() => onSearch('')}
+                onClick={handleClear}
                 className="absolute right-3 text-cyan-400/60 hover:text-white"
+                type="button"
+                aria-label="Clear search"
               >
                 <X className="w-4 h-4" />
               </button>
