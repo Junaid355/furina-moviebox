@@ -1,0 +1,1668 @@
+{
+  "source": "MyDubList + Fribb Anime Lists",
+  "total_mapped": 217,
+  "tmdb_ids": [
+    30984,
+    31724,
+    45782,
+    45790,
+    46260,
+    46261,
+    46298,
+    46435,
+    50712,
+    60846,
+    60862,
+    60863,
+    62110,
+    63926,
+    65930,
+    66941,
+    67800,
+    69295,
+    73223,
+    73833,
+    75775,
+    76121,
+    78204,
+    80671,
+    82684,
+    82879,
+    85937,
+    86031,
+    88044,
+    88046,
+    88803,
+    91024,
+    91026,
+    94664,
+    95269,
+    95479,
+    96316,
+    97860,
+    98123,
+    99778,
+    100436,
+    104032,
+    105009,
+    110309,
+    111819,
+    112613,
+    113256,
+    114410,
+    117061,
+    117933,
+    118821,
+    120089,
+    121792,
+    121964,
+    122587,
+    122826,
+    123249,
+    128826,
+    131041,
+    131365,
+    133733,
+    137045,
+    138882,
+    139287,
+    139512,
+    153337,
+    154743,
+    155942,
+    156563,
+    194829,
+    196400,
+    199920,
+    200777,
+    201363,
+    202160,
+    204832,
+    205050,
+    205308,
+    205366,
+    205743,
+    206629,
+    207564,
+    207743,
+    208067,
+    208493,
+    208891,
+    209867,
+    210879,
+    212766,
+    212963,
+    213181,
+    213331,
+    213402,
+    214310,
+    214540,
+    214547,
+    214587,
+    216269,
+    217390,
+    217766,
+    220542,
+    220779,
+    221148,
+    222623,
+    222787,
+    222925,
+    222930,
+    226905,
+    228663,
+    229743,
+    232230,
+    234910,
+    235758,
+    236994,
+    240125,
+    240411,
+    240641,
+    241535,
+    242143,
+    244672,
+    245842,
+    248817,
+    248951,
+    249409,
+    249882,
+    249907,
+    254492,
+    256721,
+    257790,
+    258055,
+    258348,
+    258912,
+    259786,
+    261091,
+    261148,
+    261298,
+    271609,
+    277222,
+    277881,
+    278043,
+    278816,
+    280110,
+    282662,
+    284442,
+    287278,
+    293010,
+    372058,
+    568160,
+    635302,
+    916224,
+    1062807
+  ],
+  "items": [
+    {
+      "mal_id": 20,
+      "tmdb_ids": [
+        46260
+      ],
+      "title": "naruto"
+    },
+    {
+      "mal_id": 1316,
+      "tmdb_ids": [],
+      "title": "idaten-jump"
+    },
+    {
+      "mal_id": 1575,
+      "tmdb_ids": [
+        31724
+      ],
+      "title": "code-geass-lelouch-of-the-rebellion"
+    },
+    {
+      "mal_id": 3603,
+      "tmdb_ids": [
+        60862
+      ],
+      "title": "jojos-bizarre-adventure-phantom-blood"
+    },
+    {
+      "mal_id": 6702,
+      "tmdb_ids": [
+        46261
+      ],
+      "title": "fairy-tail"
+    },
+    {
+      "mal_id": 11061,
+      "tmdb_ids": [
+        46298
+      ],
+      "title": "hunter-x-hunter-2011"
+    },
+    {
+      "mal_id": 11757,
+      "tmdb_ids": [
+        45782
+      ],
+      "title": "sword-art-online"
+    },
+    {
+      "mal_id": 13599,
+      "tmdb_ids": [
+        46435
+      ],
+      "title": "robotics-notes"
+    },
+    {
+      "mal_id": 14719,
+      "tmdb_ids": [
+        45790
+      ],
+      "title": "jojos-bizarre-adventure-2012"
+    },
+    {
+      "mal_id": 17265,
+      "tmdb_ids": [
+        60846
+      ],
+      "title": "log-horizon"
+    },
+    {
+      "mal_id": 22043,
+      "tmdb_ids": [
+        46261
+      ],
+      "title": "fairy-tail-2"
+    },
+    {
+      "mal_id": 20583,
+      "tmdb_ids": [
+        60863
+      ],
+      "title": "haikyuu"
+    },
+    {
+      "mal_id": 20899,
+      "tmdb_ids": [
+        45790
+      ],
+      "title": "jojos-bizarre-adventure-stardust-crusaders"
+    },
+    {
+      "mal_id": 21881,
+      "tmdb_ids": [
+        45782
+      ],
+      "title": "sword-art-online-ii"
+    },
+    {
+      "mal_id": 23321,
+      "tmdb_ids": [
+        60846
+      ],
+      "title": "log-horizon-2"
+    },
+    {
+      "mal_id": 24833,
+      "tmdb_ids": [
+        62110
+      ],
+      "title": "assassination-classroom"
+    },
+    {
+      "mal_id": 26055,
+      "tmdb_ids": [
+        45790
+      ],
+      "title": "jojos-bizarre-adventure-stardust-crusaders-battle-in-egypt"
+    },
+    {
+      "mal_id": 28891,
+      "tmdb_ids": [
+        60863
+      ],
+      "title": "haikyuu-second-season"
+    },
+    {
+      "mal_id": 30015,
+      "tmdb_ids": [
+        66941
+      ],
+      "title": "relife"
+    },
+    {
+      "mal_id": 30276,
+      "tmdb_ids": [
+        63926
+      ],
+      "title": "one-punch-man"
+    },
+    {
+      "mal_id": 30654,
+      "tmdb_ids": [
+        62110
+      ],
+      "title": "assassination-classroom-2nd-season"
+    },
+    {
+      "mal_id": 32281,
+      "tmdb_ids": [
+        372058
+      ],
+      "title": "your-name"
+    },
+    {
+      "mal_id": 32902,
+      "tmdb_ids": [
+        67800
+      ],
+      "title": "the-ancient-magus-bride-those-awaiting-a-star"
+    },
+    {
+      "mal_id": 32935,
+      "tmdb_ids": [
+        60863
+      ],
+      "title": "haikyuu-karasuno-high-school-vs-shiratorizawa-academy"
+    },
+    {
+      "mal_id": 33486,
+      "tmdb_ids": [
+        65930
+      ],
+      "title": "my-hero-academia-2"
+    },
+    {
+      "mal_id": 33487,
+      "tmdb_ids": [
+        69295
+      ],
+      "title": "masamune-kuns-revenge"
+    },
+    {
+      "mal_id": 34134,
+      "tmdb_ids": [
+        63926
+      ],
+      "title": "one-punch-man-2"
+    },
+    {
+      "mal_id": 34572,
+      "tmdb_ids": [
+        73223
+      ],
+      "title": "black-clover"
+    },
+    {
+      "mal_id": 35062,
+      "tmdb_ids": [
+        73833
+      ],
+      "title": "the-ancient-magus-bride"
+    },
+    {
+      "mal_id": 35849,
+      "tmdb_ids": [
+        76121
+      ],
+      "title": "darling-in-the-franxx"
+    },
+    {
+      "mal_id": 36124,
+      "tmdb_ids": [
+        75775
+      ],
+      "title": "junji-ito-collection"
+    },
+    {
+      "mal_id": 36456,
+      "tmdb_ids": [
+        65930
+      ],
+      "title": "my-hero-academia-3"
+    },
+    {
+      "mal_id": 36475,
+      "tmdb_ids": [
+        78204
+      ],
+      "title": "sword-art-online-alternative-gun-gale-online"
+    },
+    {
+      "mal_id": 37141,
+      "tmdb_ids": [
+        80671
+      ],
+      "title": "cells-at-work"
+    },
+    {
+      "mal_id": 37202,
+      "tmdb_ids": [
+        82879
+      ],
+      "title": "radiant"
+    },
+    {
+      "mal_id": 37430,
+      "tmdb_ids": [
+        82684
+      ],
+      "title": "that-time-i-got-reincarnated-as-a-slime"
+    },
+    {
+      "mal_id": 37521,
+      "tmdb_ids": [
+        88803
+      ],
+      "title": "vinland-saga"
+    },
+    {
+      "mal_id": 37890,
+      "tmdb_ids": [
+        91024
+      ],
+      "title": "if-my-favorite-pop-idol-made-it-to-the-budokan-i-would-die"
+    },
+    {
+      "mal_id": 38000,
+      "tmdb_ids": [
+        85937
+      ],
+      "title": "demon-slayer-kimetsu-no-yaiba"
+    },
+    {
+      "mal_id": 38276,
+      "tmdb_ids": [
+        91026
+      ],
+      "title": "after-school-dice-club"
+    },
+    {
+      "mal_id": 38297,
+      "tmdb_ids": [
+        88044
+      ],
+      "title": "demon-lord-retry"
+    },
+    {
+      "mal_id": 38408,
+      "tmdb_ids": [
+        65930
+      ],
+      "title": "my-hero-academia-4"
+    },
+    {
+      "mal_id": 38671,
+      "tmdb_ids": [
+        88046
+      ],
+      "title": "fire-force"
+    },
+    {
+      "mal_id": 38691,
+      "tmdb_ids": [
+        86031
+      ],
+      "title": "dr-stone"
+    },
+    {
+      "mal_id": 38826,
+      "tmdb_ids": [
+        568160
+      ],
+      "title": "weathering-with-you"
+    },
+    {
+      "mal_id": 38883,
+      "tmdb_ids": [
+        60863
+      ],
+      "title": "haikyuu-to-the-top"
+    },
+    {
+      "mal_id": 39355,
+      "tmdb_ids": [
+        82879
+      ],
+      "title": "radiant-2nd-season"
+    },
+    {
+      "mal_id": 39534,
+      "tmdb_ids": [
+        95269
+      ],
+      "title": "toilet-bound-hanako-kun"
+    },
+    {
+      "mal_id": 39535,
+      "tmdb_ids": [
+        94664
+      ],
+      "title": "mushoku-tensei-jobless-reincarnation"
+    },
+    {
+      "mal_id": 39551,
+      "tmdb_ids": [
+        82684
+      ],
+      "title": "that-time-i-got-reincarnated-as-a-slime-season-2"
+    },
+    {
+      "mal_id": 40262,
+      "tmdb_ids": [
+        60863
+      ],
+      "title": "haikyuu-riku-vs-kuu"
+    },
+    {
+      "mal_id": 40456,
+      "tmdb_ids": [
+        635302
+      ],
+      "title": "demon-slayer-kimetsu-no-yaiba-movie-mugen-train"
+    },
+    {
+      "mal_id": 40748,
+      "tmdb_ids": [
+        95479
+      ],
+      "title": "jujutsu-kaisen"
+    },
+    {
+      "mal_id": 40834,
+      "tmdb_ids": [
+        112613
+      ],
+      "title": "ranking-of-kings"
+    },
+    {
+      "mal_id": 40839,
+      "tmdb_ids": [
+        96316
+      ],
+      "title": "rent-a-girlfriend"
+    },
+    {
+      "mal_id": 40852,
+      "tmdb_ids": [
+        86031
+      ],
+      "title": "dr-stone-stone-wars"
+    },
+    {
+      "mal_id": 40956,
+      "tmdb_ids": [
+        88046
+      ],
+      "title": "fire-force-season-2"
+    },
+    {
+      "mal_id": 40221,
+      "tmdb_ids": [
+        97860
+      ],
+      "title": "tower-of-god"
+    },
+    {
+      "mal_id": 41353,
+      "tmdb_ids": [
+        99778
+      ],
+      "title": "the-god-of-high-school"
+    },
+    {
+      "mal_id": 41433,
+      "tmdb_ids": [
+        100436
+      ],
+      "title": "akudama-drive"
+    },
+    {
+      "mal_id": 41467,
+      "tmdb_ids": [
+        30984
+      ],
+      "title": "bleach-thousand-year-blood-war"
+    },
+    {
+      "mal_id": 41587,
+      "tmdb_ids": [
+        65930
+      ],
+      "title": "my-hero-academia-5"
+    },
+    {
+      "mal_id": 42072,
+      "tmdb_ids": [
+        104032
+      ],
+      "title": "she-professed-herself-pupil-of-the-wise-man"
+    },
+    {
+      "mal_id": 42249,
+      "tmdb_ids": [
+        105009
+      ],
+      "title": "tokyo-revengers"
+    },
+    {
+      "mal_id": 42923,
+      "tmdb_ids": [
+        110309
+      ],
+      "title": "sk8-the-infinity"
+    },
+    {
+      "mal_id": 43523,
+      "tmdb_ids": [
+        111819
+      ],
+      "title": "tsukimichi-moonlit-fantasy"
+    },
+    {
+      "mal_id": 44037,
+      "tmdb_ids": [
+        113256
+      ],
+      "title": "banished-from-the-heros-party-i-decided-to-live-a-quiet-life-in-the-countryside"
+    },
+    {
+      "mal_id": 44511,
+      "tmdb_ids": [
+        114410
+      ],
+      "title": "chainsaw-man"
+    },
+    {
+      "mal_id": 46471,
+      "tmdb_ids": [
+        117061
+      ],
+      "title": "the-detective-is-already-dead"
+    },
+    {
+      "mal_id": 47194,
+      "tmdb_ids": [
+        117933
+      ],
+      "title": "summer-time-rendering"
+    },
+    {
+      "mal_id": 47778,
+      "tmdb_ids": [
+        85937
+      ],
+      "title": "demon-slayer-kimetsu-no-yaiba-entertainment-district-arc"
+    },
+    {
+      "mal_id": 47790,
+      "tmdb_ids": [
+        118821
+      ],
+      "title": "the-worlds-finest-assassin-gets-reincarnated-in-another-world-as-an-aristocrat"
+    },
+    {
+      "mal_id": 50612,
+      "tmdb_ids": [
+        86031
+      ],
+      "title": "dr-stone-ryuusui"
+    },
+    {
+      "mal_id": 48553,
+      "tmdb_ids": [
+        121792
+      ],
+      "title": "akebis-sailor-uniform"
+    },
+    {
+      "mal_id": 48580,
+      "tmdb_ids": [
+        121964
+      ],
+      "title": "the-case-study-of-vanitas"
+    },
+    {
+      "mal_id": 48675,
+      "tmdb_ids": [
+        122587
+      ],
+      "title": "a-couple-of-cuckoos"
+    },
+    {
+      "mal_id": 48702,
+      "tmdb_ids": [
+        122826
+      ],
+      "title": "dance-dance-danseur"
+    },
+    {
+      "mal_id": 48736,
+      "tmdb_ids": [
+        123249
+      ],
+      "title": "my-dress-up-darling"
+    },
+    {
+      "mal_id": 44069,
+      "tmdb_ids": [
+        98123
+      ],
+      "title": "the-daily-life-of-the-immortal-king-2"
+    },
+    {
+      "mal_id": 49385,
+      "tmdb_ids": [
+        128826
+      ],
+      "title": "miss-kuroitsu-from-the-monster-development-department"
+    },
+    {
+      "mal_id": 49387,
+      "tmdb_ids": [
+        88803
+      ],
+      "title": "vinland-saga-season-2"
+    },
+    {
+      "mal_id": 49596,
+      "tmdb_ids": [
+        131041
+      ],
+      "title": "blue-lock"
+    },
+    {
+      "mal_id": 49613,
+      "tmdb_ids": [
+        131365
+      ],
+      "title": "the-wrong-way-to-use-healing-magic"
+    },
+    {
+      "mal_id": 49828,
+      "tmdb_ids": [
+        196400
+      ],
+      "title": "mobile-suit-gundam-the-witch-from-mercury"
+    },
+    {
+      "mal_id": 49831,
+      "tmdb_ids": [
+        133733
+      ],
+      "title": "black-rock-shooter-dawn-fall"
+    },
+    {
+      "mal_id": 49889,
+      "tmdb_ids": [
+        111819
+      ],
+      "title": "tsukimichi-moonlit-fantasy-season-2"
+    },
+    {
+      "mal_id": 49918,
+      "tmdb_ids": [
+        65930
+      ],
+      "title": "my-hero-academia-6"
+    },
+    {
+      "mal_id": 50204,
+      "tmdb_ids": [
+        137045
+      ],
+      "title": "tokyo-24th-ward"
+    },
+    {
+      "mal_id": 50265,
+      "tmdb_ids": [
+        120089
+      ],
+      "title": "spy-x-family"
+    },
+    {
+      "mal_id": 50379,
+      "tmdb_ids": [
+        138882
+      ],
+      "title": "shoot-goal-to-the-future"
+    },
+    {
+      "mal_id": 50425,
+      "tmdb_ids": [
+        139287
+      ],
+      "title": "more-than-a-married-couple-but-not-lovers"
+    },
+    {
+      "mal_id": 50461,
+      "tmdb_ids": [
+        139512
+      ],
+      "title": "trapped-in-a-dating-sim-the-world-of-otome-games-is-tough-for-mobs"
+    },
+    {
+      "mal_id": 50582,
+      "tmdb_ids": [
+        153337
+      ],
+      "title": "reign-of-the-seven-spellblades"
+    },
+    {
+      "mal_id": 50594,
+      "tmdb_ids": [
+        916224
+      ],
+      "title": "suzume"
+    },
+    {
+      "mal_id": 48549,
+      "tmdb_ids": [
+        86031
+      ],
+      "title": "dr-stone-new-world"
+    },
+    {
+      "mal_id": 50602,
+      "tmdb_ids": [
+        120089
+      ],
+      "title": "spy-x-family-part-ii"
+    },
+    {
+      "mal_id": 50613,
+      "tmdb_ids": [
+        210879
+      ],
+      "title": "rurouni-kenshin-2023"
+    },
+    {
+      "mal_id": 50739,
+      "tmdb_ids": [
+        154743
+      ],
+      "title": "the-angel-next-door-spoils-me-rotten"
+    },
+    {
+      "mal_id": 50404,
+      "tmdb_ids": [
+        98123
+      ],
+      "title": "the-daily-life-of-the-immortal-king-3"
+    },
+    {
+      "mal_id": 50854,
+      "tmdb_ids": [
+        155942
+      ],
+      "title": "handyman-saitou-in-another-world"
+    },
+    {
+      "mal_id": 50932,
+      "tmdb_ids": [
+        156563
+      ],
+      "title": "the-reincarnation-of-the-strongest-exorcist-in-another-world"
+    },
+    {
+      "mal_id": 51009,
+      "tmdb_ids": [
+        95479
+      ],
+      "title": "jujutsu-kaisen-season-2"
+    },
+    {
+      "mal_id": 51019,
+      "tmdb_ids": [
+        85937
+      ],
+      "title": "demon-slayer-kimetsu-no-yaiba-swordsmith-village-arc"
+    },
+    {
+      "mal_id": 51179,
+      "tmdb_ids": [
+        94664
+      ],
+      "title": "mushoku-tensei-jobless-reincarnation-2nd-season"
+    },
+    {
+      "mal_id": 51219,
+      "tmdb_ids": [
+        194829
+      ],
+      "title": "my-one-hit-kill-sister"
+    },
+    {
+      "mal_id": 51693,
+      "tmdb_ids": [
+        199920
+      ],
+      "title": "kamikatsu-working-for-god-in-a-godless-world"
+    },
+    {
+      "mal_id": 51711,
+      "tmdb_ids": [
+        200777
+      ],
+      "title": "the-iceblade-sorcerer-shall-rule-the-world"
+    },
+    {
+      "mal_id": 51764,
+      "tmdb_ids": [
+        201363
+      ],
+      "title": "my-unique-skill-makes-me-op-even-at-level-1"
+    },
+    {
+      "mal_id": 51818,
+      "tmdb_ids": [
+        88046
+      ],
+      "title": "fire-force-season-3"
+    },
+    {
+      "mal_id": 51837,
+      "tmdb_ids": [
+        202160
+      ],
+      "title": "the-maid-i-hired-recently-is-mysterious"
+    },
+    {
+      "mal_id": 52211,
+      "tmdb_ids": [
+        204832
+      ],
+      "title": "mashle-magic-and-muscles"
+    },
+    {
+      "mal_id": 52305,
+      "tmdb_ids": [
+        205308
+      ],
+      "title": "tomo-chan-is-a-girl"
+    },
+    {
+      "mal_id": 52308,
+      "tmdb_ids": [
+        205366
+      ],
+      "title": "why-raeliana-ended-up-at-the-dukes-mansion"
+    },
+    {
+      "mal_id": 52347,
+      "tmdb_ids": [
+        205050
+      ],
+      "title": "shangri-la-frontier"
+    },
+    {
+      "mal_id": 52367,
+      "tmdb_ids": [
+        205743
+      ],
+      "title": "no-longer-allowed-in-another-world"
+    },
+    {
+      "mal_id": 52481,
+      "tmdb_ids": [
+        206629
+      ],
+      "title": "days-with-my-stepsister"
+    },
+    {
+      "mal_id": 52619,
+      "tmdb_ids": [
+        207564
+      ],
+      "title": "reborn-as-a-vending-machine-i-now-wander-the-dungeon"
+    },
+    {
+      "mal_id": 52657,
+      "tmdb_ids": [
+        207743
+      ],
+      "title": "ranking-of-kings-treasure-chest-of-courage"
+    },
+    {
+      "mal_id": 52807,
+      "tmdb_ids": [
+        63926
+      ],
+      "title": "one-punch-man-3"
+    },
+    {
+      "mal_id": 52830,
+      "tmdb_ids": [
+        208493
+      ],
+      "title": "i-got-a-cheat-skill-in-another-world-and-became-unrivaled-in-the-real-world-too"
+    },
+    {
+      "mal_id": 52955,
+      "tmdb_ids": [
+        73833
+      ],
+      "title": "the-ancient-magus-bride-season-2"
+    },
+    {
+      "mal_id": 52991,
+      "tmdb_ids": [
+        209867
+      ],
+      "title": "frieren-beyond-journeys-end"
+    },
+    {
+      "mal_id": 53050,
+      "tmdb_ids": [
+        96316
+      ],
+      "title": "rent-a-girlfriend-season-3"
+    },
+    {
+      "mal_id": 53065,
+      "tmdb_ids": [
+        123249
+      ],
+      "title": "my-dress-up-darling-season-2"
+    },
+    {
+      "mal_id": 53126,
+      "tmdb_ids": [
+        208067
+      ],
+      "title": "my-love-story-with-yamada-kun-at-lv999"
+    },
+    {
+      "mal_id": 53263,
+      "tmdb_ids": [
+        220779
+      ],
+      "title": "the-great-cleric"
+    },
+    {
+      "mal_id": 53379,
+      "tmdb_ids": [
+        217390
+      ],
+      "title": "my-tiny-senpai"
+    },
+    {
+      "mal_id": 53393,
+      "tmdb_ids": [
+        208891
+      ],
+      "title": "heavenly-delusion"
+    },
+    {
+      "mal_id": 53397,
+      "tmdb_ids": [
+        212766
+      ],
+      "title": "new-saga"
+    },
+    {
+      "mal_id": 53411,
+      "tmdb_ids": [
+        212963
+      ],
+      "title": "buddy-daddies"
+    },
+    {
+      "mal_id": 53421,
+      "tmdb_ids": [
+        213181
+      ],
+      "title": "hokkaido-gals-are-super-adorable"
+    },
+    {
+      "mal_id": 53439,
+      "tmdb_ids": [
+        213331
+      ],
+      "title": "berserk-of-gluttony"
+    },
+    {
+      "mal_id": 53446,
+      "tmdb_ids": [
+        213402
+      ],
+      "title": "campfire-cooking-in-another-world-with-my-absurd-skill"
+    },
+    {
+      "mal_id": 53488,
+      "tmdb_ids": [
+        113256
+      ],
+      "title": "banished-from-the-heros-party-i-decided-to-live-a-quiet-life-in-the-countryside-2nd-season"
+    },
+    {
+      "mal_id": 53580,
+      "tmdb_ids": [
+        82684
+      ],
+      "title": "that-time-i-got-reincarnated-as-a-slime-season-3"
+    },
+    {
+      "mal_id": 53590,
+      "tmdb_ids": [
+        214310
+      ],
+      "title": "the-weakest-tamer-began-a-journey-to-pick-up-trash"
+    },
+    {
+      "mal_id": 53613,
+      "tmdb_ids": [
+        214540
+      ],
+      "title": "dead-mount-death-play"
+    },
+    {
+      "mal_id": 53621,
+      "tmdb_ids": [
+        214547
+      ],
+      "title": "my-clueless-first-friend"
+    },
+    {
+      "mal_id": 53626,
+      "tmdb_ids": [
+        214587
+      ],
+      "title": "bye-bye-earth"
+    },
+    {
+      "mal_id": 53998,
+      "tmdb_ids": [
+        30984
+      ],
+      "title": "bleach-thousand-year-blood-war-part-ii-the-separation"
+    },
+    {
+      "mal_id": 53833,
+      "tmdb_ids": [
+        216269
+      ],
+      "title": "im-in-love-with-the-villainess"
+    },
+    {
+      "mal_id": 53887,
+      "tmdb_ids": [
+        120089
+      ],
+      "title": "spy-x-family-season-2"
+    },
+    {
+      "mal_id": 53888,
+      "tmdb_ids": [
+        1062807
+      ],
+      "title": "spy-x-family-movie-code-white"
+    },
+    {
+      "mal_id": 53924,
+      "tmdb_ids": [
+        95269
+      ],
+      "title": "toilet-bound-hanako-kun-2nd-season"
+    },
+    {
+      "mal_id": 54112,
+      "tmdb_ids": [
+        217766
+      ],
+      "title": "zom-100-bucket-list-of-the-dead"
+    },
+    {
+      "mal_id": 54284,
+      "tmdb_ids": [
+        229743
+      ],
+      "title": "vtuber-legend-how-i-went-viral-after-forgetting-to-turn-off-my-stream"
+    },
+    {
+      "mal_id": 54492,
+      "tmdb_ids": [
+        220542
+      ],
+      "title": "the-apothecary-diaries"
+    },
+    {
+      "mal_id": 54616,
+      "tmdb_ids": [
+        221148
+      ],
+      "title": "i-shall-survive-using-potions"
+    },
+    {
+      "mal_id": 54724,
+      "tmdb_ids": [
+        222623
+      ],
+      "title": "the-elusive-samurai"
+    },
+    {
+      "mal_id": 54744,
+      "tmdb_ids": [
+        235758
+      ],
+      "title": "alya-sometimes-hides-her-feelings-in-russian"
+    },
+    {
+      "mal_id": 54794,
+      "tmdb_ids": [
+        222787
+      ],
+      "title": "metallic-rouge"
+    },
+    {
+      "mal_id": 54789,
+      "tmdb_ids": [
+        65930
+      ],
+      "title": "my-hero-academia-7"
+    },
+    {
+      "mal_id": 54835,
+      "tmdb_ids": [
+        222925
+      ],
+      "title": "quality-assurance-in-another-world"
+    },
+    {
+      "mal_id": 54837,
+      "tmdb_ids": [
+        222930
+      ],
+      "title": "villainess-level-99-i-may-be-the-hidden-boss-but-im-not-the-demon-lord"
+    },
+    {
+      "mal_id": 54856,
+      "tmdb_ids": [
+        228663
+      ],
+      "title": "horimiya-the-missing-pieces"
+    },
+    {
+      "mal_id": 54865,
+      "tmdb_ids": [
+        131041
+      ],
+      "title": "blue-lock-vs-u-20-japan"
+    },
+    {
+      "mal_id": 55071,
+      "tmdb_ids": [
+        234910
+      ],
+      "title": "tying-the-knot-with-an-amagami-sister"
+    },
+    {
+      "mal_id": 55358,
+      "tmdb_ids": [
+        226905
+      ],
+      "title": "bucchigiri"
+    },
+    {
+      "mal_id": 55742,
+      "tmdb_ids": [
+        73833
+      ],
+      "title": "the-ancient-magus-bride-season-2-part-ii"
+    },
+    {
+      "mal_id": 55813,
+      "tmdb_ids": [
+        204832
+      ],
+      "title": "mashle-magic-and-muscles-the-divine-visionary-candidate-exam-arc"
+    },
+    {
+      "mal_id": 55844,
+      "tmdb_ids": [
+        249409
+      ],
+      "title": "twilight-out-of-focus"
+    },
+    {
+      "mal_id": 55855,
+      "tmdb_ids": [
+        50712
+      ],
+      "title": "black-butler-public-school-arc"
+    },
+    {
+      "mal_id": 55888,
+      "tmdb_ids": [
+        94664
+      ],
+      "title": "mushoku-tensei-jobless-reincarnation-2nd-season-part-ii"
+    },
+    {
+      "mal_id": 56009,
+      "tmdb_ids": [
+        249907
+      ],
+      "title": "sentenced-to-be-a-hero"
+    },
+    {
+      "mal_id": 56062,
+      "tmdb_ids": [
+        244672
+      ],
+      "title": "why-does-nobody-remember-me-in-this-world"
+    },
+    {
+      "mal_id": 56228,
+      "tmdb_ids": [
+        248817
+      ],
+      "title": "ill-become-a-villainess-who-goes-down-in-history"
+    },
+    {
+      "mal_id": 56400,
+      "tmdb_ids": [
+        88044
+      ],
+      "title": "demon-lord-retry-r"
+    },
+    {
+      "mal_id": 56662,
+      "tmdb_ids": [
+        240125
+      ],
+      "title": "trillion-game"
+    },
+    {
+      "mal_id": 56700,
+      "tmdb_ids": [
+        207564
+      ],
+      "title": "reborn-as-a-vending-machine-i-now-wander-the-dungeon-2nd-season"
+    },
+    {
+      "mal_id": 53450,
+      "tmdb_ids": [
+        98123
+      ],
+      "title": "the-daily-life-of-the-immortal-king-4"
+    },
+    {
+      "mal_id": 56784,
+      "tmdb_ids": [
+        30984
+      ],
+      "title": "bleach-thousand-year-blood-war-part-iii-the-conflict"
+    },
+    {
+      "mal_id": 56894,
+      "tmdb_ids": [
+        236994
+      ],
+      "title": "dragon-ball-daima"
+    },
+    {
+      "mal_id": 57025,
+      "tmdb_ids": [
+        213402
+      ],
+      "title": "campfire-cooking-in-another-world-with-my-absurd-skill-2nd-season"
+    },
+    {
+      "mal_id": 57334,
+      "tmdb_ids": [
+        240411
+      ],
+      "title": "dandadan"
+    },
+    {
+      "mal_id": 57362,
+      "tmdb_ids": [
+        240641
+      ],
+      "title": "nina-the-starry-bride"
+    },
+    {
+      "mal_id": 57524,
+      "tmdb_ids": [
+        241535
+      ],
+      "title": "makeine-too-many-losing-heroines"
+    },
+    {
+      "mal_id": 57554,
+      "tmdb_ids": [
+        210879
+      ],
+      "title": "rurouni-kenshin-kyoto-disturbance"
+    },
+    {
+      "mal_id": 57611,
+      "tmdb_ids": [
+        242143
+      ],
+      "title": "you-are-ms-servant"
+    },
+    {
+      "mal_id": 57876,
+      "tmdb_ids": [
+        248951
+      ],
+      "title": "the-strongest-magician-in-the-demon-lords-army-was-a-human"
+    },
+    {
+      "mal_id": 58059,
+      "tmdb_ids": [
+        245842
+      ],
+      "title": "wistoria-wand-and-sword"
+    },
+    {
+      "mal_id": 58131,
+      "tmdb_ids": [
+        261091
+      ],
+      "title": "the-shiunji-family-children"
+    },
+    {
+      "mal_id": 58445,
+      "tmdb_ids": [
+        259786
+      ],
+      "title": "goodbye-dragon-life"
+    },
+    {
+      "mal_id": 58502,
+      "tmdb_ids": [
+        249882
+      ],
+      "title": "zenshu"
+    },
+    {
+      "mal_id": 58514,
+      "tmdb_ids": [
+        220542
+      ],
+      "title": "the-apothecary-diaries-2nd-season"
+    },
+    {
+      "mal_id": 58572,
+      "tmdb_ids": [
+        205050
+      ],
+      "title": "shangri-la-frontier-2nd-season"
+    },
+    {
+      "mal_id": 58822,
+      "tmdb_ids": [
+        261298
+      ],
+      "title": "possibly-the-greatest-alchemist-of-all-time"
+    },
+    {
+      "mal_id": 58861,
+      "tmdb_ids": [
+        254492
+      ],
+      "title": "hana-kimi"
+    },
+    {
+      "mal_id": 59027,
+      "tmdb_ids": [
+        120089
+      ],
+      "title": "spy-x-family-season-3"
+    },
+    {
+      "mal_id": 59062,
+      "tmdb_ids": [
+        256721
+      ],
+      "title": "gachiakuta"
+    },
+    {
+      "mal_id": 59135,
+      "tmdb_ids": [
+        257790
+      ],
+      "title": "im-getting-married-to-a-girl-i-hate-in-my-class"
+    },
+    {
+      "mal_id": 59169,
+      "tmdb_ids": [
+        258055
+      ],
+      "title": "once-upon-a-witchs-death"
+    },
+    {
+      "mal_id": 59205,
+      "tmdb_ids": [
+        258348
+      ],
+      "title": "clevatess"
+    },
+    {
+      "mal_id": 59228,
+      "tmdb_ids": [
+        50712
+      ],
+      "title": "black-butler-emerald-witch-arc"
+    },
+    {
+      "mal_id": 59229,
+      "tmdb_ids": [
+        88046
+      ],
+      "title": "fire-force-season-3-part-ii"
+    },
+    {
+      "mal_id": 59265,
+      "tmdb_ids": [
+        258912
+      ],
+      "title": "magic-maker-how-to-make-magic-in-another-world"
+    },
+    {
+      "mal_id": 59277,
+      "tmdb_ids": [
+        96316
+      ],
+      "title": "rent-a-girlfriend-season-4"
+    },
+    {
+      "mal_id": 59402,
+      "tmdb_ids": [
+        122587
+      ],
+      "title": "a-couple-of-cuckoos-season-2"
+    },
+    {
+      "mal_id": 59484,
+      "tmdb_ids": [
+        287278
+      ],
+      "title": "mechanical-marie"
+    },
+    {
+      "mal_id": 57192,
+      "tmdb_ids": [],
+      "title": "true-beauty"
+    },
+    {
+      "mal_id": 59514,
+      "tmdb_ids": [
+        261148
+      ],
+      "title": "the-red-ranger-becomes-an-adventurer-in-another-world"
+    },
+    {
+      "mal_id": 59819,
+      "tmdb_ids": [
+        214587
+      ],
+      "title": "bye-bye-earth-season-2"
+    },
+    {
+      "mal_id": 59853,
+      "tmdb_ids": [
+        271609
+      ],
+      "title": "dark-moon-the-blood-altar"
+    },
+    {
+      "mal_id": 59935,
+      "tmdb_ids": [
+        278816
+      ],
+      "title": "the-gorilla-gods-go-to-girl"
+    },
+    {
+      "mal_id": 60140,
+      "tmdb_ids": [
+        277881
+      ],
+      "title": "the-unaware-atelier-meister"
+    },
+    {
+      "mal_id": 60293,
+      "tmdb_ids": [
+        277222
+      ],
+      "title": "catch-me-at-the-ballpark"
+    },
+    {
+      "mal_id": 60371,
+      "tmdb_ids": [
+        278043
+      ],
+      "title": "you-and-i-are-polar-opposites"
+    },
+    {
+      "mal_id": 60543,
+      "tmdb_ids": [
+        240411
+      ],
+      "title": "dandadan-2nd-season"
+    },
+    {
+      "mal_id": 60593,
+      "tmdb_ids": [
+        280110
+      ],
+      "title": "my-hero-academia-vigilantes"
+    },
+    {
+      "mal_id": 60765,
+      "tmdb_ids": [
+        282662
+      ],
+      "title": "with-you-our-love-will-make-it-through"
+    },
+    {
+      "mal_id": 61174,
+      "tmdb_ids": [
+        284442
+      ],
+      "title": "a-gatherers-adventure-in-isekai"
+    },
+    {
+      "mal_id": 61339,
+      "tmdb_ids": [
+        95269
+      ],
+      "title": "toilet-bound-hanako-kun-2nd-season-part-ii"
+    },
+    {
+      "mal_id": 49818,
+      "tmdb_ids": [
+        232230
+      ],
+      "title": "lord-of-mysteries"
+    },
+    {
+      "mal_id": 61773,
+      "tmdb_ids": [
+        293010
+      ],
+      "title": "lets-play"
+    },
+    {
+      "mal_id": 60560,
+      "tmdb_ids": [
+        98123
+      ],
+      "title": "the-daily-life-of-the-immortal-king-5"
+    },
+    {
+      "mal_id": 39164,
+      "tmdb_ids": [],
+      "title": "eve-dramaturgy"
+    },
+    {
+      "mal_id": 59989,
+      "tmdb_ids": [],
+      "title": null
+    },
+    {
+      "mal_id": 52635,
+      "tmdb_ids": [],
+      "title": null
+    }
+  ]
+}

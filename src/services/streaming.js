@@ -92,6 +92,40 @@ export const SERVERS = [
       if (audioMode === 'hindi') url += '&audio=hi';
       return url;
     }
+  },
+  {
+    id: 'animeworld_india',
+    name: 'Server 7: AnimeWorld India (Hindi Anime & Movies)',
+    shortName: 'Server 7 (AnimeWorld India)',
+    badge: '🇮🇳 AnimeWorld India',
+    color: 'bg-orange-500/20 text-orange-300 border-orange-500/40',
+    supportedAudios: ['hindi', 'english', 'sub'],
+    getMovieUrl: (tmdbId, audioMode = 'hindi') => {
+      return `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1${audioMode === 'hindi' ? '&audio=hi' : ''}`;
+    },
+    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'hindi') => {
+      return `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${s}&e=${e}${audioMode === 'hindi' ? '&audio=hi' : ''}`;
+    }
+  },
+  {
+    id: 'tatakai',
+    name: 'Server 8: Tatakai Multi-Provider (Unified Anime CDN)',
+    shortName: 'Server 8 (Tatakai CDN)',
+    badge: '⚡ Tatakai CDN',
+    color: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
+    supportedAudios: ['hindi', 'english', 'sub'],
+    getMovieUrl: (tmdbId, audioMode = 'english', isAnime = false) => {
+      if (audioMode === 'hindi') {
+        return `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&audio=hi`;
+      }
+      return `https://vidsrc.in/embed/movie/${tmdbId}`;
+    },
+    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'english', isAnime = false) => {
+      if (audioMode === 'hindi') {
+        return `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${s}&e=${e}&audio=hi`;
+      }
+      return `https://vidsrc.in/embed/tv/${tmdbId}/${s}/${e}`;
+    }
   }
 ];
 
@@ -103,10 +137,56 @@ export function getStreamUrl(server, tmdbId, type = 'movie', season = 1, episode
   return server.getMovieUrl(tmdbId, audioMode, isAnime);
 }
 
+export function getDownloadMirrors(tmdbId, type = 'movie', season = 1, episode = 1, audioMode = 'english') {
+  const isTv = type === 'tv';
+  return [
+    {
+      id: 'mirror_vidsrc',
+      name: 'Server 1: VidSrc Cloud Downloader',
+      quality: '1080p / 4K UHD',
+      badge: 'Fast CDN',
+      color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40',
+      url: isTv 
+        ? `https://vidsrc.in/embed/tv/${tmdbId}/${season}/${episode}` 
+        : `https://vidsrc.in/embed/movie/${tmdbId}`
+    },
+    {
+      id: 'mirror_autoembed',
+      name: 'Server 2: AutoEmbed Direct Stream Hub',
+      quality: '1080p Full HD',
+      badge: 'Multi-Thread',
+      color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+      url: isTv 
+        ? `https://autoembed.co/tv/tmdb/${tmdbId}-${season}-${episode}` 
+        : `https://autoembed.co/movie/tmdb/${tmdbId}`
+    },
+    {
+      id: 'mirror_multiembed',
+      name: 'Server 3: MultiEmbed (Multi-Audio & Hindi Dub)',
+      quality: '1080p Multi-Audio',
+      badge: 'Hindi Dub Mirror',
+      color: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+      url: isTv 
+        ? `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${season}&e=${episode}${audioMode === 'hindi' ? '&audio=hi' : ''}` 
+        : `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1${audioMode === 'hindi' ? '&audio=hi' : ''}`
+    },
+    {
+      id: 'mirror_vidlink',
+      name: 'Server 4: VidLink Pro Downloader',
+      quality: '1080p Ultra Clear',
+      badge: 'Dub & Sub',
+      color: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
+      url: isTv 
+        ? `https://vidlink.pro/tv/${tmdbId}/${season}/${episode}` 
+        : `https://vidlink.pro/movie/${tmdbId}`
+    }
+  ];
+}
+
 export function getDownloadUrl(tmdbId, type = 'movie', season = 1, episode = 1) {
   if (type === 'tv') {
-    return 'https://dl.vidsrc.vip/tv/' + tmdbId + '/' + season + '/' + episode;
+    return `https://vidsrc.in/embed/tv/${tmdbId}/${season}/${episode}`;
   }
-  return 'https://dl.vidsrc.vip/movie/' + tmdbId;
+  return `https://vidsrc.in/embed/movie/${tmdbId}`;
 }
 

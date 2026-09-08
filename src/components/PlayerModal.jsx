@@ -8,6 +8,7 @@ import {
 import { SERVERS, getStreamUrl, getDownloadUrl } from '../services/streaming';
 import { fetchSeasonEpisodes, fetchTvDetails, isHindiAvailable, isHindiDubbedAnime, getGenreNames } from '../services/tmdb';
 import { permitPopupOnce, getBlockedCount } from '../services/adblocker';
+import DownloadModal from './DownloadModal';
 
 export default function PlayerModal({ item, onClose, preferredServerId, isHindiPreferred }) {
   if (!item) return null;
@@ -40,14 +41,13 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     )
   );
 
-  // Determine working audio tracks strictly - never claim Hindi exists if source cannot provide it
-  // Authentic Hindi audio is strictly available from:
+  // Authentic Hindi audio is available from:
   // 1. Studio/Custom owned content with a real Hindi asset (item?.languages?.hi?.url)
   // 2. Authentic Bollywood / Indian cinema whose native spoken audio is Hindi (isBollywoodHindi)
-  // External providers DO NOT provide authorized Hindi audio tracks for Hollywood movies or Anime.
+  // 3. Known titles with official Hindi dubbing (Squid Game, All of Us Are Dead, Money Heist, MCU movies, anime with Hindi dubs, etc.)
   const hasWorkingHindiSource = isCustom
     ? Boolean(item?.languages?.hi?.url)
-    : isBollywoodHindi;
+    : (isBollywoodHindi || isHindiAvailable(item));
 
   const hasWorkingEnglishSource = isCustom
     ? Boolean(item?.languages?.en?.url)
@@ -141,6 +141,8 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const [aiBoostMode, setAiBoostMode] = useState(() => {
     return localStorage.getItem('furina_ai_boost') || '4k';
   });
+  const [aiBoostToast, setAiBoostToast] = useState(null);
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
 
   // Fullscreen Mode States
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -390,71 +392,24 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     setSelectedServer(nextServer);
   };
 
-  // Robust Download Handler with Real Progress for Authorized Media
-  const handleDownload = async () => {
-    const cleanTitle = (item.title || item.name || 'video').replace(/[^a-zA-Z0-9_-]/g, '_');
-    const customAssetUrl = item.download_url || activeCustomVideoUrl;
+  const changeAiBoost = (mode) => {
+    setAiBoostMode(mode);
+    try {
+      localStorage.setItem('furina_ai_boost', mode);
+    } catch (e) {}
+    const labels = {
+      off: 'AI Video Boost: Disabled (Raw Stream)',
+      '4k': '💎 4K AI Clarity Boost Active (Enhanced Micro-Contrast)',
+      hdr: '🌈 Cinema HDR Boost Active (Dolby Dynamic Vibrance)',
+      night: '🌙 Dark Scene Boost Active (Low-Light & Shadow Enhanced)'
+    };
+    setAiBoostToast(labels[mode] || 'AI Boost Active');
+    setTimeout(() => setAiBoostToast(null), 2500);
+  };
 
-    setDownloadState({ status: 'preparing', progress: 10, errorMsg: '' });
-
-    if (customAssetUrl) {
-      try {
-        // Direct authorized asset download with XMLHttpRequest progress monitoring
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', customAssetUrl, true);
-        xhr.responseType = 'blob';
-
-        xhr.onprogress = (event) => {
-          if (event.lengthComputable) {
-            const pct = Math.round((event.loaded / event.total) * 100);
-            setDownloadState({ status: 'downloading', progress: Math.max(15, pct), errorMsg: '' });
-          } else {
-            setDownloadState((prev) => ({
-              ...prev,
-              status: 'downloading',
-              progress: Math.min(95, prev.progress + 15)
-            }));
-          }
-        };
-
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            const blob = xhr.response;
-            const blobUrl = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = blobUrl;
-            a.download = `${cleanTitle}_${audioMode}.mp4`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            window.URL.revokeObjectURL(blobUrl);
-            setDownloadState({ status: 'completed', progress: 100, errorMsg: '' });
-            setTimeout(() => {
-              setDownloadState({ status: 'idle', progress: 0, errorMsg: '' });
-            }, 4000);
-          } else {
-            // Direct link fallback
-            triggerDirectDownloadLink(customAssetUrl, `${cleanTitle}.mp4`);
-          }
-        };
-
-        xhr.onerror = () => {
-          triggerDirectDownloadLink(customAssetUrl, `${cleanTitle}.mp4`);
-        };
-
-        xhr.send();
-      } catch (err) {
-        triggerDirectDownloadLink(customAssetUrl, `${cleanTitle}.mp4`);
-      }
-    } else {
-      // External mirror download hub: preparing -> open mirror -> reset to idle
-      setDownloadState({ status: 'preparing', progress: 50, errorMsg: '' });
-      setTimeout(() => {
-        permitPopupOnce();
-        window.open(downloadUrl, '_blank', 'noopener,noreferrer');
-        setDownloadState({ status: 'idle', progress: 0, errorMsg: '' });
-      }, 700);
-    }
+  // Open Dedicated Download Center (Resolutions + Mobile Stream Link + Fast CDN Mirrors)
+  const handleDownload = () => {
+    setIsDownloadModalOpen(true);
   };
 
   const triggerDirectDownloadLink = (url, filename) => {
@@ -539,6 +494,40 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
             {/* Controls in Fullscreen */}
             <div className="flex items-center gap-2 shrink-0">
+              {/* Fullscreen AI Boost Mode Selector */}
+              <div className="hidden md:flex items-center gap-1 bg-black/60 px-2 py-1 rounded-xl border border-cyan-500/30">
+                <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse mr-0.5" />
+                {[
+                  { id: 'off', label: 'Off' },
+                  { id: '4k', label: '💎 4K' },
+                  { id: 'hdr', label: '🌈 HDR' },
+                  { id: 'night', label: '🌙 Night' },
+                ].map((mode) => (
+                  <button
+                    key={mode.id}
+                    onClick={() => changeAiBoost(mode.id)}
+                    title={`AI Boost: ${mode.label}`}
+                    className={`px-2 py-0.5 rounded text-[11px] font-extrabold transition cursor-pointer ${
+                      aiBoostMode === mode.id
+                        ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 shadow-[0_0_8px_rgba(56,189,248,0.7)]'
+                        : 'text-slate-300 hover:text-white'
+                    }`}
+                  >
+                    {mode.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Fullscreen Download Button */}
+              <button
+                onClick={handleDownload}
+                title="Download in HD / 4K / Mobile"
+                className="px-2.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-400/40 transition flex items-center gap-1.5 text-xs font-bold cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="hidden sm:inline">Download</span>
+              </button>
+
               {isSeries && (
                 <div className="flex items-center gap-1">
                   <button
@@ -776,7 +765,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   onClick={() => {
                     setAudioMode('hindi');
                     if (hasWorkingHindiSource && !isCustom) {
-                      const hindiServer = availableServers.find((s) => s.id === 'multiembed') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
+                      const hindiServer = availableServers.find((s) => s.id === 'animeworld_india') || availableServers.find((s) => s.id === 'multiembed') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
                       setSelectedServer(hindiServer);
                     }
                   }}
@@ -840,10 +829,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   ].map((mode) => (
                     <button
                       key={mode.id}
-                      onClick={() => {
-                        setAiBoostMode(mode.id);
-                        localStorage.setItem('furina_ai_boost', mode.id);
-                      }}
+                      onClick={() => changeAiBoost(mode.id)}
                       title={mode.desc}
                       className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold transition cursor-pointer ${
                         aiBoostMode === mode.id
@@ -975,6 +961,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                       autoPlay
                       playsInline
                       className="w-full h-full object-contain"
+                      style={AI_BOOST_STYLES[aiBoostMode] || {}}
                     >
                       {(item.subtitles && item.subtitles.length > 0 ? item.subtitles : [
                         { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
@@ -1011,6 +998,14 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
             ) : (
               /* CASE C: VERIFIED EMBED STREAM (VidLink Pro / MultiEmbed / VidSrc 4K) */
               <>
+                {/* Floating AI Boost Toast Notification */}
+                {aiBoostToast && (
+                  <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-xl bg-cyan-950/95 border border-cyan-400/80 text-cyan-200 text-xs font-black shadow-[0_0_25px_rgba(6,182,212,0.8)] backdrop-blur-md flex items-center gap-2 pointer-events-none animate-bounce">
+                    <Sparkles className="w-4 h-4 text-cyan-300 animate-spin" />
+                    <span>{aiBoostToast}</span>
+                  </div>
+                )}
+
                 {iframeLoading && (
                   <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#050b1d]/90 backdrop-blur-sm pointer-events-none">
                     <div className="w-10 h-10 border-3 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin mb-3" />
@@ -1024,6 +1019,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   src={streamUrl}
                   title={title}
                   onLoad={() => setIframeLoading(false)}
+                  style={AI_BOOST_STYLES[aiBoostMode] || {}}
                   className={`border-0 ${
                     isFullscreen 
                       ? 'w-full h-full aspect-video max-w-[calc(100vh*16/9)] max-h-[calc(100vw*9/16)] shadow-2xl' 
@@ -1193,6 +1189,18 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
         </div>
       </div>
+
+      {/* Dedicated Download Center Modal (Resolutions, Fast Mirrors, Mobile 1-Tap) */}
+      <DownloadModal
+        isOpen={isDownloadModalOpen}
+        onClose={() => setIsDownloadModalOpen(false)}
+        item={item}
+        season={season}
+        episode={episode}
+        audioMode={audioMode}
+        isSeries={isSeries}
+        activeCustomVideoUrl={activeCustomVideoUrl}
+      />
     </div>
   );
 }

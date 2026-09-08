@@ -45,7 +45,7 @@ export default function HeroBanner({ items, item, onPlay, isWatchlisted, onToggl
 
   const isHindi = Boolean(
     currentItem?.languages?.hi?.url ||
-    (!isAnime && isHindiAvailable(currentItem))
+    isHindiAvailable(currentItem)
   );
 
   const saved = (isWatchlisted && currentItem?.id) ? isWatchlisted(currentItem.id) : false;

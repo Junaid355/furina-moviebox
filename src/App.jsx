@@ -46,6 +46,7 @@ export default function App() {
   const [activeCategory, setActiveCategory] = useState('trending');
   const [animeAudioFilter, setAnimeAudioFilter] = useState('all');
   const [movieFilter, setMovieFilter] = useState('hollywood');
+  const [kdramaFilter, setKdramaFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [items, setItems] = useState([]);
@@ -168,7 +169,7 @@ export default function App() {
     }
     if (cat === 'hindi') return await fetchHindiMovies(pageNum);
     if (cat === 'series') return await fetchTrendingSeries(pageNum);
-    if (cat === 'kdrama') return await fetchKDramas(pageNum);
+    if (cat === 'kdrama') return await fetchKDramas(pageNum, kdramaFilter);
     if (cat === 'horror') return await fetchHorrorMovies(pageNum);
     if (cat === 'anime') return await fetchAnime(pageNum, animeAudioFilter);
     if (cat === 'ecchi_anime' || cat === 'mature_anime') {
@@ -220,7 +221,7 @@ export default function App() {
         if (currentSeq !== requestSeqRef.current) return;
         setLoading(false);
       });
-  }, [activeCategory, debouncedQuery, animeAudioFilter, movieFilter, includeMature, isMasterMode, watchlist.length, studioVersion]);
+  }, [activeCategory, debouncedQuery, animeAudioFilter, movieFilter, kdramaFilter, includeMature, isMasterMode, watchlist.length, studioVersion]);
 
   // Load More (Pagination) with strict dual deduplication
   const handleLoadMore = async () => {
@@ -522,6 +523,35 @@ export default function App() {
               >
                 <span>⭐</span>
                 <span>Popular Movies</span>
+              </button>
+            </div>
+          )}
+
+          {/* K-Drama Quick Filters */}
+          {activeCategory === 'kdrama' && !searchQuery.trim() && (
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 text-xs">
+              <span className="text-cyan-200/50 text-[11px] whitespace-nowrap font-medium">K-Drama Audio:</span>
+              <button
+                onClick={() => setKdramaFilter('all')}
+                className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border cursor-pointer ${
+                  kdramaFilter === 'all'
+                    ? 'bg-cyan-500 text-gray-950 border-cyan-400 shadow'
+                    : 'bg-cyan-500/15 border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/25'
+                }`}
+              >
+                <span>🇰🇷</span>
+                <span>All K-Dramas</span>
+              </button>
+              <button
+                onClick={() => setKdramaFilter('hindi')}
+                className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border cursor-pointer ${
+                  kdramaFilter === 'hindi'
+                    ? 'bg-amber-500 text-gray-950 border-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.6)] font-black'
+                    : 'bg-amber-500/15 border-amber-500/30 text-amber-300 hover:bg-amber-500/25'
+                }`}
+              >
+                <span>🇮🇳</span>
+                <span>Hindi Dubbed K-Dramas (Squid Game, All of Us Are Dead)</span>
               </button>
             </div>
           )}

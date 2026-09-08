@@ -29,7 +29,7 @@ const MediaCard = React.memo(function MediaCard({ item, onPlay, isWatchlisted, o
 
   const isHindi = Boolean(
     item.languages?.hi?.url ||
-    (!isAnime && isHindiAvailable(item))
+    isHindiAvailable(item)
   );
 
   const savedProgress = (() => {
@@ -90,7 +90,7 @@ const MediaCard = React.memo(function MediaCard({ item, onPlay, isWatchlisted, o
           {isHindi && (
             <span className="bg-gradient-to-r from-amber-500 to-orange-600 text-gray-950 text-[9px] font-black tracking-wider px-2 py-0.5 rounded-md shadow flex items-center gap-1">
               <span>🇮🇳</span>
-              <span>HINDI</span>
+              <span>{isAnime ? 'HINDI DUB' : 'HINDI'}</span>
             </span>
           )}
           {isAnime && (
