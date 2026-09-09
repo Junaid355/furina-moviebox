@@ -35,35 +35,56 @@ export default function Navbar({
       ]
     : baseCategories;
 
-  // Local state buffering to prevent mobile IME / keyboard cursor reset ("backwalk")
+  // Local state buffering & caret preservation to eliminate mobile keyboard cursor reset ("backwalk")
   const [localSearch, setLocalSearch] = useState(searchQuery || '');
+  const inputRef = useRef(null);
+  const isFocusedRef = useRef(false);
   const isComposingRef = useRef(false);
   const debounceTimerRef = useRef(null);
+  const lastEmittedQueryRef = useRef(searchQuery || '');
 
   // Synchronize local search with external parent changes (e.g. category pill click, clear button)
+  // CRITICAL FOR ANDROID: Never overwrite localSearch while user is actively typing in the focused input
   useEffect(() => {
-    setLocalSearch(searchQuery || '');
+    if (!isFocusedRef.current || searchQuery === '' || searchQuery !== lastEmittedQueryRef.current) {
+      setLocalSearch(searchQuery || '');
+      lastEmittedQueryRef.current = searchQuery || '';
+    }
   }, [searchQuery]);
 
   const handleInputChange = (e) => {
     const nextVal = e.target.value;
+    const cursor = e.target.selectionStart;
     setLocalSearch(nextVal);
+
+    // Save & restore selection caret across Android mobile composition cycles to prevent jumping to index 0
+    if (typeof cursor === 'number') {
+      requestAnimationFrame(() => {
+        if (inputRef.current && document.activeElement === inputRef.current) {
+          try {
+            inputRef.current.setSelectionRange(cursor, cursor);
+          } catch (err) {}
+        }
+      });
+    }
 
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
 
     if (!nextVal.trim()) {
+      lastEmittedQueryRef.current = '';
       onSearch('');
       return;
     }
 
-    // Debounce notifying parent so that mobile keyboards (Gboard/iOS) never suffer cursor reset or backwalk
+    // Debounce notifying parent so that mobile virtual keyboards (Gboard/iOS) never suffer re-render interruptions
     debounceTimerRef.current = setTimeout(() => {
       if (!isComposingRef.current) {
+        lastEmittedQueryRef.current = nextVal;
         onSearch(nextVal);
       }
-    }, 280);
+    }, 350);
   };
 
   const handleKeyDown = (e) => {
@@ -71,6 +92,7 @@ export default function Navbar({
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
+      lastEmittedQueryRef.current = localSearch;
       onSearch(localSearch);
       e.target.blur();
     }
@@ -80,6 +102,7 @@ export default function Navbar({
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
+    lastEmittedQueryRef.current = '';
     setLocalSearch('');
     onSearch('');
   };
@@ -129,10 +152,13 @@ export default function Navbar({
           <div className="relative flex items-center">
             <Search className="absolute left-3.5 w-4 h-4 text-cyan-400/70 pointer-events-none" />
             <input
+              ref={inputRef}
               type="text"
               value={localSearch}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
+              onFocus={() => { isFocusedRef.current = true; }}
+              onBlur={() => { isFocusedRef.current = false; }}
               onCompositionStart={() => { isComposingRef.current = true; }}
               onCompositionEnd={(e) => {
                 isComposingRef.current = false;

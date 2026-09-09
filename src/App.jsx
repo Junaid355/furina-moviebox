@@ -631,7 +631,12 @@ export default function App() {
             isHindiPreferred={
               activeCategory === 'hindi' ||
               (Boolean(searchQuery) && searchQuery.toLowerCase().includes('hindi')) ||
-              activeMedia?.category === 'hindi'
+              activeMedia?.category === 'hindi' ||
+              activeMedia?.isHindiDubbed === true ||
+              activeMedia?.hasHindiDub === true ||
+              (activeCategory === 'anime' && animeAudioFilter === 'hindi') ||
+              (activeCategory === 'kdrama' && kdramaFilter === 'hindi') ||
+              (activeCategory === 'hollywood' && movieFilter === 'hindi')
             }
             onClose={() => setActiveMedia(null)}
           />

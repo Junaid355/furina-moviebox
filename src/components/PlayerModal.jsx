@@ -66,9 +66,11 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       return 'english';
     }
     if (isBollywoodHindi) return 'hindi';
-    if (isAnime) return 'sub'; // Anime defaults to Japanese sub or English dub, NEVER Hindi
-    if (isHindiPreferred && hasWorkingHindiSource) return 'hindi';
+    // CRITICAL: Check Hindi preference BEFORE anime sub default
+    // so that anime titles with verified Hindi dubs start in Hindi when user selected Hindi filter
+    if ((isHindiPreferred || item?.isHindiDubbed === true || item?.hasHindiDub === true || item?.dub_type === 'hindi') && hasWorkingHindiSource) return 'hindi';
     if (item?.dub_type === 'sub') return 'sub';
+    if (isAnime) return 'sub';
     return 'english';
   });
 
@@ -77,8 +79,13 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     ? SERVERS.filter((s) => s.id !== 'autoembed') 
     : SERVERS;
 
-  // Determine initial server
+  // Determine initial server — route Hindi to verified zero-captcha Hindi servers
   const getInitialServer = () => {
+    // If Hindi audio mode is active, prioritize Hindi-verified servers
+    const willBeHindi = isBollywoodHindi || ((isHindiPreferred || item?.isHindiDubbed === true || item?.hasHindiDub === true || item?.dub_type === 'hindi') && hasWorkingHindiSource);
+    if (willBeHindi && !isCustom) {
+      return availableServers.find((s) => s.id === 'vidsrc_in') || availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
+    }
     if (isAnime) {
       return availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
     }
@@ -765,7 +772,8 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   onClick={() => {
                     setAudioMode('hindi');
                     if (hasWorkingHindiSource && !isCustom) {
-                      const hindiServer = availableServers.find((s) => s.id === 'animeworld_india') || availableServers.find((s) => s.id === 'multiembed') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
+                      // Route to verified zero-captcha Hindi-capable servers
+                      const hindiServer = availableServers.find((s) => s.id === 'vidsrc_in') || availableServers.find((s) => s.id === 'vidlink') || availableServers.find((s) => s.id === 'one23embed') || availableServers[0];
                       setSelectedServer(hindiServer);
                     }
                   }}
