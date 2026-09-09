@@ -30,27 +30,25 @@ export const SERVERS = [
     supportedAudios: ['english', 'sub', 'hindi'],
     getMovieUrl: (tmdbId, audioMode = 'english', isAnime = false) => {
       let url = `https://vidlink.pro/movie/${tmdbId}?primaryColor=06b6d4`;
-      if (isAnime) {
-        if (audioMode === 'sub') {
-          url += '&sub_dub=sub';
-        } else if (audioMode === 'hindi') {
-          url += '&sub_dub=hindi';
-        } else {
-          url += '&sub_dub=dub';
-        }
+      // Always pass sub_dub parameter for ALL content types so Hindi actually changes the audio track
+      if (audioMode === 'sub') {
+        url += '&sub_dub=sub';
+      } else if (audioMode === 'hindi') {
+        url += '&sub_dub=hindi';
+      } else {
+        url += '&sub_dub=dub';
       }
       return url;
     },
     getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'english', isAnime = false) => {
       let url = `https://vidlink.pro/tv/${tmdbId}/${s}/${e}?primaryColor=06b6d4`;
-      if (isAnime) {
-        if (audioMode === 'sub') {
-          url += '&sub_dub=sub';
-        } else if (audioMode === 'hindi') {
-          url += '&sub_dub=hindi';
-        } else {
-          url += '&sub_dub=dub';
-        }
+      // Always pass sub_dub parameter for ALL content types so Hindi actually changes the audio track
+      if (audioMode === 'sub') {
+        url += '&sub_dub=sub';
+      } else if (audioMode === 'hindi') {
+        url += '&sub_dub=hindi';
+      } else {
+        url += '&sub_dub=dub';
       }
       return url;
     }

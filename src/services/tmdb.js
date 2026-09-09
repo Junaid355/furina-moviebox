@@ -4946,6 +4946,216 @@ export const SECRET_ECCHI_ANIME = [
 
     "is_mature": true
 
+  },
+
+  {
+    "id": 126646,
+    "name": "Isaku Respect",
+    "title": "Isaku Respect",
+    "overview": "A dark suspense OVA where trapped victims in a mysterious mansion must survive twisted games and traps set by the enigmatic Isaku.",
+    "poster_path": "/6czmCM6tty2odD9oc2zgTo1hbye.jpg",
+    "backdrop_path": "/6czmCM6tty2odD9oc2zgTo1hbye.jpg",
+    "media_type": "tv",
+    "vote_average": 6.0,
+    "first_air_date": "2001-02-23",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+
+  {
+    "id": 156062,
+    "name": "Futari Ecchi",
+    "title": "Futari Ecchi",
+    "overview": "A newly married couple navigates the complexities of intimacy and relationships. Based on the long-running manga by Katsu Aki.",
+    "poster_path": "/urLDGPMVlihzMrYJgFySEpLRQZV.jpg",
+    "backdrop_path": "/urLDGPMVlihzMrYJgFySEpLRQZV.jpg",
+    "media_type": "tv",
+    "vote_average": 3.2,
+    "first_air_date": "2011-07-29",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+
+  {
+    "id": 323990,
+    "name": "Are the Sexy Buttocks Not Good?",
+    "title": "Are the Sexy Buttocks Not Good?",
+    "overview": "A chance rescue reunites a college student with his company's CEO, where an unlikely workplace romance begins to bloom.",
+    "poster_path": "/82kmYM4Q6YtBrWjHu8563Oljyz4.jpg",
+    "backdrop_path": "/gYk01PhjOAGbd4vXeQwcZMSCgmA.jpg",
+    "media_type": "tv",
+    "vote_average": 6.6,
+    "first_air_date": "2026-07-07",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+
+  {
+    "id": 287973,
+    "name": "Ren Arisugawa Is Actually a Girl",
+    "title": "Ren Arisugawa Is Actually a Girl",
+    "overview": "Kyohei's only brush with fame is being the cousin of Japan's hottest male celebrity, Ren Arisugawa. When he discovers Ren's secret, their lives take an unexpected turn.",
+    "poster_path": "/m9d3D1U9bdzV4vCHvr2PkdCW92z.jpg",
+    "backdrop_path": "/eu87J5S0N8YpcdL3sl0ltxpXfog.jpg",
+    "media_type": "tv",
+    "vote_average": 5.0,
+    "first_air_date": "2026-01-05",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+
+  {
+    "id": 127414,
+    "name": "Watashitachi Tetsuincho Hajimemasu",
+    "title": "Watashitachi Tetsuincho Hajimemasu",
+    "overview": "An intimate slice-of-life following two people as they start keeping a couples' notebook, exploring their deepening relationship.",
+    "poster_path": "/35sV8pTlyAkhaaWCWdZ6XaTQWzx.jpg",
+    "backdrop_path": "/w0ZNZbiaQnz5tv2s4q0SL3bNc5z.jpg",
+    "media_type": "tv",
+    "vote_average": 10.0,
+    "first_air_date": "2021-06-12",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+
+  {
+    "id": 60073,
+    "name": "To LOVE-Ru Darkness",
+    "title": "To LOVE-Ru Darkness",
+    "overview": "The sequel to To LOVE-Ru follows Rito Yuuki as he becomes further entangled in romantic chaos with alien princesses and assassins.",
+    "poster_path": "/A6W4rfVYHnYCPqrHcN7D1KNXBnM.jpg",
+    "backdrop_path": "/A6W4rfVYHnYCPqrHcN7D1KNXBnM.jpg",
+    "media_type": "tv",
+    "vote_average": 7.5,
+    "first_air_date": "2012-10-06",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+
+  {
+    "id": 46262,
+    "name": "Rosario + Vampire",
+    "title": "Rosario + Vampire",
+    "overview": "Average student Tsukune Aono accidentally enrolls in a school for monsters, where he meets the beautiful vampire Moka Akashiya.",
+    "poster_path": "/lgU5u7YZXP9sGnwUCVOHKj6aMaU.jpg",
+    "backdrop_path": "/lgU5u7YZXP9sGnwUCVOHKj6aMaU.jpg",
+    "media_type": "tv",
+    "vote_average": 7.2,
+    "first_air_date": "2008-01-03",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+
+  {
+    "id": 62745,
+    "name": "Is It Wrong to Try to Pick Up Girls in a Dungeon?",
+    "title": "Is It Wrong to Try to Pick Up Girls in a Dungeon?",
+    "overview": "In a world where gods and goddesses live among mortals, young adventurer Bell Cranel seeks to become the greatest hero in the dungeon city of Orario.",
+    "poster_path": "/h97iHupymkJXBv0gyr4qlePhKAk.jpg",
+    "backdrop_path": "/xHzLhMzsAg3OcrfyZlYMmRTfCJC.jpg",
+    "media_type": "tv",
+    "vote_average": 7.3,
+    "first_air_date": "2015-04-04",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+
+  {
+    "id": 62196,
+    "name": "Food Wars! Shokugeki no Soma",
+    "title": "Food Wars! Shokugeki no Soma",
+    "overview": "Soma Yukihira enrolls in an elite culinary school where intense cooking battles determine the best chefs, with provocative foodgasm reactions.",
+    "poster_path": "/9e9hBJudkJAghyNzMJFzx6Wy9ja.jpg",
+    "backdrop_path": "/9e9hBJudkJAghyNzMJFzx6Wy9ja.jpg",
+    "media_type": "tv",
+    "vote_average": 8.3,
+    "first_air_date": "2015-04-04",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+
+  {
+    "id": 61737,
+    "name": "Monster Musume: Everyday Life with Monster Girls",
+    "title": "Monster Musume",
+    "overview": "When mythological creatures are integrated into human society, a young man becomes host to a group of exotic monster girls who all compete for his affection.",
+    "poster_path": "/cFbrLdB3VI44L5p3iuvb2eyT7KP.jpg",
+    "backdrop_path": "/cFbrLdB3VI44L5p3iuvb2eyT7KP.jpg",
+    "media_type": "tv",
+    "vote_average": 7.0,
+    "first_air_date": "2015-07-08",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+
+  {
+    "id": 62104,
+    "name": "The Seven Deadly Sins",
+    "title": "The Seven Deadly Sins",
+    "overview": "Princess Elizabeth searches for the legendary Seven Deadly Sins, a group of disgraced knights, to save her kingdom from tyranny.",
+    "poster_path": "/gxTojpKEOtue85EEFlozwRbDXwJ.jpg",
+    "backdrop_path": "/cmziOVMQrqvVfrjjQdadMdi2bGL.jpg",
+    "media_type": "tv",
+    "vote_average": 8.4,
+    "first_air_date": "2014-10-05",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+
+  {
+    "id": 65733,
+    "name": "No Game No Life",
+    "title": "No Game No Life",
+    "overview": "Genius gamer siblings Sora and Shiro are transported to a world where everything is decided by games. Ecchi-comedy meets fantasy strategy.",
+    "poster_path": "/8R70Rz0XKXO2Qf0KCi89oJxVxY.jpg",
+    "backdrop_path": "/8R70Rz0XKXO2Qf0KCi89oJxVxY.jpg",
+    "media_type": "tv",
+    "vote_average": 8.2,
+    "first_air_date": "2014-04-09",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+
+  {
+    "id": 72636,
+    "name": "Nande Koko ni Sensei ga!?",
+    "title": "Why the Hell are You Here, Teacher!?",
+    "overview": "Through a series of impossible coincidences, a high school student keeps ending up in compromising situations with his strict teacher.",
+    "poster_path": "/sjbXfJNI9BH30R1hflZPCw0OxJK.jpg",
+    "backdrop_path": "/sjbXfJNI9BH30R1hflZPCw0OxJK.jpg",
+    "media_type": "tv",
+    "vote_average": 6.8,
+    "first_air_date": "2019-04-08",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+
+  {
+    "id": 87456,
+    "name": "Peter Grill and the Philosopher's Time",
+    "title": "Peter Grill and the Philosopher's Time",
+    "overview": "Peter Grill wins a fighting tournament and is declared the strongest man in the world, but now every female monster wants to bear his children.",
+    "poster_path": "/sXVzOUKpjbMKGi2dEoG45C4rhjI.jpg",
+    "backdrop_path": "/sXVzOUKpjbMKGi2dEoG45C4rhjI.jpg",
+    "media_type": "tv",
+    "vote_average": 6.0,
+    "first_air_date": "2020-07-11",
+    "category": "ecchi_anime",
+    "is_mature": true
+  },
+
+  {
+    "id": 209857,
+    "name": "Harem in the Labyrinth of Another World",
+    "title": "Harem in the Labyrinth of Another World",
+    "overview": "Michio Kaga is transported to a fantasy world where he explores dungeons and builds a harem of beautiful companions. Uncensored fantasy action.",
+    "poster_path": "/yvjB8uoRzLhPgyGSMZN7o8CJKIA.jpg",
+    "backdrop_path": "/yvjB8uoRzLhPgyGSMZN7o8CJKIA.jpg",
+    "media_type": "tv",
+    "vote_average": 6.4,
+    "first_air_date": "2022-07-06",
+    "category": "ecchi_anime",
+    "is_mature": true
   }
 
 ];

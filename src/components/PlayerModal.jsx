@@ -84,7 +84,8 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     // If Hindi audio mode is active, prioritize Hindi-verified servers
     const willBeHindi = isBollywoodHindi || ((isHindiPreferred || item?.isHindiDubbed === true || item?.hasHindiDub === true || item?.dub_type === 'hindi') && hasWorkingHindiSource);
     if (willBeHindi && !isCustom) {
-      return availableServers.find((s) => s.id === 'vidsrc_in') || availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
+      // vidlink is the ONLY server that supports &sub_dub=hindi parameter to actually switch audio
+      return availableServers.find((s) => s.id === 'vidlink') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
     }
     if (isAnime) {
       return availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
@@ -772,8 +773,8 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   onClick={() => {
                     setAudioMode('hindi');
                     if (hasWorkingHindiSource && !isCustom) {
-                      // Route to verified zero-captcha Hindi-capable servers
-                      const hindiServer = availableServers.find((s) => s.id === 'vidsrc_in') || availableServers.find((s) => s.id === 'vidlink') || availableServers.find((s) => s.id === 'one23embed') || availableServers[0];
+                      // vidlink is the ONLY server that supports &sub_dub=hindi to actually switch audio track
+                      const hindiServer = availableServers.find((s) => s.id === 'vidlink') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers.find((s) => s.id === 'one23embed') || availableServers[0];
                       setSelectedServer(hindiServer);
                     }
                   }}
