@@ -102,6 +102,20 @@ export const SERVERS = [
     supportedAudios: ['hindi', 'english', 'sub'],
     getMovieUrl: (tmdbId) => `https://vidsrc.in/embed/movie/${tmdbId}`,
     getTvUrl: (tmdbId, s = 1, e = 1) => `https://vidsrc.in/embed/tv/${tmdbId}/${s}/${e}`
+  },
+  {
+    id: 'multiembed',
+    name: 'Server 9: MultiEmbed (Dedicated Multi-Audio & Hindi Dub)',
+    shortName: 'Server 9 (MultiEmbed Hindi)',
+    badge: 'Multi-Audio / Hindi',
+    color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+    supportedAudios: ['hindi', 'english', 'sub'],
+    getMovieUrl: (tmdbId, audioMode = 'english') => {
+      return `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1${audioMode === 'hindi' ? '&audio=hi' : ''}`;
+    },
+    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'english') => {
+      return `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${s}&e=${e}${audioMode === 'hindi' ? '&audio=hi' : ''}`;
+    }
   }
 ];
 

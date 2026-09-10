@@ -44,9 +44,9 @@ export default function Navbar({
   const lastEmittedQueryRef = useRef(searchQuery || '');
 
   // Synchronize local search with external parent changes (e.g. category pill click, clear button)
-  // CRITICAL FOR ANDROID: Never overwrite localSearch while user is actively typing in the focused input
+  // CRITICAL FOR MOBILE: NEVER overwrite localSearch while user is actively typing in the focused input
   useEffect(() => {
-    if (!isFocusedRef.current || searchQuery === '' || searchQuery !== lastEmittedQueryRef.current) {
+    if (!isFocusedRef.current) {
       setLocalSearch(searchQuery || '');
       lastEmittedQueryRef.current = searchQuery || '';
     }
@@ -54,19 +54,7 @@ export default function Navbar({
 
   const handleInputChange = (e) => {
     const nextVal = e.target.value;
-    const cursor = e.target.selectionStart;
     setLocalSearch(nextVal);
-
-    // Save & restore selection caret across Android mobile composition cycles to prevent jumping to index 0
-    if (typeof cursor === 'number') {
-      requestAnimationFrame(() => {
-        if (inputRef.current && document.activeElement === inputRef.current) {
-          try {
-            inputRef.current.setSelectionRange(cursor, cursor);
-          } catch (err) {}
-        }
-      });
-    }
 
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
@@ -84,10 +72,11 @@ export default function Navbar({
         lastEmittedQueryRef.current = nextVal;
         onSearch(nextVal);
       }
-    }, 350);
+    }, 300);
   };
 
   const handleKeyDown = (e) => {
+    e.stopPropagation();
     if (e.key === 'Enter') {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);

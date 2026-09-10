@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Play, Star, Bookmark, Check, Sparkles, Volume2 } from 'lucide-react';
+import { Play, Star, Bookmark, Check, Sparkles, Volume2, Film, Tv } from 'lucide-react';
 import { POSTER_THUMB_BASE, isHindiAvailable } from '../services/tmdb';
 
 const MediaCard = React.memo(function MediaCard({ item, onPlay, isWatchlisted, onToggleWatchlist }) {
   if (!item) return null;
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const title = item.title || item.name || 'Untitled';
   const year = String(item.release_date || item.first_air_date || '').substring(0, 4);
   const rating = typeof item.vote_average === 'number' 
@@ -59,25 +60,50 @@ const MediaCard = React.memo(function MediaCard({ item, onPlay, isWatchlisted, o
       {/* Poster Image Container */}
       <div className="relative aspect-[2/3] w-full overflow-hidden bg-[#060c1d]">
         {/* Shimmer Placeholder while loading */}
-        {!imageLoaded && (
+        {!imageLoaded && !imageError && (
           <div className="absolute inset-0 skeleton-shimmer z-0" />
         )}
 
-        <img
-          src={item.poster_path ? (item.poster_path.startsWith('http') ? item.poster_path : `${POSTER_THUMB_BASE}${item.poster_path}`) : './icon-512.png'}
-          alt={title}
-          loading="lazy"
-          decoding="async"
-          onLoad={() => setImageLoaded(true)}
-          onError={(e) => {
-            e.currentTarget.onerror = null;
-            e.currentTarget.src = './icon-512.png';
-            setImageLoaded(true);
-          }}
-          className={`w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105 ${
-            imageLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
-        />
+        {imageError || !item.poster_path ? (
+          <div className="w-full h-full bg-gradient-to-br from-[#0c1838] via-[#070f24] to-[#030611] flex flex-col items-center justify-center p-4 text-center relative overflow-hidden border border-cyan-500/20">
+            <div className="absolute -top-12 -right-12 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none" />
+            <div className="w-12 h-12 rounded-2xl bg-cyan-500/15 border border-cyan-400/30 flex items-center justify-center mb-3 shadow-lg group-hover:scale-110 transition duration-300">
+              {isAnime ? (
+                <Sparkles className="w-6 h-6 text-cyan-300" />
+              ) : isSeries ? (
+                <Tv className="w-6 h-6 text-sky-400" />
+              ) : (
+                <Film className="w-6 h-6 text-cyan-400" />
+              )}
+            </div>
+            <p className="font-extrabold text-xs sm:text-sm text-white line-clamp-3 leading-snug px-1 drop-shadow-md">
+              {title}
+            </p>
+            {year && (
+              <span className="text-[11px] text-cyan-300/80 font-bold mt-1.5 tracking-wider">
+                {year}
+              </span>
+            )}
+            <span className="text-[9px] uppercase tracking-widest text-cyan-400/60 font-black mt-2 px-2 py-0.5 rounded bg-cyan-950/60 border border-cyan-800/40">
+              {isAnime ? 'Anime Series' : isSeries ? 'Web Series' : 'Cinema Film'}
+            </span>
+          </div>
+        ) : (
+          <img
+            src={item.poster_path.startsWith('http') ? item.poster_path : `${POSTER_THUMB_BASE}${item.poster_path}`}
+            alt={title}
+            loading="lazy"
+            decoding="async"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => {
+              setImageError(true);
+              setImageLoaded(true);
+            }}
+            className={`w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105 ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+          />
+        )}
 
         {/* Cinematic Vignette */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#050b1d] via-transparent to-black/30 pointer-events-none" />

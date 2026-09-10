@@ -3,7 +3,7 @@ import {
   X, Server, Film, Tv, RefreshCw, ExternalLink, Info, Zap, Play, Pause,
   Sparkles, ShieldCheck, Download, Maximize2, Minimize2, Volume2, VolumeX,
   CheckCircle2, AlertTriangle, ArrowRight, Loader2, ChevronLeft, ChevronRight,
-  PictureInPicture
+  PictureInPicture, Keyboard, HelpCircle, Subtitles
 } from 'lucide-react';
 import { SERVERS, getStreamUrl, getDownloadUrl } from '../services/streaming';
 import { fetchSeasonEpisodes, fetchTvDetails, isHindiAvailable, isHindiDubbedAnime, getGenreNames } from '../services/tmdb';
@@ -79,13 +79,15 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     ? SERVERS.filter((s) => s.id !== 'autoembed') 
     : SERVERS;
 
-  // Determine initial server — route Hindi to verified zero-captcha Hindi servers
+  // Determine initial server — route Hindi to verified multi-audio servers
   const getInitialServer = () => {
     // If Hindi audio mode is active, prioritize Hindi-verified servers
     const willBeHindi = isBollywoodHindi || ((isHindiPreferred || item?.isHindiDubbed === true || item?.hasHindiDub === true || item?.dub_type === 'hindi') && hasWorkingHindiSource);
     if (willBeHindi && !isCustom) {
-      // vidlink is the ONLY server that supports &sub_dub=hindi parameter to actually switch audio
-      return availableServers.find((s) => s.id === 'vidlink') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
+      if (isBollywoodHindi) {
+        return availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
+      }
+      return availableServers.find((s) => s.id === 'multiembed') || availableServers.find((s) => s.id === 'smashy') || availableServers.find((s) => s.id === 'one23embed') || availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
     }
     if (isAnime) {
       return availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
@@ -151,6 +153,8 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   });
   const [aiBoostToast, setAiBoostToast] = useState(null);
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
+  const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false);
+  const [activeSubtitle, setActiveSubtitle] = useState('en');
 
   // Fullscreen Mode States
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -192,6 +196,11 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       }
     }
     setIsFullscreen(false);
+    try {
+      if (window.history.state?.modal === 'player_active') {
+        window.history.back();
+      }
+    } catch (e) {}
     onClose();
   };
 
@@ -214,7 +223,11 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     } catch (e) {}
 
     const handlePopState = () => {
-      handleSafeClose();
+      if (document.fullscreenElement || document.webkitFullscreenElement) {
+        if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+      }
+      setIsFullscreen(false);
+      onClose();
     };
     window.addEventListener('popstate', handlePopState);
     return () => {
@@ -246,10 +259,23 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   // Keyboard Escape, Fullscreen, and Video Playback Key Listeners
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
+      // Strictly ignore keyboard shortcuts while user is typing in any input, textarea, select, or editable element
+      if (
+        e.target.tagName === 'INPUT' || 
+        e.target.tagName === 'TEXTAREA' || 
+        e.target.tagName === 'SELECT' || 
+        e.target.isContentEditable ||
+        document.activeElement?.tagName === 'INPUT' ||
+        document.activeElement?.tagName === 'TEXTAREA'
+      ) {
         return;
       }
+
       if (e.key === 'Escape') {
+        if (isShortcutsHelpOpen) {
+          setIsShortcutsHelpOpen(false);
+          return;
+        }
         if (document.fullscreenElement || isFullscreen) {
           if (document.exitFullscreen) {
             document.exitFullscreen().catch(() => {});
@@ -258,9 +284,13 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
         } else {
           handleSafeClose();
         }
+      } else if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+        e.preventDefault();
+        setIsShortcutsHelpOpen((prev) => !prev);
       } else if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
         toggleFullscreen();
-      } else if (e.key === ' ' || e.code === 'Space') {
+      } else if (e.key === ' ' || e.code === 'Space' || e.key === 'k' || e.key === 'K') {
         if (videoRef.current) {
           e.preventDefault();
           if (videoRef.current.paused) {
@@ -268,6 +298,16 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
           } else {
             videoRef.current.pause();
           }
+        }
+      } else if (e.key === 'j' || e.key === 'J') {
+        if (videoRef.current) {
+          e.preventDefault();
+          videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 10);
+        }
+      } else if (e.key === 'l' || e.key === 'L') {
+        if (videoRef.current) {
+          e.preventDefault();
+          videoRef.current.currentTime = Math.min(videoRef.current.duration || 9999, videoRef.current.currentTime + 10);
         }
       } else if (e.key === 'm' || e.key === 'M') {
         if (videoRef.current) {
@@ -683,6 +723,15 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 </button>
               )}
 
+              {/* Keyboard Shortcuts modal button */}
+              <button
+                onClick={() => setIsShortcutsHelpOpen((prev) => !prev)}
+                title="Keyboard Shortcuts (?)"
+                className="hidden sm:flex items-center gap-1 p-2 rounded-xl bg-[#0c1836] border border-cyan-500/30 text-cyan-300 hover:text-white hover:bg-white/10 transition cursor-pointer"
+              >
+                <Keyboard className="w-3.5 h-3.5" />
+              </button>
+
               {/* Reload stream button */}
               <button
                 onClick={handleReload}
@@ -773,8 +822,9 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   onClick={() => {
                     setAudioMode('hindi');
                     if (hasWorkingHindiSource && !isCustom) {
-                      // vidlink is the ONLY server that supports &sub_dub=hindi to actually switch audio track
-                      const hindiServer = availableServers.find((s) => s.id === 'vidlink') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers.find((s) => s.id === 'one23embed') || availableServers[0];
+                      const hindiServer = isBollywoodHindi
+                        ? (availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0])
+                        : (availableServers.find((s) => s.id === 'multiembed') || availableServers.find((s) => s.id === 'smashy') || availableServers.find((s) => s.id === 'one23embed') || availableServers.find((s) => s.id === 'vidlink') || availableServers[0]);
                       setSelectedServer(hindiServer);
                     }
                   }}
@@ -1024,7 +1074,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   </div>
                 )}
                 <iframe
-                  key={`${currentServer.id}-${season}-${episode}-${reloadKey}`}
+                  key={`${currentServer.id}-${season}-${episode}-${audioMode}-${reloadKey}`}
                   src={streamUrl}
                   title={title}
                   onLoad={() => setIframeLoading(false)}
@@ -1068,8 +1118,14 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 </div>
               </div>
 
-              <div className="text-[11px] text-slate-400">
-                Stream 404 or Buffering? Tap <strong>Auto-Switch</strong> or click another mirror.
+              <div className="flex items-center gap-2 text-[11px] text-cyan-200/80 flex-wrap">
+                <span className="flex items-center gap-1 bg-cyan-950/60 border border-cyan-500/30 px-2 py-0.5 rounded-md text-[10px] font-bold text-cyan-300">
+                  <Subtitles className="w-3 h-3 text-cyan-400" />
+                  <span>Subtitles (CC): Toggle English/Hindi subtitles inside player</span>
+                </span>
+                <span className="text-slate-400 hidden sm:inline">
+                  Stream buffering? Tap <strong>Auto-Switch</strong> or select another mirror.
+                </span>
               </div>
             </div>
           )}
@@ -1198,6 +1254,60 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
         </div>
       </div>
+
+      {/* Keyboard Shortcuts Cheat Sheet Modal */}
+      {isShortcutsHelpOpen && (
+        <div 
+          className="fixed inset-0 z-[100000] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in"
+          onClick={() => setIsShortcutsHelpOpen(false)}
+        >
+          <div 
+            className="w-full max-w-md bg-[#08122c] border border-cyan-500/40 rounded-2xl p-5 shadow-[0_0_50px_rgba(6,182,212,0.4)] text-white"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-cyan-500/20 pb-3 mb-4">
+              <div className="flex items-center gap-2">
+                <Keyboard className="w-5 h-5 text-cyan-400" />
+                <h3 className="text-base font-black tracking-wide text-cyan-100">Keyboard Shortcuts</h3>
+              </div>
+              <button 
+                onClick={() => setIsShortcutsHelpOpen(false)}
+                className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-2 text-xs">
+              {[
+                { key: 'Space or K', desc: 'Play / Pause video' },
+                { key: 'J / L', desc: 'Rewind / Fast-forward 10s' },
+                { key: '← / →', desc: 'Seek backward / forward 5s' },
+                { key: '↑ / ↓', desc: 'Increase / Decrease volume' },
+                { key: 'M', desc: 'Mute / Unmute audio' },
+                { key: 'F', desc: 'Toggle Cinema Fullscreen' },
+                { key: 'P', desc: 'Picture-in-Picture mode (PiP)' },
+                { key: 'Esc', desc: 'Exit Fullscreen / Close Player' },
+                { key: '?', desc: 'Toggle this shortcut guide' },
+              ].map((sc, i) => (
+                <div key={i} className="flex items-center justify-between py-1.5 px-2.5 rounded-lg bg-white/5 border border-white/5">
+                  <span className="text-slate-300 font-medium">{sc.desc}</span>
+                  <kbd className="px-2 py-0.5 rounded bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 font-mono font-bold text-[11px] shadow-sm">
+                    {sc.key}
+                  </kbd>
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setIsShortcutsHelpOpen(false)}
+              className="mt-5 w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-gray-950 font-black text-xs transition shadow-md cursor-pointer"
+            >
+              Got it (Esc)
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Dedicated Download Center Modal (Resolutions, Fast Mirrors, Mobile 1-Tap) */}
       <DownloadModal
