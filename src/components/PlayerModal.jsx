@@ -958,13 +958,11 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 <img src="./favicon.png" alt="Furina" className="w-full h-full object-cover" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <h2 className="font-extrabold text-xs sm:text-base text-white truncate min-w-0 max-w-[170px] xs:max-w-[260px] sm:max-w-none" title={title}>
-                    {title}
-                  </h2>
+                <h2 className="font-extrabold text-xs sm:text-base text-white flex items-center gap-1.5 min-w-0" title={title}>
+                  <span className="truncate min-w-0">{title}</span>
                   {isSeries && (
                     <span className="text-cyan-300 font-bold text-[10px] sm:text-[11px] bg-cyan-500/20 px-1.5 py-0.5 rounded-full border border-cyan-500/40 shrink-0 whitespace-nowrap">
-                      S{season}E{episode}
+                      S{season} E{episode}
                     </span>
                   )}
                   {isCustom && (
@@ -972,7 +970,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                       Studio Original
                     </span>
                   )}
-                </div>
+                </h2>
                 <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-cyan-200/70 truncate">
                   <span className="text-emerald-400 font-bold shrink-0">
                     {isCustom ? 'Verified Studio' : selectedServer.badge}

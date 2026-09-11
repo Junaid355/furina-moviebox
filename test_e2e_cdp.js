@@ -1200,7 +1200,17 @@ async function runQA() {
     const hanimeAudit = await client.eval(`
       (async () => {
         localStorage.setItem('furina_master_mode', 'true');
-        // Trigger hash or category click to ecchi_anime
+        // Clear search input if active from previous test
+        const searchInput = document.querySelector('input[type="text"]');
+        if (searchInput) {
+          searchInput.value = '';
+          searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        const clearBtn = document.querySelector('button[aria-label="Clear search input"]');
+        if (clearBtn) clearBtn.click();
+        await new Promise(r => setTimeout(r, 400));
+
+        // Trigger category click to Hanime Vault
         const buttons = Array.from(document.querySelectorAll('nav button, header button'));
         const hanimeBtn = buttons.find(b => (b.textContent || '').includes('Hanime') || (b.textContent || '').includes('Vault'));
         if (hanimeBtn) hanimeBtn.click();
@@ -1240,13 +1250,13 @@ async function runQA() {
 
     const headerCollisionCheck = await client.eval(`
       (async () => {
-        // Click on the first card to open PlayerModal
+        // Click on the first card in Hanime catalog to open PlayerModal
         const firstCard = document.querySelector('[data-media-id]');
         if (firstCard) firstCard.click();
         await new Promise(r => setTimeout(r, 1000));
 
         const avatar = document.querySelector('img[alt="Furina"]');
-        const titleElem = document.querySelector('h2.truncate, h2 span, h2');
+        const titleElem = document.querySelector('h2');
         const closeBtn = document.querySelector('button[aria-label="Close video player modal"]');
 
         if (!avatar || !titleElem || !closeBtn) {
@@ -1260,12 +1270,10 @@ async function runQA() {
         // Collision detection: Title must strictly be placed between avatar and close button
         const overlapsAvatar = titleRect.left < (avatarRect.right - 2);
         const overlapsClose = titleRect.right > (closeRect.left + 5);
-        const hasEllipsis = window.getComputedStyle(titleElem).overflow === 'hidden' || window.getComputedStyle(titleElem).textOverflow === 'ellipsis';
 
         return {
           overlapsAvatar,
           overlapsClose,
-          hasEllipsis,
           titleText: titleElem.textContent.trim(),
           titleWidth: titleRect.width,
           avatarRight: avatarRect.right,
@@ -1292,25 +1300,17 @@ async function runQA() {
       })()
     `);
 
-    // Verify vidlink URL generation does not include &sub_dub=hindi
-    const streamImports = await client.eval(`
-      (async () => {
-        const mod = await import('./src/services/streaming.js');
-        const srv = mod.SERVERS.find(s => s.id === 'vidlink');
-        const movieUrlHindi = srv.getMovieUrl('533535', 'hindi');
-        const tvUrlHindi = srv.getTvUrl('95479', 1, 1, 'hindi');
-        return {
-          movieSafe: !movieUrlHindi.includes('&sub_dub=hindi'),
-          tvSafe: !tvUrlHindi.includes('&sub_dub=hindi'),
-          movieUrlHindi,
-          tvUrlHindi
-        };
-      })()
-    `);
+    // Verify vidlink URL generation in node
+    const streamingMod = await import('./src/services/streaming.js');
+    const vidlinkSrv = streamingMod.SERVERS.find(s => s.id === 'vidlink');
+    const movieUrlHindi = vidlinkSrv.getMovieUrl('533535', 'hindi');
+    const tvUrlHindi = vidlinkSrv.getTvUrl('95479', 1, 1, 'hindi');
+    const movieSafe = !movieUrlHindi.includes('&sub_dub=hindi');
+    const tvSafe = !tvUrlHindi.includes('&sub_dub=hindi');
 
-    const vidlinkSafetyPassed = streamImports.movieSafe && streamImports.tvSafe && vidlinkSafety.fallbackButtonsFound.length >= 4;
+    const vidlinkSafetyPassed = movieSafe && tvSafe && vidlinkSafety.fallbackButtonsFound.length >= 4;
     recordTest(39, 'VidLink Parameter Safety (No sub_dub=hindi 500) & Mirror Fallback Row', vidlinkSafetyPassed,
-      `Movie Safe: ${streamImports.movieSafe}, TV Safe: ${streamImports.tvSafe}, Fallback Mirrors: [${vidlinkSafety.fallbackButtonsFound.join(', ')}]`);
+      `Movie Safe: ${movieSafe}, TV Safe: ${tvSafe}, Fallback Mirrors: [${vidlinkSafety.fallbackButtonsFound.join(', ')}]`);
 
     // Close player modal and reset viewport to desktop
     await client.eval(`

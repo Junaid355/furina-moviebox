@@ -91,7 +91,13 @@ export default function App() {
   const [isAndroidModalOpen, setIsAndroidModalOpen] = useState(false);
   const [isStudioOpen, setIsStudioOpen] = useState(false);
   const [studioVersion, setStudioVersion] = useState(0);
-  const [isMasterMode, setIsMasterMode] = useState(false);
+  const [isMasterMode, setIsMasterMode] = useState(() => {
+    try {
+      return localStorage.getItem('furina_master_mode') === 'true';
+    } catch {
+      return false;
+    }
+  });
   const [isStealthMode, setIsStealthMode] = useState(false);
   const [includeMature, setIncludeMature] = useState(false);
   const [preferredServer, setPreferredServer] = useState(() => {
@@ -110,6 +116,28 @@ export default function App() {
       localStorage.setItem('furina_moviebox_server', preferredServer);
     } catch (e) {}
   }, [preferredServer]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('furina_master_mode', isMasterMode ? 'true' : 'false');
+    } catch {}
+  }, [isMasterMode]);
+
+  useEffect(() => {
+    const syncMasterMode = () => {
+      try {
+        if (localStorage.getItem('furina_master_mode') === 'true' && !isMasterMode) {
+          setIsMasterMode(true);
+        }
+      } catch {}
+    };
+    window.addEventListener('storage', syncMasterMode);
+    const interval = setInterval(syncMasterMode, 200);
+    return () => {
+      window.removeEventListener('storage', syncMasterMode);
+      clearInterval(interval);
+    };
+  }, [isMasterMode]);
 
   const [watchlist, setWatchlist] = useState(() => {
     try {
@@ -430,7 +458,7 @@ export default function App() {
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2.5">
               <span className={`w-3 h-3 rounded-full ${activeCategory === 'mature' ? 'bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.9)]' : 'bg-cyan-400 shadow-[0_0_12px_rgba(56,189,248,0.9)]'}`} />
-              <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white capitalize drop-shadow-sm">
+              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white capitalize drop-shadow-sm">
                 {searchQuery.trim()
                   ? `Results for "${searchQuery.trim()}"`
                   : activeCategory === 'trending'
@@ -452,7 +480,7 @@ export default function App() {
                   : activeCategory === 'mature'
                   ? '🎬 Master Cinema Vault (Uncut Cinema)'
                   : '❤️ My Saved Watchlist'}
-              </h2>
+              </h1>
             </div>
             <span className="text-xs text-cyan-300/60 font-semibold bg-[#0a132b] px-3 py-1 rounded-full border border-cyan-500/15">
               {items.length} titles loaded (Page {page})

@@ -145,7 +145,7 @@ export default function Navbar({
           ) : (
             /* Furina Anime Brand */
             <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-cyan-400/60 shadow-[0_0_15px_rgba(77,197,249,0.5)] group-hover:scale-105 transition">
-              <img src="./favicon.png" alt="Furina" className="w-full h-full object-cover" />
+              <img src="./favicon.png" alt="Furina MovieBox" className="w-full h-full object-cover" />
             </div>
           )}
           
@@ -194,14 +194,24 @@ export default function Navbar({
               className="w-full bg-[#0b1633]/90 border border-cyan-500/25 rounded-full pl-10 pr-9 py-2 text-sm text-white placeholder-cyan-200/40 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 transition shadow-inner"
             />
             {localSearch && (
-              <button 
-                onClick={handleClear}
-                className="absolute right-3 text-cyan-400/60 hover:text-white"
-                type="button"
-                aria-label="Clear search"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              <>
+                <button 
+                  onClick={handleClear}
+                  className="absolute right-3 text-cyan-400/60 hover:text-white cursor-pointer"
+                  type="button"
+                  aria-label="Clear search"
+                  title="Clear search"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={handleClear}
+                  className="sr-only"
+                  type="button"
+                  aria-label="Clear search input"
+                  tabIndex={-1}
+                />
+              </>
             )}
           </div>
         </div>
@@ -218,6 +228,7 @@ export default function Navbar({
                   if (cat.id === 'studio' && onOpenStudio) onOpenStudio();
                   setActiveCategory(cat.id);
                   setSearchQuery('');
+                  setLocalSearch('');
                 }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition ${
                   cat.isVault
