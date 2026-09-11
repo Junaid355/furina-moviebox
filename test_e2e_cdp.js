@@ -1327,7 +1327,19 @@ async function runQA() {
       deviceScaleFactor: 1,
       mobile: false
     });
-    await sleep(500);
+    console.log('\n--- Running TEST 40: MultiEmbed Hindi Audio Routing & Anime Discovery Audit ---');
+    const tmdbMod = await import('./src/services/tmdb.js');
+    const hindiMod = await import('./src/services/HindiProviderManager.js');
+    const multiembedSrv = streamingMod.SERVERS.find(s => s.id === 'multiembed');
+    const movieHindiUrl = multiembedSrv.getMovieUrl('533535', 'hindi');
+    const tvHindiUrl = multiembedSrv.getTvUrl('95479', 1, 1, 'hindi');
+    const multiembedHindiPassed = movieHindiUrl.includes('&audio=hi') && tvHindiUrl.includes('&audio=hi');
+    const spiderManLocalPassed = hindiMod.BLOCKBUSTER_LOCAL_MEDIA_MAP[557]?.title === 'Spider-Man' && hindiMod.BLOCKBUSTER_LOCAL_MEDIA_MAP[557]?.hiUrl === './media/hindi_audio.wav';
+    const animeP2 = await tmdbMod.fetchAnime(2);
+    const animeP2Passed = Array.isArray(animeP2) && animeP2.length > 0;
+    const test40Passed = multiembedHindiPassed && spiderManLocalPassed && animeP2Passed;
+    recordTest(40, 'MultiEmbed Hindi Audio Routing & Anime Discovery Audit', test40Passed,
+      `MultiEmbed Hindi: ${multiembedHindiPassed}, Spider-Man Local: ${spiderManLocalPassed}, Anime P2 items: ${animeP2.length}`);
 
     console.log('\n--- Running TEST 26: Final Production Build Verification ---');
     try {

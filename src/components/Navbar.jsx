@@ -4,30 +4,12 @@ import soundFx from '../services/soundFx';
 
 export function HanimeIcon({ className = "w-4 h-4 sm:w-5 sm:h-5", ...props }) {
   return (
-    <svg 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      xmlns="http://www.w3.org/2000/svg" 
-      className={className} 
-      {...props}
-    >
-      <rect width="24" height="24" rx="6" fill="url(#hanimeGradNav)" />
-      <path 
-        d="M6.5 5.5H9.5V10.5H14.5V5.5H17.5V18.5H14.5V13.5H9.5V18.5H6.5V5.5Z" 
-        fill="#ffffff" 
-      />
-      <path 
-        d="M9.5 10.5L14.5 13.5V10.5H9.5Z" 
-        fill="#ffd1dc" 
-        opacity="0.9"
-      />
-      <defs>
-        <linearGradient id="hanimeGradNav" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#ff1493" />
-          <stop offset="1" stopColor="#ff4081" />
-        </linearGradient>
-      </defs>
-    </svg>
+    <img 
+      src="./hanime_icon.png" 
+      alt="Hanime Vault" 
+      className={`rounded-full object-contain inline-block filter drop-shadow-[0_0_6px_rgba(255,20,147,0.7)] ${className}`}
+      {...props} 
+    />
   );
 }
 

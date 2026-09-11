@@ -1668,6 +1668,201 @@ export const CURATED_HINDI_DUBBED_ANIME = [
     backdrop_path: '/ydf1CeiBLfdxiyNTpskM0802TKl.jpg',
     media_type: 'tv',
     vote_average: 8.4,
+    backdrop_path: '/2UG177tWHy7xRmMKWJHB7nAUmKd.jpg',
+    media_type: 'tv',
+    vote_average: 8.7,
+    first_air_date: '2009-04-05',
+    original_language: 'ja',
+    category: 'anime',
+    isAnime: true,
+    hasHindiDub: true,
+    dub_type: 'hindi',
+  },
+  {
+    id: 127532,
+    title: 'Solo Leveling',
+    name: 'Solo Leveling',
+    overview: 'They say whatever doesn’t kill you makes you stronger, but that’s not the case for the world’s weakest hunter Sung Jinwoo. After being brutally slaughtered by monsters in a high-ranking dungeon, Jinwoo came back with the System, a program only he could see, that’s leveling him up in every way. Now, he’s inspired to discover the secrets behind his powers and the dungeon that spawned them.',
+    poster_path: '/geCRueV3ElhRTr0xtJuEWJt6dJ1.jpg',
+    backdrop_path: '/xMNH87maNLt9n2bMDYeI6db5VFm.jpg',
+    media_type: 'tv',
+    vote_average: 8.7,
+    first_air_date: '2024-01-07',
+    original_language: 'ja',
+    category: 'anime',
+    isAnime: true,
+    hasHindiDub: true,
+    dub_type: 'hindi',
+  },
+  {
+    id: 114410,
+    title: 'Chainsaw Man',
+    name: 'Chainsaw Man',
+    overview: 'Denji has a simple dream—to live a happy and peaceful life, spending time with a girl he likes. This is a far cry from reality, however, as Denji is forced by the yakuza into killing devils in order to pay off his crushing debts. Using his pet devil Pochita as a weapon, he is ready to do anything for a bit of cash.',
+    poster_path: '/iFM1dyFi0rByvEomEkmm7NpQeeb.jpg',
+    backdrop_path: '/5DUMPBSnHOZsbBv81GFXZXvDpo6.jpg',
+    media_type: 'tv',
+    vote_average: 8.5,
+    first_air_date: '2022-10-12',
+    original_language: 'ja',
+    category: 'anime',
+    isAnime: true,
+    hasHindiDub: true,
+    dub_type: 'hindi',
+  },
+  {
+    id: 65930,
+    title: 'My Hero Academia',
+    name: 'My Hero Academia',
+    overview: 'Izuku has dreamt of being a hero all his life—a lofty goal for anyone, but especially challenging for a kid with no superpowers. That’s right, in a world where eighty percent of the population has some kind of super-powered "quirk," Izuku was unlucky enough to be born completely normal. But that’s not enough to stop him from enrolling in one of the world’s most prestigious hero academies.',
+    poster_path: '/phuYuzqWW9ru8EA3HVjE9W2Rr3M.jpg',
+    backdrop_path: '/ol0H2DGp4ifBHA4JDlCpwJWxnY2.jpg',
+    media_type: 'tv',
+    vote_average: 8.6,
+    first_air_date: '2016-04-03',
+    original_language: 'ja',
+    category: 'anime',
+    isAnime: true,
+    hasHindiDub: true,
+    dub_type: 'hindi',
+  },
+  {
+    id: 73223,
+    title: 'Black Clover',
+    name: 'Black Clover',
+    overview: 'Asta and Yuno are two orphans who want the same thing: to become the Wizard King. Locked in a friendly rivalry, they work hard towards their goal. While Yuno excels at magic, Asta has a problem uncommon in this world: he has no powers! But, on the day they receive their grimoires, they surprise everyone. To reach their goal, they’ll each find their own path to greatness—with or without magic.',
+    poster_path: '/kaMisKeOoTBPxPkbC3OW7Wgt6ON.jpg',
+    backdrop_path: '/oUsm3pq6rUga7lVGQFS3g84etVE.jpg',
+    media_type: 'tv',
+    vote_average: 8.5,
+    first_air_date: '2017-10-03',
+    original_language: 'ja',
+    category: 'anime',
+    isAnime: true,
+    hasHindiDub: true,
+    dub_type: 'hindi',
+  },
+  {
+    id: 61374,
+    title: 'Tokyo Ghoul',
+    name: 'Tokyo Ghoul',
+    overview: 'Ken Kaneki, a bookworm college student, meets Rize, a girl his own age with whom he shares many interests.',
+    poster_path: '/1m4RlC9BTCbyY549TOdVQ5NRPcR.jpg',
+    backdrop_path: '/jnwRlthXIgJB75Mt9GEl93Dczki.jpg',
+    media_type: 'tv',
+    vote_average: 8.3,
+    first_air_date: '2014-07-04',
+    original_language: 'ja',
+    category: 'anime',
+    isAnime: true,
+    hasHindiDub: true,
+    dub_type: 'hindi',
+  },
+  {
+    id: 45782,
+    title: 'Sword Art Online',
+    name: 'Sword Art Online',
+    overview: 'In the near future, a Virtual Reality Massive Multiplayer Online Role-Playing Game (VRMMORPG) called Sword Art Online has been released where players control their avatars with their bodies using a piece of technology called Nerve Gear. One day, players discover they cannot log out, as the game creator is holding them captive unless they reach the 100th floor of the game\'s tower and defeat the final boss. However, if they die in the game, they die in real life. Their struggle for survival starts now...',
+    poster_path: '/9m8bFIXPg26taNrFSXGwEORVACD.jpg',
+    backdrop_path: '/pr78HhmOYlA0fwaoYNcH1FstqBH.jpg',
+    media_type: 'tv',
+    vote_average: 8.1,
+    first_air_date: '2012-07-08',
+    original_language: 'ja',
+    category: 'anime',
+    isAnime: true,
+    hasHindiDub: true,
+    dub_type: 'hindi',
+  },
+  {
+    id: 120089,
+    title: 'Spy x Family',
+    name: 'SPY x FAMILY',
+    overview: 'A spy, an assassin and a telepath come together to pose as a family, each for their own reasons, while hiding their true identities from each other.',
+    poster_path: '/7NAvPYPAu7MeHwP8E9sn81PqsRh.jpg',
+    backdrop_path: '/lysUnU6V0VfcthDbviuVlIqgHOR.jpg',
+    media_type: 'tv',
+    vote_average: 8.5,
+    first_air_date: '2022-04-09',
+    original_language: 'ja',
+    category: 'anime',
+    isAnime: true,
+    hasHindiDub: true,
+    dub_type: 'hindi',
+  },
+  {
+    id: 209867,
+    title: 'Frieren: Beyond Journey\'s End',
+    name: 'Frieren: Beyond Journey\'s End',
+    overview: 'After the party of heroes defeated the Demon King, they restored peace to the land and returned to lives of solitude.  Generations pass, and the elven mage Frieren comes face to face with humanity’s mortality. She takes on a new apprentice and promises to fulfill old friends’ dying wishes. Can an elven mind make peace with the nature of life and death? Frieren embarks on her quest to find out.',
+    poster_path: '/dqZENchTd7lp5zht7BdlqM7RBhD.jpg',
+    backdrop_path: '/rBOnrVlck7BIlGeWVlzYiZeg4l2.jpg',
+    media_type: 'tv',
+    vote_average: 8.8,
+    first_air_date: '2023-09-29',
+    original_language: 'ja',
+    category: 'anime',
+    isAnime: true,
+    hasHindiDub: true,
+    dub_type: 'hindi',
+  },
+  {
+    id: 65739,
+    title: 'Perman',
+    name: 'Perman',
+    overview: 'After Mitsuo receives a mask from a retiring superhero, he becomes Perman.',
+    poster_path: '/gIYb3boKJ7QScJwzmcUs2ztb84U.jpg',
+    backdrop_path: '/c7mEIDPaZu9HbUZEZdMDObvMM0d.jpg',
+    media_type: 'tv',
+    vote_average: 7.1,
+    first_air_date: '1967-04-02',
+    original_language: 'ja',
+    category: 'anime',
+    isAnime: true,
+    hasHindiDub: true,
+    dub_type: 'hindi',
+  },
+  {
+    id: 42912,
+    title: 'Inazuma Eleven',
+    name: 'Inazuma Eleven',
+    overview: 'Mamoru Endou is a cheerful goalkeeper in Raimon Jr High, with six other players in the team. But there was a day when the team was almost lead to disbandment by Natsumi unless they are able to win the match against the Teikoku Gakuen, currently the best team in Japan. He tried to save the club by gathering four more players to join the team.',
+    poster_path: '/9kQWvBMPWz1gykKLXuX6JBjC9uQ.jpg',
+    backdrop_path: '/zhtEYosjlYtNavbvImxcs36We4i.jpg',
+    media_type: 'tv',
+    vote_average: 8.0,
+    first_air_date: '2008-10-05',
+    original_language: 'ja',
+    category: 'anime',
+    isAnime: true,
+    hasHindiDub: true,
+    dub_type: 'hindi',
+  },
+  {
+    id: 30983,
+    title: 'Detective Conan',
+    name: 'Detective Conan',
+    overview: 'The son of a world famous mystery writer, Jimmy Kudo, has achieved his own notoriety by assisting the local police as a student detective. He has always been able to solve the most difficult of criminal cases using his wits and power of reason.',
+    poster_path: '/rRIEFvHRy01OYzmXQBbGeW0Qilc.jpg',
+    backdrop_path: '/z67lpMtm8YGykJO4p89meuNMvj8.jpg',
+    media_type: 'tv',
+    vote_average: 8.0,
+    first_air_date: '1996-01-08',
+    original_language: 'ja',
+    category: 'anime',
+    isAnime: true,
+    hasHindiDub: true,
+    dub_type: 'hindi',
+  },
+  {
+    id: 12971,
+    title: 'Dragon Ball',
+    name: 'Dragon Ball Z',
+    overview: 'Now happily married and with a son, martial arts champion Goku must defend Earth from a series of extraterrestrial invaders bent on destruction.',
+    poster_path: '/oQ5CnVj3TRifXl2bIOri6H6rfNe.jpg',
+    backdrop_path: '/ydf1CeiBLfdxiyNTpskM0802TKl.jpg',
+    media_type: 'tv',
+    vote_average: 8.4,
     first_air_date: '1989-04-26',
     original_language: 'ja',
     category: 'anime',
@@ -1675,7 +1870,6 @@ export const CURATED_HINDI_DUBBED_ANIME = [
     hasHindiDub: true,
     dub_type: 'hindi',
   },
-,
 {
   "id": 104877,
   "title": "Tokyo Revengers",
@@ -2203,7 +2397,6 @@ export async function fetchAnime(page = 1, audioFilter = 'all') {
     }
 
     const allCurated = [
-      ...(includeAdult ? SECRET_ECCHI_ANIME : []),
       ...CURATED_HINDI_DUBBED_ANIME,
       ...CURATED_ENGLISH_DUBBED_ANIME,
       ...CURATED_SUBBED_ANIME
@@ -3411,6 +3604,7 @@ export const VERIFIED_HINDI_HOLLYWOOD_IDS = new Set([
   575264, // Mission: Impossible - Dead Reckoning
   693134, // Dune: Part Two
   438631, // Dune
+
   385687, // Fast X
   603692, // John Wick: Chapter 4
   572802, // Aquaman and the Lost Kingdom
@@ -3418,11 +3612,27 @@ export const VERIFIED_HINDI_HOLLYWOOD_IDS = new Set([
   453395, // Doctor Strange in the Multiverse of Madness
   558449, // Gladiator II
   361743, // Top Gun: Maverick
+  557,    // Spider-Man (2002)
+  558,    // Spider-Man 2 (2004)
+  559,    // Spider-Man 3 (2007)
+  1930,   // The Amazing Spider-Man
+  102382, // The Amazing Spider-Man 2
+  315635, // Spider-Man: Homecoming
+  429617, // Spider-Man: Far From Home
+  1726,   // Iron Man
+  10138,  // Iron Man 2
+  68721,  // Iron Man 3
+  1771,   // Captain America: The First Avenger
+  100402, // Captain America: The Winter Soldier
+  271110, // Captain America: Civil War
+  284052, // Doctor Strange
+  284054, // Black Panther
+  299537, // Captain Marvel
+  579974, // RRR
 ]);
 
 export function isHindiAvailable(item) {
   if (!item) return false;
-
   // Studio / Multi-Audio content with verified physical Hindi audio asset
   if (item.languages?.hi?.url || item.audio_hi_url) {
     return true;
@@ -5459,6 +5669,7 @@ export async function searchContent(query, page = 1, includeAdult = false) {
   let curatedMatches = [];
   if (page === 1) {
     const allCurated = [
+      ...(includeAdult ? SECRET_ECCHI_ANIME : []),
       ...CURATED_HINDI_DUBBED_ANIME,
       ...CURATED_ENGLISH_DUBBED_ANIME,
       ...CURATED_SUBBED_ANIME,

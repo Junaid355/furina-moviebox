@@ -37,7 +37,13 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   );
   const title = item?.title || item?.name || 'Now Playing';
 
-  // Accurate Anime vs Hindi classification
+  // Accurate Anime, Hanime & Hindi classification
+  const isHanime = Boolean(
+    item?.category === 'ecchi_anime' || 
+    item?.is_mature === true || 
+    item?.isVault === true
+  );
+
   const isAnime = Boolean(
     item?.category === 'anime' ||
     item?.category === 'ecchi_anime' ||
@@ -169,13 +175,23 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const savedVolumeRef = useRef(1);
   const savedMutedRef = useRef(false);
 
-  // Filter servers for anime to prioritize VidLink and VidSrc
-  const availableServers = isAnime 
-    ? SERVERS.filter((s) => s.id !== 'autoembed') 
+  // Filter servers: Hanime content is strictly NOT hosted on VidLink (causes Next.js 500 error Digest 4082599258)
+  const availableServers = isHanime
+    ? SERVERS.filter((s) => s.id !== 'vidlink')
     : SERVERS;
 
   // Determine initial server — route to fast, verified 200 OK servers
   const getInitialServer = () => {
+    if (isHanime) {
+      return (
+        availableServers.find((s) => s.id === 'vidsrc_in') ||
+        availableServers.find((s) => s.id === 'autoembed') ||
+        availableServers.find((s) => s.id === 'smashy') ||
+        availableServers.find((s) => s.id === 'embed_su') ||
+        availableServers.find((s) => s.id === 'twoembed_vip') ||
+        availableServers[0]
+      );
+    }
     if (audioMode === 'hindi' || userPreferredAudio === 'hindi') {
       return (
         availableServers.find((s) => s.id === 'multiembed') ||
@@ -308,24 +324,26 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       physicalSwitched = selectPhysicalAudioTrack(videoRef.current, newMode);
     }
 
-    if (!isCustom) {
-      if (newMode === 'hindi') {
-        const hindiServer = 
-          availableServers.find((s) => s.id === 'multiembed') ||
-          availableServers.find((s) => s.id === 'smashy') ||
-          availableServers.find((s) => s.id === 'autoembed') ||
-          availableServers.find((s) => s.id === 'vidsrc_in') ||
-          availableServers.find((s) => s.id === 'twoembed_vip') ||
-          availableServers.find((s) => s.id === 'embed_su') ||
-          availableServers[0];
-        setSelectedServer(hindiServer);
-      } else if (newMode === 'sub') {
-        const subServer = availableServers.find((s) => s.id === 'vidsrc_in') || availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
-        setSelectedServer(subServer);
-      } else {
-        const engServer = availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
-        setSelectedServer(engServer);
-      }
+    if (newMode === 'hindi') {
+      const hindiServer = 
+        availableServers.find((s) => s.id === 'multiembed') ||
+        availableServers.find((s) => s.id === 'smashy') ||
+        availableServers.find((s) => s.id === 'autoembed') ||
+        availableServers.find((s) => s.id === 'vidsrc_in') ||
+        availableServers.find((s) => s.id === 'twoembed_vip') ||
+        availableServers.find((s) => s.id === 'embed_su') ||
+        availableServers[0];
+      setSelectedServer(hindiServer);
+    } else if (newMode === 'sub') {
+      const subServer = isHanime
+        ? (availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0])
+        : (availableServers.find((s) => s.id === 'vidsrc_in') || availableServers.find((s) => s.id === 'vidlink') || availableServers[0]);
+      setSelectedServer(subServer);
+    } else {
+      const engServer = isHanime
+        ? (availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0])
+        : (availableServers.find((s) => s.id === 'vidlink') || availableServers[0]);
+      setSelectedServer(engServer);
     }
 
     setTimeout(() => {
@@ -836,7 +854,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5 min-w-0">
-                  <h2 className="font-black text-xs sm:text-base text-white truncate min-w-0 max-w-[180px] xs:max-w-[260px] sm:max-w-none" title={title}>
+                  <h2 className="font-black text-xs sm:text-base text-white truncate min-w-0" title={title}>
                     {title}
                   </h2>
                   {isSeries && (
@@ -1602,8 +1620,17 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   <div className="absolute top-3 left-1/2 -translate-x-1/2 z-40 max-w-lg px-3.5 py-1.5 rounded-xl bg-amber-950/80 border border-amber-500/40 text-amber-200 text-[11px] shadow-xl backdrop-blur-md flex items-center justify-between gap-2.5 animate-in fade-in slide-in-from-top-2 duration-200 pointer-events-auto">
                     <div className="flex items-center gap-1.5">
                       <span className="text-amber-400 font-bold">🇮🇳</span>
-                      <span>Hindi Multi-Audio Active ({selectedServer?.shortName || 'MultiEmbed'}). Use in-player audio/server icon if needed.</span>
+                      <span>Hindi Multi-Audio Active ({selectedServer?.shortName || 'MultiEmbed'}).</span>
                     </div>
+                    {isCustom && playerMode === 'stream' && (
+                      <button
+                        onClick={() => setPlayerMode('studio')}
+                        className="px-2 py-0.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold text-[10px] transition cursor-pointer whitespace-nowrap"
+                        title="Switch to verified studio Hindi track"
+                      >
+                        🎙️ Studio Track
+                      </button>
+                    )}
                   </div>
                 )}
 

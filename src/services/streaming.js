@@ -78,8 +78,18 @@ export const SERVERS = [
     badge: 'Multi-Audio 1080p',
     color: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
     supportedAudios: ['hindi', 'english', 'sub'],
-    getMovieUrl: (tmdbId) => `https://play2.123embed.net/movie/${tmdbId}`,
-    getTvUrl: (tmdbId, s = 1, e = 1) => `https://play2.123embed.net/tv/${tmdbId}/${s}/${e}`
+    getMovieUrl: (tmdbId, audioMode = 'english') => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '');
+      let url = `https://play2.123embed.net/movie/${cleanId}`;
+      if (audioMode === 'hindi') url += '?audio=hi';
+      return url;
+    },
+    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'english') => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '');
+      let url = `https://play2.123embed.net/tv/${cleanId}/${s}/${e}`;
+      if (audioMode === 'hindi') url += '?audio=hi';
+      return url;
+    }
   },
   {
     id: 'smashy',
@@ -108,8 +118,18 @@ export const SERVERS = [
     badge: 'Hindi & Multi-Audio Hub',
     color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
     supportedAudios: ['hindi', 'english', 'sub'],
-    getMovieUrl: (tmdbId) => `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1`,
-    getTvUrl: (tmdbId, s = 1, e = 1) => `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${s}&e=${e}`
+    getMovieUrl: (tmdbId, audioMode = 'english') => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '');
+      let url = `https://multiembed.mov/?video_id=${cleanId}&tmdb=1`;
+      if (audioMode === 'hindi') url += '&audio=hi';
+      return url;
+    },
+    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'english') => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '');
+      let url = `https://multiembed.mov/?video_id=${cleanId}&tmdb=1&s=${s}&e=${e}`;
+      if (audioMode === 'hindi') url += '&audio=hi';
+      return url;
+    }
   },
   {
     id: 'vidsrc_cc',

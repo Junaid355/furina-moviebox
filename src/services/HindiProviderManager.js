@@ -966,6 +966,171 @@ export const BLOCKBUSTER_LOCAL_MEDIA_MAP = {
       { lang: 'ja', label: 'Japanese Sub', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AJapanese%20Captions' }
     ]
   },
+  557: {
+    title: 'Spider-Man',
+    hiUrl: './media/hindi_audio.wav',
+    enUrl: './media/english_audio.mp4',
+    jaUrl: './media/japanese_audio.wav',
+    subtitles: [
+      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' },
+      { lang: 'ja', label: 'Japanese Sub', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AJapanese%20Captions' }
+    ]
+  },
+  558: {
+    title: 'Spider-Man 2',
+    hiUrl: './media/hindi_audio.wav',
+    enUrl: './media/english_audio.mp4',
+    jaUrl: './media/japanese_audio.wav',
+    subtitles: [
+      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' },
+      { lang: 'ja', label: 'Japanese Sub', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AJapanese%20Captions' }
+    ]
+  },
+  559: {
+    title: 'Spider-Man 3',
+    hiUrl: './media/hindi_audio.wav',
+    enUrl: './media/english_audio.mp4',
+    jaUrl: './media/japanese_audio.wav',
+    subtitles: [
+      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' },
+      { lang: 'ja', label: 'Japanese Sub', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AJapanese%20Captions' }
+    ]
+  },
+  1930: {
+    title: 'The Amazing Spider-Man',
+    hiUrl: './media/hindi_audio.wav',
+    enUrl: './media/english_audio.mp4',
+    jaUrl: './media/japanese_audio.wav',
+    subtitles: [
+      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' },
+      { lang: 'ja', label: 'Japanese Sub', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AJapanese%20Captions' }
+    ]
+  },
+  102382: {
+    title: 'The Amazing Spider-Man 2',
+    hiUrl: './media/hindi_audio.wav',
+    enUrl: './media/english_audio.mp4',
+    jaUrl: './media/japanese_audio.wav',
+    subtitles: [
+      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' },
+      { lang: 'ja', label: 'Japanese Sub', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AJapanese%20Captions' }
+    ]
+  },
+  315635: {
+    title: 'Spider-Man: Homecoming',
+    hiUrl: './media/hindi_audio.wav',
+    enUrl: './media/english_audio.mp4',
+    jaUrl: './media/japanese_audio.wav',
+    subtitles: [
+      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' },
+      { lang: 'ja', label: 'Japanese Sub', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AJapanese%20Captions' }
+    ]
+  },
+  429617: {
+    title: 'Spider-Man: Far From Home',
+    hiUrl: './media/hindi_audio.wav',
+    enUrl: './media/english_audio.mp4',
+    jaUrl: './media/japanese_audio.wav',
+    subtitles: [
+      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' },
+      { lang: 'ja', label: 'Japanese Sub', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AJapanese%20Captions' }
+    ]
+  },
+  1726: {
+    title: 'Iron Man',
+    hiUrl: './media/hindi_audio.wav',
+    enUrl: './media/english_audio.mp4',
+    jaUrl: './media/japanese_audio.wav',
+    subtitles: [
+      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' },
+      { lang: 'ja', label: 'Japanese Sub', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AJapanese%20Captions' }
+    ]
+  },
+  10138: {
+    title: 'Iron Man 2',
+    hiUrl: './media/hindi_audio.wav',
+    enUrl: './media/english_audio.mp4',
+    jaUrl: './media/japanese_audio.wav',
+    subtitles: [
+      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' },
+      { lang: 'ja', label: 'Japanese Sub', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AJapanese%20Captions' }
+    ]
+  },
+  68721: {
+    title: 'Iron Man 3',
+    hiUrl: './media/hindi_audio.wav',
+    enUrl: './media/english_audio.mp4',
+    jaUrl: './media/japanese_audio.wav',
+    subtitles: [
+      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' },
+      { lang: 'ja', label: 'Japanese Sub', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AJapanese%20Captions' }
+    ]
+  },
+  1771: {
+    title: 'Captain America: The First Avenger',
+    hiUrl: './media/hindi_audio.wav',
+    enUrl: './media/english_audio.mp4',
+    jaUrl: './media/japanese_audio.wav',
+    subtitles: [
+      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' },
+      { lang: 'ja', label: 'Japanese Sub', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AJapanese%20Captions' }
+    ]
+  },
+  100402: {
+    title: 'Captain America: The Winter Soldier',
+    hiUrl: './media/hindi_audio.wav',
+    enUrl: './media/english_audio.mp4',
+    jaUrl: './media/japanese_audio.wav',
+    subtitles: [
+      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' },
+      { lang: 'ja', label: 'Japanese Sub', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AJapanese%20Captions' }
+    ]
+  },
+  284052: {
+    title: 'Doctor Strange',
+    hiUrl: './media/hindi_audio.wav',
+    enUrl: './media/english_audio.mp4',
+    jaUrl: './media/japanese_audio.wav',
+    subtitles: [
+      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' },
+      { lang: 'ja', label: 'Japanese Sub', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AJapanese%20Captions' }
+    ]
+  },
+  284054: {
+    title: 'Black Panther',
+    hiUrl: './media/hindi_audio.wav',
+    enUrl: './media/english_audio.mp4',
+    jaUrl: './media/japanese_audio.wav',
+    subtitles: [
+      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' },
+      { lang: 'ja', label: 'Japanese Sub', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AJapanese%20Captions' }
+    ]
+  },
+  299537: {
+    title: 'Captain Marvel',
+    hiUrl: './media/hindi_audio.wav',
+    enUrl: './media/english_audio.mp4',
+    jaUrl: './media/japanese_audio.wav',
+    subtitles: [
+      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' },
+      { lang: 'ja', label: 'Japanese Sub', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AJapanese%20Captions' }
+    ]
+  }
 };
 
 /**
