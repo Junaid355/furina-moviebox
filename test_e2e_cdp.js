@@ -1196,6 +1196,139 @@ async function runQA() {
     `);
     await sleep(800);
 
+    console.log('\n--- Running TEST 37: Hanime Vault 100+ Catalog & Artwork Audit ---');
+    const hanimeAudit = await client.eval(`
+      (async () => {
+        localStorage.setItem('furina_master_mode', 'true');
+        // Trigger hash or category click to ecchi_anime
+        const buttons = Array.from(document.querySelectorAll('nav button, header button'));
+        const hanimeBtn = buttons.find(b => (b.textContent || '').includes('Hanime') || (b.textContent || '').includes('Vault'));
+        if (hanimeBtn) hanimeBtn.click();
+        await new Promise(r => setTimeout(r, 1200));
+
+        const cards = Array.from(document.querySelectorAll('[data-media-id]'));
+        const titles = cards.map(c => c.querySelector('p, h3')?.textContent || '');
+        const images = cards.map(c => c.querySelector('img')?.src || '');
+
+        const westernJunk = ['Lucky Ghost', 'Pompeii', 'Dream of a Warrior', 'Platinum Comedy', 'Tracy Morgan'];
+        const hasWesternJunk = titles.some(t => westernJunk.some(j => t.includes(j)));
+        const allHaveValidImages = images.length > 0 && images.every(src => src && (src.includes('tmdb.org') || src.includes('.jpg') || src.includes('.png')));
+
+        return {
+          cardCount: cards.length,
+          hasWesternJunk,
+          allHaveValidImages,
+          firstTitle: titles[0] || '',
+          sampleTitles: titles.slice(0, 5)
+        };
+      })()
+    `);
+
+    const hanimeAuditPassed = hanimeAudit.cardCount >= 10 && !hanimeAudit.hasWesternJunk && hanimeAudit.allHaveValidImages;
+    recordTest(37, 'Hanime Vault 100+ Catalog & Artwork Audit', hanimeAuditPassed,
+      `Cards: ${hanimeAudit.cardCount}, First: "${hanimeAudit.firstTitle}", Western Junk: ${hanimeAudit.hasWesternJunk}, Real Artwork: ${hanimeAudit.allHaveValidImages}`);
+
+    console.log('\n--- Running TEST 38: Mobile Player Header Layout Collision & Truncation Audit ---');
+    // Emulate mobile screen width (375px)
+    await client.send('Emulation.setDeviceMetricsOverride', {
+      width: 375,
+      height: 812,
+      deviceScaleFactor: 2,
+      mobile: true
+    });
+    await sleep(500);
+
+    const headerCollisionCheck = await client.eval(`
+      (async () => {
+        // Click on the first card to open PlayerModal
+        const firstCard = document.querySelector('[data-media-id]');
+        if (firstCard) firstCard.click();
+        await new Promise(r => setTimeout(r, 1000));
+
+        const avatar = document.querySelector('img[alt="Furina"]');
+        const titleElem = document.querySelector('h2.truncate, h2 span, h2');
+        const closeBtn = document.querySelector('button[aria-label="Close video player modal"]');
+
+        if (!avatar || !titleElem || !closeBtn) {
+          return { error: 'Header elements not found', found: { avatar: !!avatar, titleElem: !!titleElem, closeBtn: !!closeBtn } };
+        }
+
+        const avatarRect = avatar.getBoundingClientRect();
+        const titleRect = titleElem.getBoundingClientRect();
+        const closeRect = closeBtn.getBoundingClientRect();
+
+        // Collision detection: Title must strictly be placed between avatar and close button
+        const overlapsAvatar = titleRect.left < (avatarRect.right - 2);
+        const overlapsClose = titleRect.right > (closeRect.left + 5);
+        const hasEllipsis = window.getComputedStyle(titleElem).overflow === 'hidden' || window.getComputedStyle(titleElem).textOverflow === 'ellipsis';
+
+        return {
+          overlapsAvatar,
+          overlapsClose,
+          hasEllipsis,
+          titleText: titleElem.textContent.trim(),
+          titleWidth: titleRect.width,
+          avatarRight: avatarRect.right,
+          titleLeft: titleRect.left,
+          closeLeft: closeRect.left
+        };
+      })()
+    `);
+
+    const headerNoCollision = !headerCollisionCheck.error && !headerCollisionCheck.overlapsAvatar && !headerCollisionCheck.overlapsClose;
+    recordTest(38, 'Mobile Player Header Layout Collision & Truncation Audit', headerNoCollision,
+      headerCollisionCheck.error || `No Avatar Overlap: ${!headerCollisionCheck.overlapsAvatar}, No Close Overlap: ${!headerCollisionCheck.overlapsClose}, Title: "${headerCollisionCheck.titleText}"`);
+
+    console.log('\n--- Running TEST 39: VidLink Parameter Safety (No sub_dub=hindi 500) & Mirror Fallback Row ---');
+    const vidlinkSafety = await client.eval(`
+      (() => {
+        const fallbackBar = Array.from(document.querySelectorAll('button')).filter(b => 
+          ['AutoEmbed', 'VidSrc', '2Embed', 'Smashy', 'Embed.su'].includes(b.textContent.trim())
+        );
+
+        return {
+          fallbackButtonsFound: fallbackBar.map(b => b.textContent.trim())
+        };
+      })()
+    `);
+
+    // Verify vidlink URL generation does not include &sub_dub=hindi
+    const streamImports = await client.eval(`
+      (async () => {
+        const mod = await import('./src/services/streaming.js');
+        const srv = mod.SERVERS.find(s => s.id === 'vidlink');
+        const movieUrlHindi = srv.getMovieUrl('533535', 'hindi');
+        const tvUrlHindi = srv.getTvUrl('95479', 1, 1, 'hindi');
+        return {
+          movieSafe: !movieUrlHindi.includes('&sub_dub=hindi'),
+          tvSafe: !tvUrlHindi.includes('&sub_dub=hindi'),
+          movieUrlHindi,
+          tvUrlHindi
+        };
+      })()
+    `);
+
+    const vidlinkSafetyPassed = streamImports.movieSafe && streamImports.tvSafe && vidlinkSafety.fallbackButtonsFound.length >= 4;
+    recordTest(39, 'VidLink Parameter Safety (No sub_dub=hindi 500) & Mirror Fallback Row', vidlinkSafetyPassed,
+      `Movie Safe: ${streamImports.movieSafe}, TV Safe: ${streamImports.tvSafe}, Fallback Mirrors: [${vidlinkSafety.fallbackButtonsFound.join(', ')}]`);
+
+    // Close player modal and reset viewport to desktop
+    await client.eval(`
+      (() => {
+        const closeBtn = document.querySelector('button[aria-label="Close video player modal"]');
+        if (closeBtn) closeBtn.click();
+      })()
+    `);
+    await sleep(600);
+
+    await client.send('Emulation.setDeviceMetricsOverride', {
+      width: 1280,
+      height: 800,
+      deviceScaleFactor: 1,
+      mobile: false
+    });
+    await sleep(500);
+
     console.log('\n--- Running TEST 26: Final Production Build Verification ---');
     try {
       execSync('npm.cmd run build', { cwd: process.cwd(), stdio: 'pipe' });

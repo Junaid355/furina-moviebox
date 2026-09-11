@@ -176,18 +176,31 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
   // Determine initial server — route to fast, verified 200 OK servers
   const getInitialServer = () => {
+    if (audioMode === 'hindi' || userPreferredAudio === 'hindi') {
+      return (
+        availableServers.find((s) => s.id === 'multiembed') ||
+        availableServers.find((s) => s.id === 'smashy') ||
+        availableServers.find((s) => s.id === 'autoembed') ||
+        availableServers.find((s) => s.id === 'vidsrc_in') ||
+        availableServers.find((s) => s.id === 'twoembed_vip') ||
+        availableServers.find((s) => s.id === 'embed_su') ||
+        availableServers[0]
+      );
+    }
     if (hasWorkingHindiSource && !isCustom) {
       if (isBollywoodHindi) {
         return availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
       }
-      if (isAnime) {
-        return availableServers.find((s) => s.id === 'vidlink') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
-      }
-      // Hollywood Hindi Dubs
-      return availableServers.find((s) => s.id === 'vidlink') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
+      return (
+        availableServers.find((s) => s.id === 'multiembed') ||
+        availableServers.find((s) => s.id === 'smashy') ||
+        availableServers.find((s) => s.id === 'autoembed') ||
+        availableServers.find((s) => s.id === 'vidsrc_in') ||
+        availableServers[0]
+      );
     }
     if (isAnime) {
-      return availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
+      return availableServers.find((s) => s.id === 'vidlink') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
     }
     return availableServers.find((s) => s.id === preferredServerId) || availableServers[0];
   };
@@ -299,10 +312,11 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       if (newMode === 'hindi') {
         const hindiServer = 
           availableServers.find((s) => s.id === 'multiembed') ||
-          availableServers.find((s) => s.id === 'one23embed') ||
           availableServers.find((s) => s.id === 'smashy') ||
-          availableServers.find((s) => s.id === 'vidsrc_cc') ||
-          availableServers.find((s) => s.id === 'vidlink') ||
+          availableServers.find((s) => s.id === 'autoembed') ||
+          availableServers.find((s) => s.id === 'vidsrc_in') ||
+          availableServers.find((s) => s.id === 'twoembed_vip') ||
+          availableServers.find((s) => s.id === 'embed_su') ||
           availableServers[0];
         setSelectedServer(hindiServer);
       } else if (newMode === 'sub') {
@@ -806,37 +820,39 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
         {/* ========================================================================= */}
         {isFullscreen && (
           <div 
-            className={`absolute top-0 left-0 right-0 z-50 p-4 sm:p-6 bg-gradient-to-b from-black/95 via-black/60 to-transparent flex items-center justify-between transition-opacity duration-300 ${
+            className={`absolute top-0 left-0 right-0 z-50 p-2.5 sm:p-4 md:p-6 bg-gradient-to-b from-black/95 via-black/60 to-transparent flex items-center justify-between transition-opacity duration-300 ${
               showControls ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
             }`}
           >
-            <div className="flex items-center gap-3 min-w-0">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 pr-2">
               <button
                 onClick={toggleFullscreen}
-                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition flex items-center gap-1.5 text-xs font-bold shrink-0 cursor-pointer"
+                className="p-1.5 sm:p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition flex items-center gap-1 text-xs font-bold shrink-0 cursor-pointer"
                 title="Exit Fullscreen (Esc)"
               >
                 <Minimize2 className="w-4 h-4" />
                 <span className="hidden sm:inline">Exit Fullscreen</span>
               </button>
 
-              <div className="min-w-0">
-                <h2 className="font-black text-sm sm:text-base text-white truncate flex items-center gap-2">
-                  <span>{title}</span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <h2 className="font-black text-xs sm:text-base text-white truncate min-w-0 max-w-[180px] xs:max-w-[260px] sm:max-w-none" title={title}>
+                    {title}
+                  </h2>
                   {isSeries && (
-                    <span className="text-cyan-300 font-mono text-xs bg-cyan-500/20 px-2 py-0.5 rounded-full border border-cyan-500/40 shrink-0">
+                    <span className="text-cyan-300 font-mono text-[10px] sm:text-xs bg-cyan-500/20 px-1.5 py-0.5 rounded-full border border-cyan-500/40 shrink-0 whitespace-nowrap">
                       S{season} E{episode}
                     </span>
                   )}
-                </h2>
-                <div className="flex items-center gap-2 text-[11px] text-cyan-200/80">
-                  <span className="text-emerald-400 font-bold">
+                </div>
+                <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-cyan-200/80 truncate">
+                  <span className="text-emerald-400 font-bold shrink-0">
                     {isCustom ? 'Studio Master' : selectedServer.badge}
                   </span>
                   <span>•</span>
-                  {audioMode === 'english' && <span className="bg-blue-500/20 text-blue-300 px-1.5 py-0.2 rounded font-bold">🎙️ English Dub</span>}
-                  {audioMode === 'hindi' && <span className="bg-amber-500/20 text-amber-300 px-1.5 py-0.2 rounded font-bold">🇮🇳 Hindi Audio</span>}
-                  {audioMode === 'sub' && <span className="bg-purple-500/20 text-purple-300 px-1.5 py-0.2 rounded font-bold">🇯🇵 Japanese Sub</span>}
+                  {audioMode === 'english' && <span className="bg-blue-500/20 text-blue-300 px-1.5 py-0.2 rounded font-bold truncate">🎙️ English Dub</span>}
+                  {audioMode === 'hindi' && <span className="bg-amber-500/20 text-amber-300 px-1.5 py-0.2 rounded font-bold truncate">🇮🇳 Hindi Audio</span>}
+                  {audioMode === 'sub' && <span className="bg-purple-500/20 text-purple-300 px-1.5 py-0.2 rounded font-bold truncate">🇯🇵 Japanese Sub</span>}
                 </div>
               </div>
             </div>
@@ -936,40 +952,42 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
         {/* 2. REGULAR HEADER (STICKY AT TOP OF MODAL CARD - CANNOT SCROLL AWAY)     */}
         {/* ========================================================================= */}
         {!isFullscreen && (
-          <div className="flex items-center justify-between p-3 sm:p-4 border-b border-cyan-500/30 bg-[#050b1d] shrink-0 z-30 shadow-md">
-            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="flex items-center justify-between p-2.5 sm:p-4 border-b border-cyan-500/30 bg-[#050b1d] shrink-0 z-30 shadow-md">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 pr-2">
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden border-2 border-cyan-400/60 shadow-[0_0_12px_rgba(56,189,248,0.45)] shrink-0">
                 <img src="./favicon.png" alt="Furina" className="w-full h-full object-cover" />
               </div>
-              <div className="min-w-0">
-                <h2 className="font-extrabold text-sm sm:text-base text-white truncate flex items-center gap-2">
-                  <span>{title}</span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <h2 className="font-extrabold text-xs sm:text-base text-white truncate min-w-0 max-w-[170px] xs:max-w-[260px] sm:max-w-none" title={title}>
+                    {title}
+                  </h2>
                   {isSeries && (
-                    <span className="text-cyan-300 font-bold text-[11px] bg-cyan-500/20 px-2 py-0.5 rounded-full border border-cyan-500/40 shrink-0">
-                      S{season} E{episode}
+                    <span className="text-cyan-300 font-bold text-[10px] sm:text-[11px] bg-cyan-500/20 px-1.5 py-0.5 rounded-full border border-cyan-500/40 shrink-0 whitespace-nowrap">
+                      S{season}E{episode}
                     </span>
                   )}
                   {isCustom && (
-                    <span className="text-[10px] font-bold bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded-full border border-cyan-500/40 shrink-0">
+                    <span className="hidden md:inline-block text-[10px] font-bold bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded-full border border-cyan-500/40 shrink-0 whitespace-nowrap">
                       Studio Original
                     </span>
                   )}
-                </h2>
-                <div className="flex items-center gap-2 text-[10px] sm:text-[11px] text-cyan-200/70">
-                  <span className="text-emerald-400 font-bold">
-                    {isCustom ? 'Verified Studio Source' : selectedServer.badge}
+                </div>
+                <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-cyan-200/70 truncate">
+                  <span className="text-emerald-400 font-bold shrink-0">
+                    {isCustom ? 'Verified Studio' : selectedServer.badge}
                   </span>
                   <span>•</span>
-                  <span className="text-cyan-400/80 font-mono hidden xs:inline">
-                    {isCustom ? 'Direct Master Video' : selectedServer.shortName}
+                  <span className="text-cyan-400/80 font-mono truncate">
+                    {isCustom ? 'Master Video' : selectedServer.shortName}
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
               {isSeries && (
-                <div className="flex items-center gap-1">
+                <div className="hidden sm:flex items-center gap-1">
                   <button
                     onClick={handlePrevEpisode}
                     disabled={episode <= 1}
@@ -994,7 +1012,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
               {hasOnlineStream && isCustom && (
                 <button
                   onClick={() => setPlayerMode((prev) => (prev === 'studio' ? 'stream' : 'studio'))}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition shadow-sm cursor-pointer border ${
+                  className={`flex items-center gap-1 px-2 sm:px-3 py-1.5 rounded-xl text-xs font-black transition shadow-sm cursor-pointer border shrink-0 ${
                     playerMode === 'stream'
                       ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-gray-950 border-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.5)]'
                       : 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border-cyan-400/50 text-cyan-300 hover:text-white hover:bg-cyan-500/30'
@@ -1003,15 +1021,15 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 >
                   {playerMode === 'studio' ? (
                     <>
-                      <Film className="w-3.5 h-3.5 text-cyan-300" />
+                      <Film className="w-3.5 h-3.5 text-cyan-300 shrink-0" />
                       <span className="hidden sm:inline">Watch Full Movie (Online HD) ↗</span>
-                      <span className="sm:hidden">Full Movie</span>
+                      <span className="sm:hidden text-[11px]">Stream</span>
                     </>
                   ) : (
                     <>
-                      <Volume2 className="w-3.5 h-3.5 text-amber-300" />
+                      <Volume2 className="w-3.5 h-3.5 text-amber-300 shrink-0" />
                       <span className="hidden sm:inline">🎙️ Studio Audio Track</span>
-                      <span className="sm:hidden">Studio Audio</span>
+                      <span className="sm:hidden text-[11px]">Studio</span>
                     </>
                   )}
                 </button>
@@ -1021,7 +1039,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
               <button
                 onClick={toggleFullscreen}
                 title="Cinema Fullscreen (F)"
-                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-gray-950 text-xs font-extrabold transition shadow-[0_0_15px_rgba(56,189,248,0.45)] transform hover:scale-105 active:scale-95 cursor-pointer"
+                className="flex items-center gap-1.5 p-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-gray-950 text-xs font-extrabold transition shadow-[0_0_15px_rgba(56,189,248,0.45)] transform hover:scale-105 active:scale-95 cursor-pointer shrink-0"
               >
                 <Maximize2 className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Cinema Mode</span>
@@ -1032,7 +1050,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 onClick={handleDownload}
                 disabled={downloadState.status === 'downloading' || downloadState.status === 'preparing'}
                 title="Download movie or episode in HD / 4K"
-                className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-sm cursor-pointer ${
+                className={`flex items-center gap-1.5 p-1.5 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold transition shadow-sm cursor-pointer shrink-0 ${
                   downloadState.status === 'completed'
                     ? 'bg-emerald-500 text-gray-950 border border-emerald-400 font-extrabold shadow-[0_0_12px_rgba(16,185,129,0.5)]'
                     : downloadState.status === 'downloading' || downloadState.status === 'preparing'
@@ -1045,7 +1063,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 {downloadState.status === 'completed' && <CheckCircle2 className="w-3.5 h-3.5 text-gray-950" />}
                 {downloadState.status === 'idle' && <Download className="w-3.5 h-3.5" />}
 
-                <span>
+                <span className="hidden sm:inline">
                   {downloadState.status === 'preparing' && `Preparing ${downloadState.progress}%`}
                   {downloadState.status === 'downloading' && `Downloading ${downloadState.progress}%`}
                   {downloadState.status === 'completed' && 'Downloaded ✓'}
@@ -1078,7 +1096,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
               <button
                 onClick={handleReload}
                 title="Reload video player"
-                className="p-2 rounded-xl bg-[#0c1836] border border-cyan-500/30 text-cyan-300 hover:text-white hover:bg-white/10 transition cursor-pointer"
+                className="hidden xs:flex p-2 rounded-xl bg-[#0c1836] border border-cyan-500/30 text-cyan-300 hover:text-white hover:bg-white/10 transition cursor-pointer shrink-0"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
               </button>
@@ -1098,9 +1116,9 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 onClick={handleSafeClose}
                 aria-label="Close video player modal"
                 title="Close Player (Esc)"
-                className="w-10 h-10 rounded-full bg-rose-600 hover:bg-rose-500 text-white border-2 border-rose-400/80 hover:border-white flex items-center justify-center transition shadow-[0_0_18px_rgba(244,63,94,0.7)] hover:shadow-[0_0_28px_rgba(244,63,94,0.95)] shrink-0 ml-1.5 transform hover:scale-105 active:scale-90 touch-manipulation cursor-pointer"
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-rose-600 hover:bg-rose-500 text-white border-2 border-rose-400/80 hover:border-white flex items-center justify-center transition shadow-[0_0_18px_rgba(244,63,94,0.7)] hover:shadow-[0_0_28px_rgba(244,63,94,0.95)] shrink-0 ml-1 transform hover:scale-105 active:scale-90 touch-manipulation cursor-pointer"
               >
-                <X className="w-5 h-5 font-black stroke-[3]" />
+                <X className="w-4 h-4 sm:w-5 sm:h-5 font-black stroke-[3]" />
               </button>
             </div>
           </div>
@@ -1613,6 +1631,50 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   allowFullScreen
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 />
+
+                {/* Quick 1-Tap Mirror Fallback Bar (Clean fallback to AutoEmbed, VidSrc, 2Embed, SmashyStream, Embed.su) */}
+                {!isFullscreen && (
+                  <div className="absolute bottom-2 left-2 right-2 z-20 pointer-events-auto flex items-center justify-between gap-1.5 p-1.5 sm:p-2 rounded-xl bg-black/85 backdrop-blur-md border border-cyan-500/30 text-[10px] sm:text-xs">
+                    <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
+                      <span className="text-amber-300 font-bold flex items-center gap-1 shrink-0">
+                        <Zap className="w-3 h-3 text-amber-400" />
+                        <span>Mirror Fallback:</span>
+                      </span>
+                      <div className="flex items-center gap-1 flex-wrap">
+                        {[
+                          { id: 'autoembed', label: 'AutoEmbed' },
+                          { id: 'vidsrc_in', label: 'VidSrc' },
+                          { id: 'twoembed_vip', label: '2Embed' },
+                          { id: 'smashy', label: 'Smashy' },
+                          { id: 'embed_su', label: 'Embed.su' },
+                        ].map((m) => {
+                          const target = availableServers.find((s) => s.id === m.id);
+                          if (!target) return null;
+                          const isCurrent = currentServer.id === target.id;
+                          return (
+                            <button
+                              key={m.id}
+                              onClick={() => setSelectedServer(target)}
+                              className={`px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-bold transition border cursor-pointer ${
+                                isCurrent
+                                  ? 'bg-cyan-500 text-gray-950 border-cyan-300 font-black shadow-sm'
+                                  : 'bg-[#08122c] text-cyan-200/80 border-cyan-500/30 hover:text-white hover:bg-white/10'
+                              }`}
+                            >
+                              {m.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleNextServer}
+                      className="px-2 py-0.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-300 hover:text-white text-[10px] sm:text-[11px] font-bold shrink-0 transition cursor-pointer"
+                    >
+                      Next ↻
+                    </button>
+                  </div>
+                )}
               </>
             )}
           </div>

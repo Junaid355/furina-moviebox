@@ -944,6 +944,28 @@ export const BLOCKBUSTER_LOCAL_MEDIA_MAP = {
       { lang: 'ja', label: 'Japanese Sub', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AJapanese%20Captions' }
     ]
   },
+  579974: { // RRR
+    title: 'RRR',
+    hiUrl: './media/hindi_audio.wav',
+    enUrl: './media/english_audio.mp4',
+    jaUrl: './media/japanese_audio.wav',
+    subtitles: [
+      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' },
+      { lang: 'ja', label: 'Japanese Sub', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AJapanese%20Captions' }
+    ]
+  },
+  1011985: { // Kung Fu Panda 4
+    title: 'Kung Fu Panda 4',
+    hiUrl: './media/hindi_audio.wav',
+    enUrl: './media/english_audio.mp4',
+    jaUrl: './media/japanese_audio.wav',
+    subtitles: [
+      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' },
+      { lang: 'ja', label: 'Japanese Sub', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AJapanese%20Captions' }
+    ]
+  },
 };
 
 /**

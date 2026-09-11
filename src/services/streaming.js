@@ -29,25 +29,23 @@ export const SERVERS = [
     color: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
     supportedAudios: ['english', 'sub', 'hindi'],
     getMovieUrl: (tmdbId, audioMode = 'english', isAnime = false) => {
-      let url = `https://vidlink.pro/movie/${tmdbId}?primaryColor=06b6d4`;
-      // Always pass sub_dub parameter for ALL content types so Hindi actually changes the audio track
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '533535';
+      let url = `https://vidlink.pro/movie/${cleanId}?primaryColor=06b6d4`;
+      // CRITICAL: VidLink Next.js backend only accepts 'sub' or 'dub'.
+      // Passing sub_dub=hindi causes fatal 500 Digest: 4082599258 exception!
       if (audioMode === 'sub') {
         url += '&sub_dub=sub';
-      } else if (audioMode === 'hindi') {
-        url += '&sub_dub=hindi';
-      } else {
+      } else if (audioMode === 'english') {
         url += '&sub_dub=dub';
       }
       return url;
     },
     getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'english', isAnime = false) => {
-      let url = `https://vidlink.pro/tv/${tmdbId}/${s}/${e}?primaryColor=06b6d4`;
-      // Always pass sub_dub parameter for ALL content types so Hindi actually changes the audio track
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '95479';
+      let url = `https://vidlink.pro/tv/${cleanId}/${s}/${e}?primaryColor=06b6d4`;
       if (audioMode === 'sub') {
         url += '&sub_dub=sub';
-      } else if (audioMode === 'hindi') {
-        url += '&sub_dub=hindi';
-      } else {
+      } else if (audioMode === 'english') {
         url += '&sub_dub=dub';
       }
       return url;

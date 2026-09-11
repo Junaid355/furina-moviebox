@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import Navbar from './components/Navbar';
+import Navbar, { HanimeIcon } from './components/Navbar';
 import HeroBanner from './components/HeroBanner';
 import MediaCard from './components/MediaCard';
 import PlayerModal from './components/PlayerModal';
@@ -448,7 +448,7 @@ export default function App() {
                   : activeCategory === 'anime'
                   ? '🌸 Anime & Japanese Animations (Sub/Dub)'
                   : activeCategory === 'ecchi_anime'
-                  ? '✨ Secret Master Vault (Exclusive Uncut Collection)'
+                  ? '🔞 Hanime Vault (Exclusive Uncut Collection)'
                   : activeCategory === 'mature'
                   ? '🎬 Master Cinema Vault (Uncut Cinema)'
                   : '❤️ My Saved Watchlist'}
@@ -801,7 +801,7 @@ export default function App() {
           { id: 'studio', label: 'Studio', icon: Film },
           ...(isMasterMode ? [
             { id: 'mature', label: 'Uncut', icon: Flame },
-            { id: 'ecchi_anime', label: 'Vault', icon: Flame }
+            { id: 'ecchi_anime', label: 'Hanime', icon: HanimeIcon }
           ] : []),
           { id: 'watchlist', label: 'Saved', icon: Heart },
         ].map((tab) => {
