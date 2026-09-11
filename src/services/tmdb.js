@@ -2057,16 +2057,28 @@ export async function fetchAnime(page = 1, audioFilter = 'all') {
       });
 
     if (page === 1) {
+      let studioAnime = [];
+      try {
+        const raw = typeof localStorage !== 'undefined' ? localStorage.getItem('furina_studio_movies') : null;
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            studioAnime = parsed.filter((m) => (m.category === 'anime' || m.isAnime) && (audioFilter === 'hindi' ? m.languages?.hi?.url : true));
+          }
+        }
+      } catch (e) {}
+
       let curatedBase = [];
       if (audioFilter === 'hindi') {
-        curatedBase = CURATED_HINDI_DUBBED_ANIME.map((a) => ({ ...a, hasHindiDub: true, isHindiDubbed: true, dub_type: 'hindi' }));
+        curatedBase = [...studioAnime, ...CURATED_HINDI_DUBBED_ANIME.map((a) => ({ ...a, hasHindiDub: true, isHindiDubbed: true, dub_type: 'hindi' }))];
       } else if (audioFilter === 'english') {
-        curatedBase = CURATED_ENGLISH_DUBBED_ANIME;
+        curatedBase = [...studioAnime, ...CURATED_ENGLISH_DUBBED_ANIME];
       } else if (audioFilter === 'sub') {
-        curatedBase = CURATED_SUBBED_ANIME;
+        curatedBase = [...studioAnime, ...CURATED_SUBBED_ANIME];
       } else {
         const seenIds = new Set();
         curatedBase = [
+          ...studioAnime,
           ...CURATED_HINDI_DUBBED_ANIME.slice(0, 15),
           ...CURATED_ENGLISH_DUBBED_ANIME.slice(0, 15),
           ...CURATED_SUBBED_ANIME.slice(0, 10)
@@ -2274,7 +2286,17 @@ export async function fetchHindiDubbedAnime(page = 1) {
 
 export async function fetchHindiDubbedHollywood(page = 1) {
   if (page === 1) {
-    return deduplicateMedia(CURATED_HOLLYWOOD_HINDI_DUBS);
+    let studioHindi = [];
+    try {
+      const raw = typeof localStorage !== 'undefined' ? localStorage.getItem('furina_studio_movies') : null;
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          studioHindi = parsed.filter((m) => m.category === 'hollywood' && m.languages?.hi?.url);
+        }
+      }
+    } catch (e) {}
+    return deduplicateMedia(studioHindi);
   }
   return [];
 }
@@ -3227,36 +3249,15 @@ export const VERIFIED_HINDI_HOLLYWOOD_IDS = new Set([
 export function isHindiAvailable(item) {
   if (!item) return false;
 
-  // Studio/Custom uploaded content with explicit Hindi audio asset
+  // Studio / Multi-Audio content with verified physical Hindi audio asset
   if (item.languages?.hi?.url || item.audio_hi_url) {
     return true;
   }
 
-  // Title explicitly designated as Hindi Dubbed
-  const title = (item.title || item.name || item.original_title || item.original_name || '').toLowerCase();
-  if (title.includes('hindi dubbed') || title.includes('(hindi') || title.includes('[hindi') || title.includes('hindi dub')) {
+  // Custom Studio titles explicitly flagged
+  if (item.isCustom && (item.isHindiDubbed || item.hasHindiDub || item.languages?.hi)) {
     return true;
   }
-
-  // Explicitly flagged on item object
-  if (item.isHindiDubbed === true || item.hasHindiDub === true || item.dub_type === 'hindi') {
-    return true;
-  }
-
-  const id = Number(item.id);
-
-  // Curated Hollywood with verified Hindi dubs
-  if (VERIFIED_HINDI_HOLLYWOOD_IDS.has(id)) return true;
-  if (CURATED_HOLLYWOOD_HINDI_DUBS.some((m) => Number(m.id) === id)) return true;
-
-  // Curated Anime with verified Hindi dubs (MyDubList + AnimeWorld India)
-  if (VERIFIED_HINDI_ANIME_IDS.has(id)) return true;
-  if (CURATED_HINDI_DUBBED_ANIME.some((a) => Number(a.id) === id)) return true;
-
-  // Curated K-Dramas & Global Series with verified Hindi dubs
-  if (VERIFIED_HINDI_KDRAMA_IDS.has(id)) return true;
-  if (VERIFIED_HINDI_GLOBAL_SERIES_IDS.has(id)) return true;
-  if (CURATED_HINDI_KDRAMAS.some((k) => Number(k.id) === id)) return true;
 
   // Authentic Bollywood / Indian cinema whose native spoken audio is Hindi
   if (
@@ -3266,9 +3267,12 @@ export function isHindiAvailable(item) {
     return true;
   }
 
-  // Curated Bollywood list
+  // Curated Bollywood list (authentic Hindi cinema)
+  const id = Number(item.id);
   if (CURATED_BOLLYWOOD_BLOCKBUSTERS.some((b) => Number(b.id) === id)) return true;
 
+  // Third-party Hollywood and Anime embeds host English/Japanese streams only.
+  // We strictly NEVER falsely report Hindi availability when the underlying stream is English.
   return false;
 }
 

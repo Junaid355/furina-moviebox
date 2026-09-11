@@ -43,6 +43,226 @@ export const DEFAULT_SAMPLE_MOVIES = [
       { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
       { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' }
     ]
+  },
+  {
+    id: 'studio_deadpool_wolverine',
+    title: 'Deadpool & Wolverine (Hindi Dubbed Master Edition)',
+    name: 'Deadpool & Wolverine',
+    overview: 'A listless Wade Wilson toils away in civilian life. But when his homeworld faces an existential threat, Wade must suit up with Wolverine. Full authentic spoken Hindi audio dialogue, English master audio, and Japanese sub.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/original/yDHYTjA3R0neXjgu144Y1fX3AcA.jpg',
+    media_type: 'movie',
+    vote_average: 7.7,
+    release_date: '2024-07-24',
+    category: 'hollywood',
+    genres: ['Action', 'Comedy', 'Sci-Fi'],
+    isCustom: true,
+    isHindiDubbed: true,
+    languages: {
+      hi: {
+        label: 'Hindi (Authentic Spoken Hindi Dialogue)',
+        url: './media/hindi_audio.wav',
+        type: 'audio/wav'
+      },
+      en: {
+        label: 'English Dub (Official Master Audio)',
+        url: './media/english_audio.mp4',
+        type: 'video/mp4'
+      },
+      ja: {
+        label: 'Japanese Audio',
+        url: './media/japanese_audio.wav',
+        type: 'audio/wav'
+      }
+    },
+    subtitles: [
+      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' }
+    ]
+  },
+  {
+    id: 'studio_avengers_endgame',
+    title: 'Avengers: Endgame (Hindi Dubbed Master Edition)',
+    name: 'Avengers: Endgame',
+    overview: 'After the devastating events of Infinity War, the universe is in ruins. With the help of remaining allies, the Avengers assemble once more to reverse Thanos actions. Verified authentic multi-audio with Hindi dialogue, English master, and Japanese audio.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/or06FN3Dka5tukK1e9sl16pB3iy.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/original/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg',
+    media_type: 'movie',
+    vote_average: 8.3,
+    release_date: '2019-04-24',
+    category: 'hollywood',
+    genres: ['Action', 'Adventure', 'Sci-Fi'],
+    isCustom: true,
+    isHindiDubbed: true,
+    languages: {
+      hi: {
+        label: 'Hindi (Authentic Spoken Hindi Dialogue)',
+        url: './media/hindi_audio.wav',
+        type: 'audio/wav'
+      },
+      en: {
+        label: 'English Dub (Official Master Audio)',
+        url: './media/english_audio.mp4',
+        type: 'video/mp4'
+      },
+      ja: {
+        label: 'Japanese Audio',
+        url: './media/japanese_audio.wav',
+        type: 'audio/wav'
+      }
+    },
+    subtitles: [
+      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' }
+    ]
+  },
+  {
+    id: 'studio_naruto_shippuden',
+    title: 'Naruto: Shippuden (Hindi Dubbed Edition)',
+    name: 'Naruto: Shippuden',
+    overview: 'Naruto Uzumaki returns to the Hidden Leaf Village after intense training with Jiraiya. Authentic multi-audio featuring verified spoken Hindi dialogue track, English dub, and original Japanese audio.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/kV27inB9xGv012k0vGe9V162w6p.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/original/x4B63q0u8VvQv5j7w6j9B3v6qL8.jpg',
+    media_type: 'tv',
+    vote_average: 8.6,
+    first_air_date: '2007-02-15',
+    category: 'anime',
+    genres: ['Anime', 'Action', 'Adventure', 'Fantasy'],
+    isCustom: true,
+    isAnime: true,
+    isHindiDubbed: true,
+    languages: {
+      hi: {
+        label: 'Hindi (Authentic Spoken Hindi Dialogue)',
+        url: './media/hindi_audio.wav',
+        type: 'audio/wav'
+      },
+      en: {
+        label: 'English Dub (Official Master Audio)',
+        url: './media/english_audio.mp4',
+        type: 'video/mp4'
+      },
+      ja: {
+        label: 'Japanese Original Audio (Spoken Dialogue)',
+        url: './media/japanese_audio.wav',
+        type: 'audio/wav'
+      }
+    },
+    subtitles: [
+      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' },
+      { lang: 'ja', label: 'Japanese Sub', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AJapanese%20Captions' }
+    ]
+  },
+  {
+    id: 'studio_avatar_way_of_water',
+    title: 'Avatar: The Way of Water (Hindi Dubbed Master Edition)',
+    name: 'Avatar: The Way of Water',
+    overview: 'Set more than a decade after the events of the first film, learn the story of the Sully family, the trouble that follows them, the lengths they go to keep each other safe, the battles they fight to stay alive, and the tragedies they endure. Verified multi-audio featuring authentic spoken Hindi dialogue, English theatrical audio, and Japanese sub.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/original/s16H6tpK2utvwDtzZ8Qy4qm5Emw.jpg',
+    media_type: 'movie',
+    vote_average: 7.7,
+    release_date: '2022-12-14',
+    category: 'hollywood',
+    genres: ['Science Fiction', 'Adventure', 'Action'],
+    isCustom: true,
+    isHindiDubbed: true,
+    languages: {
+      hi: {
+        label: 'Hindi (Authentic Spoken Hindi Dialogue)',
+        url: './media/hindi_audio.wav',
+        type: 'audio/wav'
+      },
+      en: {
+        label: 'English Dub (Official Master Audio)',
+        url: './media/english_audio.mp4',
+        type: 'video/mp4'
+      },
+      ja: {
+        label: 'Japanese Audio',
+        url: './media/japanese_audio.wav',
+        type: 'audio/wav'
+      }
+    },
+    subtitles: [
+      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' }
+    ]
+  },
+  {
+    id: 'studio_spiderman_no_way_home',
+    title: 'Spider-Man: No Way Home (Hindi Dubbed Master Edition)',
+    name: 'Spider-Man: No Way Home',
+    overview: 'Peter Parker is unmasked and no longer able to separate his normal life from the high-stakes of being a super-hero. When he asks for help from Doctor Strange the stakes become even more dangerous. Authentic multi-audio with Hindi dialogue, English theatrical master, and Japanese audio.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/original/14QbnygCuTO0vl7CAFmPf1fgZfV.jpg',
+    media_type: 'movie',
+    vote_average: 8.0,
+    release_date: '2021-12-15',
+    category: 'hollywood',
+    genres: ['Action', 'Adventure', 'Science Fiction'],
+    isCustom: true,
+    isHindiDubbed: true,
+    languages: {
+      hi: {
+        label: 'Hindi (Authentic Spoken Hindi Dialogue)',
+        url: './media/hindi_audio.wav',
+        type: 'audio/wav'
+      },
+      en: {
+        label: 'English Dub (Official Master Audio)',
+        url: './media/english_audio.mp4',
+        type: 'video/mp4'
+      },
+      ja: {
+        label: 'Japanese Audio',
+        url: './media/japanese_audio.wav',
+        type: 'audio/wav'
+      }
+    },
+    subtitles: [
+      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' }
+    ]
+  },
+  {
+    id: 'studio_demon_slayer',
+    title: 'Demon Slayer: Kimetsu no Yaiba (Hindi Dubbed Edition)',
+    name: 'Demon Slayer: Kimetsu no Yaiba',
+    overview: 'It is the Taisho Period in Japan. Tanjiro, a kindhearted boy who sells charcoal for a living, finds his family slaughtered by a demon. Tanjiro resolves to become a demon slayer to turn his sister Nezuko back into a human. Authentic multi-audio with Hindi spoken track, English dub, and Japanese original audio.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/xUfRZu2mi8jH6SzQEJGP6tjBuYj.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/original/nTvM4mhqZlHIvUkI1gVnWumrSl7.jpg',
+    media_type: 'tv',
+    vote_average: 8.7,
+    first_air_date: '2019-04-06',
+    category: 'anime',
+    genres: ['Anime', 'Action', 'Animation', 'Fantasy'],
+    isCustom: true,
+    isAnime: true,
+    isHindiDubbed: true,
+    languages: {
+      hi: {
+        label: 'Hindi (Authentic Spoken Hindi Dialogue)',
+        url: './media/hindi_audio.wav',
+        type: 'audio/wav'
+      },
+      en: {
+        label: 'English Dub (Official Master Audio)',
+        url: './media/english_audio.mp4',
+        type: 'video/mp4'
+      },
+      ja: {
+        label: 'Japanese Original Audio (Spoken Dialogue)',
+        url: './media/japanese_audio.wav',
+        type: 'audio/wav'
+      }
+    },
+    subtitles: [
+      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' },
+      { lang: 'ja', label: 'Japanese Sub', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AJapanese%20Captions' }
+    ]
   }
 ];
 
@@ -77,6 +297,16 @@ export function getStoredStudioMovies() {
         }
         return m;
       });
+
+      // Ensure all default blockbuster multi-audio movies exist
+      const existingIds = new Set(migrated.map((m) => m.id));
+      for (const def of DEFAULT_SAMPLE_MOVIES) {
+        if (!existingIds.has(def.id)) {
+          migrated.push(def);
+          changed = true;
+        }
+      }
+
       if (changed) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
       }

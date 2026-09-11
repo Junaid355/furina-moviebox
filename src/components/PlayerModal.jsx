@@ -41,16 +41,14 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     )
   );
 
-  // Authentic Hindi audio is available strictly from:
-  // 1. Studio/Custom owned content with a real Hindi asset (item?.languages?.hi?.url)
-  // 2. Verified Bollywood, Hollywood Hindi Dubs, or Anime Hindi Dubs confirmed by isHindiAvailable
+  // Authentic audio tracks strictly based on physical audio assets or native spoken languages
   const hasWorkingHindiSource = isCustom
     ? Boolean(item?.languages?.hi?.url)
-    : isHindiAvailable(item);
+    : isBollywoodHindi;
 
   const hasWorkingEnglishSource = isCustom
     ? Boolean(item?.languages?.en?.url)
-    : true;
+    : !isBollywoodHindi;
 
   const hasWorkingJapaneseSource = isCustom
     ? Boolean(item?.languages?.ja?.url)
@@ -64,17 +62,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       if (item?.languages?.ja?.url) return 'sub';
       return 'english';
     }
-    const itemTitle = (item?.title || item?.name || '').toLowerCase();
-    if (
-      itemTitle.includes('hindi dubbed') || 
-      itemTitle.includes('(hindi') || 
-      itemTitle.includes('hindi dub') ||
-      item?.isHindiDubbed || 
-      isBollywoodHindi || 
-      isHindiPreferred
-    ) {
-      if (hasWorkingHindiSource) return 'hindi';
-    }
+    if (isBollywoodHindi && hasWorkingHindiSource) return 'hindi';
     if (isAnime) return 'sub';
     return 'english';
   });
@@ -892,11 +880,11 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                     </button>
                   )}
 
-                  {/* Hindi Option: Verified or Non-Intrusive Notice */}
-                  <button
-                    data-testid="audio-btn-hindi"
-                    onClick={() => {
-                      if (hasWorkingHindiSource) {
+                  {/* Hindi Audio Option - ONLY shown when authentic Hindi audio is available */}
+                  {hasWorkingHindiSource && (
+                    <button
+                      data-testid="audio-btn-hindi"
+                      onClick={() => {
                         setAudioMode('hindi');
                         setUnavailableNotice({ show: false, message: '' });
                         if (!isCustom) {
@@ -911,26 +899,17 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                             setSelectedServer(hindiServer);
                           }
                         }
-                      } else {
-                        // Non-intrusive alert: Keep playing default stream while showing clear feedback
-                        setUnavailableNotice({
-                          show: true,
-                          message: `Hindi audio is unavailable from providers for this ${isAnime ? 'anime' : 'title'}. Streaming in ${hasWorkingEnglishSource ? 'English Dub' : 'Japanese Sub'}.`
-                        });
-                        setTimeout(() => setUnavailableNotice({ show: false, message: '' }), 4500);
-                      }
-                    }}
-                    className={`px-3 py-1 rounded-full text-xs font-extrabold transition flex items-center gap-1 border cursor-pointer ${
-                      audioMode === 'hindi' && hasWorkingHindiSource
-                        ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-gray-950 border-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.6)] scale-105'
-                        : hasWorkingHindiSource
-                        ? 'bg-amber-500/10 text-amber-200/70 border-transparent hover:text-white'
-                        : 'bg-white/5 text-slate-400 border-transparent hover:text-slate-200 opacity-60'
-                    }`}
-                  >
-                    <span>🇮🇳</span>
-                    <span>Hindi {hasWorkingHindiSource ? 'Audio' : '(Unavailable)'}</span>
-                  </button>
+                      }}
+                      className={`px-3 py-1 rounded-full text-xs font-extrabold transition flex items-center gap-1 border cursor-pointer ${
+                        audioMode === 'hindi'
+                          ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-gray-950 border-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.6)] scale-105'
+                          : 'bg-amber-500/10 text-amber-200/70 border-transparent hover:text-white'
+                      }`}
+                    >
+                      <span>🇮🇳</span>
+                      <span>Hindi Audio</span>
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -961,24 +940,19 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
             {/* Audio Mode Active Guidance Badge */}
             <div className="text-[11px] text-cyan-200/70">
-              {audioMode === 'english' && (
+              {audioMode === 'english' && hasWorkingEnglishSource && (
                 <span className="text-cyan-300 font-medium">
-                  ✓ <strong>English Dub Active</strong> ({isCustom ? 'Studio Master Track' : isAnime ? 'VidLink Pro verified English stream • Never Japanese' : 'Original English Audio • Dolby 5.1 / Ultra HD Stream'})
+                  ✓ <strong>English Audio Active</strong> ({isCustom ? 'Studio Master Track' : isAnime ? 'VidLink Pro verified English stream' : 'Original Theatrical Master Audio'})
                 </span>
               )}
-              {audioMode === 'sub' && (
+              {audioMode === 'sub' && hasWorkingJapaneseSource && (
                 <span className="text-purple-300 font-medium">
-                  ✓ <strong>Japanese Subbed Active</strong> ({isCustom ? 'Studio Master Track' : 'Original Japanese Audio • CC Subtitles Configured'})
+                  ✓ <strong>Japanese Subbed Active</strong> ({isCustom ? 'Studio Master Track' : 'Original Japanese Dialogue'})
                 </span>
               )}
               {audioMode === 'hindi' && hasWorkingHindiSource && (
                 <span className="text-amber-300 font-medium">
-                  ✓ <strong>Hindi Audio Active</strong> ({isCustom ? 'Studio Master Track' : isBollywoodHindi ? 'Original Hindi Audio Track' : 'Verified Multi-Audio Hindi Stream'})
-                </span>
-              )}
-              {(!hasWorkingHindiSource || (audioMode === 'hindi' && !hasWorkingHindiSource)) && (
-                <span className="text-amber-300/80 font-medium">
-                  ℹ️ <strong>Hindi (Unavailable)</strong> • Active Stream: {hasWorkingEnglishSource ? 'English Dub' : 'Japanese Sub'}
+                  ✓ <strong>Hindi Audio Active</strong> ({isCustom ? 'Studio Master Track' : isBollywoodHindi ? 'Original Native Hindi Audio Track' : 'Verified Multi-Audio Hindi Stream'})
                 </span>
               )}
             </div>
@@ -1086,7 +1060,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   <div className="relative w-full h-full group/player flex items-center justify-center">
                     <video
                       ref={videoRef}
-                      key={item.id}
+                      key={`${item.id}_${audioMode}`}
                       src={activeCustomVideoUrl}
                       controls
                       autoPlay

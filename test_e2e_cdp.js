@@ -743,39 +743,88 @@ async function runQA() {
     const deadpoolAudioCheck = await client.eval(`
       (() => {
         const hindiBtn = document.querySelector('[data-testid="audio-btn-hindi"]');
+        const engBtn = document.querySelector('[data-testid="audio-btn-english"]');
+        const subBtn = document.querySelector('[data-testid="audio-btn-sub"]');
+        const video = document.querySelector('video');
         const text = document.body.innerText;
         return {
-          hindiBtnText: hindiBtn ? hindiBtn.innerText : '',
-          isAvailable: hindiBtn ? !hindiBtn.innerText.includes('(Unavailable)') : false,
-          isHindiActive: text.includes('Hindi Audio Active')
+          hasHindiBtn: Boolean(hindiBtn),
+          hasEngBtn: Boolean(engBtn),
+          hasSubBtn: Boolean(subBtn),
+          isHindiActive: text.includes('Hindi Audio Active'),
+          videoSrc: video ? video.src : ''
         };
       })()
     `);
 
-    // If not already active, click Hindi Audio button to activate
-    if (!deadpoolAudioCheck.isHindiActive) {
-      await client.eval(`
-        (() => {
-          const hindiBtn = document.querySelector('[data-testid="audio-btn-hindi"]');
-          if (hindiBtn) hindiBtn.click();
-        })()
-      `);
-      await sleep(800);
-    }
-
-    const deadpoolAfterClick = await client.eval(`
+    // Switch to English Dub
+    await client.eval(`
       (() => {
+        const engBtn = document.querySelector('[data-testid="audio-btn-english"]');
+        if (engBtn) engBtn.click();
+      })()
+    `);
+    await sleep(800);
+
+    const englishSwitchCheck = await client.eval(`
+      (() => {
+        const video = document.querySelector('video');
         const text = document.body.innerText;
-        const iframeSrc = document.querySelector('iframe')?.src || '';
+        return {
+          isEngActive: text.includes('English Audio Active'),
+          videoSrc: video ? video.src : ''
+        };
+      })()
+    `);
+
+    // Switch to Japanese Sub
+    await client.eval(`
+      (() => {
+        const subBtn = document.querySelector('[data-testid="audio-btn-sub"]');
+        if (subBtn) subBtn.click();
+      })()
+    `);
+    await sleep(800);
+
+    const japaneseSwitchCheck = await client.eval(`
+      (() => {
+        const video = document.querySelector('video');
+        const text = document.body.innerText;
+        return {
+          isJaActive: text.includes('Japanese Subbed Active'),
+          videoSrc: video ? video.src : ''
+        };
+      })()
+    `);
+
+    // Switch back to Hindi
+    await client.eval(`
+      (() => {
+        const hindiBtn = document.querySelector('[data-testid="audio-btn-hindi"]');
+        if (hindiBtn) hindiBtn.click();
+      })()
+    `);
+    await sleep(800);
+
+    const hindiSwitchCheck = await client.eval(`
+      (() => {
+        const video = document.querySelector('video');
+        const text = document.body.innerText;
         return {
           isHindiActive: text.includes('Hindi Audio Active'),
-          routesToHindi: iframeSrc.includes('audio=hi') || iframeSrc.includes('sub_dub=hindi') || iframeSrc.includes('multiembed') || iframeSrc.includes('vidlink')
+          videoSrc: video ? video.src : ''
         };
       })()
     `);
 
-    const deadpoolPassed = deadpoolAudioCheck.isAvailable && deadpoolAfterClick.isHindiActive && deadpoolAfterClick.routesToHindi;
-    recordTest(28, 'Hollywood Blockbuster Hindi Dub Resolution (Deadpool & Wolverine)', deadpoolPassed, `Hindi available: ${deadpoolAudioCheck.isAvailable}, Active badge: ${deadpoolAfterClick.isHindiActive}, Route: ${deadpoolAfterClick.routesToHindi}`);
+    const deadpoolPassed = deadpoolAudioCheck.hasHindiBtn && 
+      deadpoolAudioCheck.videoSrc.includes('hindi_audio.wav') &&
+      englishSwitchCheck.isEngActive && englishSwitchCheck.videoSrc.includes('english_audio.mp4') &&
+      japaneseSwitchCheck.isJaActive && japaneseSwitchCheck.videoSrc.includes('japanese_audio.wav') &&
+      hindiSwitchCheck.isHindiActive && hindiSwitchCheck.videoSrc.includes('hindi_audio.wav');
+
+    recordTest(28, 'Hollywood Blockbuster Real Multi-Audio Switching (Deadpool & Wolverine)', deadpoolPassed, 
+      `Hindi initial src: ${deadpoolAudioCheck.videoSrc}, English src: ${englishSwitchCheck.videoSrc}, Japanese src: ${japaneseSwitchCheck.videoSrc}, Hindi final src: ${hindiSwitchCheck.videoSrc}`);
 
     console.log('\n--- Running TEST 29: AI Boost Controls & Keyboard Shortcut (B) ---');
     const initialBoost = await client.eval(`localStorage.getItem('furina_ai_boost') || '4k'`);
@@ -802,15 +851,15 @@ async function runQA() {
       (() => {
         const text = document.body.innerText;
         return {
-          hasProtectionNotice: text.includes('Catalog Media Cloud Protection'),
+          hasProtectionNotice: text.includes('Catalog Media Cloud Protection') || text.includes('Studio Master Direct File'),
           hasMobileHub: text.includes('Mobile Quick Download Center'),
-          hasMirrors: Array.from(document.querySelectorAll('a')).some(a => a.innerText.includes('Open Mirror'))
+          hasMirrors: Array.from(document.querySelectorAll('a, button')).some(a => a.innerText.includes('Open Mirror') || a.innerText.includes('Save MP4'))
         };
       })()
     `);
 
     const dlHubPassed = downloadHubCheck.hasProtectionNotice && downloadHubCheck.hasMobileHub && downloadHubCheck.hasMirrors;
-    recordTest(30, 'Download Hub & Mobile Quick Downloader', dlHubPassed, `Cloud Notice: ${downloadHubCheck.hasProtectionNotice}, Mobile Hub: ${downloadHubCheck.hasMobileHub}, Open Mirror links: ${downloadHubCheck.hasMirrors}`);
+    recordTest(30, 'Download Hub & Mobile Quick Downloader', dlHubPassed, `Notice: ${downloadHubCheck.hasProtectionNotice}, Mobile Hub: ${downloadHubCheck.hasMobileHub}, Action elements: ${downloadHubCheck.hasMirrors}`);
 
     // Close Download Modal
     await client.eval(`
@@ -830,7 +879,7 @@ async function runQA() {
     `);
     await sleep(1000);
 
-    console.log('\n--- Running TEST 28b: Hollywood Movie Audio Honesty & Non-Intrusive UX ---');
+    console.log('\n--- Running TEST 28b: Hollywood Movie Audio Honesty (Inside Out - English Only) ---');
     await client.eval(`window.__setReactInput('input[type="text"]', 'Inside Out');`);
     await sleep(2000);
     await client.eval(`
@@ -841,37 +890,24 @@ async function runQA() {
     `);
     await sleep(1500);
 
-    const unavailAudioCheck = await client.eval(`
+    const hollywoodHonestyCheck = await client.eval(`
       (() => {
         const hindiBtn = document.querySelector('[data-testid="audio-btn-hindi"]');
-        return {
-          hasUnavailableLabel: hindiBtn ? hindiBtn.innerText.includes('(Unavailable)') : false
-        };
-      })()
-    `);
-
-    // Click unavailable Hindi button to verify non-intrusive notification without blocking video
-    await client.eval(`
-      (() => {
-        const hindiBtn = document.querySelector('[data-testid="audio-btn-hindi"]');
-        if (hindiBtn) hindiBtn.click();
-      })()
-    `);
-    await sleep(800);
-
-    const nonIntrusiveCheck = await client.eval(`
-      (() => {
+        const engBtn = document.querySelector('[data-testid="audio-btn-english"]');
         const text = document.body.innerText;
-        const hasIframe = Boolean(document.querySelector('iframe'));
+        const subButtons = Array.from(document.querySelectorAll('button')).map(b => b.textContent.trim());
         return {
-          showsToast: text.includes('Hindi audio is unavailable from providers') || text.includes('Hindi audio unavailable'),
-          iframeStillPlaying: hasIframe
+          hindiBtnAbsent: !hindiBtn,
+          engBtnPresent: Boolean(engBtn),
+          isEngActive: text.includes('English Audio Active'),
+          hasHindiCC: subButtons.some(t => t.includes('Hindi CC'))
         };
       })()
     `);
 
-    const unavailPassed = unavailAudioCheck.hasUnavailableLabel && nonIntrusiveCheck.showsToast && nonIntrusiveCheck.iframeStillPlaying;
-    recordTest('28b', 'Hollywood Movie Audio Honesty & Non-Intrusive Feedback', unavailPassed, `Unavailable label: ${unavailAudioCheck.hasUnavailableLabel}, Non-intrusive toast: ${nonIntrusiveCheck.showsToast}, Player intact: ${nonIntrusiveCheck.iframeStillPlaying}`);
+    const honestyPassed = hollywoodHonestyCheck.hindiBtnAbsent && hollywoodHonestyCheck.engBtnPresent && hollywoodHonestyCheck.isEngActive;
+    recordTest('28b', 'Hollywood Movie Audio Honesty (Inside Out - English Only, No Fake Hindi Button)', honestyPassed, 
+      `Hindi btn absent: ${hollywoodHonestyCheck.hindiBtnAbsent}, Eng btn present: ${hollywoodHonestyCheck.engBtnPresent}, Eng active: ${hollywoodHonestyCheck.isEngActive}, Hindi CC available: ${hollywoodHonestyCheck.hasHindiCC}`);
 
     // Close Player Modal
     await client.eval(`
@@ -896,16 +932,18 @@ async function runQA() {
     const bollywoodAudioCheck = await client.eval(`
       (() => {
         const hindiBtn = document.querySelector('[data-testid="audio-btn-hindi"]');
+        const engBtn = document.querySelector('[data-testid="audio-btn-english"]');
         const text = document.body.innerText;
         return {
-          hindiBtnText: hindiBtn ? hindiBtn.innerText : '',
-          isHindiActive: text.includes('Hindi Audio Active') || text.includes('Original Hindi Audio Track')
+          hasHindiBtn: Boolean(hindiBtn),
+          engBtnAbsent: !engBtn,
+          isHindiActive: text.includes('Hindi Audio Active') || text.includes('Original Native Hindi Audio Track')
         };
       })()
     `);
 
-    const bollywoodPassed = bollywoodAudioCheck.hindiBtnText.includes('Hindi Audio') && !bollywoodAudioCheck.hindiBtnText.includes('(Unavailable)') && bollywoodAudioCheck.isHindiActive;
-    recordTest(31, 'Bollywood Movie Authentic Spoken Hindi Playback', bollywoodPassed, `Hindi Btn: "${bollywoodAudioCheck.hindiBtnText}", Active Badge: ${bollywoodAudioCheck.isHindiActive}`);
+    const bollywoodPassed = bollywoodAudioCheck.hasHindiBtn && bollywoodAudioCheck.engBtnAbsent && bollywoodAudioCheck.isHindiActive;
+    recordTest(31, 'Bollywood Movie Authentic Spoken Hindi Playback', bollywoodPassed, `Hindi Btn: ${bollywoodAudioCheck.hasHindiBtn}, Eng Btn absent: ${bollywoodAudioCheck.engBtnAbsent}, Active Badge: ${bollywoodAudioCheck.isHindiActive}`);
 
     // Close Player Modal
     await client.eval(`
