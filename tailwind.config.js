@@ -17,6 +17,15 @@ export default {
           cyan: '#6be5ff',
           glow: '#9ae8ff',
           accent: '#2a5b9e'
+        },
+        cozy: {
+          amber: '#f59e0b',
+          peach: '#fb923c',
+          rose: '#f43f5e',
+          violet: '#a855f7',
+          warmNight: '#060813',
+          card: '#0e1633',
+          cardHover: '#131b3e'
         }
       }
     },
