@@ -238,6 +238,7 @@ export default function Navbar({
 
           <button
             onClick={onOpenSettings}
+            data-testid="settings-btn"
             title="Settings & Master Vault"
             className={`p-2 rounded-full border transition flex items-center gap-1.5 ${
               isMasterMode

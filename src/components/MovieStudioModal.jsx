@@ -2,10 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { 
   X, Film, Tv, Plus, Edit2, Trash2, Play, Download, 
   Sparkles, Volume2, Save, Eye, Layers, CheckCircle2,
-  Video, FileVideo, HardDrive, ShieldCheck, ArrowRight
+  Video, FileVideo, HardDrive, ShieldCheck, ArrowRight,
+  ListOrdered, Tag, Sliders
 } from 'lucide-react';
 
 const STORAGE_KEY = 'furina_studio_movies';
+
+export const PROVIDER_OPTIONS = [
+  { id: 'Owned Studio Master', label: '⭐ Owned Studio Master (Direct CDN / Local)' },
+  { id: 'Indian Cinema Native', label: '🇮🇳 Indian Cinema Native Master' },
+  { id: 'AnimeWorld India Dub', label: '🌸 AnimeWorld India Official Dub' },
+  { id: 'MultiEmbed Localized', label: '🌐 MultiEmbed Localized Audio Stream' },
+  { id: 'External Custom CDN', label: '⚡ External Fast CDN / High-Bandwidth Mirror' }
+];
 
 export const DEFAULT_SAMPLE_MOVIES = [
   {
@@ -345,8 +354,23 @@ export default function MovieStudioModal({ isOpen, onClose, onPlayMovie, onMovie
     release_date: new Date().toISOString().split('T')[0],
     isAnime: false,
     audio_hi_url: '',
+    audio_hi_url_p2: '',
+    audio_hi_url_p3: '',
+    audio_hi_provider: 'Owned Studio Master',
     audio_en_url: '',
+    audio_en_url_p2: '',
+    audio_en_url_p3: '',
+    audio_en_provider: 'Owned Studio Master',
     audio_ja_url: '',
+    audio_ja_url_p2: '',
+    audio_ja_url_p3: '',
+    audio_ja_provider: 'Owned Studio Master',
+    audio_other_lang: '',
+    audio_other_label: '',
+    audio_other_url: '',
+    audio_other_url_p2: '',
+    audio_other_url_p3: '',
+    audio_other_provider: 'External Custom CDN',
     subtitle_url: '',
     download_url: ''
   });
@@ -371,8 +395,23 @@ export default function MovieStudioModal({ isOpen, onClose, onPlayMovie, onMovie
       release_date: new Date().toISOString().split('T')[0],
       isAnime: false,
       audio_hi_url: '',
+      audio_hi_url_p2: '',
+      audio_hi_url_p3: '',
+      audio_hi_provider: 'Owned Studio Master',
       audio_en_url: '',
+      audio_en_url_p2: '',
+      audio_en_url_p3: '',
+      audio_en_provider: 'Owned Studio Master',
       audio_ja_url: '',
+      audio_ja_url_p2: '',
+      audio_ja_url_p3: '',
+      audio_ja_provider: 'Owned Studio Master',
+      audio_other_lang: '',
+      audio_other_label: '',
+      audio_other_url: '',
+      audio_other_url_p2: '',
+      audio_other_url_p3: '',
+      audio_other_provider: 'External Custom CDN',
       subtitle_url: '',
       download_url: ''
     });
@@ -385,6 +424,9 @@ export default function MovieStudioModal({ isOpen, onClose, onPlayMovie, onMovie
       ? m.genres.map((g) => (typeof g === 'string' ? g : g?.name)).filter(Boolean).join(', ')
       : (m.genres || 'Sci-Fi, Action');
 
+    const otherLangKey = Object.keys(m.languages || {}).find((k) => !['hi', 'en', 'ja'].includes(k));
+    const otherLangObj = otherLangKey ? m.languages[otherLangKey] : null;
+
     setFormData({
       title: m.title || m.name || '',
       overview: m.overview || '',
@@ -395,9 +437,24 @@ export default function MovieStudioModal({ isOpen, onClose, onPlayMovie, onMovie
       vote_average: m.vote_average || 8.5,
       release_date: m.release_date || m.first_air_date || new Date().toISOString().split('T')[0],
       isAnime: Boolean(m.isAnime),
-      audio_hi_url: m.languages?.hi?.url || '',
-      audio_en_url: m.languages?.en?.url || '',
-      audio_ja_url: m.languages?.ja?.url || '',
+      audio_hi_url: m.languages?.hi?.sources?.[0]?.url || m.languages?.hi?.url || '',
+      audio_hi_url_p2: m.languages?.hi?.sources?.[1]?.url || '',
+      audio_hi_url_p3: m.languages?.hi?.sources?.[2]?.url || '',
+      audio_hi_provider: m.languages?.hi?.provider || m.languages?.hi?.sources?.[0]?.provider || 'Owned Studio Master',
+      audio_en_url: m.languages?.en?.sources?.[0]?.url || m.languages?.en?.url || '',
+      audio_en_url_p2: m.languages?.en?.sources?.[1]?.url || '',
+      audio_en_url_p3: m.languages?.en?.sources?.[2]?.url || '',
+      audio_en_provider: m.languages?.en?.provider || m.languages?.en?.sources?.[0]?.provider || 'Owned Studio Master',
+      audio_ja_url: m.languages?.ja?.sources?.[0]?.url || m.languages?.ja?.url || '',
+      audio_ja_url_p2: m.languages?.ja?.sources?.[1]?.url || '',
+      audio_ja_url_p3: m.languages?.ja?.sources?.[2]?.url || '',
+      audio_ja_provider: m.languages?.ja?.provider || m.languages?.ja?.sources?.[0]?.provider || 'Owned Studio Master',
+      audio_other_lang: otherLangKey || '',
+      audio_other_label: otherLangObj?.label || '',
+      audio_other_url: otherLangObj?.sources?.[0]?.url || otherLangObj?.url || '',
+      audio_other_url_p2: otherLangObj?.sources?.[1]?.url || '',
+      audio_other_url_p3: otherLangObj?.sources?.[2]?.url || '',
+      audio_other_provider: otherLangObj?.provider || otherLangObj?.sources?.[0]?.provider || 'External Custom CDN',
       subtitle_url: m.subtitles?.[0]?.src || '',
       download_url: m.download_url || m.languages?.hi?.url || m.languages?.en?.url || ''
     });
@@ -424,6 +481,33 @@ export default function MovieStudioModal({ isOpen, onClose, onPlayMovie, onMovie
     const sampleEn = './media/english_audio.mp4';
     const sampleJa = './media/japanese_audio.wav';
 
+    const primaryHi = formData.audio_hi_url.trim() || sampleHi;
+    const hiSources = [
+      { priority: 1, url: primaryHi, provider: formData.audio_hi_provider || 'Owned Studio Master' },
+      formData.audio_hi_url_p2.trim() ? { priority: 2, url: formData.audio_hi_url_p2.trim(), provider: 'Backup CDN' } : null,
+      formData.audio_hi_url_p3.trim() ? { priority: 3, url: formData.audio_hi_url_p3.trim(), provider: 'Fallback Mirror' } : null
+    ].filter(Boolean);
+
+    const primaryEn = formData.audio_en_url.trim() || sampleEn;
+    const enSources = [
+      { priority: 1, url: primaryEn, provider: formData.audio_en_provider || 'Owned Studio Master' },
+      formData.audio_en_url_p2.trim() ? { priority: 2, url: formData.audio_en_url_p2.trim(), provider: 'Backup CDN' } : null,
+      formData.audio_en_url_p3.trim() ? { priority: 3, url: formData.audio_en_url_p3.trim(), provider: 'Fallback Mirror' } : null
+    ].filter(Boolean);
+
+    const primaryJa = formData.audio_ja_url.trim() || sampleJa;
+    const jaSources = [
+      { priority: 1, url: primaryJa, provider: formData.audio_ja_provider || 'Owned Studio Master' },
+      formData.audio_ja_url_p2.trim() ? { priority: 2, url: formData.audio_ja_url_p2.trim(), provider: 'Backup CDN' } : null,
+      formData.audio_ja_url_p3.trim() ? { priority: 3, url: formData.audio_ja_url_p3.trim(), provider: 'Fallback Mirror' } : null
+    ].filter(Boolean);
+
+    const otherSources = (formData.audio_other_lang.trim() && (formData.audio_other_url.trim() || formData.audio_other_url_p2.trim())) ? [
+      formData.audio_other_url.trim() ? { priority: 1, url: formData.audio_other_url.trim(), provider: formData.audio_other_provider || 'External Custom CDN' } : null,
+      formData.audio_other_url_p2.trim() ? { priority: 2, url: formData.audio_other_url_p2.trim(), provider: 'Backup CDN' } : null,
+      formData.audio_other_url_p3.trim() ? { priority: 3, url: formData.audio_other_url_p3.trim(), provider: 'Fallback Mirror' } : null
+    ].filter(Boolean) : [];
+
     const movieObj = {
       id: editingId || `studio_${Date.now()}`,
       title: formData.title.trim(),
@@ -439,23 +523,38 @@ export default function MovieStudioModal({ isOpen, onClose, onPlayMovie, onMovie
       thumbnail: formData.backdrop_path.trim() || formData.poster_path.trim(),
       isCustom: true,
       isAnime: formData.isAnime,
-      download_url: formData.download_url.trim() || formData.audio_hi_url.trim() || formData.audio_en_url.trim() || sampleHi,
+      download_url: formData.download_url.trim() || primaryHi || primaryEn,
       languages: {
         hi: {
           label: 'Hindi Dub (Studio Master)',
-          url: formData.audio_hi_url.trim() || sampleHi,
+          url: primaryHi,
+          provider: formData.audio_hi_provider || 'Owned Studio Master',
+          sources: hiSources,
           type: 'video/mp4'
         },
         en: {
           label: 'English Audio (Studio Master)',
-          url: formData.audio_en_url.trim() || sampleEn,
+          url: primaryEn,
+          provider: formData.audio_en_provider || 'Owned Studio Master',
+          sources: enSources,
           type: 'video/mp4'
         },
         ja: {
           label: 'Japanese Audio (Studio Master)',
-          url: formData.audio_ja_url.trim() || sampleJa,
+          url: primaryJa,
+          provider: formData.audio_ja_provider || 'Owned Studio Master',
+          sources: jaSources,
           type: 'video/mp4'
         },
+        ...(formData.audio_other_lang.trim() && otherSources.length > 0 ? {
+          [formData.audio_other_lang.trim().toLowerCase()]: {
+            label: `${formData.audio_other_label.trim() || 'Other Audio'} (${formData.audio_other_lang.trim().toUpperCase()})`,
+            url: otherSources[0]?.url || '',
+            provider: formData.audio_other_provider || 'External Custom CDN',
+            sources: otherSources,
+            type: 'video/mp4'
+          }
+        } : {})
       },
       subtitles: formData.subtitle_url.trim() ? [
         { lang: 'en', label: 'English Subtitles', src: formData.subtitle_url.trim() }
@@ -621,18 +720,33 @@ export default function MovieStudioModal({ isOpen, onClose, onPlayMovie, onMovie
                             <div className="flex items-center gap-1 mt-2.5 flex-wrap text-[10px]">
                               <span className="text-cyan-300/60 font-semibold mr-1">Audios:</span>
                               {hasHi && (
-                                <span className="bg-amber-500/20 text-amber-300 border border-amber-500/40 px-1.5 py-0.5 rounded font-bold">
-                                  🇮🇳 Hindi
+                                <span className="bg-amber-500/20 text-amber-300 border border-amber-500/40 px-1.5 py-0.5 rounded font-bold inline-flex items-center gap-1">
+                                  <span>🇮🇳 Hindi</span>
+                                  {m.languages?.hi?.sources?.length > 1 && (
+                                    <span className="text-[9px] bg-amber-400/30 text-amber-200 px-1 rounded-full font-mono">
+                                      P1-{m.languages.hi.sources.length}
+                                    </span>
+                                  )}
                                 </span>
                               )}
                               {hasEn && (
-                                <span className="bg-blue-500/20 text-blue-300 border border-blue-500/40 px-1.5 py-0.5 rounded font-bold">
-                                  🇬🇧 English
+                                <span className="bg-blue-500/20 text-blue-300 border border-blue-500/40 px-1.5 py-0.5 rounded font-bold inline-flex items-center gap-1">
+                                  <span>🇬🇧 English</span>
+                                  {m.languages?.en?.sources?.length > 1 && (
+                                    <span className="text-[9px] bg-blue-400/30 text-blue-200 px-1 rounded-full font-mono">
+                                      P1-{m.languages.en.sources.length}
+                                    </span>
+                                  )}
                                 </span>
                               )}
                               {hasJa && (
-                                <span className="bg-purple-500/20 text-purple-300 border border-purple-500/40 px-1.5 py-0.5 rounded font-bold">
-                                  🇯🇵 Japanese
+                                <span className="bg-purple-500/20 text-purple-300 border border-purple-500/40 px-1.5 py-0.5 rounded font-bold inline-flex items-center gap-1">
+                                  <span>🇯🇵 Japanese</span>
+                                  {m.languages?.ja?.sources?.length > 1 && (
+                                    <span className="text-[9px] bg-purple-400/30 text-purple-200 px-1 rounded-full font-mono">
+                                      P1-{m.languages.ja.sources.length}
+                                    </span>
+                                  )}
                                 </span>
                               )}
                               {!hasHi && !hasEn && !hasJa && (
@@ -796,57 +910,268 @@ export default function MovieStudioModal({ isOpen, onClose, onPlayMovie, onMovie
               {/* Multi-Audio Tracks Configuration */}
               <div className="bg-[#081534] border border-cyan-500/30 rounded-2xl p-5 space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-black text-amber-300 uppercase tracking-wider flex items-center gap-2">
-                    <Volume2 className="w-4 h-4 text-amber-400" />
-                    <span>3. Dedicated Multi-Language Audio Media Sources</span>
-                  </h3>
-                  <span className="text-[11px] text-slate-400">Direct MP4 or HLS (.m3u8)</span>
+                  <div>
+                    <h3 className="text-sm font-black text-amber-300 uppercase tracking-wider flex items-center gap-2">
+                      <Volume2 className="w-4 h-4 text-amber-400" />
+                      <span>3. Multi-Source Audio Prioritization & Providers</span>
+                    </h3>
+                    <p className="text-[11px] text-cyan-200/60 mt-0.5">
+                      Configure multi-source failover (Priority 1: Primary, Priority 2: Backup CDN, Priority 3: Fallback Mirror) and provider tagging.
+                    </p>
+                  </div>
+                  <span className="text-[11px] text-emerald-400 font-mono hidden sm:inline">Failover Resilient</span>
                 </div>
 
-                <div className="space-y-3 text-xs">
+                <div className="space-y-4 text-xs">
                   {/* Hindi Audio */}
-                  <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30">
-                    <label className="block text-amber-300 font-extrabold mb-1 flex items-center gap-1.5">
-                      <span>🇮🇳</span>
-                      <span>Hindi Audio Track Stream / File URL</span>
-                    </label>
-                    <input 
-                      type="url"
-                      value={formData.audio_hi_url}
-                      onChange={(e) => setFormData({ ...formData, audio_hi_url: e.target.value })}
-                      placeholder="https://.../movie-hindi-audio.mp4 or .m3u8"
-                      className="w-full bg-[#050c20] border border-amber-500/40 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 font-mono text-xs"
-                    />
+                  <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-2.5">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <label className="text-amber-300 font-extrabold flex items-center gap-1.5 text-xs">
+                        <span>🇮🇳</span>
+                        <span>Hindi Audio Configuration (Priority 1 - 3)</span>
+                      </label>
+                      <div className="flex items-center gap-1.5">
+                        <Tag className="w-3 h-3 text-amber-400" />
+                        <select
+                          value={formData.audio_hi_provider}
+                          onChange={(e) => setFormData({ ...formData, audio_hi_provider: e.target.value })}
+                          className="bg-[#050c20] border border-amber-500/40 rounded-lg px-2 py-1 text-[11px] text-amber-200 focus:outline-none focus:border-amber-400"
+                        >
+                          {PROVIDER_OPTIONS.map((opt) => (
+                            <option key={opt.id} value={opt.id}>{opt.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 shrink-0">Priority 1 (Primary)</span>
+                        <input 
+                          type="url"
+                          value={formData.audio_hi_url}
+                          onChange={(e) => setFormData({ ...formData, audio_hi_url: e.target.value })}
+                          placeholder="Priority 1: https://.../movie-hindi-audio.mp4 or .m3u8"
+                          className="w-full bg-[#050c20] border border-amber-500/40 rounded-xl px-3 py-1.5 text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 font-mono text-xs"
+                        />
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 shrink-0">Priority 2 (Backup CDN)</span>
+                        <input 
+                          type="url"
+                          value={formData.audio_hi_url_p2}
+                          onChange={(e) => setFormData({ ...formData, audio_hi_url_p2: e.target.value })}
+                          placeholder="Priority 2: Backup CDN Stream / File URL (Optional)"
+                          className="w-full bg-[#050c20]/80 border border-slate-700 rounded-xl px-3 py-1.5 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-amber-400 font-mono text-xs"
+                        />
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 shrink-0">Priority 3 (Fallback Mirror)</span>
+                        <input 
+                          type="url"
+                          value={formData.audio_hi_url_p3}
+                          onChange={(e) => setFormData({ ...formData, audio_hi_url_p3: e.target.value })}
+                          placeholder="Priority 3: Fallback Stream / Mirror URL (Optional)"
+                          className="w-full bg-[#050c20]/80 border border-slate-700 rounded-xl px-3 py-1.5 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-amber-400 font-mono text-xs"
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   {/* English Audio */}
-                  <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/30">
-                    <label className="block text-blue-300 font-extrabold mb-1 flex items-center gap-1.5">
-                      <span>🇬🇧</span>
-                      <span>English Audio Track Stream / File URL</span>
-                    </label>
-                    <input 
-                      type="url"
-                      value={formData.audio_en_url}
-                      onChange={(e) => setFormData({ ...formData, audio_en_url: e.target.value })}
-                      placeholder="https://.../movie-english-dub.mp4 or .m3u8"
-                      className="w-full bg-[#050c20] border border-blue-500/40 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-blue-400 font-mono text-xs"
-                    />
+                  <div className="p-3.5 rounded-xl bg-blue-500/10 border border-blue-500/30 space-y-2.5">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <label className="text-blue-300 font-extrabold flex items-center gap-1.5 text-xs">
+                        <span>🇬🇧</span>
+                        <span>English Audio Configuration (Priority 1 - 3)</span>
+                      </label>
+                      <div className="flex items-center gap-1.5">
+                        <Tag className="w-3 h-3 text-blue-400" />
+                        <select
+                          value={formData.audio_en_provider}
+                          onChange={(e) => setFormData({ ...formData, audio_en_provider: e.target.value })}
+                          className="bg-[#050c20] border border-blue-500/40 rounded-lg px-2 py-1 text-[11px] text-blue-200 focus:outline-none focus:border-blue-400"
+                        >
+                          {PROVIDER_OPTIONS.map((opt) => (
+                            <option key={opt.id} value={opt.id}>{opt.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-400/20 text-blue-300 shrink-0">Priority 1 (Primary)</span>
+                        <input 
+                          type="url"
+                          value={formData.audio_en_url}
+                          onChange={(e) => setFormData({ ...formData, audio_en_url: e.target.value })}
+                          placeholder="Priority 1: https://.../movie-english-dub.mp4 or .m3u8"
+                          className="w-full bg-[#050c20] border border-blue-500/40 rounded-xl px-3 py-1.5 text-white placeholder-slate-500 focus:outline-none focus:border-blue-400 font-mono text-xs"
+                        />
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 shrink-0">Priority 2 (Backup CDN)</span>
+                        <input 
+                          type="url"
+                          value={formData.audio_en_url_p2}
+                          onChange={(e) => setFormData({ ...formData, audio_en_url_p2: e.target.value })}
+                          placeholder="Priority 2: Backup CDN Stream / File URL (Optional)"
+                          className="w-full bg-[#050c20]/80 border border-slate-700 rounded-xl px-3 py-1.5 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-400 font-mono text-xs"
+                        />
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 shrink-0">Priority 3 (Fallback Mirror)</span>
+                        <input 
+                          type="url"
+                          value={formData.audio_en_url_p3}
+                          onChange={(e) => setFormData({ ...formData, audio_en_url_p3: e.target.value })}
+                          placeholder="Priority 3: Fallback Stream / Mirror URL (Optional)"
+                          className="w-full bg-[#050c20]/80 border border-slate-700 rounded-xl px-3 py-1.5 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-400 font-mono text-xs"
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   {/* Japanese Audio */}
-                  <div className="p-3 rounded-xl bg-purple-500/10 border border-purple-500/30">
-                    <label className="block text-purple-300 font-extrabold mb-1 flex items-center gap-1.5">
-                      <span>🇯🇵</span>
-                      <span>Japanese Audio Track Stream / File URL</span>
-                    </label>
-                    <input 
-                      type="url"
-                      value={formData.audio_ja_url}
-                      onChange={(e) => setFormData({ ...formData, audio_ja_url: e.target.value })}
-                      placeholder="https://.../movie-japanese-sub.mp4 or .m3u8"
-                      className="w-full bg-[#050c20] border border-purple-500/40 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 font-mono text-xs"
-                    />
+                  <div className="p-3.5 rounded-xl bg-purple-500/10 border border-purple-500/30 space-y-2.5">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <label className="text-purple-300 font-extrabold flex items-center gap-1.5 text-xs">
+                        <span>🇯🇵</span>
+                        <span>Japanese Audio Configuration (Priority 1 - 3)</span>
+                      </label>
+                      <div className="flex items-center gap-1.5">
+                        <Tag className="w-3 h-3 text-purple-400" />
+                        <select
+                          value={formData.audio_ja_provider}
+                          onChange={(e) => setFormData({ ...formData, audio_ja_provider: e.target.value })}
+                          className="bg-[#050c20] border border-purple-500/40 rounded-lg px-2 py-1 text-[11px] text-purple-200 focus:outline-none focus:border-purple-400"
+                        >
+                          {PROVIDER_OPTIONS.map((opt) => (
+                            <option key={opt.id} value={opt.id}>{opt.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-400/20 text-purple-300 shrink-0">Priority 1 (Primary)</span>
+                        <input 
+                          type="url"
+                          value={formData.audio_ja_url}
+                          onChange={(e) => setFormData({ ...formData, audio_ja_url: e.target.value })}
+                          placeholder="Priority 1: https://.../movie-japanese-sub.mp4 or .m3u8"
+                          className="w-full bg-[#050c20] border border-purple-500/40 rounded-xl px-3 py-1.5 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 font-mono text-xs"
+                        />
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 shrink-0">Priority 2 (Backup CDN)</span>
+                        <input 
+                          type="url"
+                          value={formData.audio_ja_url_p2}
+                          onChange={(e) => setFormData({ ...formData, audio_ja_url_p2: e.target.value })}
+                          placeholder="Priority 2: Backup CDN Stream / File URL (Optional)"
+                          className="w-full bg-[#050c20]/80 border border-slate-700 rounded-xl px-3 py-1.5 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-400 font-mono text-xs"
+                        />
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 shrink-0">Priority 3 (Fallback Mirror)</span>
+                        <input 
+                          type="url"
+                          value={formData.audio_ja_url_p3}
+                          onChange={(e) => setFormData({ ...formData, audio_ja_url_p3: e.target.value })}
+                          placeholder="Priority 3: Fallback Stream / Mirror URL (Optional)"
+                          className="w-full bg-[#050c20]/80 border border-slate-700 rounded-xl px-3 py-1.5 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-400 font-mono text-xs"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Additional / Other Audio Track */}
+                  <div className="p-3.5 rounded-xl bg-teal-500/10 border border-teal-500/30 space-y-2.5">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <label className="text-teal-300 font-extrabold flex items-center gap-1.5 text-xs">
+                        <span>🌐</span>
+                        <span>Additional Audio Track (Optional Multi-Dub)</span>
+                      </label>
+                      <div className="flex items-center gap-1.5">
+                        <Tag className="w-3 h-3 text-teal-400" />
+                        <select
+                          value={formData.audio_other_provider}
+                          onChange={(e) => setFormData({ ...formData, audio_other_provider: e.target.value })}
+                          className="bg-[#050c20] border border-teal-500/40 rounded-lg px-2 py-1 text-[11px] text-teal-200 focus:outline-none focus:border-teal-400"
+                        >
+                          {PROVIDER_OPTIONS.map((opt) => (
+                            <option key={opt.id} value={opt.id}>{opt.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-teal-200/70 text-[10px] font-bold mb-1">Language Code (e.g. es, fr, ko, de)</label>
+                        <input 
+                          type="text"
+                          value={formData.audio_other_lang}
+                          onChange={(e) => setFormData({ ...formData, audio_other_lang: e.target.value })}
+                          placeholder="es"
+                          className="w-full bg-[#050c20] border border-teal-500/40 rounded-lg px-2.5 py-1.5 text-white placeholder-slate-500 focus:outline-none focus:border-teal-400 text-xs font-mono"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-teal-200/70 text-[10px] font-bold mb-1">Display Label (e.g. Spanish Dub)</label>
+                        <input 
+                          type="text"
+                          value={formData.audio_other_label}
+                          onChange={(e) => setFormData({ ...formData, audio_other_label: e.target.value })}
+                          placeholder="Spanish Dub (Castilian)"
+                          className="w-full bg-[#050c20] border border-teal-500/40 rounded-lg px-2.5 py-1.5 text-white placeholder-slate-500 focus:outline-none focus:border-teal-400 text-xs"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-teal-400/20 text-teal-300 shrink-0">Priority 1 (Primary)</span>
+                        <input 
+                          type="url"
+                          value={formData.audio_other_url}
+                          onChange={(e) => setFormData({ ...formData, audio_other_url: e.target.value })}
+                          placeholder="Priority 1: https://.../movie-spanish-audio.mp4 or .m3u8"
+                          className="w-full bg-[#050c20] border border-teal-500/40 rounded-xl px-3 py-1.5 text-white placeholder-slate-500 focus:outline-none focus:border-teal-400 font-mono text-xs"
+                        />
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 shrink-0">Priority 2 (Backup CDN)</span>
+                        <input 
+                          type="url"
+                          value={formData.audio_other_url_p2}
+                          onChange={(e) => setFormData({ ...formData, audio_other_url_p2: e.target.value })}
+                          placeholder="Priority 2: Backup CDN URL (Optional)"
+                          className="w-full bg-[#050c20]/80 border border-slate-700 rounded-xl px-3 py-1.5 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-teal-400 font-mono text-xs"
+                        />
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 shrink-0">Priority 3 (Fallback Mirror)</span>
+                        <input 
+                          type="url"
+                          value={formData.audio_other_url_p3}
+                          onChange={(e) => setFormData({ ...formData, audio_other_url_p3: e.target.value })}
+                          placeholder="Priority 3: Fallback URL (Optional)"
+                          className="w-full bg-[#050c20]/80 border border-slate-700 rounded-xl px-3 py-1.5 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-teal-400 font-mono text-xs"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

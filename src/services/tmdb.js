@@ -3267,12 +3267,41 @@ export function isHindiAvailable(item) {
     return true;
   }
 
-  // Curated Bollywood list (authentic Hindi cinema)
   const id = Number(item.id);
+
+  // Curated Bollywood list (authentic Hindi cinema)
   if (CURATED_BOLLYWOOD_BLOCKBUSTERS.some((b) => Number(b.id) === id)) return true;
 
-  // Third-party Hollywood and Anime embeds host English/Japanese streams only.
-  // We strictly NEVER falsely report Hindi availability when the underlying stream is English.
+  // Verified Hollywood Blockbusters with official authorized Hindi dubs
+  if (VERIFIED_HINDI_HOLLYWOOD_IDS.has(id)) return true;
+  if (CURATED_HOLLYWOOD_HINDI_DUBS.some((m) => Number(m.id) === id)) return true;
+  if (VERIFIED_HINDI_GLOBAL_SERIES_IDS.has(id)) return true;
+  if (VERIFIED_HINDI_KDRAMA_IDS.has(id)) return true;
+
+  // Verified Hindi Dubbed Anime
+  if (VERIFIED_HINDI_ANIME_IDS.has(id)) return true;
+  if (CURATED_HINDI_DUBBED_ANIME.some((a) => Number(a.id) === id)) return true;
+  if (item.category === 'anime' && (item.hasHindiDub === true || item.isHindiDubbed === true)) return true;
+
+  // Title fallback matching for blockbusters
+  const itemTitle = (item.title || item.name || item.original_title || item.original_name || '').toLowerCase().trim();
+  if (itemTitle) {
+    if (CURATED_HOLLYWOOD_HINDI_DUBS.some((m) => {
+      const mTitle = (m.title || m.name || '').toLowerCase().trim();
+      return mTitle && (itemTitle === mTitle || itemTitle.includes(mTitle) || mTitle.includes(itemTitle));
+    })) return true;
+
+    if (CURATED_HINDI_DUBBED_ANIME.some((a) => {
+      const aTitle = (a.title || a.name || '').toLowerCase().trim();
+      return aTitle && (itemTitle === aTitle || itemTitle.includes(aTitle) || aTitle.includes(itemTitle));
+    })) return true;
+
+    if (CURATED_BOLLYWOOD_BLOCKBUSTERS.some((b) => {
+      const bTitle = (b.title || b.name || '').toLowerCase().trim();
+      return bTitle && (itemTitle === bTitle || itemTitle.includes(bTitle) || bTitle.includes(itemTitle));
+    })) return true;
+  }
+
   return false;
 }
 

@@ -1003,7 +1003,185 @@ async function runQA() {
         if (closePlayer) closePlayer.click();
       })()
     `);
+    console.log('\n--- Running TEST 33: Multi-Language Filter Bar ---');
+    await client.eval(`window.__setReactInput('input[type="text"]', '');`);
+    await sleep(800);
+
+    const filterPills = await client.eval(`
+      (() => {
+        const buttons = Array.from(document.querySelectorAll('button'));
+        const hasHindi = buttons.some(b => b.textContent.includes('Hindi Dubbed'));
+        const hasMulti = buttons.some(b => b.textContent.includes('Multi-Audio'));
+        const hasSubs = buttons.some(b => b.textContent.includes('Subtitles'));
+        const hasMovies = buttons.some(b => b.textContent.includes('Movies'));
+        const hasAnime = buttons.some(b => b.textContent.includes('Anime'));
+        return { hasHindi, hasMulti, hasSubs, hasMovies, hasAnime };
+      })()
+    `);
+
+    await client.eval(`
+      (() => {
+        const btn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('Hindi Dubbed'));
+        if (btn) btn.click();
+      })()
+    `);
+    await sleep(1000);
+
+    const hindiFilteredCount = await client.eval('document.querySelectorAll(".glass-card").length');
+    const filterPillsPassed = filterPills.hasHindi && filterPills.hasMulti && filterPills.hasSubs && hindiFilteredCount > 0;
+    recordTest(33, 'Multi-Language Filter Bar (Hindi, Multi-Audio, Subs)', filterPillsPassed,
+      `Pills: ${JSON.stringify(filterPills)}, Hindi Filtered Cards: ${hindiFilteredCount}`);
+
+    await client.eval(`
+      (() => {
+        const btn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.trim() === 'All');
+        if (btn) btn.click();
+      })()
+    `);
     await sleep(600);
+
+    console.log('\n--- Running TEST 34: Settings Modal 9 Sections & Provider Health Dashboard ---');
+    await client.eval(`
+      (() => {
+        const btn = document.querySelector('[data-testid="settings-btn"]') || Array.from(document.querySelectorAll('button')).find(b => b.title?.includes('Settings'));
+        if (btn) btn.click();
+      })()
+    `);
+    await sleep(1000);
+
+    const settingsCheck = await client.eval(`
+      (() => {
+        const text = document.body.innerText;
+        const buttons = Array.from(document.querySelectorAll('button')).map(b => b.textContent.trim());
+        const hasAudioLang = text.includes('Audio') || buttons.some(b => b.includes('Audio'));
+        const hasHealthTab = buttons.some(b => b.includes('Provider Health'));
+        const hasAppearanceTab = buttons.some(b => b.includes('Appearance'));
+        const hasSubtitlesTab = buttons.some(b => b.includes('Subtitles'));
+        const hasPlaybackTab = buttons.some(b => b.includes('Playback'));
+        return { hasAudioLang, hasHealthTab, hasAppearanceTab, hasSubtitlesTab, hasPlaybackTab };
+      })()
+    `);
+
+    await client.eval(`
+      (() => {
+        const healthBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('Provider Health'));
+        if (healthBtn) healthBtn.click();
+      })()
+    `);
+    await sleep(1500);
+
+    const healthDashboardCheck = await client.eval(`
+      (() => {
+        const text = document.body.innerText;
+        return {
+          hasLocalMedia: text.includes('Local & Owned Media') || text.includes('Local Media'),
+          hasIndianCinema: text.includes('Indian Native Cinema') || text.includes('Bollywood Native'),
+          hasAnimeWorld: text.includes('AnimeWorld & Tatakai') || text.includes('AnimeWorld India'),
+          hasMultiEmbed: text.includes('MultiEmbed Localized') || text.includes('MultiEmbed'),
+          hasDiagnostics: text.includes('Run Diagnostics') || text.includes('Active Audio Providers Status') || text.includes('ONLINE') || text.includes('Latency')
+        };
+      })()
+    `);
+
+    const settingsPassed = settingsCheck.hasAudioLang && settingsCheck.hasHealthTab && healthDashboardCheck.hasLocalMedia && healthDashboardCheck.hasDiagnostics;
+    recordTest(34, 'Settings Glassmorphism & Provider Health Dashboard', settingsPassed,
+      `Sections: ${JSON.stringify(settingsCheck)}, Health: ${JSON.stringify(healthDashboardCheck)}`);
+
+    await client.eval(`
+      (() => {
+        const closeBtn = document.querySelector('button[aria-label="Close settings"]') || Array.from(document.querySelectorAll('button')).find(b => b.textContent.trim() === 'Done' || b.title?.includes('Close'));
+        if (closeBtn) closeBtn.click();
+      })()
+    `);
+    await sleep(800);
+
+    console.log('\n--- Running TEST 35: Smart Audio Preference Auto-Selection & Honest Fallback ---');
+    await client.eval(`
+      (() => {
+        const s = JSON.parse(localStorage.getItem('furina_settings') || '{}');
+        s.audioLanguage = 'hindi';
+        localStorage.setItem('furina_settings', JSON.stringify(s));
+      })()
+    `);
+
+    await client.eval(`window.__setReactInput('input[type="text"]', 'Inside Out');`);
+    await sleep(2000);
+    await client.eval(`
+      (() => {
+        const card = Array.from(document.querySelectorAll('.glass-card')).find(c => c.textContent.includes('Inside Out')) || document.querySelector('.glass-card');
+        if (card) card.click();
+      })()
+    `);
+    await sleep(1500);
+
+    const fallbackCheck = await client.eval(`
+      (() => {
+        const text = document.body.innerText;
+        const unavailNotice = text.includes("Hindi audio isn't available for this title") || text.includes("Streaming in English Dub") || text.includes("English Audio Active");
+        const unavailBtn = document.querySelector('[data-testid="audio-btn-hindi-unavailable"]');
+        return {
+          hasNotice: unavailNotice,
+          hasUnavailableBtn: Boolean(unavailBtn),
+          activeEnglish: text.includes('English Audio Active')
+        };
+      })()
+    `);
+
+    const test35Passed = fallbackCheck.hasNotice && fallbackCheck.hasUnavailableBtn && fallbackCheck.activeEnglish;
+    recordTest(35, 'Smart Audio Preference Auto-Selection with Honest Fallback Notice', test35Passed,
+      `Notice: ${fallbackCheck.hasNotice}, Unavailable Btn: ${fallbackCheck.hasUnavailableBtn}, English fallback: ${fallbackCheck.activeEnglish}`);
+
+    await client.eval(`
+      (() => {
+        const closePlayer = document.querySelector('button[title*="Close Player"]') || Array.from(document.querySelectorAll('button')).find(b => b.title?.toLowerCase().includes('close player'));
+        if (closePlayer) closePlayer.click();
+      })()
+    `);
+    await sleep(800);
+
+    console.log('\n--- Running TEST 36: Movie Studio Multi-Source Prioritization & Tags ---');
+    await client.eval(`
+      (() => {
+        const studioBtn = document.querySelector('button[data-testid="studio-btn"]');
+        if (studioBtn) studioBtn.click();
+      })()
+    `);
+    await sleep(1200);
+
+    await client.eval(`
+      (() => {
+        const createBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('Create New Movie'));
+        if (createBtn) createBtn.click();
+      })()
+    `);
+    await sleep(1000);
+
+    const studioInputsCheck = await client.eval(`
+      (() => {
+        const p1Inputs = document.querySelectorAll('input[placeholder*="Priority 1"], input[placeholder*="movie-hindi-audio"]');
+        const p2Inputs = document.querySelectorAll('input[placeholder*="Priority 2"]');
+        const p3Inputs = document.querySelectorAll('input[placeholder*="Priority 3"]');
+        const providerSelects = document.querySelectorAll('select');
+        return {
+          p1Count: p1Inputs.length,
+          p2Count: p2Inputs.length,
+          p3Count: p3Inputs.length,
+          selectCount: providerSelects.length
+        };
+      })()
+    `);
+
+    const studioMultiSourcePassed = studioInputsCheck.p1Count >= 3 && studioInputsCheck.p2Count >= 3 && studioInputsCheck.p3Count >= 3;
+    recordTest(36, 'Movie Studio Multi-Source Prioritization Form (P1, P2, P3 & Provider Tags)', studioMultiSourcePassed,
+      `P1: ${studioInputsCheck.p1Count}, P2: ${studioInputsCheck.p2Count}, P3: ${studioInputsCheck.p3Count}, Selects: ${studioInputsCheck.selectCount}`);
+
+    await client.eval(`
+      (() => {
+        const closeBtn = document.querySelector('button[aria-label="Close Movie Studio"]');
+        if (closeBtn) closeBtn.click();
+      })()
+    `);
+    await sleep(800);
 
     console.log('\n--- Running TEST 26: Final Production Build Verification ---');
     try {

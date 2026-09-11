@@ -20,7 +20,8 @@ import {
   fetchMatureMovies,
   fetchEcchiAnime,
   searchContent,
-  deduplicateMedia
+  deduplicateMedia,
+  isHindiAvailable
 } from './services/tmdb';
 import { SERVERS } from './services/streaming';
 import { Flame, Film, Tv, Sparkles, Heart, RefreshCw, Shield, Settings, ChevronDown, Clock, Play, X } from 'lucide-react';
@@ -240,6 +241,78 @@ export default function App() {
     } catch (e) {}
     setLoadingMore(false);
   };
+
+  const [globalMediaFilter, setGlobalMediaFilter] = useState('all');
+
+  const displayedItems = useMemo(() => {
+    if (globalMediaFilter === 'all') return items;
+    if (globalMediaFilter === 'hindi') return items.filter((item) => isHindiAvailable(item));
+    if (globalMediaFilter === 'english') return items.filter((item) => item.original_language !== 'hi' || item.languages?.en);
+    if (globalMediaFilter === 'japanese') return items.filter((item) => item.original_language === 'ja' || item.category === 'anime' || item.languages?.ja);
+    if (globalMediaFilter === 'multiaudio') return items.filter((item) => (isHindiAvailable(item) && item.original_language !== 'hi') || item.languages || (item.category === 'anime' && isHindiAvailable(item)));
+    if (globalMediaFilter === 'subtitles') return items.filter((item) => item.subtitles?.length > 0 || item.category === 'anime' || item.languages);
+    if (globalMediaFilter === 'movies') return items.filter((item) => item.media_type === 'movie' || (!item.first_air_date && item.category !== 'series'));
+    if (globalMediaFilter === 'anime') return items.filter((item) => item.category === 'anime' || item.original_language === 'ja');
+    if (globalMediaFilter === 'series') return items.filter((item) => item.media_type === 'tv' || Boolean(item.first_air_date) || item.category === 'series');
+    return items;
+  }, [items, globalMediaFilter]);
+
+  // Mobile & Desktop Keyboard and Back-Navigation Protection (Requirement 15)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      const isInput = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT' || e.target.isContentEditable;
+
+      // Prevent accidental browser back-navigation on Backspace outside of inputs
+      if (e.key === 'Backspace' && !isInput) {
+        e.preventDefault();
+        return;
+      }
+
+      // Never intercept hotkeys when typing into inputs!
+      if (isInput) return;
+
+      // When player modal is active, let PlayerModal exclusively handle video hotkeys
+      if (document.querySelector('video')) return;
+
+      if (e.code === 'Space') {
+        const video = document.querySelector('video');
+        if (video) {
+          e.preventDefault();
+          if (video.paused) video.play();
+          else video.pause();
+        }
+      } else if (e.key === 'f' || e.key === 'F') {
+        const fsBtn = document.querySelector('button[title*="Fullscreen"]') || document.querySelector('button[title*="fullscreen"]');
+        if (fsBtn) fsBtn.click();
+      } else if (e.key === 'm' || e.key === 'M') {
+        const video = document.querySelector('video');
+        if (video) {
+          video.muted = !video.muted;
+        }
+      } else if (e.key === 'ArrowRight') {
+        const video = document.querySelector('video');
+        if (video) video.currentTime = Math.min(video.duration || 0, video.currentTime + 10);
+      } else if (e.key === 'ArrowLeft') {
+        const video = document.querySelector('video');
+        if (video) video.currentTime = Math.max(0, video.currentTime - 10);
+      } else if (e.key === 'ArrowUp') {
+        const video = document.querySelector('video');
+        if (video) {
+          e.preventDefault();
+          video.volume = Math.min(1, video.volume + 0.1);
+        }
+      } else if (e.key === 'ArrowDown') {
+        const video = document.querySelector('video');
+        if (video) {
+          e.preventDefault();
+          video.volume = Math.max(0, video.volume - 0.1);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
     <div className={`min-h-screen ${isStealthMode ? 'bg-[#080b11]' : 'bg-[#030712]'} text-white flex flex-col selection:bg-cyan-500 selection:text-gray-950 pb-20 lg:pb-8 relative overflow-hidden`}>
@@ -561,6 +634,40 @@ export default function App() {
           )}
         </div>
 
+        {/* Universal Multi-Language & Media Filter Bar (Requirement 9) */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 text-xs mb-4">
+          {[
+            { id: 'all', label: 'All' },
+            { id: 'hindi', label: '🇮🇳 Hindi Dubbed', highlight: 'amber' },
+            { id: 'english', label: '🇺🇸 English' },
+            { id: 'japanese', label: '🇯🇵 Japanese' },
+            { id: 'multiaudio', label: '🎧 Multi-Audio' },
+            { id: 'subtitles', label: '💬 Subtitles' },
+            { id: 'movies', label: '🎬 Movies' },
+            { id: 'anime', label: '🌸 Anime' },
+            { id: 'series', label: '📺 Series' }
+          ].map((pill) => {
+            const isSelected = globalMediaFilter === pill.id;
+            return (
+              <button
+                key={pill.id}
+                onClick={() => setGlobalMediaFilter(pill.id)}
+                className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition border flex items-center gap-1 cursor-pointer text-xs ${
+                  isSelected
+                    ? pill.id === 'hindi'
+                      ? 'bg-amber-500 text-gray-950 border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.5)] font-black'
+                      : 'bg-gradient-to-r from-cyan-500 to-blue-600 text-gray-950 border-cyan-300 shadow-[0_0_15px_rgba(56,189,248,0.5)] font-black'
+                    : pill.id === 'hindi'
+                    ? 'bg-amber-500/10 text-amber-300 border-amber-500/30 hover:bg-amber-500/20'
+                    : 'bg-[#0a132b] text-slate-300 border-cyan-500/20 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                <span>{pill.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
         {/* Skeleton Shimmer Loading Grid */}
         {loading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-5">
@@ -574,11 +681,11 @@ export default function App() {
               </div>
             ))}
           </div>
-        ) : items.length > 0 ? (
+        ) : displayedItems.length > 0 ? (
           <>
             {/* Media Cards Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-5">
-              {items.map((item, idx) => (
+              {displayedItems.map((item, idx) => (
                 <MediaCard
                   key={`${item.id}-${idx}`}
                   item={item}
