@@ -84,9 +84,9 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     ? Boolean(customSources.hi)
     : (isBollywoodHindi || hindiProviderManager.hasLegitimateHindiSource(item));
 
-  const hasWorkingEnglishSource = isCustom
-    ? Boolean(customSources.en)
-    : !isBollywoodHindi;
+  const hasWorkingEnglishSource = isBollywoodHindi
+    ? false
+    : (isCustom ? Boolean(customSources.en) : !isBollywoodHindi);
 
   const hasWorkingJapaneseSource = isCustom
     ? Boolean(customSources.ja)
@@ -159,17 +159,17 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     ? SERVERS.filter((s) => s.id !== 'autoembed') 
     : SERVERS;
 
-  // Determine initial server — route Hindi to verified multi-audio servers
+  // Determine initial server — route to fast, verified 200 OK servers
   const getInitialServer = () => {
     if (hasWorkingHindiSource && !isCustom) {
       if (isBollywoodHindi) {
         return availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
       }
       if (isAnime) {
-        return availableServers.find((s) => s.id === 'animeworld_india') || availableServers.find((s) => s.id === 'multiembed') || availableServers[0];
+        return availableServers.find((s) => s.id === 'vidlink') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
       }
       // Hollywood Hindi Dubs
-      return availableServers.find((s) => s.id === 'multiembed') || availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
+      return availableServers.find((s) => s.id === 'vidlink') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
     }
     if (isAnime) {
       return availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
@@ -204,6 +204,15 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const [isLoadingEpisodes, setIsLoadingEpisodes] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const handleReload = () => setReloadKey((k) => k + 1);
+
+  // Auto-clear loading spinner after reasonable connection window
+  useEffect(() => {
+    setIframeLoading(true);
+    const timer = setTimeout(() => {
+      setIframeLoading(false);
+    }, 4500);
+    return () => clearTimeout(timer);
+  }, [selectedServer?.id, season, episode, audioMode, reloadKey]);
 
   // Next & Previous Episode Navigation Handlers
   const handlePrevEpisode = () => {
@@ -277,10 +286,10 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
           const hindiServer = availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
           setSelectedServer(hindiServer);
         } else if (isAnime) {
-          const hindiServer = availableServers.find((s) => s.id === 'animeworld_india') || availableServers.find((s) => s.id === 'multiembed') || availableServers[0];
+          const hindiServer = availableServers.find((s) => s.id === 'vidlink') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
           setSelectedServer(hindiServer);
         } else {
-          const hindiServer = availableServers.find((s) => s.id === 'multiembed') || availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
+          const hindiServer = availableServers.find((s) => s.id === 'vidlink') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
           setSelectedServer(hindiServer);
         }
       } else if (newMode === 'sub') {
@@ -1444,7 +1453,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   title={title}
                   onLoad={() => setIframeLoading(false)}
                   style={AI_BOOST_STYLES[aiBoostMode] || {}}
-                  className={`border-0 ${
+                  className={`border-0 bg-black ${
                     isFullscreen 
                       ? 'w-full h-full aspect-video max-w-[calc(100vh*16/9)] max-h-[calc(100vw*9/16)] shadow-2xl' 
                       : 'w-full h-full'

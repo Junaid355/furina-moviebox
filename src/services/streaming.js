@@ -95,27 +95,23 @@ export const SERVERS = [
   },
   {
     id: 'animeworld_india',
-    name: 'Server 8: AnimeWorld India & Tatakai (High-Speed CDN)',
-    shortName: 'Server 8 (AnimeWorld/Tatakai)',
-    badge: '🇮🇳 High-Speed CDN',
+    name: 'Server 8: Cinema Mirror 2 (Verified High-Speed CDN)',
+    shortName: 'Server 8 (Cinema Mirror)',
+    badge: 'High-Speed CDN',
     color: 'bg-orange-500/20 text-orange-300 border-orange-500/40',
     supportedAudios: ['hindi', 'english', 'sub'],
-    getMovieUrl: (tmdbId, audioMode = 'hindi') => `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1${audioMode === 'hindi' ? '&audio=hi' : ''}`,
-    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'hindi') => `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${s}&e=${e}${audioMode === 'hindi' ? '&audio=hi' : ''}`
+    getMovieUrl: (tmdbId) => `https://www.2embed.skin/embed/${tmdbId}`,
+    getTvUrl: (tmdbId, s = 1, e = 1) => `https://www.2embed.skin/embedtv/${tmdbId}&s=${s}&e=${e}`
   },
   {
     id: 'multiembed',
-    name: 'Server 9: MultiEmbed (Dedicated Multi-Audio & Hindi Dub)',
-    shortName: 'Server 9 (MultiEmbed Hindi)',
-    badge: 'Multi-Audio / Hindi',
+    name: 'Server 9: SmashyStream (Multi-Language & Dub Mirror)',
+    shortName: 'Server 9 (SmashyStream)',
+    badge: 'Multi-Language',
     color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
     supportedAudios: ['hindi', 'english', 'sub'],
-    getMovieUrl: (tmdbId, audioMode = 'english') => {
-      return `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1${audioMode === 'hindi' ? '&audio=hi' : ''}`;
-    },
-    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'english') => {
-      return `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${s}&e=${e}${audioMode === 'hindi' ? '&audio=hi' : ''}`;
-    }
+    getMovieUrl: (tmdbId) => `https://embed.smashystream.com/playere.php?tmdb=${tmdbId}`,
+    getTvUrl: (tmdbId, s = 1, e = 1) => `https://embed.smashystream.com/playere.php?tmdb=${tmdbId}&season=${s}&episode=${e}`
   }
 ];
 

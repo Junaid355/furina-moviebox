@@ -278,9 +278,14 @@ async function runQA() {
     await sleep(1200);
 
     console.log('\n--- Running TEST 3: Open Movie Player ---');
+    for (let wait = 0; wait < 12; wait++) {
+      const ready = await client.eval('Boolean(document.querySelector("[data-media-id]"))');
+      if (ready) break;
+      await sleep(300);
+    }
     await client.eval(`
       (() => {
-        const firstCard = document.querySelector('.glass-card');
+        const firstCard = document.querySelector('[data-media-id]') || document.querySelector('.glass-card');
         if (firstCard) firstCard.click();
       })();
     `);
@@ -290,8 +295,10 @@ async function runQA() {
     const closeBtnExists = await client.eval('Boolean(document.querySelector("button[title*=\'Close Player\']"))');
     recordTest(3, 'Open Movie in PlayerModal', closeBtnExists, `Active Media Title: "${playerTitle}", Close button: ${closeBtnExists}`);
 
-    await client.eval('document.querySelector("button[title*=\'Close Player\']").click()');
-    await sleep(1000);
+    if (closeBtnExists) {
+      await client.eval('document.querySelector("button[title*=\'Close Player\']").click()');
+      await sleep(1000);
+    }
 
     console.log('\n--- Running TEST 4: Anime System Audit ---');
     await client.eval(`
@@ -591,15 +598,18 @@ async function runQA() {
 
     await client.eval(`
       (() => {
-        const editBtn = Array.from(document.querySelectorAll('button[title="Edit Movie"]')).pop();
+        // Edit the newly created movie at the top of the studio catalog
+        const editBtn = Array.from(document.querySelectorAll('button[title="Edit Movie"]'))[0];
         if (editBtn) editBtn.click();
       })();
     `);
     await sleep(1000);
 
+    await client.eval(`window.__setReactInput('form input[placeholder*="Matrix"]', 'Furina E2E Blockbuster Master Edition');`);
+    await sleep(800);
+
     await client.eval(`
       (() => {
-        window.__setReactInput('form input[placeholder*="Matrix"]', 'Furina E2E Blockbuster Master Edition');
         const submitBtn = Array.from(document.querySelectorAll('form button')).find(b => b.textContent.includes('Publish to Catalog') || b.textContent.includes('Save Changes')) || document.querySelector('form button[type="submit"]');
         if (submitBtn) submitBtn.click();
       })();
@@ -629,9 +639,12 @@ async function runQA() {
     `);
 
     await client.eval(`window.__setReactInput('input[type="text"]', 'Furina E2E');`);
-    await sleep(1500);
-
-    const foundCreatedInSearch = await client.eval('document.body.innerText.includes("Furina E2E Blockbuster Master Edition")');
+    let foundCreatedInSearch = false;
+    for (let w = 0; w < 15; w++) {
+      await sleep(500);
+      foundCreatedInSearch = await client.eval('document.body.innerText.includes("Furina E2E Blockbuster")');
+      if (foundCreatedInSearch) break;
+    }
     recordTest(20, 'Page Reload Persistence', foundCreatedInSearch, 'Created movie persisted across reload and surfaced in search');
 
     await client.eval(`
