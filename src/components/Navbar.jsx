@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Film, Tv, Flame, Heart, Sparkles, X, Shield, Lock, Settings, Smartphone, Skull } from 'lucide-react';
+import { Search, Film, Tv, Flame, Heart, Sparkles, X, Shield, Lock, Settings, Smartphone, Skull, Volume2, VolumeX } from 'lucide-react';
+import soundFx from '../services/soundFx';
 
 export default function Navbar({ 
   activeCategory, 
@@ -38,6 +39,7 @@ export default function Navbar({
 
   // Local state buffering & caret preservation to eliminate mobile keyboard cursor reset ("backwalk")
   const [localSearch, setLocalSearch] = useState(searchQuery || '');
+  const [isSoundOn, setIsSoundOn] = useState(() => !soundFx.isMuted());
   const inputRef = useRef(null);
   const isFocusedRef = useRef(false);
   const isComposingRef = useRef(false);
@@ -234,6 +236,25 @@ export default function Navbar({
           >
             <Smartphone className="w-3.5 h-3.5 text-cyan-400" />
             <span>iPhone</span>
+          </button>
+
+          <button
+            onClick={() => {
+              const unmuted = soundFx.toggleMute();
+              setIsSoundOn(unmuted);
+            }}
+            data-testid="cozy-sound-btn"
+            title={isSoundOn ? 'Cozy Sound FX: Active (Click to Mute)' : 'Cozy Sound FX: Muted (Click to Enable)'}
+            className={`p-2 rounded-full border transition flex items-center gap-1.5 ${
+              isSoundOn
+                ? 'bg-amber-500/20 border-amber-400/40 text-amber-300 hover:bg-amber-500/30 shadow-[0_0_10px_rgba(251,146,60,0.3)]'
+                : 'bg-[#0b1633] border-cyan-500/30 text-slate-400 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            {isSoundOn ? <Volume2 className="w-4 h-4 text-amber-300" /> : <VolumeX className="w-4 h-4 text-slate-400" />}
+            <span className="hidden md:inline text-xs font-semibold">
+              {isSoundOn ? 'Cozy Audio' : 'Muted'}
+            </span>
           </button>
 
           <button

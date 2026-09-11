@@ -297,16 +297,14 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
     if (!isCustom) {
       if (newMode === 'hindi') {
-        if (isBollywoodHindi) {
-          const hindiServer = availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
-          setSelectedServer(hindiServer);
-        } else if (isAnime) {
-          const hindiServer = availableServers.find((s) => s.id === 'vidlink') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
-          setSelectedServer(hindiServer);
-        } else {
-          const hindiServer = availableServers.find((s) => s.id === 'vidlink') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
-          setSelectedServer(hindiServer);
-        }
+        const hindiServer = 
+          availableServers.find((s) => s.id === 'multiembed') ||
+          availableServers.find((s) => s.id === 'one23embed') ||
+          availableServers.find((s) => s.id === 'smashy') ||
+          availableServers.find((s) => s.id === 'vidsrc_cc') ||
+          availableServers.find((s) => s.id === 'vidlink') ||
+          availableServers[0];
+        setSelectedServer(hindiServer);
       } else if (newMode === 'sub') {
         const subServer = availableServers.find((s) => s.id === 'vidsrc_in') || availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
         setSelectedServer(subServer);
@@ -1580,6 +1578,16 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                     >
                       Switch
                     </button>
+                  </div>
+                )}
+
+                {/* Hindi Dub Multi-Server Guidance Banner */}
+                {audioMode === 'hindi' && hasWorkingHindiSource && !unavailableNotice.show && (
+                  <div className="absolute top-3 left-1/2 -translate-x-1/2 z-40 max-w-lg px-3.5 py-1.5 rounded-xl bg-amber-950/80 border border-amber-500/40 text-amber-200 text-[11px] shadow-xl backdrop-blur-md flex items-center justify-between gap-2.5 animate-in fade-in slide-in-from-top-2 duration-200 pointer-events-auto">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-amber-400 font-bold">🇮🇳</span>
+                      <span>Hindi Multi-Audio Active ({selectedServer?.shortName || 'MultiEmbed'}). Use in-player audio/server icon if needed.</span>
+                    </div>
                   </div>
                 )}
 

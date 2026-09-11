@@ -207,6 +207,19 @@ export default function DownloadModal({
             </div>
           )}
 
+          {/* Hindi Dubbed Highlight Banner */}
+          {audioMode === 'hindi' && (
+            <div className="bg-amber-500/15 border border-amber-500/40 rounded-xl p-3 flex items-center gap-2.5 text-amber-200 text-xs">
+              <span className="text-base">🇮🇳</span>
+              <div>
+                <span className="font-bold text-amber-300">Hindi Dubbed Streaming & Download Enabled:</span>
+                <p className="text-[11px] text-amber-200/80 mt-0.5">
+                  MultiEmbed Hub & 123Embed are prioritized below with authentic multi-audio tracks including Hindi.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Fast Working Stream & Download Mirrors */}
           <div>
             <label className="block text-xs font-bold text-cyan-200/80 mb-2 flex items-center gap-1.5">

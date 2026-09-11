@@ -105,13 +105,33 @@ export const SERVERS = [
   },
   {
     id: 'multiembed',
-    name: 'Server 9: SmashyStream (Multi-Language & Dub Mirror)',
-    shortName: 'Server 9 (SmashyStream)',
-    badge: 'Multi-Language',
+    name: 'Server 9: MultiEmbed VIP (Multi-Language & Hindi Stream Hub)',
+    shortName: 'Server 9 (MultiEmbed)',
+    badge: 'Hindi & Multi-Audio Hub',
     color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
     supportedAudios: ['hindi', 'english', 'sub'],
-    getMovieUrl: (tmdbId) => `https://embed.smashystream.com/playere.php?tmdb=${tmdbId}`,
-    getTvUrl: (tmdbId, s = 1, e = 1) => `https://embed.smashystream.com/playere.php?tmdb=${tmdbId}&season=${s}&episode=${e}`
+    getMovieUrl: (tmdbId) => `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1`,
+    getTvUrl: (tmdbId, s = 1, e = 1) => `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${s}&e=${e}`
+  },
+  {
+    id: 'vidsrc_cc',
+    name: 'Server 10: VidSrc CC (Fast Multi-Server & Audio Dub)',
+    shortName: 'Server 10 (VidSrc CC)',
+    badge: 'Multi-Server Fast',
+    color: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
+    supportedAudios: ['hindi', 'english', 'sub'],
+    getMovieUrl: (tmdbId) => `https://vidsrc.cc/v2/embed/movie/${tmdbId}`,
+    getTvUrl: (tmdbId, s = 1, e = 1) => `https://vidsrc.cc/v2/embed/tv/${tmdbId}/${s}/${e}`
+  },
+  {
+    id: 'embed_su',
+    name: 'Server 11: Embed.su (VIP Multi-Language Stream)',
+    shortName: 'Server 11 (Embed.su)',
+    badge: 'VIP Multi-Stream',
+    color: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40',
+    supportedAudios: ['hindi', 'english', 'sub'],
+    getMovieUrl: (tmdbId) => `https://embed.su/embed/movie/${tmdbId}`,
+    getTvUrl: (tmdbId, s = 1, e = 1) => `https://embed.su/embed/tv/${tmdbId}/${s}/${e}`
   }
 ];
 
@@ -134,48 +154,83 @@ export function getStreamUrl(server, tmdbId, type = 'movie', season = 1, episode
 
 export function getDownloadMirrors(tmdbId, type = 'movie', season = 1, episode = 1, audioMode = 'english') {
   const isTv = type === 'tv';
-  return [
+  const allMirrors = [
+    {
+      id: 'mirror_multiembed',
+      name: 'Server 1: MultiEmbed Hub (Multi-Audio & Hindi Dub Stream & Downloader)',
+      quality: '1080p / 4K UHD Multi-Audio',
+      badge: audioMode === 'hindi' ? '🇮🇳 Hindi Dub Recommended' : 'Multi-Audio Hub',
+      color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+      isHindi: true,
+      url: isTv 
+        ? `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${season}&e=${episode}` 
+        : `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1`
+    },
+    {
+      id: 'mirror_123embed',
+      name: 'Server 2: 123Embed (Multi-Audio & Hindi Dub Stream Hub)',
+      quality: '1080p Multi-Audio',
+      badge: '🇮🇳 Hindi Dub Mirror',
+      color: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+      isHindi: true,
+      url: isTv 
+        ? `https://play2.123embed.net/tv/${tmdbId}/${season}/${episode}` 
+        : `https://play2.123embed.net/movie/${tmdbId}`
+    },
     {
       id: 'mirror_vidsrc',
-      name: 'Server 1: VidSrc Cloud Downloader',
+      name: 'Server 3: VidSrc Cloud Downloader',
       quality: '1080p / 4K UHD',
       badge: 'Fast CDN',
       color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40',
+      isHindi: false,
       url: isTv 
         ? `https://vidsrc.in/embed/tv/${tmdbId}/${season}/${episode}` 
         : `https://vidsrc.in/embed/movie/${tmdbId}`
     },
     {
       id: 'mirror_autoembed',
-      name: 'Server 2: AutoEmbed Direct Stream Hub',
+      name: 'Server 4: AutoEmbed Direct Stream Hub',
       quality: '1080p Full HD',
       badge: 'Multi-Thread',
-      color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+      color: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
+      isHindi: false,
       url: isTv 
         ? `https://autoembed.co/tv/tmdb/${tmdbId}-${season}-${episode}` 
         : `https://autoembed.co/movie/tmdb/${tmdbId}`
     },
     {
-      id: 'mirror_123embed',
-      name: 'Server 3: 123Embed (Multi-Audio & Hindi Dub)',
-      quality: '1080p Multi-Audio',
-      badge: 'Hindi Dub Mirror',
-      color: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
-      url: isTv 
-        ? `https://play2.123embed.net/tv/${tmdbId}/${season}/${episode}` 
-        : `https://play2.123embed.net/movie/${tmdbId}`
-    },
-    {
       id: 'mirror_vidlink',
-      name: 'Server 4: VidLink Pro Downloader',
+      name: 'Server 5: VidLink Pro Downloader',
       quality: '1080p Ultra Clear',
       badge: 'Dub & Sub',
-      color: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
+      color: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
+      isHindi: false,
       url: isTv 
         ? `https://vidlink.pro/tv/${tmdbId}/${season}/${episode}` 
         : `https://vidlink.pro/movie/${tmdbId}`
+    },
+    {
+      id: 'mirror_vidsrc_cc',
+      name: 'Server 6: VidSrc CC Fast Multi-Server Hub',
+      quality: '1080p High Speed',
+      badge: 'Multi-Server',
+      color: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
+      isHindi: true,
+      url: isTv 
+        ? `https://vidsrc.cc/v2/embed/tv/${tmdbId}/${season}/${episode}` 
+        : `https://vidsrc.cc/v2/embed/movie/${tmdbId}`
     }
   ];
+
+  if (audioMode === 'hindi') {
+    return [
+      ...allMirrors.filter((m) => m.isHindi),
+      ...allMirrors.filter((m) => !m.isHindi)
+    ];
+  }
+
+  return allMirrors;
 }
 
 export function getDownloadUrl(tmdbId, type = 'movie', season = 1, episode = 1) {
@@ -184,4 +239,5 @@ export function getDownloadUrl(tmdbId, type = 'movie', season = 1, episode = 1) 
   }
   return `https://vidsrc.in/embed/movie/${tmdbId}`;
 }
+
 
