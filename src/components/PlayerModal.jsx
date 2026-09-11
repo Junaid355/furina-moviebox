@@ -41,13 +41,12 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     )
   );
 
-  // Authentic Hindi audio is available from:
+  // Authentic Hindi audio is available strictly from:
   // 1. Studio/Custom owned content with a real Hindi asset (item?.languages?.hi?.url)
   // 2. Authentic Bollywood / Indian cinema whose native spoken audio is Hindi (isBollywoodHindi)
-  // 3. Known titles with official Hindi dubbing (Squid Game, All of Us Are Dead, Money Heist, MCU movies, anime with Hindi dubs, etc.)
   const hasWorkingHindiSource = isCustom
     ? Boolean(item?.languages?.hi?.url)
-    : (isBollywoodHindi || isHindiAvailable(item));
+    : isBollywoodHindi;
 
   const hasWorkingEnglishSource = isCustom
     ? Boolean(item?.languages?.en?.url)
@@ -66,10 +65,6 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       return 'english';
     }
     if (isBollywoodHindi) return 'hindi';
-    // CRITICAL: Check Hindi preference BEFORE anime sub default
-    // so that anime titles with verified Hindi dubs start in Hindi when user selected Hindi filter
-    if ((isHindiPreferred || item?.isHindiDubbed === true || item?.hasHindiDub === true || item?.dub_type === 'hindi') && hasWorkingHindiSource) return 'hindi';
-    if (item?.dub_type === 'sub') return 'sub';
     if (isAnime) return 'sub';
     return 'english';
   });
@@ -81,13 +76,8 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
   // Determine initial server — route Hindi to verified multi-audio servers
   const getInitialServer = () => {
-    // If Hindi audio mode is active, prioritize Hindi-verified servers
-    const willBeHindi = isBollywoodHindi || ((isHindiPreferred || item?.isHindiDubbed === true || item?.hasHindiDub === true || item?.dub_type === 'hindi') && hasWorkingHindiSource);
-    if (willBeHindi && !isCustom) {
-      if (isBollywoodHindi) {
-        return availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
-      }
-      return availableServers.find((s) => s.id === 'multiembed') || availableServers.find((s) => s.id === 'smashy') || availableServers.find((s) => s.id === 'one23embed') || availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
+    if (isBollywoodHindi && hasWorkingHindiSource && !isCustom) {
+      return availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
     }
     if (isAnime) {
       return availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
@@ -290,6 +280,11 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       } else if (e.key === 'f' || e.key === 'F') {
         e.preventDefault();
         toggleFullscreen();
+      } else if (e.key === 'b' || e.key === 'B') {
+        e.preventDefault();
+        const modes = ['off', '4k', 'hdr', 'night'];
+        const nextMode = modes[(modes.indexOf(aiBoostMode) + 1) % modes.length];
+        changeAiBoost(nextMode);
       } else if (e.key === ' ' || e.code === 'Space' || e.key === 'k' || e.key === 'K') {
         if (videoRef.current) {
           e.preventDefault();
@@ -542,20 +537,20 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
             {/* Controls in Fullscreen */}
             <div className="flex items-center gap-2 shrink-0">
-              {/* Fullscreen AI Boost Mode Selector */}
-              <div className="hidden md:flex items-center gap-1 bg-black/60 px-2 py-1 rounded-xl border border-cyan-500/30">
-                <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse mr-0.5" />
+              {/* Fullscreen AI Boost Mode Selector (Available on Mobile and Desktop) */}
+              <div className="flex items-center gap-0.5 sm:gap-1 bg-black/75 px-1.5 sm:px-2 py-1 rounded-xl border border-cyan-500/30 shrink-0">
+                <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse mr-0.5 shrink-0" />
                 {[
                   { id: 'off', label: 'Off' },
-                  { id: '4k', label: '💎 4K' },
-                  { id: 'hdr', label: '🌈 HDR' },
-                  { id: 'night', label: '🌙 Night' },
+                  { id: '4k', label: '4K' },
+                  { id: 'hdr', label: 'HDR' },
+                  { id: 'night', label: 'Night' },
                 ].map((mode) => (
                   <button
                     key={mode.id}
                     onClick={() => changeAiBoost(mode.id)}
                     title={`AI Boost: ${mode.label}`}
-                    className={`px-2 py-0.5 rounded text-[11px] font-extrabold transition cursor-pointer ${
+                    className={`px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-extrabold transition cursor-pointer ${
                       aiBoostMode === mode.id
                         ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 shadow-[0_0_8px_rgba(56,189,248,0.7)]'
                         : 'text-slate-300 hover:text-white'
@@ -824,18 +819,20 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                     if (hasWorkingHindiSource && !isCustom) {
                       const hindiServer = isBollywoodHindi
                         ? (availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0])
-                        : (availableServers.find((s) => s.id === 'multiembed') || availableServers.find((s) => s.id === 'smashy') || availableServers.find((s) => s.id === 'one23embed') || availableServers.find((s) => s.id === 'vidlink') || availableServers[0]);
+                        : (availableServers.find((s) => s.id === 'multiembed') || availableServers[0]);
                       setSelectedServer(hindiServer);
                     }
                   }}
                   className={`px-3 py-1 rounded-full text-xs font-extrabold transition flex items-center gap-1 border cursor-pointer ${
                     audioMode === 'hindi'
                       ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-gray-950 border-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.6)] scale-105'
-                      : 'bg-amber-500/10 text-amber-200/70 border-amber-500/30 hover:text-white'
+                      : hasWorkingHindiSource
+                      ? 'bg-amber-500/10 text-amber-200/70 border-amber-500/30 hover:text-white'
+                      : 'bg-white/5 text-slate-400 border-white/10 hover:text-slate-200'
                   }`}
                 >
                   <span>🇮🇳</span>
-                  <span>Hindi Audio</span>
+                  <span>Hindi {hasWorkingHindiSource ? 'Audio' : '(Unavailable)'}</span>
                 </button>
               </div>
             </div>

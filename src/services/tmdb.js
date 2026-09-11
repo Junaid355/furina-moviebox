@@ -347,7 +347,7 @@ export const CURATED_HOLLYWOOD_BLOCKBUSTERS = [
 
     category: 'hollywood',
 
-    isHindiDubbed: true
+    isHindiDubbed: false
 
   },
 
@@ -373,7 +373,7 @@ export const CURATED_HOLLYWOOD_BLOCKBUSTERS = [
 
     category: 'hollywood',
 
-    isHindiDubbed: true
+    isHindiDubbed: false
 
   },
 
@@ -399,7 +399,7 @@ export const CURATED_HOLLYWOOD_BLOCKBUSTERS = [
 
     category: 'hollywood',
 
-    isHindiDubbed: true
+    isHindiDubbed: false
 
   },
 
@@ -425,7 +425,7 @@ export const CURATED_HOLLYWOOD_BLOCKBUSTERS = [
 
     category: 'hollywood',
 
-    isHindiDubbed: true
+    isHindiDubbed: false
 
   },
 
@@ -451,7 +451,7 @@ export const CURATED_HOLLYWOOD_BLOCKBUSTERS = [
 
     category: 'hollywood',
 
-    isHindiDubbed: true
+    isHindiDubbed: false
 
   },
 
@@ -477,7 +477,7 @@ export const CURATED_HOLLYWOOD_BLOCKBUSTERS = [
 
     category: 'hollywood',
 
-    isHindiDubbed: true
+    isHindiDubbed: false
 
   },
 
@@ -503,7 +503,7 @@ export const CURATED_HOLLYWOOD_BLOCKBUSTERS = [
 
     category: 'hollywood',
 
-    isHindiDubbed: true
+    isHindiDubbed: false
 
   },
 
@@ -529,7 +529,7 @@ export const CURATED_HOLLYWOOD_BLOCKBUSTERS = [
 
     category: 'hollywood',
 
-    isHindiDubbed: true
+    isHindiDubbed: false
 
   },
 
@@ -555,7 +555,7 @@ export const CURATED_HOLLYWOOD_BLOCKBUSTERS = [
 
     category: 'hollywood',
 
-    isHindiDubbed: true
+    isHindiDubbed: false
 
   },
 
@@ -581,7 +581,7 @@ export const CURATED_HOLLYWOOD_BLOCKBUSTERS = [
 
     category: 'hollywood',
 
-    isHindiDubbed: true
+    isHindiDubbed: false
 
   },
 
@@ -607,7 +607,7 @@ export const CURATED_HOLLYWOOD_BLOCKBUSTERS = [
 
     category: 'hollywood',
 
-    isHindiDubbed: true
+    isHindiDubbed: false
 
   },
 
@@ -633,7 +633,7 @@ export const CURATED_HOLLYWOOD_BLOCKBUSTERS = [
 
     category: 'hollywood',
 
-    isHindiDubbed: true
+    isHindiDubbed: false
 
   },
 
@@ -659,7 +659,7 @@ export const CURATED_HOLLYWOOD_BLOCKBUSTERS = [
 
     category: 'hollywood',
 
-    isHindiDubbed: true
+    isHindiDubbed: false
 
   },
 
@@ -685,7 +685,7 @@ export const CURATED_HOLLYWOOD_BLOCKBUSTERS = [
 
     category: 'hollywood',
 
-    isHindiDubbed: true
+    isHindiDubbed: false
 
   }
 
@@ -1972,14 +1972,9 @@ export const CURATED_SUBBED_ANIME = [
 ];
 
 export async function fetchHindiMovies(page = 1) {
-
   try {
-
-    const curatedAll = [...CURATED_BOLLYWOOD_BLOCKBUSTERS, ...CURATED_HOLLYWOOD_HINDI_DUBS];
-
+    const curatedAll = [...CURATED_BOLLYWOOD_BLOCKBUSTERS];
     const curatedIds = new Set(curatedAll.map((b) => b.id));
-
-
 
     const data = await cachedFetchJson(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_original_language=hi&region=IN&primary_release_date.lte=${today}&vote_count.gte=5&sort_by=popularity.desc&page=${page}`);
 
@@ -1988,13 +1983,13 @@ export async function fetchHindiMovies(page = 1) {
           .filter((m) => m && m.id && !curatedIds.has(m.id))
           .map((m) => ({ ...m, media_type: 'movie', category: 'hindi', original_language: 'hi', isHindiDubbed: true }))
       : (page === 1 ? FALLBACK_MEDIA.filter((m) => m.category === 'hindi') : []);
-    
+
     if (page === 1) {
       return [...curatedAll, ...bollywood];
     }
     return bollywood;
   } catch (err) {
-    return page === 1 ? [...CURATED_BOLLYWOOD_BLOCKBUSTERS, ...CURATED_HOLLYWOOD_HINDI_DUBS, ...FALLBACK_MEDIA.filter((m) => m.category === 'hindi')] : [];
+    return page === 1 ? [...CURATED_BOLLYWOOD_BLOCKBUSTERS, ...FALLBACK_MEDIA.filter((m) => m.category === 'hindi')] : [];
   }
 }
 
@@ -2324,9 +2319,9 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
   "release_date": "2015-04-01",
 
-  "category": "hindi",
+  "category": "hollywood",
 
-  "isHindiDubbed": true
+  "isHindiDubbed": false
 
 },
 
@@ -2350,9 +2345,9 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
   "release_date": "2024-10-22",
 
-  "category": "hindi",
+  "category": "hollywood",
 
-  "isHindiDubbed": true
+  "isHindiDubbed": false
 
 },
 
@@ -2376,9 +2371,9 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
   "release_date": "2024-03-02",
 
-  "category": "hindi",
+  "category": "hollywood",
 
-  "isHindiDubbed": true
+  "isHindiDubbed": false
 
 },
 
@@ -2402,9 +2397,9 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
   "release_date": "2023-05-31",
 
-  "category": "hindi",
+  "category": "hollywood",
 
-  "isHindiDubbed": true
+  "isHindiDubbed": false
 
 },
 
@@ -2428,9 +2423,9 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
   "release_date": "2023-05-03",
 
-  "category": "hindi",
+  "category": "hollywood",
 
-  "isHindiDubbed": true
+  "isHindiDubbed": false
 
 },
 
@@ -2454,9 +2449,9 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
   "release_date": "2017-10-02",
 
-  "category": "hindi",
+  "category": "hollywood",
 
-  "isHindiDubbed": true
+  "isHindiDubbed": false
 
 },
 
@@ -2480,9 +2475,9 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
   "release_date": "2012-04-25",
 
-  "category": "hindi",
+  "category": "hollywood",
 
-  "isHindiDubbed": true
+  "isHindiDubbed": false
 
 },
 
@@ -2506,9 +2501,9 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
   "release_date": "2014-11-05",
 
-  "category": "hindi",
+  "category": "hollywood",
 
-  "isHindiDubbed": true
+  "isHindiDubbed": false
 
 },
 
@@ -2532,9 +2527,9 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
   "release_date": "2010-07-15",
 
-  "category": "hindi",
+  "category": "hollywood",
 
-  "isHindiDubbed": true
+  "isHindiDubbed": false
 
 },
 
@@ -2558,9 +2553,9 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
   "release_date": "2008-07-16",
 
-  "category": "hindi",
+  "category": "hollywood",
 
-  "isHindiDubbed": true
+  "isHindiDubbed": false
 
 },
 
@@ -2584,9 +2579,9 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
   "release_date": "2022-05-24",
 
-  "category": "hindi",
+  "category": "hollywood",
 
-  "isHindiDubbed": true
+  "isHindiDubbed": false
 
 },
 
@@ -2610,9 +2605,9 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
   "release_date": "2022-03-01",
 
-  "category": "hindi",
+  "category": "hollywood",
 
-  "isHindiDubbed": true
+  "isHindiDubbed": false
 
 },
 
@@ -2636,9 +2631,9 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
   "release_date": "2023-06-06",
 
-  "category": "hindi",
+  "category": "hollywood",
 
-  "isHindiDubbed": true
+  "isHindiDubbed": false
 
 },
 
@@ -2662,9 +2657,9 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
   "release_date": "2024-11-05",
 
-  "category": "hindi",
+  "category": "hollywood",
 
-  "isHindiDubbed": true
+  "isHindiDubbed": false
 
 },
 
@@ -3199,37 +3194,15 @@ export function isHindiAvailable(item) {
   // Authentic Bollywood / Indian cinema whose native spoken audio is Hindi
   if (
     item.original_language === 'hi' ||
-    item.category === 'hindi' ||
-    item.isHindi === true ||
-    (Array.isArray(item.origin_country) && item.origin_country.includes('IN'))
+    (Array.isArray(item.origin_country) && item.origin_country.includes('IN') && item.original_language !== 'en')
   ) {
     return true;
   }
 
   const id = Number(item.id);
-  const title = (item.title || item.name || '').toLowerCase();
 
   // Curated Bollywood list
   if (CURATED_BOLLYWOOD_BLOCKBUSTERS.some((b) => Number(b.id) === id)) return true;
-
-  // Curated Hollywood Hindi dubs
-  if (CURATED_HOLLYWOOD_HINDI_DUBS.some((h) => Number(h.id) === id)) return true;
-
-  // Curated Anime with Hindi dubs
-  if (CURATED_HINDI_DUBBED_ANIME.some((a) => Number(a.id) === id)) return true;
-  if (VERIFIED_HINDI_ANIME_IDS.has(id)) return true;
-
-  // Verified K-Dramas with Hindi dubs (Squid Game, All of Us Are Dead, etc.)
-  if (VERIFIED_HINDI_KDRAMA_IDS.has(id)) return true;
-
-  // Verified Global Series with Hindi dubs (Money Heist, Stranger Things, etc.)
-  if (VERIFIED_HINDI_GLOBAL_SERIES_IDS.has(id)) return true;
-
-  // Explicit Hindi Dub flag
-  if (item.isHindiDubbed === true || item.hasHindiDub === true) return true;
-
-  // Title mentions Hindi
-  if (title.includes('hindi dubbed') || title.includes('(hindi') || title.includes('hindi audio') || title.includes('in hindi')) return true;
 
   return false;
 }

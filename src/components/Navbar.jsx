@@ -12,6 +12,7 @@ export default function Navbar({
   includeMature,
   onOpenSettings,
   onOpenIPhoneModal,
+  onOpenAndroidModal,
   onOpenStudio
 }) {
   const baseCategories = [
@@ -217,12 +218,22 @@ export default function Navbar({
           </button>
 
           <button
+            onClick={onOpenAndroidModal}
+            title="Install App on Android (1-Tap Standalone PWA & Native)"
+            className="px-2.5 sm:px-3 py-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/15 text-emerald-300 hover:text-white hover:bg-emerald-500/25 transition flex items-center gap-1.5 text-xs font-bold cursor-pointer"
+          >
+            <Smartphone className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="hidden sm:inline">Android App</span>
+            <span className="sm:hidden">App</span>
+          </button>
+
+          <button
             onClick={onOpenIPhoneModal}
             title="Install App on iPhone / iPad (Zero Ads)"
-            className="px-3 py-1.5 rounded-full border border-cyan-500/30 bg-[#0b1633] text-cyan-300 hover:text-white hover:bg-white/10 transition flex items-center gap-1.5 text-xs font-semibold"
+            className="hidden sm:flex px-3 py-1.5 rounded-full border border-cyan-500/30 bg-[#0b1633] text-cyan-300 hover:text-white hover:bg-white/10 transition items-center gap-1.5 text-xs font-semibold"
           >
             <Smartphone className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="hidden sm:inline">iPhone App</span>
+            <span>iPhone</span>
           </button>
 
           <button

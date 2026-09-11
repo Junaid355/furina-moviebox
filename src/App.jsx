@@ -5,6 +5,7 @@ import MediaCard from './components/MediaCard';
 import PlayerModal from './components/PlayerModal';
 import SettingsModal from './components/SettingsModal';
 import IPhoneAppModal from './components/IPhoneAppModal';
+import AndroidAppModal from './components/AndroidAppModal';
 import MovieStudioModal, { getStoredStudioMovies } from './components/MovieStudioModal';
 import ErrorBoundary from './components/ErrorBoundary';
 import { 
@@ -85,6 +86,7 @@ export default function App() {
   // Settings & Secret Master Mode (Passcode: 2030)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isIPhoneModalOpen, setIsIPhoneModalOpen] = useState(false);
+  const [isAndroidModalOpen, setIsAndroidModalOpen] = useState(false);
   const [isStudioOpen, setIsStudioOpen] = useState(false);
   const [studioVersion, setStudioVersion] = useState(0);
   const [isMasterMode, setIsMasterMode] = useState(false);
@@ -258,6 +260,7 @@ export default function App() {
         includeMature={includeMature}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenIPhoneModal={() => setIsIPhoneModalOpen(true)}
+        onOpenAndroidModal={() => setIsAndroidModalOpen(true)}
         onOpenStudio={() => setIsStudioOpen(true)}
       />
 
@@ -664,6 +667,12 @@ export default function App() {
       <IPhoneAppModal
         isOpen={isIPhoneModalOpen}
         onClose={() => setIsIPhoneModalOpen(false)}
+      />
+
+      {/* Android Native PWA & APK Installation Modal */}
+      <AndroidAppModal
+        isOpen={isAndroidModalOpen}
+        onClose={() => setIsAndroidModalOpen(false)}
       />
 
       {/* Furina Movie Studio & Creator Modal */}

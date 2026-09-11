@@ -707,6 +707,168 @@ async function runQA() {
     console.log('\n--- Running TEST 25: Network Health ---');
     recordTest(25, 'Network Pipeline Health', true, 'All core bundles, manifests, and TMDB queries operational');
 
+    console.log('\n--- Running TEST 27: Android App Modal & PWA 1-Tap Prompt ---');
+    const hasAppBtn = await client.eval(`
+      (() => {
+        const btn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('Android App') || b.textContent.includes('App'));
+        if (btn) { btn.click(); return true; }
+        return false;
+      })()
+    `);
+    await sleep(800);
+    const androidModalText = await client.eval('document.body.innerText');
+    const androidModalValid = androidModalText.includes('Furina MovieBox for Android') && androidModalText.includes('1-Tap Instant Install on Android');
+    recordTest(27, 'Android App Modal & PWA 1-Tap Prompt', hasAppBtn && androidModalValid, `Button clicked: ${hasAppBtn}, Modal valid: ${androidModalValid}`);
+
+    // Close Android Modal
+    await client.eval(`
+      (() => {
+        const closeBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('Close'));
+        if (closeBtn) closeBtn.click();
+      })()
+    `);
+    await sleep(600);
+
+    console.log('\n--- Running TEST 28: Hollywood Movie Audio Honesty & Hindi Safeguard ---');
+    await client.eval(`window.__setReactInput('input[type="text"]', 'Deadpool');`);
+    await sleep(2000);
+    await client.eval(`
+      (() => {
+        const card = document.querySelector('.glass-card');
+        if (card) card.click();
+      })()
+    `);
+    await sleep(1500);
+
+    const hollywoodAudioCheck = await client.eval(`
+      (() => {
+        const hindiBtn = document.querySelector('[data-testid="audio-btn-hindi"]');
+        const text = document.body.innerText;
+        return {
+          hasUnavailableLabel: hindiBtn ? hindiBtn.innerText.includes('(Unavailable)') : false,
+          isEnglishDubActive: text.includes('English Dub Active')
+        };
+      })()
+    `);
+
+    // Click Hindi button to verify honesty screen
+    await client.eval(`
+      (() => {
+        const hindiBtn = document.querySelector('[data-testid="audio-btn-hindi"]');
+        if (hindiBtn) hindiBtn.click();
+      })()
+    `);
+    await sleep(800);
+
+    const honestyScreenCheck = await client.eval(`
+      (() => {
+        const text = document.body.innerText;
+        return {
+          showsNotice: text.includes('Hindi audio is unavailable from streaming providers') || text.includes('Hindi audio unavailable'),
+          hasWatchInEnglish: text.includes('Watch in English')
+        };
+      })()
+    `);
+
+    const hollywoodPassed = hollywoodAudioCheck.hasUnavailableLabel && hollywoodAudioCheck.isEnglishDubActive && honestyScreenCheck.showsNotice;
+    recordTest(28, 'Hollywood Movie Audio Honesty & Hindi Safeguard', hollywoodPassed, `Unavailable label: ${hollywoodAudioCheck.hasUnavailableLabel}, English default: ${hollywoodAudioCheck.isEnglishDubActive}, Honesty notice: ${honestyScreenCheck.showsNotice}`);
+
+    // Switch back to English
+    await client.eval(`
+      (() => {
+        const watchEngBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('Watch in English'));
+        if (watchEngBtn) watchEngBtn.click();
+      })()
+    `);
+    await sleep(600);
+
+    console.log('\n--- Running TEST 29: AI Boost Controls & Keyboard Shortcut (B) ---');
+    const initialBoost = await client.eval(`localStorage.getItem('furina_ai_boost') || '4k'`);
+    await client.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'b', code: 'KeyB', windowsVirtualKeyCode: 66 });
+    await client.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'b', code: 'KeyB', windowsVirtualKeyCode: 66 });
+    await sleep(600);
+    const nextBoost = await client.eval(`localStorage.getItem('furina_ai_boost')`);
+    const boostButtonsCount = await client.eval(`
+      document.querySelectorAll('button[title*="AI Boost"], button[title*="Clarity"], button[title*="Raw"]').length
+    `);
+    const aiBoostPassed = initialBoost !== nextBoost || boostButtonsCount > 0;
+    recordTest(29, 'AI Boost Controls & Keyboard Shortcut (B)', aiBoostPassed, `Mode cycled: ${initialBoost} -> ${nextBoost}, Buttons rendered: ${boostButtonsCount}`);
+
+    console.log('\n--- Running TEST 30: Download Hub & Mobile Quick Downloader ---');
+    await client.eval(`
+      (() => {
+        const dlBtn = Array.from(document.querySelectorAll('button')).find(b => b.title?.includes('Download') || b.innerText.includes('Download'));
+        if (dlBtn) dlBtn.click();
+      })()
+    `);
+    await sleep(800);
+
+    const downloadHubCheck = await client.eval(`
+      (() => {
+        const text = document.body.innerText;
+        return {
+          hasProtectionNotice: text.includes('Catalog Media Cloud Protection'),
+          hasMobileHub: text.includes('Mobile Quick Download Center'),
+          hasMirrors: Array.from(document.querySelectorAll('a')).some(a => a.innerText.includes('Open Mirror'))
+        };
+      })()
+    `);
+
+    const dlHubPassed = downloadHubCheck.hasProtectionNotice && downloadHubCheck.hasMobileHub && downloadHubCheck.hasMirrors;
+    recordTest(30, 'Download Hub & Mobile Quick Downloader', dlHubPassed, `Cloud Notice: ${downloadHubCheck.hasProtectionNotice}, Mobile Hub: ${downloadHubCheck.hasMobileHub}, Open Mirror links: ${downloadHubCheck.hasMirrors}`);
+
+    // Close Download Modal
+    await client.eval(`
+      (() => {
+        const closeBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText === 'Done' || b.title?.includes('Close Download'));
+        if (closeBtn) closeBtn.click();
+      })()
+    `);
+    await sleep(500);
+
+    // Close Player Modal
+    await client.eval(`
+      (() => {
+        const closePlayer = document.querySelector('button[title*="Close Player"]') || Array.from(document.querySelectorAll('button')).find(b => b.title?.toLowerCase().includes('close player'));
+        if (closePlayer) closePlayer.click();
+      })()
+    `);
+    await sleep(1000);
+
+    console.log('\n--- Running TEST 31: Bollywood Movie Authentic Spoken Hindi Playback ---');
+    await client.eval(`window.__setReactInput('input[type="text"]', 'Stree 2');`);
+    await sleep(2000);
+    await client.eval(`
+      (() => {
+        const card = Array.from(document.querySelectorAll('.glass-card')).find(c => c.textContent.includes('Stree 2')) || document.querySelector('.glass-card');
+        if (card) card.click();
+      })()
+    `);
+    await sleep(1500);
+
+    const bollywoodAudioCheck = await client.eval(`
+      (() => {
+        const hindiBtn = document.querySelector('[data-testid="audio-btn-hindi"]');
+        const text = document.body.innerText;
+        return {
+          hindiBtnText: hindiBtn ? hindiBtn.innerText : '',
+          isHindiActive: text.includes('Hindi Audio Active') || text.includes('Original Hindi Audio Track')
+        };
+      })()
+    `);
+
+    const bollywoodPassed = bollywoodAudioCheck.hindiBtnText.includes('Hindi Audio') && !bollywoodAudioCheck.hindiBtnText.includes('(Unavailable)') && bollywoodAudioCheck.isHindiActive;
+    recordTest(31, 'Bollywood Movie Authentic Spoken Hindi Playback', bollywoodPassed, `Hindi Btn: "${bollywoodAudioCheck.hindiBtnText}", Active Badge: ${bollywoodAudioCheck.isHindiActive}`);
+
+    // Close Player Modal
+    await client.eval(`
+      (() => {
+        const closePlayer = Array.from(document.querySelectorAll('button')).find(b => b.title?.includes('Close player'));
+        if (closePlayer) closePlayer.click();
+      })()
+    `);
+    await sleep(600);
+
     console.log('\n--- Running TEST 26: Final Production Build Verification ---');
     try {
       execSync('npm.cmd run build', { cwd: process.cwd(), stdio: 'pipe' });

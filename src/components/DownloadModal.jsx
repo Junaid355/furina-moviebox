@@ -47,57 +47,32 @@ export default function DownloadModal({
 
   const handleCustomBlobDownload = () => {
     if (!activeCustomVideoUrl) return;
-    const cleanTitle = title.replace(/[^a-zA-Z0-9_-]/g, '_');
-    setCustomDownloadState({ status: 'downloading', progress: 10, errorMsg: '' });
+    const cleanTitle = (title || 'movie').replace(/[^a-zA-Z0-9_-]/g, '_');
+    const filename = `${cleanTitle}_${selectedQuality}_${audioMode}.mp4`;
+    setCustomDownloadState({ status: 'downloading', progress: 25, errorMsg: '' });
 
     try {
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', activeCustomVideoUrl, true);
-      xhr.responseType = 'blob';
+      // 1. Trigger direct browser download via anchor element
+      const a = document.createElement('a');
+      a.href = activeCustomVideoUrl;
+      a.download = filename;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => a.remove(), 1000);
 
-      xhr.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const pct = Math.round((event.loaded / event.total) * 100);
-          setCustomDownloadState({ status: 'downloading', progress: Math.max(15, pct), errorMsg: '' });
-        } else {
-          setCustomDownloadState((prev) => ({
-            ...prev,
-            status: 'downloading',
-            progress: Math.min(95, prev.progress + 15)
-          }));
-        }
-      };
-
-      xhr.onload = () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          const blob = xhr.response;
-          const blobUrl = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = blobUrl;
-          a.download = `${cleanTitle}_${selectedQuality}_${audioMode}.mp4`;
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          window.URL.revokeObjectURL(blobUrl);
-          setCustomDownloadState({ status: 'completed', progress: 100, errorMsg: '' });
-          setTimeout(() => {
-            setCustomDownloadState({ status: 'idle', progress: 0, errorMsg: '' });
-          }, 4000);
-        } else {
-          window.open(activeCustomVideoUrl, '_blank');
-          setCustomDownloadState({ status: 'idle', progress: 0, errorMsg: '' });
-        }
-      };
-
-      xhr.onerror = () => {
-        window.open(activeCustomVideoUrl, '_blank');
+      setCustomDownloadState({ status: 'completed', progress: 100, errorMsg: '' });
+      setTimeout(() => {
         setCustomDownloadState({ status: 'idle', progress: 0, errorMsg: '' });
-      };
-
-      xhr.send();
+      }, 3500);
     } catch (e) {
+      // Fallback: open URL directly
       window.open(activeCustomVideoUrl, '_blank');
-      setCustomDownloadState({ status: 'idle', progress: 0, errorMsg: '' });
+      setCustomDownloadState({ status: 'completed', progress: 100, errorMsg: '' });
+      setTimeout(() => {
+        setCustomDownloadState({ status: 'idle', progress: 0, errorMsg: '' });
+      }, 3500);
     }
   };
 
@@ -219,11 +194,24 @@ export default function DownloadModal({
             </div>
           )}
 
-          {/* Fast Working Download Mirrors */}
+          {/* Catalog Stream Notice */}
+          {!isCustom && (
+            <div className="bg-cyan-500/10 border border-cyan-500/25 rounded-xl p-3 text-xs text-cyan-200/80 leading-relaxed flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold text-cyan-300">Catalog Media Cloud Protection:</span>
+                <p className="text-[11px] text-slate-300 mt-0.5">
+                  Direct raw MP4 downloads are provided for Studio Master & Owned titles. For this catalog title, use the verified backup mirrors below or copy the direct stream link into mobile downloaders (1DM / ADM / VLC) to save offline.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Fast Working Stream & Download Mirrors */}
           <div>
             <label className="block text-xs font-bold text-cyan-200/80 mb-2 flex items-center gap-1.5">
-              <Download className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Verified Fast Download Mirrors:</span>
+              <Film className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Verified Fast Streaming & Video Mirrors:</span>
             </label>
             <div className="space-y-2">
               {mirrors.map((mirror) => (
@@ -239,7 +227,7 @@ export default function DownloadModal({
                       </span>
                     </div>
                     <span className="text-[10px] text-cyan-300/60 block mt-0.5">
-                      Quality: {selectedQuality} • High Speed CDN
+                      Quality: {selectedQuality} • High Speed CDN Mirror
                     </span>
                   </div>
 
@@ -249,7 +237,7 @@ export default function DownloadModal({
                     rel="noopener noreferrer"
                     className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-gray-950 font-black text-xs transition shadow flex items-center gap-1.5 shrink-0 cursor-pointer"
                   >
-                    <span>Download</span>
+                    <span>Open Mirror</span>
                     <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
