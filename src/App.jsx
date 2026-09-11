@@ -12,6 +12,7 @@ import {
   fetchTrendingAll, 
   fetchHollywoodMovies, 
   fetchHindiMovies, 
+  fetchHindiDubbedHollywood,
   fetchTrendingSeries, 
   fetchAnime,
   fetchKDramas,
@@ -165,7 +166,7 @@ export default function App() {
     }
     if (cat === 'trending') return await fetchTrendingAll(pageNum);
     if (cat === 'hollywood') {
-      if (movieFilter === 'hindi') return await fetchHindiMovies(pageNum);
+      if (movieFilter === 'hindi') return await fetchHindiDubbedHollywood(pageNum);
       if (movieFilter === 'popular') return await fetchTrendingAll(pageNum);
       return await fetchHollywoodMovies(pageNum);
     }
@@ -514,7 +515,7 @@ export default function App() {
                 }`}
               >
                 <span>🇮🇳</span>
-                <span>Bollywood & Hindi Dubbed</span>
+                <span>Hollywood Hindi Dubs</span>
               </button>
               <button
                 onClick={() => setMovieFilter('popular')}

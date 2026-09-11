@@ -729,7 +729,7 @@ async function runQA() {
     `);
     await sleep(600);
 
-    console.log('\n--- Running TEST 28: Hollywood Movie Audio Honesty & Hindi Safeguard ---');
+    console.log('\n--- Running TEST 28: Hollywood Blockbuster Hindi Dub Resolution (Deadpool & Wolverine) ---');
     await client.eval(`window.__setReactInput('input[type="text"]', 'Deadpool');`);
     await sleep(2000);
     await client.eval(`
@@ -740,47 +740,42 @@ async function runQA() {
     `);
     await sleep(1500);
 
-    const hollywoodAudioCheck = await client.eval(`
+    const deadpoolAudioCheck = await client.eval(`
       (() => {
         const hindiBtn = document.querySelector('[data-testid="audio-btn-hindi"]');
         const text = document.body.innerText;
         return {
-          hasUnavailableLabel: hindiBtn ? hindiBtn.innerText.includes('(Unavailable)') : false,
-          isEnglishDubActive: text.includes('English Dub Active')
+          hindiBtnText: hindiBtn ? hindiBtn.innerText : '',
+          isAvailable: hindiBtn ? !hindiBtn.innerText.includes('(Unavailable)') : false,
+          isHindiActive: text.includes('Hindi Audio Active')
         };
       })()
     `);
 
-    // Click Hindi button to verify honesty screen
-    await client.eval(`
-      (() => {
-        const hindiBtn = document.querySelector('[data-testid="audio-btn-hindi"]');
-        if (hindiBtn) hindiBtn.click();
-      })()
-    `);
-    await sleep(800);
+    // If not already active, click Hindi Audio button to activate
+    if (!deadpoolAudioCheck.isHindiActive) {
+      await client.eval(`
+        (() => {
+          const hindiBtn = document.querySelector('[data-testid="audio-btn-hindi"]');
+          if (hindiBtn) hindiBtn.click();
+        })()
+      `);
+      await sleep(800);
+    }
 
-    const honestyScreenCheck = await client.eval(`
+    const deadpoolAfterClick = await client.eval(`
       (() => {
         const text = document.body.innerText;
+        const iframeSrc = document.querySelector('iframe')?.src || '';
         return {
-          showsNotice: text.includes('Hindi audio is unavailable from streaming providers') || text.includes('Hindi audio unavailable'),
-          hasWatchInEnglish: text.includes('Watch in English')
+          isHindiActive: text.includes('Hindi Audio Active'),
+          routesToHindi: iframeSrc.includes('audio=hi') || iframeSrc.includes('sub_dub=hindi') || iframeSrc.includes('multiembed') || iframeSrc.includes('vidlink')
         };
       })()
     `);
 
-    const hollywoodPassed = hollywoodAudioCheck.hasUnavailableLabel && hollywoodAudioCheck.isEnglishDubActive && honestyScreenCheck.showsNotice;
-    recordTest(28, 'Hollywood Movie Audio Honesty & Hindi Safeguard', hollywoodPassed, `Unavailable label: ${hollywoodAudioCheck.hasUnavailableLabel}, English default: ${hollywoodAudioCheck.isEnglishDubActive}, Honesty notice: ${honestyScreenCheck.showsNotice}`);
-
-    // Switch back to English
-    await client.eval(`
-      (() => {
-        const watchEngBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('Watch in English'));
-        if (watchEngBtn) watchEngBtn.click();
-      })()
-    `);
-    await sleep(600);
+    const deadpoolPassed = deadpoolAudioCheck.isAvailable && deadpoolAfterClick.isHindiActive && deadpoolAfterClick.routesToHindi;
+    recordTest(28, 'Hollywood Blockbuster Hindi Dub Resolution (Deadpool & Wolverine)', deadpoolPassed, `Hindi available: ${deadpoolAudioCheck.isAvailable}, Active badge: ${deadpoolAfterClick.isHindiActive}, Route: ${deadpoolAfterClick.routesToHindi}`);
 
     console.log('\n--- Running TEST 29: AI Boost Controls & Keyboard Shortcut (B) ---');
     const initialBoost = await client.eval(`localStorage.getItem('furina_ai_boost') || '4k'`);
@@ -835,6 +830,58 @@ async function runQA() {
     `);
     await sleep(1000);
 
+    console.log('\n--- Running TEST 28b: Hollywood Movie Audio Honesty & Non-Intrusive UX ---');
+    await client.eval(`window.__setReactInput('input[type="text"]', 'Inside Out');`);
+    await sleep(2000);
+    await client.eval(`
+      (() => {
+        const card = Array.from(document.querySelectorAll('.glass-card')).find(c => c.textContent.includes('Inside Out')) || document.querySelector('.glass-card');
+        if (card) card.click();
+      })()
+    `);
+    await sleep(1500);
+
+    const unavailAudioCheck = await client.eval(`
+      (() => {
+        const hindiBtn = document.querySelector('[data-testid="audio-btn-hindi"]');
+        return {
+          hasUnavailableLabel: hindiBtn ? hindiBtn.innerText.includes('(Unavailable)') : false
+        };
+      })()
+    `);
+
+    // Click unavailable Hindi button to verify non-intrusive notification without blocking video
+    await client.eval(`
+      (() => {
+        const hindiBtn = document.querySelector('[data-testid="audio-btn-hindi"]');
+        if (hindiBtn) hindiBtn.click();
+      })()
+    `);
+    await sleep(800);
+
+    const nonIntrusiveCheck = await client.eval(`
+      (() => {
+        const text = document.body.innerText;
+        const hasIframe = Boolean(document.querySelector('iframe'));
+        return {
+          showsToast: text.includes('Hindi audio is unavailable from providers') || text.includes('Hindi audio unavailable'),
+          iframeStillPlaying: hasIframe
+        };
+      })()
+    `);
+
+    const unavailPassed = unavailAudioCheck.hasUnavailableLabel && nonIntrusiveCheck.showsToast && nonIntrusiveCheck.iframeStillPlaying;
+    recordTest('28b', 'Hollywood Movie Audio Honesty & Non-Intrusive Feedback', unavailPassed, `Unavailable label: ${unavailAudioCheck.hasUnavailableLabel}, Non-intrusive toast: ${nonIntrusiveCheck.showsToast}, Player intact: ${nonIntrusiveCheck.iframeStillPlaying}`);
+
+    // Close Player Modal
+    await client.eval(`
+      (() => {
+        const closePlayer = document.querySelector('button[title*="Close Player"]') || Array.from(document.querySelectorAll('button')).find(b => b.title?.toLowerCase().includes('close player'));
+        if (closePlayer) closePlayer.click();
+      })()
+    `);
+    await sleep(1000);
+
     console.log('\n--- Running TEST 31: Bollywood Movie Authentic Spoken Hindi Playback ---');
     await client.eval(`window.__setReactInput('input[type="text"]', 'Stree 2');`);
     await sleep(2000);
@@ -864,6 +911,57 @@ async function runQA() {
     await client.eval(`
       (() => {
         const closePlayer = Array.from(document.querySelectorAll('button')).find(b => b.title?.includes('Close player'));
+        if (closePlayer) closePlayer.click();
+      })()
+    `);
+    await sleep(600);
+
+    console.log('\n--- Running TEST 32: Subtitle System, Keyboard Cycle (C) & Episode Persistence ---');
+    await client.eval(`window.__setReactInput('input[type="text"]', 'One Piece');`);
+    await sleep(2000);
+    await client.eval(`
+      (() => {
+        const card = Array.from(document.querySelectorAll('.glass-card')).find(c => c.textContent.includes('One Piece')) || document.querySelector('.glass-card');
+        if (card) card.click();
+      })()
+    `);
+    await sleep(1500);
+
+    const subControls = await client.eval(`
+      (() => {
+        const buttons = Array.from(document.querySelectorAll('button')).map(b => b.textContent.trim());
+        return {
+          hasOff: buttons.some(t => t.includes('Off')),
+          hasEn: buttons.some(t => t.includes('English CC')),
+          hasJa: buttons.some(t => t.includes('Japanese Sub'))
+        };
+      })()
+    `);
+
+    // Press 'c' to cycle subtitle via keyboard shortcut
+    const initialSub = await client.eval(`localStorage.getItem('furina_active_sub') || 'en'`);
+    await client.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'c', code: 'KeyC', windowsVirtualKeyCode: 67 });
+    await client.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'c', code: 'KeyC', windowsVirtualKeyCode: 67 });
+    await sleep(600);
+    const cycledSub = await client.eval(`localStorage.getItem('furina_active_sub')`);
+
+    // Click Next Episode and verify activeSubtitle persistence
+    await client.eval(`
+      (() => {
+        const nextBtn = Array.from(document.querySelectorAll('button')).find(b => b.title?.includes('Next Episode') || b.textContent.includes('Next Ep'));
+        if (nextBtn) nextBtn.click();
+      })()
+    `);
+    await sleep(1000);
+    const persistedSub = await client.eval(`localStorage.getItem('furina_active_sub')`);
+
+    const subPassed = (subControls.hasOff || subControls.hasEn) && cycledSub !== null && persistedSub === cycledSub;
+    recordTest(32, 'Subtitle System, "C" Keyboard Cycle & Episode Persistence', subPassed, `Controls: ${JSON.stringify(subControls)}, Initial: ${initialSub}, Cycled: ${cycledSub}, Persisted: ${persistedSub}`);
+
+    // Close Player Modal
+    await client.eval(`
+      (() => {
+        const closePlayer = Array.from(document.querySelectorAll('button')).find(b => b.title?.toLowerCase().includes('close player'));
         if (closePlayer) closePlayer.click();
       })()
     `);

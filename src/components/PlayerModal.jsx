@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { 
   X, Server, Film, Tv, RefreshCw, ExternalLink, Info, Zap, Play, Pause,
   Sparkles, ShieldCheck, Download, Maximize2, Minimize2, Volume2, VolumeX,
@@ -43,10 +43,10 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
   // Authentic Hindi audio is available strictly from:
   // 1. Studio/Custom owned content with a real Hindi asset (item?.languages?.hi?.url)
-  // 2. Authentic Bollywood / Indian cinema whose native spoken audio is Hindi (isBollywoodHindi)
+  // 2. Verified Bollywood, Hollywood Hindi Dubs, or Anime Hindi Dubs confirmed by isHindiAvailable
   const hasWorkingHindiSource = isCustom
     ? Boolean(item?.languages?.hi?.url)
-    : isBollywoodHindi;
+    : isHindiAvailable(item);
 
   const hasWorkingEnglishSource = isCustom
     ? Boolean(item?.languages?.en?.url)
@@ -64,7 +64,17 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       if (item?.languages?.ja?.url) return 'sub';
       return 'english';
     }
-    if (isBollywoodHindi) return 'hindi';
+    const itemTitle = (item?.title || item?.name || '').toLowerCase();
+    if (
+      itemTitle.includes('hindi dubbed') || 
+      itemTitle.includes('(hindi') || 
+      itemTitle.includes('hindi dub') ||
+      item?.isHindiDubbed || 
+      isBollywoodHindi || 
+      isHindiPreferred
+    ) {
+      if (hasWorkingHindiSource) return 'hindi';
+    }
     if (isAnime) return 'sub';
     return 'english';
   });
@@ -76,8 +86,15 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
   // Determine initial server — route Hindi to verified multi-audio servers
   const getInitialServer = () => {
-    if (isBollywoodHindi && hasWorkingHindiSource && !isCustom) {
-      return availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
+    if (hasWorkingHindiSource && !isCustom) {
+      if (isBollywoodHindi) {
+        return availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
+      }
+      if (isAnime) {
+        return availableServers.find((s) => s.id === 'animeworld_india') || availableServers.find((s) => s.id === 'multiembed') || availableServers[0];
+      }
+      // Hollywood Hindi Dubs
+      return availableServers.find((s) => s.id === 'multiembed') || availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
     }
     if (isAnime) {
       return availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
@@ -142,9 +159,53 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     return localStorage.getItem('furina_ai_boost') || '4k';
   });
   const [aiBoostToast, setAiBoostToast] = useState(null);
+  const [subtitleToast, setSubtitleToast] = useState(null);
+  const [unavailableNotice, setUnavailableNotice] = useState({ show: false, message: '' });
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
   const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false);
-  const [activeSubtitle, setActiveSubtitle] = useState('en');
+
+  // Subtitle System State & Auto-Detection
+  const [activeSubtitle, setActiveSubtitle] = useState(() => {
+    return localStorage.getItem('furina_active_sub') || (isAnime ? 'en' : 'off');
+  });
+
+  const availableSubtitles = useMemo(() => {
+    const list = [
+      { id: 'off', label: 'Off', flag: '🚫' },
+      { id: 'en', label: 'English CC', flag: '🇬🇧' }
+    ];
+    if (hasWorkingHindiSource || isBollywoodHindi || item?.languages?.hi || item?.subtitles?.some((s) => s.lang === 'hi')) {
+      list.push({ id: 'hi', label: 'Hindi CC', flag: '🇮🇳' });
+    }
+    if (isAnime || item?.original_language === 'ja' || item?.languages?.ja || item?.subtitles?.some((s) => s.lang === 'ja')) {
+      list.push({ id: 'ja', label: 'Japanese Sub', flag: '🇯🇵' });
+    }
+    return list;
+  }, [hasWorkingHindiSource, isBollywoodHindi, isAnime, item]);
+
+  const changeSubtitle = useCallback((subId) => {
+    setActiveSubtitle(subId);
+    try {
+      localStorage.setItem('furina_active_sub', subId);
+    } catch (e) {}
+
+    if (videoRef.current && videoRef.current.textTracks) {
+      const tracks = videoRef.current.textTracks;
+      for (let i = 0; i < tracks.length; i++) {
+        tracks[i].mode = (subId !== 'off' && tracks[i].language === subId) ? 'showing' : 'disabled';
+      }
+    }
+
+    const subObj = availableSubtitles.find((s) => s.id === subId);
+    setSubtitleToast(`💬 Subtitles: ${subObj ? subObj.label : subId.toUpperCase()}`);
+    setTimeout(() => setSubtitleToast(null), 2000);
+  }, [availableSubtitles]);
+
+  const cycleSubtitles = useCallback(() => {
+    const currentIndex = availableSubtitles.findIndex((s) => s.id === activeSubtitle);
+    const nextSub = availableSubtitles[(currentIndex + 1) % availableSubtitles.length];
+    changeSubtitle(nextSub.id);
+  }, [availableSubtitles, activeSubtitle, changeSubtitle]);
 
   // Fullscreen Mode States
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -285,6 +346,9 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
         const modes = ['off', '4k', 'hdr', 'night'];
         const nextMode = modes[(modes.indexOf(aiBoostMode) + 1) % modes.length];
         changeAiBoost(nextMode);
+      } else if (e.key === 'c' || e.key === 'C') {
+        e.preventDefault();
+        cycleSubtitles();
       } else if (e.key === ' ' || e.code === 'Space' || e.key === 'k' || e.key === 'K') {
         if (videoRef.current) {
           e.preventDefault();
@@ -335,7 +399,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isFullscreen, onClose]);
+  }, [isFullscreen, onClose, isShortcutsHelpOpen, aiBoostMode, cycleSubtitles]);
 
   const togglePictureInPicture = async () => {
     try {
@@ -412,7 +476,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     (!item?.vote_count || item.vote_count < 100)
   );
 
-  const streamUrl = getStreamUrl(currentServer, item?.id, isSeries ? 'tv' : 'movie', season, episode, audioMode, isAnime);
+  const streamUrl = getStreamUrl(currentServer, item?.id, isSeries ? 'tv' : 'movie', season, episode, audioMode, isAnime, activeSubtitle);
   const downloadUrl = getDownloadUrl(item?.id, isSeries ? 'tv' : 'movie', season, episode);
 
   // Active custom video URL for owned/studio content - strict 1:1 language mapping
@@ -560,6 +624,20 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   </button>
                 ))}
               </div>
+
+              {/* Fullscreen Subtitle Quick Toggle */}
+              <button
+                onClick={cycleSubtitles}
+                title={`Subtitles: ${activeSubtitle.toUpperCase()} (Press C to cycle)`}
+                className={`px-2 py-1 rounded-xl text-[10px] sm:text-[11px] font-extrabold border transition cursor-pointer flex items-center gap-1 ${
+                  activeSubtitle !== 'off'
+                    ? 'bg-cyan-500/20 text-cyan-300 border-cyan-400/50 shadow-[0_0_8px_rgba(6,182,212,0.4)]'
+                    : 'bg-white/10 text-slate-400 border-white/15 hover:text-white'
+                }`}
+              >
+                <Subtitles className="w-3.5 h-3.5" />
+                <span>CC: {activeSubtitle.toUpperCase()}</span>
+              </button>
 
               {/* Fullscreen Download Button */}
               <button
@@ -760,80 +838,124 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
         )}
 
         {/* ========================================================================= */}
-        {/* 3. DEDICATED AUDIO TRACK SELECTOR BAR                                     */}
+        {/* 3. DEDICATED AUDIO TRACK & SUBTITLES SELECTOR BAR                         */}
         {/* ========================================================================= */}
         {!isFullscreen && (
-          <div className="px-3 sm:px-4 py-2 bg-gradient-to-r from-[#070e24] via-[#09153a] to-[#070e24] border-b border-cyan-500/20 flex flex-wrap items-center justify-between gap-2 text-xs">
-            <div className="flex items-center gap-2">
-              <span className="flex items-center gap-1.5 font-extrabold text-cyan-300 text-[11px] uppercase tracking-wider">
-                <Volume2 className="w-3.5 h-3.5 text-cyan-400" />
-                Audio Track:
-              </span>
-              <div className="flex items-center gap-1.5">
-                
-                {/* English Dub Option */}
-                {hasWorkingEnglishSource && (
+          <div className="px-3 sm:px-4 py-2.5 bg-gradient-to-r from-[#070e24] via-[#09153a] to-[#070e24] border-b border-cyan-500/20 flex flex-wrap items-center justify-between gap-2.5 text-xs">
+            <div className="flex items-center gap-4 flex-wrap">
+              {/* Audio Track Selector */}
+              <div className="flex items-center gap-2">
+                <span className="flex items-center gap-1.5 font-extrabold text-cyan-300 text-[11px] uppercase tracking-wider">
+                  <Volume2 className="w-3.5 h-3.5 text-cyan-400" />
+                  Audio Track:
+                </span>
+                <div className="flex items-center gap-1.5 bg-black/40 p-0.5 rounded-full border border-white/10">
+                  {/* English Dub Option */}
+                  {hasWorkingEnglishSource && (
+                    <button
+                      data-testid="audio-btn-english"
+                      onClick={() => {
+                        setAudioMode('english');
+                        setUnavailableNotice({ show: false, message: '' });
+                        const engServer = availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
+                        setSelectedServer(engServer);
+                      }}
+                      className={`px-3 py-1 rounded-full text-xs font-extrabold transition flex items-center gap-1 border cursor-pointer ${
+                        audioMode === 'english'
+                          ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 border-cyan-300 shadow-[0_0_12px_rgba(56,189,248,0.5)] scale-105'
+                          : 'bg-cyan-500/10 text-cyan-200/70 border-transparent hover:text-white'
+                      }`}
+                    >
+                      <span>🎙️</span>
+                      <span>English Dub</span>
+                    </button>
+                  )}
+
+                  {/* Japanese Sub Option */}
+                  {hasWorkingJapaneseSource && (
+                    <button
+                      data-testid="audio-btn-sub"
+                      onClick={() => {
+                        setAudioMode('sub');
+                        setUnavailableNotice({ show: false, message: '' });
+                        const subServer = availableServers.find((s) => s.id === 'vidsrc_in') || availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
+                        setSelectedServer(subServer);
+                      }}
+                      className={`px-3 py-1 rounded-full text-xs font-extrabold transition flex items-center gap-1 border cursor-pointer ${
+                        audioMode === 'sub'
+                          ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white border-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.5)] scale-105'
+                          : 'bg-purple-500/10 text-purple-200/70 border-transparent hover:text-white'
+                      }`}
+                    >
+                      <span>🇯🇵</span>
+                      <span>Japanese Sub</span>
+                    </button>
+                  )}
+
+                  {/* Hindi Option: Verified or Non-Intrusive Notice */}
                   <button
-                    data-testid="audio-btn-english"
+                    data-testid="audio-btn-hindi"
                     onClick={() => {
-                      setAudioMode('english');
-                      const engServer = availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
-                      setSelectedServer(engServer);
+                      if (hasWorkingHindiSource) {
+                        setAudioMode('hindi');
+                        setUnavailableNotice({ show: false, message: '' });
+                        if (!isCustom) {
+                          if (isBollywoodHindi) {
+                            const hindiServer = availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
+                            setSelectedServer(hindiServer);
+                          } else if (isAnime) {
+                            const hindiServer = availableServers.find((s) => s.id === 'animeworld_india') || availableServers.find((s) => s.id === 'multiembed') || availableServers[0];
+                            setSelectedServer(hindiServer);
+                          } else {
+                            const hindiServer = availableServers.find((s) => s.id === 'multiembed') || availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
+                            setSelectedServer(hindiServer);
+                          }
+                        }
+                      } else {
+                        // Non-intrusive alert: Keep playing default stream while showing clear feedback
+                        setUnavailableNotice({
+                          show: true,
+                          message: `Hindi audio is unavailable from providers for this ${isAnime ? 'anime' : 'title'}. Streaming in ${hasWorkingEnglishSource ? 'English Dub' : 'Japanese Sub'}.`
+                        });
+                        setTimeout(() => setUnavailableNotice({ show: false, message: '' }), 4500);
+                      }
                     }}
                     className={`px-3 py-1 rounded-full text-xs font-extrabold transition flex items-center gap-1 border cursor-pointer ${
-                      audioMode === 'english'
-                        ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 border-cyan-300 shadow-[0_0_12px_rgba(56,189,248,0.5)] scale-105'
-                        : 'bg-cyan-500/10 text-cyan-200/70 border-cyan-500/30 hover:text-white'
+                      audioMode === 'hindi' && hasWorkingHindiSource
+                        ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-gray-950 border-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.6)] scale-105'
+                        : hasWorkingHindiSource
+                        ? 'bg-amber-500/10 text-amber-200/70 border-transparent hover:text-white'
+                        : 'bg-white/5 text-slate-400 border-transparent hover:text-slate-200 opacity-60'
                     }`}
                   >
-                    <span>🎙️</span>
-                    <span>English Dub</span>
+                    <span>🇮🇳</span>
+                    <span>Hindi {hasWorkingHindiSource ? 'Audio' : '(Unavailable)'}</span>
                   </button>
-                )}
+                </div>
+              </div>
 
-                {/* Japanese Sub Option */}
-                {hasWorkingJapaneseSource && (
-                  <button
-                    data-testid="audio-btn-sub"
-                    onClick={() => {
-                      setAudioMode('sub');
-                      const subServer = availableServers.find((s) => s.id === 'vidsrc_in') || availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
-                      setSelectedServer(subServer);
-                    }}
-                    className={`px-3 py-1 rounded-full text-xs font-extrabold transition flex items-center gap-1 border cursor-pointer ${
-                      audioMode === 'sub'
-                        ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white border-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.5)] scale-105'
-                        : 'bg-purple-500/10 text-purple-200/70 border-purple-500/30 hover:text-white'
-                    }`}
-                  >
-                    <span>🇯🇵</span>
-                    <span>Japanese Sub</span>
-                  </button>
-                )}
-
-                {/* Hindi Option: Always visible with strict verified or unavailable policy feedback */}
-                <button
-                  data-testid="audio-btn-hindi"
-                  onClick={() => {
-                    setAudioMode('hindi');
-                    if (hasWorkingHindiSource && !isCustom) {
-                      const hindiServer = isBollywoodHindi
-                        ? (availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0])
-                        : (availableServers.find((s) => s.id === 'multiembed') || availableServers[0]);
-                      setSelectedServer(hindiServer);
-                    }
-                  }}
-                  className={`px-3 py-1 rounded-full text-xs font-extrabold transition flex items-center gap-1 border cursor-pointer ${
-                    audioMode === 'hindi'
-                      ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-gray-950 border-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.6)] scale-105'
-                      : hasWorkingHindiSource
-                      ? 'bg-amber-500/10 text-amber-200/70 border-amber-500/30 hover:text-white'
-                      : 'bg-white/5 text-slate-400 border-white/10 hover:text-slate-200'
-                  }`}
-                >
-                  <span>🇮🇳</span>
-                  <span>Hindi {hasWorkingHindiSource ? 'Audio' : '(Unavailable)'}</span>
-                </button>
+              {/* Subtitles (CC) Selector */}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="flex items-center gap-1 font-extrabold text-cyan-300 text-[11px] uppercase tracking-wider">
+                  <Subtitles className="w-3.5 h-3.5 text-cyan-400" />
+                  Subtitles:
+                </span>
+                <div className="flex items-center gap-1 bg-black/40 p-0.5 rounded-full border border-white/10">
+                  {availableSubtitles.map((sub) => (
+                    <button
+                      key={sub.id}
+                      onClick={() => changeSubtitle(sub.id)}
+                      className={`px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold transition flex items-center gap-1 cursor-pointer ${
+                        activeSubtitle === sub.id
+                          ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-gray-950 font-black shadow-md scale-105'
+                          : 'text-slate-400 hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      <span>{sub.flag}</span>
+                      <span>{sub.label}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -846,17 +968,17 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
               )}
               {audioMode === 'sub' && (
                 <span className="text-purple-300 font-medium">
-                  ✓ <strong>Japanese Subbed Active</strong> ({isCustom ? 'Studio Master Track' : 'Original Japanese Audio • Tap 💬 CC for subtitles'})
+                  ✓ <strong>Japanese Subbed Active</strong> ({isCustom ? 'Studio Master Track' : 'Original Japanese Audio • CC Subtitles Configured'})
                 </span>
               )}
               {audioMode === 'hindi' && hasWorkingHindiSource && (
                 <span className="text-amber-300 font-medium">
-                  ✓ <strong>Hindi Audio Active</strong> ({isCustom ? 'Studio Master Track' : isBollywoodHindi ? 'Original Hindi Audio Track' : 'Verified Hindi Stream'})
+                  ✓ <strong>Hindi Audio Active</strong> ({isCustom ? 'Studio Master Track' : isBollywoodHindi ? 'Original Hindi Audio Track' : 'Verified Multi-Audio Hindi Stream'})
                 </span>
               )}
-              {audioMode === 'hindi' && !hasWorkingHindiSource && (
-                <span className="text-rose-400 font-bold">
-                  ⚠️ <strong>{isAnime ? 'Hindi audio unavailable for this anime title.' : isSeries ? 'Hindi audio unavailable for this episode.' : 'Hindi audio unavailable for this title.'}</strong> (Select English Dub or Japanese Sub below)
+              {(!hasWorkingHindiSource || (audioMode === 'hindi' && !hasWorkingHindiSource)) && (
+                <span className="text-amber-300/80 font-medium">
+                  ℹ️ <strong>Hindi (Unavailable)</strong> • Active Stream: {hasWorkingEnglishSource ? 'English Dub' : 'Japanese Sub'}
                 </span>
               )}
             </div>
@@ -957,53 +1079,6 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   </button>
                 </div>
               </div>
-            ) : audioMode === 'hindi' && !hasWorkingHindiSource ? (
-              <div className="w-full h-full min-h-[320px] bg-[#050b1d] flex flex-col items-center justify-center p-6 text-center border-y border-amber-500/20">
-                <div className="w-14 h-14 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-3xl mb-3 text-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.3)]">
-                  🇮🇳
-                </div>
-                <h3 className="text-base sm:text-lg font-black text-white mb-2 flex items-center gap-2">
-                  <span>{isAnime ? 'Hindi audio unavailable for this anime title.' : isSeries ? 'Hindi audio unavailable for this episode.' : 'Hindi audio unavailable for this movie.'}</span>
-                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40">
-                    Strict Audio Policy
-                  </span>
-                </h3>
-                <p className="text-xs text-slate-300 max-w-md mb-5 leading-relaxed">
-                  An authorized Hindi dubbed stream is not available from the configured streaming providers for <strong>{title}</strong>. We never silently substitute Japanese or English audio when you selected Hindi.
-                </p>
-                <div className="flex items-center gap-2.5 flex-wrap justify-center">
-                  {hasWorkingEnglishSource && (
-                    <button
-                      onClick={() => {
-                        setAudioMode('english');
-                        if (!isCustom) {
-                          const engServer = availableServers.find((s) => s.id === 'vidlink') || availableServers[0];
-                          setSelectedServer(engServer);
-                        }
-                      }}
-                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-gray-950 font-black text-xs transition shadow-[0_0_15px_rgba(56,189,248,0.4)] transform hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-1.5"
-                    >
-                      <span>🎙️</span>
-                      <span>Watch in English {isCustom ? 'Audio (Studio Master)' : 'Dub (VidLink Pro)'}</span>
-                    </button>
-                  )}
-                  {(isAnime || hasWorkingJapaneseSource) && (
-                    <button
-                      onClick={() => {
-                        setAudioMode('sub');
-                        if (!isCustom) {
-                          const subServer = availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
-                          setSelectedServer(subServer);
-                        }
-                      }}
-                      className="px-4 py-2 rounded-xl bg-purple-600/25 hover:bg-purple-600/40 text-purple-200 border border-purple-500/40 font-bold text-xs transition hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-1.5"
-                    >
-                      <span>🇯🇵</span>
-                      <span>Watch in Japanese {isCustom ? 'Audio (Studio Master)' : 'Sub'}</span>
-                    </button>
-                  )}
-                </div>
-              </div>
             ) : isCustom ? (
               /* CASE B: OWNED / STUDIO CREATED MOVIE (HTML5 Custom Video Player) */
               <div className="relative w-full h-full flex items-center justify-center bg-black">
@@ -1059,6 +1134,46 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-xl bg-cyan-950/95 border border-cyan-400/80 text-cyan-200 text-xs font-black shadow-[0_0_25px_rgba(6,182,212,0.8)] backdrop-blur-md flex items-center gap-2 pointer-events-none animate-bounce">
                     <Sparkles className="w-4 h-4 text-cyan-300 animate-spin" />
                     <span>{aiBoostToast}</span>
+                  </div>
+                )}
+
+                {/* Floating Subtitle Toast Notification */}
+                {subtitleToast && (
+                  <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-xl bg-[#08122c]/95 border border-cyan-400/80 text-cyan-200 text-xs font-black shadow-[0_0_25px_rgba(6,182,212,0.8)] backdrop-blur-md flex items-center gap-2 pointer-events-none animate-in fade-in zoom-in-95 duration-150">
+                    <Subtitles className="w-4 h-4 text-cyan-300 animate-pulse" />
+                    <span>{subtitleToast}</span>
+                  </div>
+                )}
+
+                {/* Floating Non-Intrusive Unavailable Language Notice */}
+                {unavailableNotice.show && (
+                  <div className="absolute top-3 left-1/2 -translate-x-1/2 z-40 max-w-lg px-4 py-2 rounded-xl bg-slate-950/90 border border-amber-500/40 text-amber-200 text-xs shadow-xl backdrop-blur-md flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-200 pointer-events-auto">
+                    <div className="flex items-center gap-2">
+                      <span className="text-amber-400 font-bold">ℹ️</span>
+                      <span>{unavailableNotice.message}</span>
+                    </div>
+                    <button 
+                      onClick={() => setUnavailableNotice({ show: false, message: '' })} 
+                      className="text-slate-400 hover:text-white text-xs px-1 cursor-pointer"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+
+                {/* Fallback Audio Safeguard: If Hindi was selected on an unavailable title, stream default cleanly with subtle warning banner */}
+                {audioMode === 'hindi' && !hasWorkingHindiSource && !unavailableNotice.show && (
+                  <div className="absolute top-3 left-1/2 -translate-x-1/2 z-40 max-w-lg px-3.5 py-1.5 rounded-xl bg-slate-950/90 border border-amber-500/40 text-amber-200 text-xs shadow-xl backdrop-blur-md flex items-center justify-between gap-2.5 animate-in fade-in slide-in-from-top-2 duration-200 pointer-events-auto">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-amber-400 font-bold">ℹ️</span>
+                      <span>Hindi audio unavailable from providers for this title. Streaming in {hasWorkingEnglishSource ? 'English Dub' : 'Japanese Sub'}.</span>
+                    </div>
+                    <button
+                      onClick={() => setAudioMode(hasWorkingEnglishSource ? 'english' : 'sub')}
+                      className="px-2 py-0.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold text-[11px] transition cursor-pointer"
+                    >
+                      Switch
+                    </button>
                   </div>
                 )}
 

@@ -2321,7 +2321,7 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
   "category": "hollywood",
 
-  "isHindiDubbed": false
+  "isHindiDubbed": true
 
 },
 
@@ -2347,7 +2347,7 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
   "category": "hollywood",
 
-  "isHindiDubbed": false
+  "isHindiDubbed": true
 
 },
 
@@ -2373,7 +2373,7 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
   "category": "hollywood",
 
-  "isHindiDubbed": false
+  "isHindiDubbed": true
 
 },
 
@@ -2399,7 +2399,7 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
   "category": "hollywood",
 
-  "isHindiDubbed": false
+  "isHindiDubbed": true
 
 },
 
@@ -2425,7 +2425,7 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
   "category": "hollywood",
 
-  "isHindiDubbed": false
+  "isHindiDubbed": true
 
 },
 
@@ -2451,7 +2451,7 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
   "category": "hollywood",
 
-  "isHindiDubbed": false
+  "isHindiDubbed": true
 
 },
 
@@ -2477,7 +2477,7 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
   "category": "hollywood",
 
-  "isHindiDubbed": false
+  "isHindiDubbed": true
 
 },
 
@@ -2503,7 +2503,7 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
   "category": "hollywood",
 
-  "isHindiDubbed": false
+  "isHindiDubbed": true
 
 },
 
@@ -2529,7 +2529,7 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
   "category": "hollywood",
 
-  "isHindiDubbed": false
+  "isHindiDubbed": true
 
 },
 
@@ -2555,7 +2555,7 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
   "category": "hollywood",
 
-  "isHindiDubbed": false
+  "isHindiDubbed": true
 
 },
 
@@ -2581,7 +2581,7 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
   "category": "hollywood",
 
-  "isHindiDubbed": false
+  "isHindiDubbed": true
 
 },
 
@@ -2607,7 +2607,7 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
   "category": "hollywood",
 
-  "isHindiDubbed": false
+  "isHindiDubbed": true
 
 },
 
@@ -2633,7 +2633,7 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
   "category": "hollywood",
 
-  "isHindiDubbed": false
+  "isHindiDubbed": true
 
 },
 
@@ -2659,7 +2659,7 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
   "category": "hollywood",
 
-  "isHindiDubbed": false
+  "isHindiDubbed": true
 
 },
 
@@ -3183,6 +3183,47 @@ export const VERIFIED_HINDI_GLOBAL_SERIES_IDS = new Set([
   125988, // Silo
 ]);
 
+// Verified Hollywood Blockbusters with official Indian theatrical/OTT Hindi dubs
+export const VERIFIED_HINDI_HOLLYWOOD_IDS = new Set([
+  533535, // Deadpool & Wolverine
+  299534, // Avengers: Endgame
+  299536, // Avengers: Infinity War
+  634649, // Spider-Man: No Way Home
+  76600,  // Avatar: The Way of Water
+  19995,  // Avatar
+  168259, // Furious 7
+  912649, // Venom: The Last Dance
+  335983, // Venom
+  580489, // Venom: Let There Be Carnage
+  1011985,// Kung Fu Panda 4
+  823464, // Godzilla x Kong: The New Empire
+  27205,  // Inception
+  157336, // Interstellar
+  155,    // The Dark Knight
+  272,    // Batman Begins
+  49026,  // The Dark Knight Rises
+  135397, // Jurassic World
+  667538, // Transformers: Rise of the Beasts
+  284053, // Thor: Ragnarok
+  616037, // Thor: Love and Thunder
+  24428,  // The Avengers
+  99861,  // Avengers: Age of Ultron
+  447365, // Guardians of the Galaxy Vol. 3
+  569094, // Spider-Man: Across the Spider-Verse
+  324857, // Spider-Man: Into the Spider-Verse
+  414906, // The Batman
+  575264, // Mission: Impossible - Dead Reckoning
+  693134, // Dune: Part Two
+  438631, // Dune
+  385687, // Fast X
+  603692, // John Wick: Chapter 4
+  572802, // Aquaman and the Lost Kingdom
+  505642, // Black Panther: Wakanda Forever
+  453395, // Doctor Strange in the Multiverse of Madness
+  558449, // Gladiator II
+  361743, // Top Gun: Maverick
+]);
+
 export function isHindiAvailable(item) {
   if (!item) return false;
 
@@ -3191,6 +3232,32 @@ export function isHindiAvailable(item) {
     return true;
   }
 
+  // Title explicitly designated as Hindi Dubbed
+  const title = (item.title || item.name || item.original_title || item.original_name || '').toLowerCase();
+  if (title.includes('hindi dubbed') || title.includes('(hindi') || title.includes('[hindi') || title.includes('hindi dub')) {
+    return true;
+  }
+
+  // Explicitly flagged on item object
+  if (item.isHindiDubbed === true || item.hasHindiDub === true || item.dub_type === 'hindi') {
+    return true;
+  }
+
+  const id = Number(item.id);
+
+  // Curated Hollywood with verified Hindi dubs
+  if (VERIFIED_HINDI_HOLLYWOOD_IDS.has(id)) return true;
+  if (CURATED_HOLLYWOOD_HINDI_DUBS.some((m) => Number(m.id) === id)) return true;
+
+  // Curated Anime with verified Hindi dubs (MyDubList + AnimeWorld India)
+  if (VERIFIED_HINDI_ANIME_IDS.has(id)) return true;
+  if (CURATED_HINDI_DUBBED_ANIME.some((a) => Number(a.id) === id)) return true;
+
+  // Curated K-Dramas & Global Series with verified Hindi dubs
+  if (VERIFIED_HINDI_KDRAMA_IDS.has(id)) return true;
+  if (VERIFIED_HINDI_GLOBAL_SERIES_IDS.has(id)) return true;
+  if (CURATED_HINDI_KDRAMAS.some((k) => Number(k.id) === id)) return true;
+
   // Authentic Bollywood / Indian cinema whose native spoken audio is Hindi
   if (
     item.original_language === 'hi' ||
@@ -3198,8 +3265,6 @@ export function isHindiAvailable(item) {
   ) {
     return true;
   }
-
-  const id = Number(item.id);
 
   // Curated Bollywood list
   if (CURATED_BOLLYWOOD_BLOCKBUSTERS.some((b) => Number(b.id) === id)) return true;

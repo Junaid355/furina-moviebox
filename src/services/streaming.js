@@ -100,8 +100,8 @@ export const SERVERS = [
     badge: '🇮🇳 High-Speed CDN',
     color: 'bg-orange-500/20 text-orange-300 border-orange-500/40',
     supportedAudios: ['hindi', 'english', 'sub'],
-    getMovieUrl: (tmdbId) => `https://vidsrc.in/embed/movie/${tmdbId}`,
-    getTvUrl: (tmdbId, s = 1, e = 1) => `https://vidsrc.in/embed/tv/${tmdbId}/${s}/${e}`
+    getMovieUrl: (tmdbId, audioMode = 'hindi') => `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1${audioMode === 'hindi' ? '&audio=hi' : ''}`,
+    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'hindi') => `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${s}&e=${e}${audioMode === 'hindi' ? '&audio=hi' : ''}`
   },
   {
     id: 'multiembed',
@@ -119,12 +119,21 @@ export const SERVERS = [
   }
 ];
 
-export function getStreamUrl(server, tmdbId, type = 'movie', season = 1, episode = 1, audioMode = 'english', isAnime = false) {
+export function getStreamUrl(server, tmdbId, type = 'movie', season = 1, episode = 1, audioMode = 'english', isAnime = false, subLang = 'off') {
   if (!server) server = SERVERS[0];
+  let url = '';
   if (type === 'tv') {
-    return server.getTvUrl(tmdbId, season, episode, audioMode, isAnime);
+    url = server.getTvUrl(tmdbId, season, episode, audioMode, isAnime);
+  } else {
+    url = server.getMovieUrl(tmdbId, audioMode, isAnime);
   }
-  return server.getMovieUrl(tmdbId, audioMode, isAnime);
+  if (subLang && subLang !== 'off') {
+    const sep = url.includes('?') ? '&' : '?';
+    if (!url.includes('sub_lang=') && !url.includes('sub=')) {
+      url += `${sep}sub_lang=${subLang}`;
+    }
+  }
+  return url;
 }
 
 export function getDownloadMirrors(tmdbId, type = 'movie', season = 1, episode = 1, audioMode = 'english') {
