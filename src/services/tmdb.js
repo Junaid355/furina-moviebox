@@ -5716,21 +5716,21 @@ export async function searchContent(query, page = 1, includeAdult = false) {
   }
 
   try {
-    let data = await cachedFetchJson(`${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(query.trim())}&page=${page}&include_adult=${includeAdult}`);
-    let results = (data.results || []).filter(item => item && item.id && item.media_type !== 'person' && (item.poster_path || item.backdrop_path));
+    const encodedQuery = encodeURIComponent(query.trim());
+    const networkPromise = Promise.all([
+      cachedFetchJson(`${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodedQuery}&page=${page}&include_adult=${includeAdult}`).catch(() => ({ results: [] })),
+      cachedFetchJson(`${BASE_URL}/search/tv?api_key=${API_KEY}&query=${encodedQuery}&page=${page}&include_adult=${includeAdult}`).catch(() => ({ results: [] }))
+    ]);
 
-    // If no results, try stripping modifiers like 'hindi dubbed', 'hindi', 'dubbed', 'full movie', 'movie', etc.
-    if (results.length === 0) {
-      const cleaned = query.replace(/\b(hindi\s*dubbed|hindi\s*dub|hindi|dubbed|dub|full\s*movie|movie|series)\b/gi, '').trim();
-      if (cleaned && cleaned.toLowerCase() !== query.trim().toLowerCase()) {
-        data = await cachedFetchJson(`${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(cleaned)}&page=${page}&include_adult=${includeAdult}`);
-        results = (data.results || []).filter(item => item && item.id && item.media_type !== 'person' && (item.poster_path || item.backdrop_path));
-      }
-    }
+    const timeoutMs = (curatedMatches.length > 0 || studioMatches.length > 0) ? 1200 : 3500;
+    const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve([{ results: [] }, { results: [] }]), timeoutMs));
 
-    if (!includeAdult) {
-      results = results.filter(item => !isHanimeContent(item));
-    }
+    const [movieRes, tvRes] = await Promise.race([networkPromise, timeoutPromise]);
+
+    const movies = (movieRes?.results || []).map((m) => ({ ...m, media_type: 'movie' }));
+    const tvs = (tvRes?.results || []).map((t) => ({ ...t, media_type: 'tv' }));
+
+    const results = [...movies, ...tvs].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
 
     const merged = page === 1 ? [...studioMatches, ...curatedMatches, ...results] : results;
     const finalResults = deduplicateMedia(merged.map(item => ({
@@ -5771,19 +5771,12 @@ export async function fetchSeasonEpisodes(tvId, seasonNum) {
     }
 
     // Fallback: generate default episodes if empty so user is never stuck
-
     return Array.from({ length: 12 }, (_, i) => ({
-
       episode_number: i + 1,
-
       name: `Episode ${i + 1}`
-
     }));
-
   } catch (err) {
-
     return Array.from({ length: 12 }, (_, i) => ({
-
       episode_number: i + 1,
       name: `Episode ${i + 1}`
     }));

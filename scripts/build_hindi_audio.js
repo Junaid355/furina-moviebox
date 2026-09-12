@@ -4,92 +4,18 @@ import fs from 'fs';
 import path from 'path';
 
 const EDGE_PATH = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
-const PORT = 9897;
-const USER_DATA_DIR = 'C:\\Users\\User\\.gemini\\antigravity\\scratch\\edge-audio-builder';
+const PORT = 9892;
+const USER_DATA_DIR = 'C:\\Users\\User\\.gemini\\antigravity\\scratch\\edge-audio-builder-real';
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
+function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
 function httpGetJson(url) {
   return new Promise((resolve, reject) => {
     http.get(url, (res) => {
       let data = '';
-      res.on('data', (chunk) => data += chunk);
-      res.on('end', () => {
-        try {
-          resolve(JSON.parse(data));
-        } catch (e) {
-          reject(e);
-        }
-      });
+      res.on('data', (c) => data += c);
+      res.on('end', () => resolve(JSON.parse(data)));
     }).on('error', reject);
   });
-}
-
-class CDPClient {
-  constructor(wsUrl) {
-    this.ws = new WebSocket(wsUrl);
-    this.id = 1;
-    this.callbacks = new Map();
-
-    this.ws.onmessage = (event) => {
-      const msg = JSON.parse(event.data);
-      if (msg.id && this.callbacks.has(msg.id)) {
-        const { resolve, reject } = this.callbacks.get(msg.id);
-        this.callbacks.delete(msg.id);
-        if (msg.error) {
-          reject(msg.error);
-        } else {
-          resolve(msg.result);
-        }
-      }
-    };
-  }
-
-  async waitForOpen() {
-    if (this.ws.readyState === WebSocket.OPEN) return;
-    return new Promise((resolve) => {
-      this.ws.onopen = () => resolve();
-    });
-  }
-
-  send(method, params = {}) {
-    return new Promise((resolve, reject) => {
-      const id = this.id++;
-      this.callbacks.set(id, { resolve, reject });
-      this.ws.send(JSON.stringify({ id, method, params }));
-    });
-  }
-
-  async eval(expression) {
-    const res = await this.send('Runtime.evaluate', {
-      expression,
-      awaitPromise: true,
-      returnByValue: true
-    });
-    if (res.exceptionDetails) {
-      throw new Error(`Eval error: ${JSON.stringify(res.exceptionDetails)}`);
-    }
-    return res.result?.value;
-  }
-
-  close() {
-    try {
-      this.ws.close();
-    } catch (e) {}
-  }
-}
-
-async function fetchMp3(text) {
-  const q = encodeURIComponent(text);
-  const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=hi&client=tw-ob&q=${q}`;
-  const res = await fetch(url, {
-    headers: { 'User-Agent': 'Mozilla/5.0' }
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status} fetching TTS for "${text}"`);
-  const buf = await res.arrayBuffer();
-  return Buffer.from(buf);
 }
 
 function writeWavHeader(sampleRate, numChannels, numFrames) {
@@ -112,104 +38,175 @@ function writeWavHeader(sampleRate, numChannels, numFrames) {
   buffer.writeUInt16LE(bytesPerSample * 8, 34);
   buffer.write('data', 36);
   buffer.writeUInt32LE(dataSize, 40);
-
   return buffer;
 }
 
-async function main() {
-  console.log('--- Building Authentic Hindi Movie Dialogue Audio ---');
-  const dialogueLines = [
-    { label: 'Deadpool Intro', text: 'नमस्ते दोस्तों! मैं हूँ डेडपूल! और यह है मेरा नया दोस्त वूल्वरिन! चलो भाई अब विलेन की धुलाई करते हैं!' },
-    { label: 'Iron Man Endgame', text: 'और मैं... आयरन मैन हूँ! अवेंजर्स, एक साथ आओ!' },
-    { label: 'Naruto Anime', text: 'मेरा नाम नारुतो उज़ुमाकी है! और मैं एक दिन सबसे बड़ा होकागे बनके दिखाऊँगा!' },
-    { label: 'Sholay Classic', text: 'कितने आदमी थे? जो डर गया... समझो मर गया!' },
-    { label: 'Dark Knight Joker', text: 'तुम इतने सीरियस क्यों हो? चेहरे पर एक मुस्कान लाओ!' }
-  ];
-
-  console.log('1. Fetching MP3 audio chunks from authentic Hindi TTS...');
-  const mp3Buffers = [];
-  for (const line of dialogueLines) {
-    console.log(`   Fetching [${line.label}]: "${line.text}"`);
-    const mp3 = await fetchMp3(line.text);
-    mp3Buffers.push(mp3);
-    await sleep(200);
+class CDPClient {
+  constructor(wsUrl) {
+    this.ws = new WebSocket(wsUrl);
+    this.id = 1;
+    this.callbacks = new Map();
+    this.ws.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
+      if (msg.id && this.callbacks.has(msg.id)) {
+        const { resolve, reject } = this.callbacks.get(msg.id);
+        this.callbacks.delete(msg.id);
+        if (msg.error) reject(msg.error);
+        else resolve(msg.result);
+      }
+    };
   }
 
-  console.log('2. Launching headless Edge to decode MP3 via Web Audio API...');
+  async waitForOpen() {
+    if (this.ws.readyState === WebSocket.OPEN) return;
+    return new Promise((resolve) => { this.ws.onopen = () => resolve(); });
+  }
+
+  send(method, params = {}) {
+    return new Promise((resolve, reject) => {
+      const id = this.id++;
+      this.callbacks.set(id, { resolve, reject });
+      this.ws.send(JSON.stringify({ id, method, params }));
+    });
+  }
+
+  async eval(expression) {
+    const res = await this.send('Runtime.evaluate', {
+      expression,
+      awaitPromise: true,
+      returnByValue: true
+    });
+    if (res.exceptionDetails) throw new Error(JSON.stringify(res.exceptionDetails));
+    return res.result?.value;
+  }
+
+  close() { try { this.ws.close(); } catch (e) {} }
+}
+
+async function fetchAudioChunk(startByte, endByte, fallbackPath) {
+  if (fs.existsSync(fallbackPath)) {
+    return fs.readFileSync(fallbackPath);
+  }
+  const res = await fetch('https://archive.org/download/sholay-1975/SHOLAY%201975.mp3', {
+    headers: { 'Range': `bytes=${startByte}-${endByte}` }
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status} fetching Sholay master chunk`);
+  const buf = Buffer.from(await res.arrayBuffer());
+  fs.writeFileSync(fallbackPath, buf);
+  return buf;
+}
+
+export async function buildAuthenticHindiAudio() {
+  console.log('--- Building Authentic Cinematic Hindi Movie Audio ---');
+
+  const introPath = path.resolve('scripts/sholay_chunk.mp3');
+  const dialoguePath = path.resolve('scripts/chunk_gabbar.mp3');
+
+  const introBuf = await fetchAudioChunk(0, 2097152, introPath);
+  const dialogueBuf = await fetchAudioChunk(56 * 1024 * 1024, 56 * 1024 * 1024 + 2097152, dialoguePath);
+
+  console.log('1. Launching Headless Edge to process & normalize master cinema audio...');
   const edgeProc = spawn(EDGE_PATH, [
     '--headless',
     `--remote-debugging-port=${PORT}`,
     `--user-data-dir=${USER_DATA_DIR}`,
     'about:blank'
   ]);
-
   await sleep(1500);
   const tabs = await httpGetJson(`http://127.0.0.1:${PORT}/json/list`);
-  const wsUrl = tabs[0].webSocketDebuggerUrl;
-  const client = new CDPClient(wsUrl);
+  const client = new CDPClient(tabs[0].webSocketDebuggerUrl);
   await client.waitForOpen();
 
-  console.log('3. Decoding MP3 chunks to raw PCM float samples in Edge...');
-  const pcmChunks = [];
-  let sampleRate = 44100;
+  const b64Intro = introBuf.toString('base64');
+  const b64Dialogue = dialogueBuf.toString('base64');
 
-  for (let i = 0; i < mp3Buffers.length; i++) {
-    const b64 = mp3Buffers[i].toString('base64');
-    const result = await client.eval(`
-      (async () => {
-        const binary = atob("${b64}");
-        const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-        const ctx = new OfflineAudioContext(1, 44100 * 30, 44100);
-        const audioBuffer = await ctx.decodeAudioData(bytes.buffer);
-        const data = audioBuffer.getChannelData(0);
-        const pcm16 = new Int16Array(data.length);
-        for (let j = 0; j < data.length; j++) {
-          const s = Math.max(-1, Math.min(1, data[j]));
-          pcm16[j] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+  const result = await client.eval(`
+    (async () => {
+      function b64ToBytes(b64) {
+        const bin = atob(b64);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        return bytes;
+      }
+
+      const introBytes = b64ToBytes("${b64Intro}");
+      const dialogueBytes = b64ToBytes("${b64Dialogue}");
+
+      const ctx = new OfflineAudioContext(1, 44100 * 60, 44100);
+      const [introAudio, dialogueAudio] = await Promise.all([
+        ctx.decodeAudioData(introBytes.buffer),
+        ctx.decodeAudioData(dialogueBytes.buffer)
+      ]);
+
+      const introData = introAudio.getChannelData(0);
+      const dialogueData = dialogueAudio.getChannelData(0);
+
+      const sampleRate = 44100;
+      const introSamples = Math.floor(sampleRate * 8.0);
+      const fadeSamples = Math.floor(sampleRate * 1.5);
+      const dialogueSamples = Math.floor(sampleRate * 32.0);
+
+      const totalSamples = introSamples + dialogueSamples;
+      const mixed = new Float32Array(totalSamples);
+
+      for (let i = 0; i < introSamples; i++) {
+        let gain = 1.0;
+        if (i > introSamples - fadeSamples) {
+          gain = (introSamples - i) / fadeSamples;
         }
-        const u8 = new Uint8Array(pcm16.buffer);
-        let str = '';
-        const chunk = 8192;
-        for (let j = 0; j < u8.length; j += chunk) {
-          str += String.fromCharCode.apply(null, u8.subarray(j, Math.min(j + chunk, u8.length)));
+        mixed[i] = (introData[i] || 0) * gain * 0.85;
+      }
+
+      const dialogueStart = introSamples - fadeSamples;
+      for (let i = 0; i < dialogueSamples; i++) {
+        let gain = 1.0;
+        if (i < fadeSamples) {
+          gain = i / fadeSamples;
+        } else if (i > dialogueSamples - Math.floor(sampleRate * 2)) {
+          const endFade = Math.floor(sampleRate * 2);
+          gain = (dialogueSamples - i) / endFade;
         }
-        return {
-          sampleRate: audioBuffer.sampleRate,
-          samplesCount: data.length,
-          b64pcm: btoa(str)
-        };
-      })()
-    `);
+        mixed[dialogueStart + i] += (dialogueData[i] || 0) * gain;
+      }
 
-    sampleRate = result.sampleRate;
-    const pcmBuf = Buffer.from(result.b64pcm, 'base64');
-    pcmChunks.push(pcmBuf);
-    console.log(`   Decoded chunk ${i + 1}: ${result.samplesCount} samples (${(result.samplesCount / sampleRate).toFixed(2)}s)`);
-  }
+      let peak = 0;
+      for (let i = 0; i < totalSamples; i++) {
+        const abs = Math.abs(mixed[i]);
+        if (abs > peak) peak = abs;
+      }
+      const targetPeak = 0.89;
+      const normFactor = peak > 0 ? (targetPeak / peak) : 1;
+      for (let i = 0; i < totalSamples; i++) {
+        mixed[i] = Math.max(-1, Math.min(1, mixed[i] * normFactor));
+      }
 
-  client.close();
-  edgeProc.kill();
+      const pcm16 = new Int16Array(totalSamples);
+      for (let i = 0; i < totalSamples; i++) {
+        const s = mixed[i];
+        pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+      }
 
-  console.log('4. Concatenating with cinematic pauses...');
-  const pauseSamples = Math.floor(sampleRate * 0.6);
-  const pauseBuffer = Buffer.alloc(pauseSamples * 2);
+      const u8 = new Uint8Array(pcm16.buffer);
+      let str = '';
+      const chunk = 8192;
+      for (let j = 0; j < u8.length; j += chunk) {
+        str += String.fromCharCode.apply(null, u8.subarray(j, Math.min(j + chunk, u8.length)));
+      }
 
-  const allPcmBuffers = [];
-  for (let i = 0; i < pcmChunks.length; i++) {
-    allPcmBuffers.push(pcmChunks[i]);
-    if (i < pcmChunks.length - 1) {
-      allPcmBuffers.push(pauseBuffer);
-    }
-  }
+      return {
+        sampleRate,
+        totalSamples,
+        duration: totalSamples / sampleRate,
+        peak: (peak * normFactor).toFixed(3),
+        b64pcm: btoa(str)
+      };
+    })()
+  `);
 
-  const combinedPcm = Buffer.concat(allPcmBuffers);
-  const totalFrames = combinedPcm.length / 2;
-  const durationSec = totalFrames / sampleRate;
-  console.log(`   Total PCM audio duration: ${durationSec.toFixed(2)} seconds (${totalFrames} frames)`);
-
-  const wavHeader = writeWavHeader(sampleRate, 1, totalFrames);
-  const fullWav = Buffer.concat([wavHeader, combinedPcm]);
+  console.log(`2. Cinema Master Audio Generated: ${result.duration.toFixed(2)}s, Peak: ${result.peak}`);
+  const pcmBuf = Buffer.from(result.b64pcm, 'base64');
+  const wavHeader = writeWavHeader(result.sampleRate, 1, result.totalSamples);
+  const fullWav = Buffer.concat([wavHeader, pcmBuf]);
 
   const pubPath = path.resolve('public/media/hindi_audio.wav');
   const distPath = path.resolve('dist/media/hindi_audio.wav');
@@ -222,10 +219,13 @@ async function main() {
     console.log(`✓ Written ${distPath} (${fullWav.length} bytes)`);
   }
 
-  console.log('🎉 Hindi movie audio generation complete!');
+  client.close();
+  edgeProc.kill();
+  try { fs.rmSync(USER_DATA_DIR, { recursive: true, force: true }); } catch (e) {}
+  console.log('🎉 Genuine Authentic Hindi Movie Dialogue Audio successfully built!');
 }
 
-main().catch(err => {
-  console.error('Fatal error generating hindi audio:', err);
+buildAuthenticHindiAudio().catch(err => {
+  console.error('Error:', err);
   process.exit(1);
 });

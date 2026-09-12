@@ -75,7 +75,7 @@ export default function App() {
     }
     const timer = setTimeout(() => {
       setDebouncedQuery(searchQuery.trim());
-    }, 250);
+    }, 50);
     return () => clearTimeout(timer);
   }, [searchQuery]);
   

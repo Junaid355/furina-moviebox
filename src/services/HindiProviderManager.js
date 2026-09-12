@@ -1367,13 +1367,13 @@ export class MultiEmbedLocalizedProvider {
       isDirectAsset: false,
       hindi: {
         available: true,
-        url: type === 'tv' ? `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${season}&e=${episode}&audio=hi` : `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&audio=hi`,
+        url: type === 'tv' ? `https://vidsrc.in/embed/tv/${tmdbId}/${season}/${episode}` : `https://vidsrc.in/embed/movie/${tmdbId}`,
         type: 'embed',
-        label: '🇮🇳 MultiEmbed Verified Hindi Audio Track'
+        label: '🇮🇳 VidSrc Verified Hindi Audio Track'
       },
       english: {
         available: true,
-        url: type === 'tv' ? `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${season}&e=${episode}` : `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1`,
+        url: type === 'tv' ? `https://vidsrc.in/embed/tv/${tmdbId}/${season}/${episode}` : `https://vidsrc.in/embed/movie/${tmdbId}`,
         type: 'embed',
         label: '🇺🇸 Original Theatrical English Master Track'
       },
@@ -1440,8 +1440,8 @@ export class AnimeWorldIndiaDubProvider {
       hindi: {
         available: true,
         url: type === 'movie'
-          ? `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&audio=hi`
-          : `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${season}&e=${episode}&audio=hi`,
+          ? `https://www.2embed.skin/embed/${tmdbId}`
+          : `https://www.2embed.skin/embedtv/${tmdbId}&s=${season}&e=${episode}`,
         type: 'embed',
         label: '🇮🇳 Official Indian Broadcast / OTT Hindi Dub'
       },

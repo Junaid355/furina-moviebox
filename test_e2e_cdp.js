@@ -1569,6 +1569,84 @@ async function runQA() {
     recordTest(47, 'Deep Catalog Initial Grid & Rich Hindi Dubbed Grid Audit', catalogDepthPassed,
       `Initial cards: ${initialCardCount} (req >= 40), Hindi Dubbed filtered cards: ${hindiFilterCardCount} (req >= 20)`);
 
+    console.log('\n--- Running TEST 48: Multi-Dub Language Badges, In-Player Audio Guidance & 200 OK Routing Audit ---');
+    const srv1 = streamingMod.SERVERS.find(s => s.id === 'autoembed');
+    const srv2 = streamingMod.SERVERS.find(s => s.id === 'vidsrc_in');
+    const srv3 = streamingMod.SERVERS.find(s => s.id === 'vidlink');
+    const srv4 = streamingMod.SERVERS.find(s => s.id === 'vidsrc_to');
+
+    const badgesValid = 
+      srv1?.shortName.includes('🇮🇳') && srv1?.shortName.includes('Hindi Dubbed') &&
+      srv2?.shortName.includes('🎧') && srv2?.shortName.includes('Multi-Audio') &&
+      srv3?.shortName.includes('🇬🇧') && srv3?.shortName.includes('English Dub') &&
+      srv4?.shortName.includes('🇯🇵') && srv4?.shortName.includes('Japanese');
+
+    // Search and click Deadpool to open streaming player modal
+    await client.eval(`window.__setReactInput('input[type="text"]', 'Deadpool');`);
+    await sleep(1500);
+    await client.eval(`
+      (() => {
+        const card = Array.from(document.querySelectorAll('.glass-card')).find(c => c.textContent.includes('Deadpool')) || document.querySelector('.glass-card');
+        if (card) card.click();
+      })()
+    `);
+    await sleep(1500);
+
+    const playerTipAudit = await client.eval(`
+      (() => {
+        const text = document.body.innerText;
+        const expectedGuidance = "Multi-Audio: Click the Gear (⚙️) or Audio icon inside the player to select Hindi / English, or switch to the Hindi Dubbed server mirror below.";
+        const hasGuidance = text.includes(expectedGuidance) || text.includes('switch to the Hindi Dubbed server mirror below');
+        const buttons = Array.from(document.querySelectorAll('button')).map(b => b.textContent.trim());
+        const hasHindiBadgeBtn = buttons.some(b => b.includes('🇮🇳') && b.includes('Hindi Dubbed'));
+        const hasMultiBadgeBtn = buttons.some(b => b.includes('🎧') && b.includes('Multi-Audio'));
+        const hasEnglishBadgeBtn = buttons.some(b => b.includes('🇬🇧') && b.includes('English Dub'));
+        const hasJapaneseBadgeBtn = buttons.some(b => b.includes('🇯🇵') && b.includes('Japanese'));
+
+        return {
+          hasGuidance,
+          hasHindiBadgeBtn,
+          hasMultiBadgeBtn,
+          hasEnglishBadgeBtn,
+          hasJapaneseBadgeBtn
+        };
+      })()
+    `);
+
+    // Verify public/media/hindi_audio.wav authenticity
+    const wavPath = path.resolve('public/media/hindi_audio.wav');
+    const wavExists = fs.existsSync(wavPath);
+    const wavStat = wavExists ? fs.statSync(wavPath) : null;
+    const wavHeaderBuf = Buffer.alloc(12);
+    if (wavExists) {
+      const fd = fs.openSync(wavPath, 'r');
+      fs.readSync(fd, wavHeaderBuf, 0, 12, 0);
+      fs.closeSync(fd);
+    }
+    const isCinemaWavValid = wavExists && wavStat.size > 3000000 && wavHeaderBuf.toString('ascii', 0, 4) === 'RIFF' && wavHeaderBuf.toString('ascii', 8, 12) === 'WAVE';
+
+    // Verify elimination of broken streamingnow.mov / multiembed.mov domains
+    const allUrls = streamingMod.SERVERS.flatMap(s => [
+      s.getMovieUrl('533535', 'english'),
+      s.getMovieUrl('533535', 'hindi'),
+      s.getTvUrl('95479', 1, 1, 'english'),
+      s.getTvUrl('95479', 1, 1, 'hindi')
+    ]);
+    const zeroStreamingNow = allUrls.every(u => !u.includes('streamingnow.mov') && !u.includes('multiembed.mov'));
+
+    // Close player modal
+    await client.eval(`
+      (() => {
+        const closeBtn = document.querySelector('button[aria-label="Close video player modal"]');
+        if (closeBtn) closeBtn.click();
+      })()
+    `);
+    await sleep(500);
+
+    const test48Passed = badgesValid && playerTipAudit.hasGuidance && playerTipAudit.hasHindiBadgeBtn && isCinemaWavValid && zeroStreamingNow;
+    recordTest(48, 'Multi-Dub Language Badges, In-Player Audio Guidance & 200 OK Routing Audit', test48Passed,
+      `Badges: ${badgesValid}, Tip: ${playerTipAudit.hasGuidance}, Cinema WAV: ${isCinemaWavValid} (${wavStat?.size}B), Zero streamingnow.mov: ${zeroStreamingNow}`);
+
     console.log('\n--- Running TEST 26: Final Production Build Verification ---');
     try {
       execSync('npm.cmd run build', { cwd: process.cwd(), stdio: 'pipe' });

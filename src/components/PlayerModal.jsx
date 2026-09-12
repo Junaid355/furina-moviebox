@@ -202,39 +202,43 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     }
     if (audioMode === 'hindi' || userPreferredAudio === 'hindi') {
       return (
-        availableServers.find((s) => s.id === 'multiembed') ||
-        availableServers.find((s) => s.id === 'one23embed') ||
-        availableServers.find((s) => s.id === 'smashy') ||
-        availableServers.find((s) => s.id === 'vidsrc_cc') ||
-        availableServers.find((s) => s.id === 'autoembed') ||
         availableServers.find((s) => s.id === 'vidsrc_in') ||
-        availableServers.find((s) => s.id === 'twoembed_vip') ||
+        availableServers.find((s) => s.id === 'autoembed') ||
+        availableServers.find((s) => s.id === 'smashy') ||
+        availableServers.find((s) => s.id === 'animeworld_india') ||
         availableServers.find((s) => s.id === 'embed_su') ||
+        availableServers.find((s) => s.id === 'vidsrc_cc') ||
         availableServers[0]
       );
     }
     if (hasWorkingHindiSource && !isCustom) {
       if (isBollywoodHindi) {
-        return availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
+        return (
+          availableServers.find((s) => s.id === 'vidsrc_in') ||
+          availableServers.find((s) => s.id === 'autoembed') ||
+          availableServers[0]
+        );
       }
       return (
-        availableServers.find((s) => s.id === 'multiembed') ||
-        availableServers.find((s) => s.id === 'one23embed') ||
-        availableServers.find((s) => s.id === 'smashy') ||
-        availableServers.find((s) => s.id === 'vidsrc_cc') ||
-        availableServers.find((s) => s.id === 'autoembed') ||
         availableServers.find((s) => s.id === 'vidsrc_in') ||
+        availableServers.find((s) => s.id === 'autoembed') ||
+        availableServers.find((s) => s.id === 'smashy') ||
+        availableServers.find((s) => s.id === 'animeworld_india') ||
+        availableServers.find((s) => s.id === 'embed_su') ||
+        availableServers.find((s) => s.id === 'vidsrc_cc') ||
         availableServers[0]
       );
     }
     if (isAnime) {
       return availableServers.find((s) => s.id === 'vidlink') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
     }
-    return availableServers.find((s) => s.id === preferredServerId) || availableServers[0];
+    const safePreferred = (preferredServerId === 'multiembed' || !preferredServerId) ? 'vidsrc_in' : preferredServerId;
+    return availableServers.find((s) => s.id === safePreferred) || availableServers[0];
   };
 
   const [selectedServer, setSelectedServer] = useState(getInitialServer);
   const [iframeLoading, setIframeLoading] = useState(true);
+  const [showAudioTip, setShowAudioTip] = useState(true);
 
   // Episodes & Season State with Watch Progress Persistence
   const getSavedProgress = () => {
@@ -338,14 +342,12 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
     if (newMode === 'hindi') {
       const hindiServer = 
-        availableServers.find((s) => s.id === 'multiembed') ||
-        availableServers.find((s) => s.id === 'one23embed') ||
-        availableServers.find((s) => s.id === 'smashy') ||
-        availableServers.find((s) => s.id === 'vidsrc_cc') ||
-        availableServers.find((s) => s.id === 'autoembed') ||
         availableServers.find((s) => s.id === 'vidsrc_in') ||
-        availableServers.find((s) => s.id === 'twoembed_vip') ||
+        availableServers.find((s) => s.id === 'autoembed') ||
+        availableServers.find((s) => s.id === 'smashy') ||
+        availableServers.find((s) => s.id === 'animeworld_india') ||
         availableServers.find((s) => s.id === 'embed_su') ||
+        availableServers.find((s) => s.id === 'vidsrc_cc') ||
         availableServers[0];
       setSelectedServer(hindiServer);
     } else if (newMode === 'sub') {
@@ -1367,6 +1369,14 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 </span>
               )}
             </div>
+
+            {/* In-Player Audio Guidance Tip Pill */}
+            <div 
+              data-testid="audio-guidance-pill"
+              className="mt-1 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-950/60 border border-cyan-500/30 text-cyan-200 text-[11px]"
+            >
+              <span className="font-semibold">🎙️ Multi-Audio: Click the Gear (⚙️) or Audio icon inside the player to select Hindi / English, or switch to the Hindi Dubbed server mirror below.</span>
+            </div>
           </div>
         )}
 
@@ -1557,11 +1567,12 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                               onClick={() => {
                                 if (audioMode === 'hindi') {
                                   const hindiServer = 
-                                    availableServers.find((s) => s.id === 'multiembed') ||
-                                    availableServers.find((s) => s.id === 'one23embed') ||
-                                    availableServers.find((s) => s.id === 'smashy') ||
-                                    availableServers.find((s) => s.id === 'vidsrc_cc') ||
+                                    availableServers.find((s) => s.id === 'vidsrc_in') ||
                                     availableServers.find((s) => s.id === 'autoembed') ||
+                                    availableServers.find((s) => s.id === 'smashy') ||
+                                    availableServers.find((s) => s.id === 'animeworld_india') ||
+                                    availableServers.find((s) => s.id === 'embed_su') ||
+                                    availableServers.find((s) => s.id === 'vidsrc_cc') ||
                                     availableServers[0];
                                   setSelectedServer(hindiServer);
                                 }
@@ -1810,9 +1821,29 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   </div>
                 )}
 
+                {/* Helpful Sleek In-Player Audio Guidance Tip (Requirement 2) */}
+                {showAudioTip && !isFutureRelease && !unavailableNotice.show && (
+                  <div 
+                    data-testid="in-player-audio-tip"
+                    className="absolute top-3 left-1/2 -translate-x-1/2 z-40 max-w-2xl w-[94%] sm:w-auto px-3.5 py-1.5 rounded-xl bg-slate-950/90 border border-cyan-500/40 text-cyan-200 text-[11px] sm:text-xs shadow-2xl backdrop-blur-md flex items-center justify-between gap-2.5 pointer-events-auto transition animate-in fade-in slide-in-from-top-2 duration-200"
+                  >
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="font-bold text-cyan-300 shrink-0">🎙️ Multi-Audio:</span>
+                      <span className="font-medium text-slate-100">Click the Gear (⚙️) or Audio icon inside the player to select Hindi / English, or switch to the Hindi Dubbed server mirror below.</span>
+                    </div>
+                    <button
+                      onClick={() => setShowAudioTip(false)}
+                      className="text-slate-400 hover:text-white text-xs px-1.5 py-0.5 rounded hover:bg-white/10 transition shrink-0 cursor-pointer ml-1"
+                      title="Dismiss tip"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+
                 {/* Hindi Dub Multi-Server Guidance Banner */}
                 {audioMode === 'hindi' && hasWorkingHindiSource && !unavailableNotice.show && (
-                  <div className="absolute top-3 left-1/2 -translate-x-1/2 z-40 max-w-lg px-3.5 py-1.5 rounded-xl bg-amber-950/80 border border-amber-500/40 text-amber-200 text-[11px] shadow-xl backdrop-blur-md flex items-center justify-between gap-2.5 animate-in fade-in slide-in-from-top-2 duration-200 pointer-events-auto">
+                  <div className={`absolute ${showAudioTip ? 'top-12' : 'top-3'} left-1/2 -translate-x-1/2 z-40 max-w-lg px-3.5 py-1.5 rounded-xl bg-amber-950/80 border border-amber-500/40 text-amber-200 text-[11px] shadow-xl backdrop-blur-md flex items-center justify-between gap-2.5 animate-in fade-in slide-in-from-top-2 duration-200 pointer-events-auto`}>
                     <div className="flex items-center gap-1.5">
                       <span className="text-amber-400 font-bold">🇮🇳</span>
                       <span>Hindi Multi-Audio Active ({selectedServer?.shortName || 'MultiEmbed'}).</span>
@@ -1903,37 +1934,47 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
           {/* 6. STREAM RESCUE BAR                                                      */}
           {/* ========================================================================= */}
           {!isFullscreen && (!isCustom || playerMode === 'stream') && (
-            <div className="p-3 bg-[#08122c] border-b border-cyan-500/20 flex flex-wrap items-center justify-between gap-2.5">
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-bold text-cyan-300/80">Available Server Mirrors:</span>
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  {availableServers.map((srv) => {
-                    const isSelected = currentServer.id === srv.id;
-                    return (
-                      <button
-                        key={srv.id}
-                        onClick={() => setSelectedServer(srv)}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer border ${
-                          isSelected
-                            ? 'bg-cyan-500 text-gray-950 border-cyan-400 shadow-[0_0_10px_rgba(56,189,248,0.5)]'
-                            : 'bg-[#060c20] text-cyan-200/70 border-cyan-500/25 hover:bg-white/5 hover:text-white'
-                        }`}
-                      >
-                        <span>{srv.shortName}</span>
-                      </button>
-                    );
-                  })}
+            <div className="p-3 bg-[#08122c] border-b border-cyan-500/20 flex flex-col gap-2.5">
+              <div className="flex flex-wrap items-center justify-between gap-2.5">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[11px] font-bold text-cyan-300/80">Available Server Mirrors:</span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {availableServers.map((srv) => {
+                      const isSelected = currentServer.id === srv.id;
+                      return (
+                        <button
+                          key={srv.id}
+                          onClick={() => setSelectedServer(srv)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer border ${
+                            isSelected
+                              ? 'bg-cyan-500 text-gray-950 border-cyan-400 shadow-[0_0_10px_rgba(56,189,248,0.5)]'
+                              : 'bg-[#060c20] text-cyan-200/70 border-cyan-500/25 hover:bg-white/5 hover:text-white'
+                          }`}
+                        >
+                          <span>{srv.shortName}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 text-[11px] text-cyan-200/80 flex-wrap">
+                  <span className="flex items-center gap-1 bg-cyan-950/60 border border-cyan-500/30 px-2 py-0.5 rounded-md text-[10px] font-bold text-cyan-300">
+                    <Subtitles className="w-3 h-3 text-cyan-400" />
+                    <span>Subtitles (CC): Toggle English/Hindi subtitles inside player</span>
+                  </span>
+                  <span className="text-slate-400 hidden sm:inline">
+                    Stream buffering? Tap <strong>Auto-Switch</strong> or select another mirror.
+                  </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 text-[11px] text-cyan-200/80 flex-wrap">
-                <span className="flex items-center gap-1 bg-cyan-950/60 border border-cyan-500/30 px-2 py-0.5 rounded-md text-[10px] font-bold text-cyan-300">
-                  <Subtitles className="w-3 h-3 text-cyan-400" />
-                  <span>Subtitles (CC): Toggle English/Hindi subtitles inside player</span>
-                </span>
-                <span className="text-slate-400 hidden sm:inline">
-                  Stream buffering? Tap <strong>Auto-Switch</strong> or select another mirror.
-                </span>
+              {/* In-Player / Below Player Audio Guidance Tip */}
+              <div 
+                data-testid="audio-guidance-bar"
+                className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg bg-cyan-950/40 border border-cyan-500/30 text-cyan-200 text-[11px]"
+              >
+                <span className="font-semibold">🎙️ Multi-Audio: Click the Gear (⚙️) or Audio icon inside the player to select Hindi / English, or switch to the Hindi Dubbed server mirror below.</span>
               </div>
             </div>
           )}
