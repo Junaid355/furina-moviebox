@@ -56,8 +56,16 @@ export default function App() {
   const [heroItem, setHeroItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [error, setError] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
   const [page, setPage] = useState(1);
   const [activeMedia, setActiveMedia] = useState(null);
+
+  const handleRetry = useCallback(() => {
+    setError(null);
+    setLoading(true);
+    setRetryCount((prev) => prev + 1);
+  }, []);
 
   // Debounce search query changes (immediate when cleared, 250ms when typing)
   useEffect(() => {
@@ -219,6 +227,7 @@ export default function App() {
     const currentSeq = ++requestSeqRef.current;
     setPage(1);
     setLoading(true);
+    setError(null);
 
     if (activeCategory === 'watchlist') {
       const cleanWatchlist = deduplicateMedia(watchlist);
@@ -244,16 +253,22 @@ export default function App() {
         setItems(uniqueResults);
         if (uniqueResults && uniqueResults.length > 0) {
           setHeroItem(uniqueResults[0]);
+          setError(null);
         } else {
           setHeroItem(null);
+          // If no query and not watchlist/studio and returned empty array, mark error for retry
+          if (!debouncedQuery && activeCategory !== 'watchlist' && activeCategory !== 'studio') {
+            setError("Couldn't load movies");
+          }
         }
         setLoading(false);
       })
       .catch(() => {
         if (currentSeq !== requestSeqRef.current) return;
+        setError("Couldn't load movies");
         setLoading(false);
       });
-  }, [activeCategory, debouncedQuery, animeAudioFilter, movieFilter, kdramaFilter, includeMature, isMasterMode, watchlist.length, studioVersion]);
+  }, [activeCategory, debouncedQuery, animeAudioFilter, movieFilter, kdramaFilter, includeMature, isMasterMode, watchlist.length, studioVersion, retryCount]);
 
   // Load More (Pagination) with strict dual deduplication
   const handleLoadMore = async () => {
@@ -709,6 +724,24 @@ export default function App() {
               </div>
             ))}
           </div>
+        ) : error && items.length === 0 ? (
+          /* Error State with Retry */
+          <div className="py-24 text-center max-w-md mx-auto px-4">
+            <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center mx-auto mb-4 text-rose-400 shadow-[0_0_25px_rgba(244,63,94,0.2)]">
+              <RefreshCw className="w-8 h-8" />
+            </div>
+            <h3 className="text-base sm:text-lg font-bold text-white mb-2">Couldn't load movies</h3>
+            <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+              Unable to reach media catalog servers. Please check your internet connection and try again.
+            </p>
+            <button
+              onClick={handleRetry}
+              className="px-6 py-2.5 rounded-full bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-bold text-xs flex items-center gap-2 mx-auto transition shadow-[0_0_15px_rgba(56,189,248,0.4)] cursor-pointer"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Retry</span>
+            </button>
+          </div>
         ) : displayedItems.length > 0 ? (
           <>
             {/* Media Cards Grid */}
@@ -753,7 +786,7 @@ export default function App() {
             <div className="w-16 h-16 rounded-full bg-[#0c1938] border border-cyan-500/20 flex items-center justify-center mx-auto mb-3 text-cyan-400">
               <Film className="w-8 h-8" />
             </div>
-            <h3 className="text-base font-bold text-white mb-1">No titles found</h3>
+            <h3 className="text-base font-bold text-white mb-1">No movies found</h3>
             <p className="text-xs text-cyan-200/50 max-w-sm mx-auto">
               Try searching for another title or change category.
             </p>

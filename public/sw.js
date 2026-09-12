@@ -1,12 +1,11 @@
 // Furina MovieBox Service Worker — PWA & Offline App Shell
-const CACHE_NAME = 'furina-moviebox-v2';
+const CACHE_NAME = 'furina-moviebox-v3';
 const STATIC_ASSETS = [
-  './',
-  './index.html',
   './manifest.json',
   './favicon.png',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './apple-touch-icon.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -32,7 +31,20 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const url = event.request.url;
-  // Always network-first for APIs, media, and third-party embeds
+
+  // NEVER cache or intercept HTML document/navigation requests from service worker cache!
+  // Always fetch fresh HTML from the network to avoid stale hashed asset references.
+  if (
+    event.request.mode === 'navigate' ||
+    event.request.destination === 'document' ||
+    url.endsWith('.html') ||
+    url.endsWith('/furina-moviebox/') ||
+    url.endsWith('/furina-moviebox')
+  ) {
+    return;
+  }
+
+  // Always network-first/pass-through for APIs, media, and third-party embeds
   if (
     event.request.method !== 'GET' ||
     url.includes('api.themoviedb.org') ||
@@ -41,12 +53,15 @@ self.addEventListener('fetch', (event) => {
     url.includes('autoembed') ||
     url.includes('multiembed') ||
     url.includes('.mp4') ||
+    url.includes('.wav') ||
+    url.includes('.webm') ||
+    url.includes('.ogg') ||
     url.includes('.m3u8')
   ) {
     return;
   }
 
-  // Network-first with cache fallback for app shell
+  // Network-first with cache fallback for static app assets
   event.respondWith(
     fetch(event.request)
       .then((response) => {

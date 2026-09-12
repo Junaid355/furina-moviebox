@@ -1532,6 +1532,96 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                               trk.mode = (activeSubtitle !== 'off' && trk.language === activeSubtitle) ? 'showing' : 'disabled';
                             }
                           }
+                          videoRef.current.__furinaPlayback = {
+                            event: 'loadedmetadata',
+                            state: 'metadata_loaded',
+                            currentTime: videoRef.current.currentTime,
+                            duration: videoRef.current.duration,
+                            volume: videoRef.current.volume,
+                            muted: videoRef.current.muted,
+                            audioTracks: detected,
+                            ts: Date.now()
+                          };
+                        }
+                      }}
+                      onLoadedData={() => {
+                        if (videoRef.current) {
+                          videoRef.current.__furinaPlayback = {
+                            ...videoRef.current.__furinaPlayback,
+                            event: 'loadeddata',
+                            state: 'ready',
+                            ts: Date.now()
+                          };
+                        }
+                      }}
+                      onCanPlay={() => {
+                        if (videoRef.current) {
+                          videoRef.current.__furinaPlayback = {
+                            ...videoRef.current.__furinaPlayback,
+                            event: 'canplay',
+                            state: 'canplay',
+                            ts: Date.now()
+                          };
+                        }
+                      }}
+                      onPlay={() => {
+                        if (videoRef.current) {
+                          videoRef.current.__furinaPlayback = {
+                            ...videoRef.current.__furinaPlayback,
+                            event: 'play',
+                            state: 'playing',
+                            ts: Date.now()
+                          };
+                        }
+                      }}
+                      onPlaying={() => {
+                        if (videoRef.current) {
+                          videoRef.current.__furinaPlayback = {
+                            ...videoRef.current.__furinaPlayback,
+                            event: 'playing',
+                            state: 'playing',
+                            ts: Date.now()
+                          };
+                        }
+                      }}
+                      onWaiting={() => {
+                        if (videoRef.current) {
+                          videoRef.current.__furinaPlayback = {
+                            ...videoRef.current.__furinaPlayback,
+                            event: 'waiting',
+                            state: 'buffering',
+                            ts: Date.now()
+                          };
+                        }
+                      }}
+                      onStalled={() => {
+                        if (videoRef.current) {
+                          videoRef.current.__furinaPlayback = {
+                            ...videoRef.current.__furinaPlayback,
+                            event: 'stalled',
+                            state: 'stalled',
+                            ts: Date.now()
+                          };
+                        }
+                      }}
+                      onEnded={() => {
+                        if (videoRef.current) {
+                          videoRef.current.__furinaPlayback = {
+                            ...videoRef.current.__furinaPlayback,
+                            event: 'ended',
+                            state: 'ended',
+                            ts: Date.now()
+                          };
+                        }
+                      }}
+                      onTimeUpdate={() => {
+                        if (videoRef.current) {
+                          videoRef.current.__furinaPlayback = {
+                            ...videoRef.current.__furinaPlayback,
+                            currentTime: videoRef.current.currentTime,
+                            duration: videoRef.current.duration,
+                            ts: Date.now()
+                          };
                         }
                       }}
                     >
@@ -1547,16 +1637,41 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                       ))}
                       Your browser does not support HTML5 video.
                     </video>
-                    {typeof document !== 'undefined' && document.pictureInPictureEnabled && (
+                    {/* Skip Controls & PiP */}
+                    <div className="absolute top-3 right-3 flex items-center gap-1.5 opacity-80 sm:opacity-0 sm:group-hover/player:opacity-100 transition backdrop-blur-md z-20">
                       <button
-                        onClick={togglePictureInPicture}
-                        title="Picture-in-Picture (P)"
-                        className="absolute top-3 right-3 p-2 rounded-xl bg-black/70 hover:bg-black/90 border border-cyan-500/30 text-cyan-300 hover:text-white transition opacity-0 group-hover/player:opacity-100 backdrop-blur-md cursor-pointer z-20 flex items-center gap-1.5 text-xs font-bold"
+                        onClick={() => {
+                          if (videoRef.current) {
+                            videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 10);
+                          }
+                        }}
+                        title="Skip Backward 10s (←)"
+                        className="px-2.5 py-1 rounded-xl bg-black/70 hover:bg-black/90 border border-cyan-500/30 text-cyan-300 hover:text-white transition cursor-pointer text-xs font-bold"
                       >
-                        <PictureInPicture className="w-4 h-4" />
-                        <span className="hidden sm:inline">PiP</span>
+                        -10s
                       </button>
-                    )}
+                      <button
+                        onClick={() => {
+                          if (videoRef.current) {
+                            videoRef.current.currentTime = Math.min(videoRef.current.duration || 9999, videoRef.current.currentTime + 10);
+                          }
+                        }}
+                        title="Skip Forward 10s (→)"
+                        className="px-2.5 py-1 rounded-xl bg-black/70 hover:bg-black/90 border border-cyan-500/30 text-cyan-300 hover:text-white transition cursor-pointer text-xs font-bold"
+                      >
+                        +10s
+                      </button>
+                      {typeof document !== 'undefined' && document.pictureInPictureEnabled && (
+                        <button
+                          onClick={togglePictureInPicture}
+                          title="Picture-in-Picture (P)"
+                          className="p-1.5 rounded-xl bg-black/70 hover:bg-black/90 border border-cyan-500/30 text-cyan-300 hover:text-white transition cursor-pointer flex items-center gap-1 text-xs font-bold"
+                        >
+                          <PictureInPicture className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline">PiP</span>
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ) : (
                   <div className="p-6 text-center text-xs text-rose-300">
