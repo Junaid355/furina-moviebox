@@ -3,7 +3,7 @@ import Navbar, { HanimeIcon } from './components/Navbar';
 import HeroBanner from './components/HeroBanner';
 import MediaCard from './components/MediaCard';
 import PlayerModal from './components/PlayerModal';
-import SettingsModal from './components/SettingsModal';
+import SettingsModal, { getStoredSettings, applyThemeAndAppSettings } from './components/SettingsModal';
 import IPhoneAppModal from './components/IPhoneAppModal';
 import AndroidAppModal from './components/AndroidAppModal';
 import MovieStudioModal, { getStoredStudioMovies } from './components/MovieStudioModal';
@@ -83,7 +83,17 @@ export default function App() {
 
   useEffect(() => {
     setContinueWatching(getContinueWatchingList());
-  }, [activeMedia]);
+  }, [activeMedia, activeCategory]);
+
+  // Apply theme, accent, and appearance settings on mount & react to updates (Requirement 11)
+  useEffect(() => {
+    applyThemeAndAppSettings(getStoredSettings());
+    const handleSettingsChange = (e) => {
+      if (e.detail) applyThemeAndAppSettings(e.detail);
+    };
+    window.addEventListener('furina:settings-changed', handleSettingsChange);
+    return () => window.removeEventListener('furina:settings-changed', handleSettingsChange);
+  }, []);
 
   const removeContinueWatching = (id, e) => {
     if (e) e.stopPropagation();
@@ -300,7 +310,7 @@ export default function App() {
     return items;
   }, [items, globalMediaFilter]);
 
-  // Mobile & Desktop Keyboard and Back-Navigation Protection (Requirement 15)
+  // Mobile & Desktop Keyboard and Back-Navigation Protection (Requirement 12, 21, 24)
   useEffect(() => {
     const handleKeyDown = (e) => {
       const isInput = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT' || e.target.isContentEditable;
@@ -314,48 +324,19 @@ export default function App() {
       // Never intercept hotkeys when typing into inputs!
       if (isInput) return;
 
-      // When player modal is active, let PlayerModal exclusively handle video hotkeys
-      if (document.querySelector('video')) return;
-
-      if (e.code === 'Space') {
-        const video = document.querySelector('video');
-        if (video) {
-          e.preventDefault();
-          if (video.paused) video.play();
-          else video.pause();
-        }
-      } else if (e.key === 'f' || e.key === 'F') {
-        const fsBtn = document.querySelector('button[title*="Fullscreen"]') || document.querySelector('button[title*="fullscreen"]');
-        if (fsBtn) fsBtn.click();
-      } else if (e.key === 'm' || e.key === 'M') {
-        const video = document.querySelector('video');
-        if (video) {
-          video.muted = !video.muted;
-        }
-      } else if (e.key === 'ArrowRight') {
-        const video = document.querySelector('video');
-        if (video) video.currentTime = Math.min(video.duration || 0, video.currentTime + 10);
-      } else if (e.key === 'ArrowLeft') {
-        const video = document.querySelector('video');
-        if (video) video.currentTime = Math.max(0, video.currentTime - 10);
-      } else if (e.key === 'ArrowUp') {
-        const video = document.querySelector('video');
-        if (video) {
-          e.preventDefault();
-          video.volume = Math.min(1, video.volume + 0.1);
-        }
-      } else if (e.key === 'ArrowDown') {
-        const video = document.querySelector('video');
-        if (video) {
-          e.preventDefault();
-          video.volume = Math.max(0, video.volume - 0.1);
-        }
+      // ESC: Exit fullscreen / close open menus and modals (Requirement 24)
+      if (e.key === 'Escape') {
+        if (isSettingsOpen) { setIsSettingsOpen(false); return; }
+        if (isStudioOpen) { setIsStudioOpen(false); return; }
+        if (isIPhoneModalOpen) { setIsIPhoneModalOpen(false); return; }
+        if (isAndroidModalOpen) { setIsAndroidModalOpen(false); return; }
+        return;
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [isSettingsOpen, isStudioOpen, isIPhoneModalOpen, isAndroidModalOpen, activeMedia]);
 
   return (
     <div className={`min-h-screen ${isStealthMode ? 'bg-[#080b11]' : 'bg-[#030712]'} text-white flex flex-col selection:bg-cyan-500 selection:text-gray-950 pb-20 lg:pb-8 relative overflow-hidden`}>

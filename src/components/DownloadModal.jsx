@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Download, X, Copy, Check, ExternalLink, Smartphone, Sparkles, Shield, AlertCircle, Film, Tv, CheckCircle2, Loader2 } from 'lucide-react';
 import { getDownloadMirrors } from '../services/streaming';
 import { POSTER_THUMB_BASE } from '../services/tmdb';
@@ -13,12 +13,17 @@ export default function DownloadModal({
   isSeries = false,
   activeCustomVideoUrl = null
 }) {
-  if (!isOpen || !item) return null;
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
-  const title = item.title || item.name || 'Title';
-  const isCustom = Boolean(item.isCustom);
-  const mirrors = getDownloadMirrors(item.id, isSeries ? 'tv' : 'movie', season, episode, audioMode);
-  
   const [selectedQuality, setSelectedQuality] = useState('1080p');
   const [copied, setCopied] = useState(false);
   const [activeMobileTab, setActiveMobileTab] = useState('android');
@@ -29,6 +34,12 @@ export default function DownloadModal({
     progress: 0,
     errorMsg: ''
   });
+
+  if (!isOpen || !item) return null;
+
+  const title = item.title || item.name || 'Title';
+  const isCustom = Boolean(item.isCustom);
+  const mirrors = getDownloadMirrors(item.id, isSeries ? 'tv' : 'movie', season, episode, audioMode);
 
   const posterSrc = item.poster_path 
     ? (item.poster_path.startsWith('http') ? item.poster_path : `${POSTER_THUMB_BASE}${item.poster_path}`)

@@ -3,9 +3,9 @@ import { Play, Star, Bookmark, Check, Sparkles, Volume2, Film, Tv } from 'lucide
 import { POSTER_THUMB_BASE, isHindiAvailable } from '../services/tmdb';
 
 const MediaCard = React.memo(function MediaCard({ item, onPlay, isWatchlisted, onToggleWatchlist }) {
-  if (!item) return null;
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  if (!item) return null;
   const title = item.title || item.name || 'Untitled';
   const year = String(item.release_date || item.first_air_date || '').substring(0, 4);
   const rating = typeof item.vote_average === 'number' 

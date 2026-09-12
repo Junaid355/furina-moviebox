@@ -98,6 +98,11 @@ export default function Navbar({
       lastEmittedQueryRef.current = localSearch;
       onSearch(localSearch);
       e.target.blur();
+    } else if (e.key === 'Escape') {
+      if (localSearch) {
+        handleClear();
+      }
+      e.target.blur();
     }
   };
 

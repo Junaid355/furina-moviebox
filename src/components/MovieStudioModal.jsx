@@ -336,7 +336,17 @@ export function saveStoredStudioMovies(movies) {
 }
 
 export default function MovieStudioModal({ isOpen, onClose, onPlayMovie, onMoviesChanged }) {
-  if (!isOpen) return null;
+  // Close Studio on Escape (Requirement 24)
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   const [movies, setMovies] = useState(getStoredStudioMovies);
   const [activeTab, setActiveTab] = useState('list'); // 'list' | 'editor'
@@ -578,6 +588,8 @@ export default function MovieStudioModal({ isOpen, onClose, onPlayMovie, onMovie
     if (onMoviesChanged) onMoviesChanged();
     setActiveTab('list');
   };
+
+  if (!isOpen) return null;
 
   return (
     <div 

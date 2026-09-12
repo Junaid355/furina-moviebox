@@ -266,14 +266,14 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     setEpisode((prev) => prev + 1);
   };
 
-  // Persist Watch Progress on Season / Episode Change
+  // Persist Watch Progress on Mount and Season / Episode Change
   useEffect(() => {
-    if (isSeries && item?.id) {
+    if (item?.id) {
       try {
         localStorage.setItem(`furina_progress_${item.id}`, JSON.stringify({
           ...item,
-          season,
-          episode,
+          season: isSeries ? season : 1,
+          episode: isSeries ? episode : 1,
           title,
           updatedAt: Date.now()
         }));
@@ -435,6 +435,38 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     changeSubtitle(nextSub.id);
   }, [availableSubtitles, activeSubtitle, changeSubtitle]);
 
+  // Dynamic CSS variables for HTML5 video ::cue styling (Requirement 8 & 11)
+  const subtitleStyleVariables = useMemo(() => {
+    const sizeMap = {
+      small: '0.9rem',
+      medium: '1.15rem',
+      large: '1.5rem',
+      xlarge: '2rem'
+    };
+    const opacityMap = {
+      100: '1',
+      80: '0.8',
+      60: '0.6'
+    };
+    const bgMap = {
+      transparent: 'transparent',
+      box: 'rgba(0, 0, 0, 0.8)',
+      shadow: 'rgba(0, 0, 0, 0.45)'
+    };
+    const colorMap = {
+      cyan: '#67e8f9',
+      white: '#ffffff',
+      amber: '#fde047',
+      yellow: '#facc15'
+    };
+    return {
+      '--sub-font-size': sizeMap[appSettings?.subtitleSize] || '1.15rem',
+      '--sub-opacity': opacityMap[appSettings?.subtitleOpacity] || '1',
+      '--sub-bg': bgMap[appSettings?.subtitleBackground] || 'transparent',
+      '--sub-color': colorMap[appSettings?.subtitleStyle] || '#ffffff'
+    };
+  }, [appSettings?.subtitleSize, appSettings?.subtitleOpacity, appSettings?.subtitleBackground, appSettings?.subtitleStyle]);
+
   // Fullscreen Mode States
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
@@ -551,8 +583,17 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       }
 
       if (e.key === 'Escape') {
+        e.stopPropagation();
         if (isShortcutsHelpOpen) {
           setIsShortcutsHelpOpen(false);
+          return;
+        }
+        if (isDownloadModalOpen) {
+          setIsDownloadModalOpen(false);
+          return;
+        }
+        if (showUBlockGuide) {
+          setShowUBlockGuide(false);
           return;
         }
         if (document.fullscreenElement || isFullscreen) {
@@ -563,7 +604,15 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
         } else {
           handleSafeClose();
         }
-      } else if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+        return;
+      }
+
+      // If user disabled keyboard shortcuts in Settings, do not process playback hotkeys (Requirement 11 & 24)
+      if (appSettings?.keyboardShortcuts === false) {
+        return;
+      }
+
+      if (e.key === '?' || (e.shiftKey && e.key === '/')) {
         e.preventDefault();
         setIsShortcutsHelpOpen((prev) => !prev);
       } else if (e.key === 'f' || e.key === 'F') {
@@ -632,7 +681,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isFullscreen, onClose, isShortcutsHelpOpen, aiBoostMode, cycleSubtitles, appSettings]);
+  }, [isFullscreen, onClose, isShortcutsHelpOpen, isDownloadModalOpen, showUBlockGuide, unavailableNotice.show, aiBoostMode, cycleSubtitles, appSettings]);
 
   const togglePictureInPicture = async () => {
     try {
@@ -1437,7 +1486,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 )}
 
                 {activeCustomVideoUrl ? (
-                  <div className="relative w-full h-full group/player flex items-center justify-center bg-black overflow-hidden">
+                  <div className="relative w-full h-full group/player flex items-center justify-center bg-black overflow-hidden" style={subtitleStyleVariables}>
                     {/* Audio-Only Cinematic Visualizer Canvas (eliminates blank black box) */}
                     {isAudioOnly && (
                       <div className="absolute inset-0 z-0 overflow-hidden flex flex-col items-center justify-center pointer-events-none select-none">
@@ -1508,7 +1557,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                       key={`${item.id}-${audioMode}`}
                       src={activeCustomVideoUrl}
                       controls
-                      autoPlay
+                      autoPlay={appSettings?.autoplay !== false}
                       playsInline
                       className={isAudioOnly ? 'absolute bottom-0 left-0 right-0 w-full h-14 z-20 bg-black/90 backdrop-blur-md border-t border-cyan-500/20' : 'w-full h-full object-contain'}
                       style={AI_BOOST_STYLES[aiBoostMode] || {}}
@@ -1613,6 +1662,9 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                             ts: Date.now()
                           };
                         }
+                        if (isSeries && appSettings?.autoNextEpisode !== false) {
+                          handleNextEpisode();
+                        }
                       }}
                       onTimeUpdate={() => {
                         if (videoRef.current) {
@@ -1642,24 +1694,26 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                       <button
                         onClick={() => {
                           if (videoRef.current) {
-                            videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 10);
+                            const skipBwd = appSettings?.skipBackwardSecs || 10;
+                            videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - skipBwd);
                           }
                         }}
-                        title="Skip Backward 10s (←)"
+                        title={`Skip Backward ${appSettings?.skipBackwardSecs || 10}s (←)`}
                         className="px-2.5 py-1 rounded-xl bg-black/70 hover:bg-black/90 border border-cyan-500/30 text-cyan-300 hover:text-white transition cursor-pointer text-xs font-bold"
                       >
-                        -10s
+                        -{appSettings?.skipBackwardSecs || 10}s
                       </button>
                       <button
                         onClick={() => {
                           if (videoRef.current) {
-                            videoRef.current.currentTime = Math.min(videoRef.current.duration || 9999, videoRef.current.currentTime + 10);
+                            const skipFwd = appSettings?.skipForwardSecs || 10;
+                            videoRef.current.currentTime = Math.min(videoRef.current.duration || 9999, videoRef.current.currentTime + skipFwd);
                           }
                         }}
-                        title="Skip Forward 10s (→)"
+                        title={`Skip Forward ${appSettings?.skipForwardSecs || 10}s (→)`}
                         className="px-2.5 py-1 rounded-xl bg-black/70 hover:bg-black/90 border border-cyan-500/30 text-cyan-300 hover:text-white transition cursor-pointer text-xs font-bold"
                       >
-                        +10s
+                        +{appSettings?.skipForwardSecs || 10}s
                       </button>
                       {typeof document !== 'undefined' && document.pictureInPictureEnabled && (
                         <button

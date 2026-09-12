@@ -61,19 +61,67 @@ export const DEFAULT_SETTINGS = {
   mobileSettingsLayout: 'comfortable'
 };
 
+export function applyThemeAndAppSettings(settings) {
+  if (typeof document === 'undefined') return;
+  try {
+    const root = document.documentElement;
+    const body = document.body;
+
+    const theme = settings?.theme || 'furina_hydro';
+    root.setAttribute('data-theme', theme);
+
+    if (theme === 'midnight') {
+      body.style.backgroundColor = '#000000';
+    } else if (theme === 'amethyst') {
+      body.style.backgroundColor = '#0b0416';
+    } else if (theme === 'emerald') {
+      body.style.backgroundColor = '#03120d';
+    } else {
+      body.style.backgroundColor = '#030712';
+    }
+
+    const accents = {
+      cyan: '#06b6d4',
+      amber: '#f59e0b',
+      purple: '#a855f7',
+      emerald: '#10b981'
+    };
+    const accent = accents[settings?.accentColor] || '#06b6d4';
+    root.style.setProperty('--accent-color', accent);
+
+    if (settings?.animations === false) {
+      root.classList.add('reduce-motion');
+    } else {
+      root.classList.remove('reduce-motion');
+    }
+
+    if (settings?.compactUi) {
+      root.classList.add('compact-mode');
+    } else {
+      root.classList.remove('compact-mode');
+    }
+
+    window.dispatchEvent(new CustomEvent('furina:settings-changed', { detail: settings }));
+  } catch (e) {}
+}
+
 export function getStoredSettings() {
   try {
     const raw = localStorage.getItem('furina_settings');
     if (raw) {
-      return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+      const parsed = { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+      applyThemeAndAppSettings(parsed);
+      return parsed;
     }
   } catch (e) {}
+  applyThemeAndAppSettings(DEFAULT_SETTINGS);
   return DEFAULT_SETTINGS;
 }
 
 export function saveStoredSettings(newSettings) {
   try {
     localStorage.setItem('furina_settings', JSON.stringify(newSettings));
+    applyThemeAndAppSettings(newSettings);
   } catch (e) {}
 }
 
@@ -97,6 +145,18 @@ export default function SettingsModal({
   const [pin, setPin] = useState('');
   const [pinError, setPinError] = useState(false);
   const [toast, setToast] = useState(null);
+
+  // Keyboard Escape Handler (Requirement 24)
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   // Provider health monitor state
   const [providerReport, setProviderReport] = useState(() => hindiProviderManager.getProviderHealthReport());
@@ -178,7 +238,7 @@ export default function SettingsModal({
     { id: 'audio', label: 'Audio', icon: Volume2, emoji: '🎧' },
     { id: 'subtitles', label: 'Subtitles', icon: Subtitles, emoji: '💬' },
     { id: 'appearance', label: 'Appearance', icon: Palette, emoji: '🎨' },
-    { id: 'player', label: 'Player', icon: Monitor, emoji: '▶️' },
+    { id: 'player', label: 'Keyboard & Player', icon: Monitor, emoji: '⌨️' },
     { id: 'mobile', label: 'Mobile', icon: Smartphone, emoji: '📱' },
     { id: 'advanced', label: 'Provider Health & Engine', icon: Activity, emoji: '⚙️' },
     { id: 'vault', label: 'Secret Vault', icon: isMasterMode ? Unlock : Lock, emoji: '🔒' }

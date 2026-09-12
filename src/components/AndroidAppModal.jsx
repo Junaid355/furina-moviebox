@@ -2,7 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Smartphone, Download, X, CheckCircle2, ShieldCheck, Sparkles } from 'lucide-react';
 
 export default function AndroidAppModal({ isOpen, onClose }) {
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   const [canDirectInstall, setCanDirectInstall] = useState(Boolean(window.deferredInstallPrompt));
   const [installed, setInstalled] = useState(false);
@@ -12,6 +21,8 @@ export default function AndroidAppModal({ isOpen, onClose }) {
     window.addEventListener('furina:can-install', handleCanInstall);
     return () => window.removeEventListener('furina:can-install', handleCanInstall);
   }, []);
+
+  if (!isOpen) return null;
 
   const handleInstallClick = async () => {
     if (window.deferredInstallPrompt) {

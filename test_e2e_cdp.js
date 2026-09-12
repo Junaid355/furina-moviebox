@@ -1341,6 +1341,117 @@ async function runQA() {
     recordTest(40, 'MultiEmbed Hindi Audio Routing & Anime Discovery Audit', test40Passed,
       `MultiEmbed Hindi: ${multiembedHindiPassed}, Spider-Man Local: ${spiderManLocalPassed}, Anime P2 items: ${animeP2.length}`);
 
+    console.log('\n--- Running TEST 41: Escape Key Modal Dismissal & Menu Hierarchical Exit Audit ---');
+    // 1. Open Settings Modal
+    await client.eval(`
+      (() => {
+        const settingsBtn = Array.from(document.querySelectorAll('button')).find(b => b.title?.includes('Settings') || b.textContent.includes('Settings'));
+        if (settingsBtn) settingsBtn.click();
+      })()
+    `);
+    await sleep(600);
+    const settingsOpened = await client.eval(`Boolean(document.querySelector('h2')?.textContent?.includes('Settings Hub'))`);
+
+    // Press Escape to close Settings Modal
+    await client.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+    await client.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+    await sleep(600);
+    const settingsClosedOnEsc = await client.eval(`!document.querySelector('h2')?.textContent?.includes('Settings Hub')`);
+
+    // 2. Open Player Modal
+    await client.eval(`
+      (() => {
+        const firstCard = document.querySelector('.glass-card');
+        if (firstCard) firstCard.click();
+      })()
+    `);
+    await sleep(1000);
+
+    // Open Download Modal inside Player Modal
+    await client.eval(`
+      (() => {
+        const dlBtn = Array.from(document.querySelectorAll('button')).find(b => b.title?.includes('Download') || b.textContent.includes('Download'));
+        if (dlBtn) dlBtn.click();
+      })()
+    `);
+    await sleep(600);
+    const test41DlModalOpened = await client.eval(`Boolean(document.body.innerText.includes('High-Speed Cloud Download Hub') || document.body.innerText.includes('Download Center'))`);
+
+    // Press Escape: Should close Download Modal FIRST, leaving PlayerModal open!
+    await client.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+    await client.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+    await sleep(600);
+    const dlModalClosed = await client.eval(`!document.body.innerText.includes('High-Speed Cloud Download Hub')`);
+    const playerStillOpen = await client.eval(`Boolean(document.querySelector('button[title*="Close Player"]'))`);
+
+    // Press Escape second time: Should close PlayerModal cleanly
+    await client.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+    await client.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+    await sleep(800);
+    const playerClosed = await client.eval(`!document.querySelector('button[title*="Close Player"]')`);
+
+    const test41Passed = settingsOpened && settingsClosedOnEsc && test41DlModalOpened && dlModalClosed && playerStillOpen && playerClosed;
+    recordTest(41, 'Escape Key Hierarchical Modal & Sub-Menu Dismissal Audit', test41Passed,
+      `Settings: opened=${settingsOpened}, closedOnEsc=${settingsClosedOnEsc} | DL Modal: opened=${test41DlModalOpened}, closedOnEsc=${dlModalClosed}, playerKept=${playerStillOpen}, playerClosed=${playerClosed}`);
+
+    console.log('\n--- Running TEST 42: Dynamic Skip Button Durations & Subtitle CSS Variables Audit ---');
+    // Open player on custom studio blockbuster to inspect video container
+    await client.eval(`window.__setReactInput('input[type="text"]', 'Cyber Ronin');`);
+    await sleep(1500);
+    await client.eval(`
+      (() => {
+        const card = Array.from(document.querySelectorAll('.glass-card')).find(c => c.textContent.includes('Cyber Ronin')) || document.querySelector('.glass-card');
+        if (card) card.click();
+      })()
+    `);
+    await sleep(1200);
+
+    const skipAndSubAudit = await client.eval(`
+      (() => {
+        const bwdBtn = Array.from(document.querySelectorAll('button')).find(b => b.title?.includes('Skip Backward') || (b.textContent.includes('s') && b.textContent.includes('-')));
+        const fwdBtn = Array.from(document.querySelectorAll('button')).find(b => b.title?.includes('Skip Forward') || (b.textContent.includes('s') && b.textContent.includes('+')));
+        const videoWrapper = document.querySelector('[class*="group/player"]') || document.querySelector('video')?.parentElement;
+        const subFontSize = videoWrapper ? videoWrapper.style.getPropertyValue('--sub-font-size') : '';
+        const subColor = videoWrapper ? videoWrapper.style.getPropertyValue('--sub-color') : '';
+        return {
+          bwdText: bwdBtn ? bwdBtn.textContent.trim() : '',
+          fwdText: fwdBtn ? fwdBtn.textContent.trim() : '',
+          subFontSize,
+          subColor
+        };
+      })()
+    `);
+
+    // Close player
+    await client.eval(`
+      (() => {
+        const closeBtn = document.querySelector('button[title*="Close Player"]');
+        if (closeBtn) closeBtn.click();
+      })()
+    `);
+    await sleep(800);
+
+    const test42Passed = Boolean(skipAndSubAudit.bwdText && skipAndSubAudit.fwdText && skipAndSubAudit.subFontSize);
+    recordTest(42, 'Dynamic Skip Button Durations & Subtitle CSS Variables Audit', test42Passed,
+      `Bwd: "${skipAndSubAudit.bwdText}", Fwd: "${skipAndSubAudit.fwdText}", --sub-font-size: "${skipAndSubAudit.subFontSize}", --sub-color: "${skipAndSubAudit.subColor}"`);
+
+    console.log('\n--- Running TEST 43: Appearance Theme & Accessibility Class Engine Audit ---');
+    const themeAudit = await client.eval(`
+      (() => {
+        const themeAttr = document.documentElement.getAttribute('data-theme');
+        const accentColor = document.documentElement.style.getPropertyValue('--accent-color');
+        const hasBg = Boolean(document.body.style.backgroundColor);
+        return {
+          themeAttr,
+          accentColor,
+          hasBg
+        };
+      })()
+    `);
+    const test43Passed = Boolean(themeAudit.themeAttr && themeAudit.accentColor);
+    recordTest(43, 'Appearance Theme & Accessibility Class Engine Audit', test43Passed,
+      `data-theme: "${themeAudit.themeAttr}", --accent-color: "${themeAudit.accentColor}", bodyBg: ${themeAudit.hasBg}`);
+
     console.log('\n--- Running TEST 26: Final Production Build Verification ---');
     try {
       execSync('npm.cmd run build', { cwd: process.cwd(), stdio: 'pipe' });
