@@ -1342,9 +1342,20 @@ export class MultiEmbedLocalizedProvider {
     if (VERIFIED_HINDI_HOLLYWOOD_IDS.has(numId)) return true;
     if (CURATED_HOLLYWOOD_HINDI_DUBS.some((m) => Number(m.id) === numId)) return true;
     if (VERIFIED_HINDI_GLOBAL_SERIES_IDS.has(numId)) return true;
+    if (VERIFIED_HINDI_ANIME_IDS.has(numId)) return true;
+    if (CURATED_HINDI_DUBBED_ANIME.some((a) => Number(a.id) === numId)) return true;
     if (numId === 94997 || numId === 533535) return true;
     const title = (item.title || item.name || '').toLowerCase();
-    if (title.includes('house of the dragon') || title.includes('deadpool')) return true;
+    if (
+      title.includes('house of the dragon') ||
+      title.includes('deadpool') ||
+      title.includes('naruto') ||
+      title.includes('demon slayer') ||
+      title.includes('jujutsu') ||
+      title.includes('dragon ball') ||
+      title.includes('solo leveling') ||
+      title.includes('attack on titan')
+    ) return true;
     return false;
   }
 
@@ -1428,19 +1439,25 @@ export class AnimeWorldIndiaDubProvider {
       isDirectAsset: false,
       hindi: {
         available: true,
-        url: `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${season}&e=${episode}&audio=hi`,
+        url: type === 'movie'
+          ? `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&audio=hi`
+          : `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${season}&e=${episode}&audio=hi`,
         type: 'embed',
         label: '🇮🇳 Official Indian Broadcast / OTT Hindi Dub'
       },
       english: {
         available: true,
-        url: `https://vidlink.pro/tv/${tmdbId}/${season}/${episode}?primaryColor=06b6d4&sub_dub=dub`,
+        url: type === 'movie'
+          ? `https://vidlink.pro/movie/${tmdbId}?primaryColor=06b6d4&sub_dub=dub`
+          : `https://vidlink.pro/tv/${tmdbId}/${season}/${episode}?primaryColor=06b6d4&sub_dub=dub`,
         type: 'embed',
         label: '🇺🇸 English Dub Track'
       },
       japanese: {
         available: true,
-        url: `https://vidlink.pro/tv/${tmdbId}/${season}/${episode}?primaryColor=06b6d4&sub_dub=sub`,
+        url: type === 'movie'
+          ? `https://vidlink.pro/movie/${tmdbId}?primaryColor=06b6d4&sub_dub=sub`
+          : `https://vidlink.pro/tv/${tmdbId}/${season}/${episode}?primaryColor=06b6d4&sub_dub=sub`,
         type: 'embed',
         label: '🇯🇵 Japanese Original Voice Audio with Subtitles'
       },

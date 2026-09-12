@@ -323,9 +323,9 @@ export async function fetchTrendingAll(page = 1) {
       // Rich curated foundation ensuring instant blockbusters with verified Hindi dubs
       const curatedFoundation = [
         ...FALLBACK_MEDIA.map(m => ({ ...m, isHindiDubbed: isHindiAvailable(m) })),
-        ...CURATED_HOLLYWOOD_HINDI_DUBS.slice(0, 16),
-        ...CURATED_BOLLYWOOD_BLOCKBUSTERS.slice(0, 10),
-        ...CURATED_HINDI_DUBBED_ANIME.slice(0, 12)
+        ...CURATED_HOLLYWOOD_HINDI_DUBS,
+        ...CURATED_BOLLYWOOD_BLOCKBUSTERS.slice(0, 20),
+        ...CURATED_HINDI_DUBBED_ANIME.slice(0, 25)
       ];
 
       return deduplicateMedia([...curatedFoundation, ...combined]);
@@ -715,62 +715,39 @@ export const CURATED_HOLLYWOOD_BLOCKBUSTERS = [
 
 
 export async function fetchHollywoodMovies(page = 1) {
-
   try {
-
-    const controller = new AbortController();
-
-    const timeoutId = setTimeout(() => controller.abort(), 7000);
-
-
-
-    const res = await fetch(
-      `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_original_language=en&primary_release_date.lte=${today}&vote_count.gte=100&sort_by=popularity.desc&page=${page}`,
-      { signal: controller.signal }
-    );
-
-    clearTimeout(timeoutId);
-
-
-
-    const data = await res.json();
-
-    const discovered = (data.results || [])
-
-      .filter((m) => m && m.id && m.poster_path && (m.title || m.name))
-
-      .map((m) => ({
-
-        ...m,
-
-        media_type: 'movie',
-
-        category: 'hollywood',
-
-        isHindiDubbed: isHindiAvailable(m)
-
-      }));
-
-
-
     if (page === 1) {
-
+      const [res1, res2] = await Promise.allSettled([
+        cachedFetchJson(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_original_language=en&primary_release_date.lte=${today}&vote_count.gte=100&sort_by=popularity.desc&page=1`),
+        cachedFetchJson(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_original_language=en&primary_release_date.lte=${today}&vote_count.gte=100&sort_by=popularity.desc&page=2`)
+      ]);
+      const p1 = (res1.status === 'fulfilled' && res1.value?.results) ? res1.value.results : [];
+      const p2 = (res2.status === 'fulfilled' && res2.value?.results) ? res2.value.results : [];
+      const discovered = [...p1, ...p2]
+        .filter((m) => m && m.id && m.poster_path && (m.title || m.name))
+        .map((m) => ({
+          ...m,
+          media_type: 'movie',
+          category: 'hollywood',
+          isHindiDubbed: isHindiAvailable(m)
+        }));
       const merged = deduplicateMedia([...CURATED_HOLLYWOOD_BLOCKBUSTERS, ...discovered]);
-
       return merged.length > 0 ? merged : CURATED_HOLLYWOOD_BLOCKBUSTERS;
-
     }
 
-
-
+    const data = await cachedFetchJson(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_original_language=en&primary_release_date.lte=${today}&vote_count.gte=100&sort_by=popularity.desc&page=${page}`);
+    const discovered = (data?.results || [])
+      .filter((m) => m && m.id && m.poster_path && (m.title || m.name))
+      .map((m) => ({
+        ...m,
+        media_type: 'movie',
+        category: 'hollywood',
+        isHindiDubbed: isHindiAvailable(m)
+      }));
     return deduplicateMedia(discovered);
-
   } catch (err) {
-
     return page === 1 ? CURATED_HOLLYWOOD_BLOCKBUSTERS : [];
-
   }
-
 }
 
 

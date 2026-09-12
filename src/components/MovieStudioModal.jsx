@@ -55,6 +55,7 @@ export const DEFAULT_SAMPLE_MOVIES = [
   },
   {
     id: 'studio_deadpool_wolverine',
+    tmdb_id: 533535,
     title: 'Deadpool & Wolverine (Hindi Dubbed Master Edition)',
     name: 'Deadpool & Wolverine',
     overview: 'A listless Wade Wilson toils away in civilian life. But when his homeworld faces an existential threat, Wade must suit up with Wolverine. Full authentic spoken Hindi audio dialogue, English master audio, and Japanese sub.',
@@ -91,6 +92,7 @@ export const DEFAULT_SAMPLE_MOVIES = [
   },
   {
     id: 'studio_house_of_the_dragon',
+    tmdb_id: 94997,
     title: 'House of the Dragon (Hindi Dubbed Master Edition)',
     name: 'House of the Dragon',
     overview: 'The Targaryen dynasty is at the apex of its power with dragons under their yoke. Authentic spoken Hindi dialogue audio, English master audio, and Japanese subtitles.',
@@ -127,6 +129,7 @@ export const DEFAULT_SAMPLE_MOVIES = [
   },
   {
     id: 'studio_avengers_endgame',
+    tmdb_id: 299534,
     title: 'Avengers: Endgame (Hindi Dubbed Master Edition)',
     name: 'Avengers: Endgame',
     overview: 'After the devastating events of Infinity War, the universe is in ruins. With the help of remaining allies, the Avengers assemble once more to reverse Thanos actions. Verified authentic multi-audio with Hindi dialogue, English master, and Japanese audio.',
@@ -163,6 +166,7 @@ export const DEFAULT_SAMPLE_MOVIES = [
   },
   {
     id: 'studio_naruto_shippuden',
+    tmdb_id: 31910,
     title: 'Naruto: Shippuden (Hindi Dubbed Edition)',
     name: 'Naruto: Shippuden',
     overview: 'Naruto Uzumaki returns to the Hidden Leaf Village after intense training with Jiraiya. Authentic multi-audio featuring verified spoken Hindi dialogue track, English dub, and original Japanese audio.',

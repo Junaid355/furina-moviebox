@@ -238,7 +238,7 @@ export default function Navbar({
             className="px-2.5 py-1 rounded-full border border-cyan-500/40 bg-gradient-to-r from-cyan-500/20 to-blue-600/20 hover:from-cyan-500/35 hover:to-blue-600/35 text-cyan-300 hover:text-white transition flex items-center gap-1 text-[11px] font-bold cursor-pointer shadow-sm shrink-0"
           >
             <Film className="w-3 h-3 text-cyan-400" />
-            <span>🎬 Studio</span>
+            <span>Studio</span>
           </button>
 
           <button

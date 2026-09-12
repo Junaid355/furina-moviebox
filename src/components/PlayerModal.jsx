@@ -62,9 +62,15 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     if (item?.tmdb_id) return item.tmdb_id;
     if (item?.id && !isNaN(Number(item.id))) return Number(item.id);
     const titleLower = (item?.title || item?.name || '').toLowerCase();
+    if (titleLower.includes('house of the dragon')) return 94997;
     if (titleLower.includes('deadpool')) return 533535;
     if (titleLower.includes('endgame')) return 299534;
     if (titleLower.includes('naruto')) return 31910;
+    if (titleLower.includes('dragon ball')) return 12609;
+    if (titleLower.includes('demon slayer')) return 85937;
+    if (titleLower.includes('jujutsu')) return 95479;
+    if (titleLower.includes('solo leveling')) return 127532;
+    if (titleLower.includes('attack on titan')) return 1429;
     if (titleLower.includes('cyber ronin')) return 603;
     return null;
   }, [item]);
@@ -101,10 +107,11 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   };
 
   // Authentic audio tracks strictly based on physical audio assets, native spoken languages, or verified provider sources
-  const isTopVerifiedHindiTitle = [94997, 533535, 12609, 12971, 46260, 31910, 85937, 95479, 127532, 1429, 37854, 30984].includes(Number(item?.id));
-  const hasWorkingHindiSource = isCustom
+  const verifiedId = Number(item?.id) || Number(item?.tmdb_id) || Number(resolvedTmdbId);
+  const isTopVerifiedHindiTitle = [94997, 533535, 12609, 12971, 46260, 31910, 85937, 95479, 127532, 1429, 37854, 30984].includes(verifiedId);
+  const hasWorkingHindiSource = (isCustom && playerMode === 'studio')
     ? Boolean(customSources.hi)
-    : (isBollywoodHindi || isTopVerifiedHindiTitle || isHindiAvailable(item) || hindiProviderManager.hasLegitimateHindiSource(item));
+    : (Boolean(customSources.hi) || isBollywoodHindi || isTopVerifiedHindiTitle || isHindiAvailable(item) || hindiProviderManager.hasLegitimateHindiSource(item));
 
   const hasWorkingEnglishSource = isBollywoodHindi
     ? false
@@ -196,7 +203,9 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     if (audioMode === 'hindi' || userPreferredAudio === 'hindi') {
       return (
         availableServers.find((s) => s.id === 'multiembed') ||
+        availableServers.find((s) => s.id === 'one23embed') ||
         availableServers.find((s) => s.id === 'smashy') ||
+        availableServers.find((s) => s.id === 'vidsrc_cc') ||
         availableServers.find((s) => s.id === 'autoembed') ||
         availableServers.find((s) => s.id === 'vidsrc_in') ||
         availableServers.find((s) => s.id === 'twoembed_vip') ||
@@ -1545,7 +1554,19 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                           {/* 1-Click Button to switch to Full Movie Stream */}
                           {hasOnlineStream && (
                             <button
-                              onClick={() => setPlayerMode('stream')}
+                              onClick={() => {
+                                if (audioMode === 'hindi') {
+                                  const hindiServer = 
+                                    availableServers.find((s) => s.id === 'multiembed') ||
+                                    availableServers.find((s) => s.id === 'one23embed') ||
+                                    availableServers.find((s) => s.id === 'smashy') ||
+                                    availableServers.find((s) => s.id === 'vidsrc_cc') ||
+                                    availableServers.find((s) => s.id === 'autoembed') ||
+                                    availableServers[0];
+                                  setSelectedServer(hindiServer);
+                                }
+                                setPlayerMode('stream');
+                              }}
                               className="mt-2.5 px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-gray-950 font-black text-xs transition shadow-[0_0_20px_rgba(56,189,248,0.5)] transform hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-2"
                             >
                               <span>🌐</span>
