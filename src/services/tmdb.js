@@ -203,7 +203,8 @@ const FALLBACK_MEDIA = [
 
     first_air_date: '2022-08-21',
 
-    category: 'series'
+    category: 'series',
+    isHindiDubbed: true
 
   },
 
@@ -305,23 +306,43 @@ const FALLBACK_MEDIA = [
 
 export async function fetchTrendingAll(page = 1) {
   try {
-    const data = await cachedFetchJson(`${BASE_URL}/trending/all/week?api_key=${API_KEY}&page=${page}`);
-    if (!data.results || data.results.length === 0) return page === 1 ? FALLBACK_MEDIA : [];
+    if (page === 1) {
+      const [res1, res2] = await Promise.allSettled([
+        cachedFetchJson(`${BASE_URL}/trending/all/week?api_key=${API_KEY}&page=1`),
+        cachedFetchJson(`${BASE_URL}/trending/all/week?api_key=${API_KEY}&page=2`)
+      ]);
+      const p1Results = (res1.status === 'fulfilled' && res1.value?.results) ? res1.value.results : [];
+      const p2Results = (res2.status === 'fulfilled' && res2.value?.results) ? res2.value.results : [];
+      const combined = [...p1Results, ...p2Results].filter(item => {
+        if (!item || typeof item !== 'object' || !item.id) return false;
+        if (item.media_type === 'person') return false;
+        if (item.media_type === 'movie' && item.release_date && item.release_date > today) return false;
+        return true;
+      }).map(m => ({ ...m, isHindiDubbed: isHindiAvailable(m) }));
 
-    const filtered = data.results.filter(item => {
+      // Rich curated foundation ensuring instant blockbusters with verified Hindi dubs
+      const curatedFoundation = [
+        ...FALLBACK_MEDIA.map(m => ({ ...m, isHindiDubbed: isHindiAvailable(m) })),
+        ...CURATED_HOLLYWOOD_HINDI_DUBS.slice(0, 16),
+        ...CURATED_BOLLYWOOD_BLOCKBUSTERS.slice(0, 10),
+        ...CURATED_HINDI_DUBBED_ANIME.slice(0, 12)
+      ];
+
+      return deduplicateMedia([...curatedFoundation, ...combined]);
+    }
+    const data = await cachedFetchJson(`${BASE_URL}/trending/all/week?api_key=${API_KEY}&page=${page}`);
+    if (!data.results || data.results.length === 0) return [];
+
+    return data.results.filter(item => {
       if (!item || typeof item !== 'object' || !item.id) return false;
       if (item.media_type === 'person') return false;
       if (item.media_type === 'movie' && item.release_date && item.release_date > today) return false;
       return true;
-    });
-
-    return filtered.length > 0 ? filtered : (page === 1 ? FALLBACK_MEDIA : []);
+    }).map(m => ({ ...m, isHindiDubbed: isHindiAvailable(m) }));
   } catch (err) {
-    return page === 1 ? FALLBACK_MEDIA : [];
+    return page === 1 ? deduplicateMedia([...FALLBACK_MEDIA, ...CURATED_HOLLYWOOD_HINDI_DUBS, ...CURATED_BOLLYWOOD_BLOCKBUSTERS]) : [];
   }
 }
-
-
 
 export const CURATED_HOLLYWOOD_BLOCKBUSTERS = [
 
@@ -2382,8 +2403,19 @@ export async function fetchHindiMovies(page = 1) {
 
 export async function fetchTrendingSeries(page = 1) {
   try {
+    if (page === 1) {
+      const [res1, res2] = await Promise.allSettled([
+        cachedFetchJson(`${BASE_URL}/discover/tv?api_key=${API_KEY}&first_air_date.lte=${today}&vote_count.gte=15&sort_by=popularity.desc&page=1`),
+        cachedFetchJson(`${BASE_URL}/discover/tv?api_key=${API_KEY}&first_air_date.lte=${today}&vote_count.gte=15&sort_by=popularity.desc&page=2`)
+      ]);
+      const p1 = (res1.status === 'fulfilled' && res1.value?.results) ? res1.value.results : [];
+      const p2 = (res2.status === 'fulfilled' && res2.value?.results) ? res2.value.results : [];
+      const discovered = [...p1, ...p2].map((m) => ({ ...m, media_type: 'tv', category: 'series', isHindiDubbed: isHindiAvailable(m) }));
+      const curatedSeries = FALLBACK_MEDIA.filter((m) => m.media_type === 'tv').map(m => ({ ...m, isHindiDubbed: isHindiAvailable(m) }));
+      return deduplicateMedia([...curatedSeries, ...discovered]);
+    }
     const data = await cachedFetchJson(`${BASE_URL}/discover/tv?api_key=${API_KEY}&first_air_date.lte=${today}&vote_count.gte=15&sort_by=popularity.desc&page=${page}`);
-    return data.results && data.results.length > 0 ? data.results.map((m) => ({ ...m, media_type: 'tv' })) : (page === 1 ? FALLBACK_MEDIA.filter((m) => m.media_type === 'tv') : []);
+    return (data.results && data.results.length > 0) ? data.results.map((m) => ({ ...m, media_type: 'tv', category: 'series', isHindiDubbed: isHindiAvailable(m) })) : [];
   } catch (err) {
     return page === 1 ? FALLBACK_MEDIA.filter((m) => m.media_type === 'tv') : [];
   }
@@ -2672,23 +2704,44 @@ export async function fetchHindiDubbedAnime(page = 1) {
 }
 
 export async function fetchHindiDubbedHollywood(page = 1) {
-  if (page === 1) {
-    let studioHindi = [];
-    try {
-      const raw = typeof localStorage !== 'undefined' ? localStorage.getItem('furina_studio_movies') : null;
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          studioHindi = parsed.filter((m) => m.category === 'hollywood' && m.languages?.hi?.url);
-        }
+  let studioHindi = [];
+  try {
+    const raw = typeof localStorage !== 'undefined' ? localStorage.getItem('furina_studio_movies') : null;
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        studioHindi = parsed.filter((m) => m.category === 'hollywood' && (m.languages?.hi?.url || m.audio_hi_url || m.isHindiDubbed));
       }
-    } catch (e) {}
-    return deduplicateMedia(studioHindi);
+    }
+  } catch (e) {}
+
+  if (page === 1) {
+    const curatedDubs = CURATED_HOLLYWOOD_HINDI_DUBS.map((m) => ({
+      ...m,
+      media_type: 'movie',
+      category: 'hollywood',
+      isHindiDubbed: true
+    }));
+    try {
+      const res = await cachedFetchJson(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_original_language=en&primary_release_date.lte=${today}&vote_count.gte=100&sort_by=popularity.desc&page=1`);
+      const discoveredDubs = (res?.results || [])
+        .filter((m) => m && m.id && isHindiAvailable(m))
+        .map((m) => ({ ...m, media_type: 'movie', category: 'hollywood', isHindiDubbed: true }));
+      return deduplicateMedia([...studioHindi, ...curatedDubs, ...discoveredDubs]);
+    } catch (e) {
+      return deduplicateMedia([...studioHindi, ...curatedDubs]);
+    }
   }
-  return [];
+  try {
+    const res = await cachedFetchJson(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_original_language=en&primary_release_date.lte=${today}&vote_count.gte=100&sort_by=popularity.desc&page=${page}`);
+    return (res?.results || [])
+      .filter((m) => m && m.id && isHindiAvailable(m))
+      .map((m) => ({ ...m, media_type: 'movie', category: 'hollywood', isHindiDubbed: true }));
+  } catch (e) {
+    return [];
+  }
 }
 
-// Master Vault Uncut Cinema
 export async function fetchMatureMovies(page = 1) {
   try {
     const data = await cachedFetchJson(`${BASE_URL}/discover/movie?api_key=${API_KEY}&include_adult=true&certification_country=US&certification=R|NC-17&sort_by=popularity.desc&page=${page}`);
@@ -3704,6 +3757,7 @@ export function isAnimeItem(item) {
 
 // Strictly verified anime titles with confirmed Hindi dubs (sourced from MyDubList, AnimeWorld India & Indian TV broadcast history)
 export const VERIFIED_HINDI_ANIME_IDS = new Set([
+  12609,
   19, 1429, 2098, 4614, 8392, 11130, 12697, 12971, 13916, 30984, 31724, 31835,
   31910, 33758, 37854, 38472, 45782, 45790, 46260, 46261, 46298, 46435, 50712, 60572,
   60708, 60846, 60862, 60863, 62110, 62710, 63926, 65733, 65930, 66941, 67070, 67800,

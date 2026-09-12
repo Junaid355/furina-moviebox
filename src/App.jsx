@@ -676,7 +676,7 @@ export default function App() {
               <button
                 key={pill.id}
                 onClick={() => setGlobalMediaFilter(pill.id)}
-                className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition border flex items-center gap-1 cursor-pointer text-xs ${
+                className={`px-2.5 py-1 rounded-lg font-bold whitespace-nowrap transition border flex items-center gap-1 cursor-pointer text-[11px] ${
                   isSelected
                     ? pill.id === 'hindi'
                       ? 'bg-amber-500 text-gray-950 border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.5)] font-black'

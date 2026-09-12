@@ -1452,6 +1452,123 @@ async function runQA() {
     recordTest(43, 'Appearance Theme & Accessibility Class Engine Audit', test43Passed,
       `data-theme: "${themeAudit.themeAttr}", --accent-color: "${themeAudit.accentColor}", bodyBg: ${themeAudit.hasBg}`);
 
+    console.log('\n--- Running TEST 44: Navbar Horizontal Overflow & Settings Visibility Audit across 1024, 1280, 1366, 1920 Viewports ---');
+    const viewports = [1024, 1280, 1366, 1920];
+    let allViewportsPassed = true;
+    const viewportResults = [];
+
+    for (const vpWidth of viewports) {
+      await client.send('Emulation.setDeviceMetricsOverride', {
+        width: vpWidth,
+        height: 800,
+        deviceScaleFactor: 1,
+        mobile: false
+      });
+      await sleep(800);
+
+      const navMetrics = await client.eval(`
+        (() => {
+          window.scrollTo(0, 0);
+          const header = document.querySelector('header');
+          const settingsBtn = document.querySelector('[data-testid="settings-btn"]');
+          const docScrollWidth = document.documentElement.scrollWidth;
+          const windowWidth = window.innerWidth;
+          const settingsRect = settingsBtn ? settingsBtn.getBoundingClientRect() : null;
+          const settingsVisible = Boolean(settingsRect && settingsRect.right <= windowWidth + 2 && settingsRect.width > 0);
+          const noDocOverflow = docScrollWidth <= windowWidth + 2;
+
+          return {
+            windowWidth,
+            docScrollWidth,
+            noDocOverflow,
+            settingsVisible,
+            settingsRight: settingsRect?.right
+          };
+        })()
+      `);
+
+      const vpOk = navMetrics.noDocOverflow && navMetrics.settingsVisible;
+      if (!vpOk) allViewportsPassed = false;
+      viewportResults.push(`${vpWidth}px: overflow=${!navMetrics.noDocOverflow}, settingsVisible=${navMetrics.settingsVisible}`);
+    }
+
+    recordTest(44, 'Navbar Zero Overflow & Settings Button Full Visibility (1024px, 1280px, 1366px, 1920px)',
+      allViewportsPassed, viewportResults.join(' | '));
+
+    console.log('\n--- Running TEST 45: Duplicate Studio Elimination Audit ---');
+    const studioAudit = await client.eval(`
+      (() => {
+        const headerButtons = Array.from(document.querySelectorAll('header nav button'));
+        const hasStudioInNav = headerButtons.some(b => b.textContent.includes('Studio'));
+        const studioActionBtn = document.querySelector('button[data-testid="studio-btn"]');
+        const studioActionCount = document.querySelectorAll('button[data-testid="studio-btn"]').length;
+        return {
+          hasStudioInNav,
+          hasStudioAction: Boolean(studioActionBtn),
+          studioActionCount
+        };
+      })()
+    `);
+    const studioDeduplicated = !studioAudit.hasStudioInNav && studioAudit.hasStudioAction && studioAudit.studioActionCount === 1;
+    recordTest(45, 'Duplicate Studio Button Elimination Audit', studioDeduplicated,
+      `Studio in nav pills: ${studioAudit.hasStudioInNav}, Studio action button: ${studioAudit.hasStudioAction}, Action count: ${studioAudit.studioActionCount}`);
+
+    console.log('\n--- Running TEST 46: House of the Dragon (94997) & Top Titles Hindi Dub Availability ---');
+    const hindiProviderMod = await import('./src/services/HindiProviderManager.js');
+    const hotdLegit = hindiProviderMod.hindiProviderManager.hasLegitimateHindiSource({ id: 94997, title: 'House of the Dragon' });
+    const deadpoolLegit = hindiProviderMod.hindiProviderManager.hasLegitimateHindiSource({ id: 533535, title: 'Deadpool & Wolverine' });
+    const narutoLegit = hindiProviderMod.hindiProviderManager.hasLegitimateHindiSource({ id: 46260, title: 'Naruto' });
+    const dbzLegit = hindiProviderMod.hindiProviderManager.hasLegitimateHindiSource({ id: 12609, title: 'Dragon Ball Z' });
+    const hotdBlockbuster = hindiProviderMod.resolveBlockbusterLocal({ id: 94997, title: 'House of the Dragon' });
+    const hotdSources = hindiProviderMod.hindiProviderManager.resolveAudioSources({ id: 94997, title: 'House of the Dragon' }, 'tv', 1, 1);
+    const hotdPassed = hotdLegit && deadpoolLegit && narutoLegit && dbzLegit && Boolean(hotdBlockbuster?.hiUrl) && hotdSources?.hindi?.available;
+    recordTest(46, 'House of the Dragon, Deadpool, Naruto & DBZ Verified Hindi Dub Audit', hotdPassed,
+      `HOTD legit: ${hotdLegit}, Deadpool: ${deadpoolLegit}, Naruto: ${narutoLegit}, DBZ: ${dbzLegit}, HOTD local audio: ${Boolean(hotdBlockbuster?.hiUrl)}`);
+
+    console.log('\n--- Running TEST 47: Deep Catalog Grid Audit (Initial Load & Hindi Dub Filter) ---');
+    // Reset to 1280px viewport
+    await client.send('Emulation.setDeviceMetricsOverride', {
+      width: 1280,
+      height: 900,
+      deviceScaleFactor: 1,
+      mobile: false
+    });
+    await sleep(400);
+
+    // Clear any previous test search query and reset category to Trending
+    await client.eval(`
+      (() => {
+        window.__setReactInput('input[type="text"]', '');
+        const trendBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.trim() === 'Trending');
+        if (trendBtn) trendBtn.click();
+      })()
+    `);
+    await sleep(1500);
+
+    const initialCardCount = await client.eval('document.querySelectorAll(".glass-card").length');
+    // Click Hindi Dubbed filter
+    await client.eval(`
+      (() => {
+        const btn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('Hindi Dubbed'));
+        if (btn) btn.click();
+      })()
+    `);
+    await sleep(800);
+    const hindiFilterCardCount = await client.eval('document.querySelectorAll(".glass-card").length');
+
+    // Click All filter back
+    await client.eval(`
+      (() => {
+        const btn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.trim() === 'All');
+        if (btn) btn.click();
+      })()
+    `);
+    await sleep(400);
+
+    const catalogDepthPassed = initialCardCount >= 40 && hindiFilterCardCount >= 20;
+    recordTest(47, 'Deep Catalog Initial Grid & Rich Hindi Dubbed Grid Audit', catalogDepthPassed,
+      `Initial cards: ${initialCardCount} (req >= 40), Hindi Dubbed filtered cards: ${hindiFilterCardCount} (req >= 20)`);
+
     console.log('\n--- Running TEST 26: Final Production Build Verification ---');
     try {
       execSync('npm.cmd run build', { cwd: process.cwd(), stdio: 'pipe' });

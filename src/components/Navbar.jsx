@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Search, Film, Tv, Flame, Heart, Sparkles, X, Shield, Lock, Settings, Smartphone, Skull, Volume2, VolumeX } from 'lucide-react';
 import soundFx from '../services/soundFx';
 
-export function HanimeIcon({ className = "w-4 h-4 sm:w-5 sm:h-5", ...props }) {
+export function HanimeIcon({ className = "w-3.5 h-3.5 sm:w-4 sm:h-4", ...props }) {
   return (
     <img 
       src="./hanime_icon.png" 
@@ -27,23 +27,23 @@ export default function Navbar({
   onOpenAndroidModal,
   onOpenStudio
 }) {
+  // Base categories: Studio removed from pills to eliminate duplication (available in right actions)
   const baseCategories = [
     { id: 'trending', label: 'Trending', icon: Flame },
     { id: 'hollywood', label: 'Hollywood', icon: Film },
-    { id: 'hindi', label: 'Bollywood & Hindi', icon: Sparkles },
-    { id: 'kdrama', label: '🇰🇷 K-Drama', icon: Tv },
-    { id: 'anime', label: '🌸 Anime', icon: Sparkles },
-    { id: 'horror', label: '👻 Horror', icon: Skull },
-    { id: 'series', label: 'Web Series', icon: Tv },
-    { id: 'watchlist', label: 'Watchlist', icon: Heart },
-    { id: 'studio', label: '🎬 Studio', icon: Film },
+    { id: 'hindi', label: 'Hindi', icon: Sparkles },
+    { id: 'kdrama', label: 'K-Drama', icon: Tv },
+    { id: 'anime', label: 'Anime', icon: Sparkles },
+    { id: 'horror', label: 'Horror', icon: Skull },
+    { id: 'series', label: 'Series', icon: Tv },
+    { id: 'watchlist', label: 'Watchlist', icon: Heart }
   ];
 
   const categories = isMasterMode
     ? [
         ...baseCategories.slice(0, 5),
-        { id: 'mature', label: '🎬 Uncut Cinema', icon: Flame, isVault: true },
-        { id: 'ecchi_anime', label: '🔞 Hanime Vault', icon: HanimeIcon, isVault: true },
+        { id: 'mature', label: 'Uncut', icon: Flame, isVault: true },
+        { id: 'ecchi_anime', label: 'Hanime', icon: HanimeIcon, isVault: true },
         ...baseCategories.slice(5)
       ]
     : baseCategories;
@@ -57,8 +57,7 @@ export default function Navbar({
   const debounceTimerRef = useRef(null);
   const lastEmittedQueryRef = useRef(searchQuery || '');
 
-  // Synchronize local search with external parent changes (e.g. category pill click, clear button)
-  // CRITICAL FOR MOBILE: NEVER overwrite localSearch while user is actively typing in the focused input
+  // Synchronize local search with external parent changes
   useEffect(() => {
     if (!isFocusedRef.current) {
       setLocalSearch(searchQuery || '');
@@ -80,7 +79,6 @@ export default function Navbar({
       return;
     }
 
-    // Debounce notifying parent so that mobile virtual keyboards (Gboard/iOS) never suffer re-render interruptions
     debounceTimerRef.current = setTimeout(() => {
       if (!isComposingRef.current) {
         lastEmittedQueryRef.current = nextVal;
@@ -116,49 +114,47 @@ export default function Navbar({
   };
 
   return (
-    <header className="sticky top-0 z-40 glass-nav px-4 py-3 sm:px-8">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 sm:gap-4">
+    <header className="sticky top-0 z-40 glass-nav px-2 sm:px-4 py-2 w-full overflow-hidden">
+      <div className="w-full max-w-full mx-auto flex items-center justify-between gap-1.5 sm:gap-2">
         
-        {/* Brand Logo - Changes based on Stealth Mode */}
+        {/* Brand Logo - Compact Cozy Scale */}
         <div 
           onClick={() => { setActiveCategory('trending'); setSearchQuery(''); }}
-          className="flex items-center gap-2.5 cursor-pointer group"
+          className="flex items-center gap-1.5 sm:gap-2 cursor-pointer group shrink-0"
         >
           {isStealthMode ? (
-            /* Stealth Neutral Brand */
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 border border-slate-600/50 flex items-center justify-center text-cyan-400 font-black text-lg shadow">
-              <Film className="w-5 h-5 text-cyan-400" />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-slate-700 to-slate-900 border border-slate-600/50 flex items-center justify-center text-cyan-400 font-black text-xs shadow">
+              <Film className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400" />
             </div>
           ) : (
-            /* Furina Anime Brand */
-            <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-cyan-400/60 shadow-[0_0_15px_rgba(77,197,249,0.5)] group-hover:scale-105 transition">
+            <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden border border-cyan-400/60 shadow-[0_0_8px_rgba(77,197,249,0.5)] group-hover:scale-105 transition">
               <img src="./favicon.png" alt="Furina MovieBox" className="w-full h-full object-cover" />
             </div>
           )}
           
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className={`font-extrabold text-lg sm:text-xl tracking-tight ${
+          <div className="shrink-0">
+            <div className="flex items-center gap-1">
+              <span className={`font-extrabold text-sm sm:text-base tracking-tight ${
                 isStealthMode
                   ? 'text-white'
                   : 'bg-gradient-to-r from-cyan-300 via-sky-400 to-blue-500 bg-clip-text text-transparent'
               }`}>
                 {isStealthMode ? 'Stream' : 'Furina'}
               </span>
-              <span className="font-bold text-lg sm:text-xl text-white">
+              <span className="font-bold text-sm sm:text-base text-white">
                 {isStealthMode ? 'Cinema' : 'MovieBox'}
               </span>
             </div>
-            <div className="text-[10px] text-cyan-300/80 font-medium tracking-wider uppercase hidden sm:block">
+            <div className="text-[8.5px] text-cyan-300/80 font-medium tracking-wider uppercase hidden 2xl:block">
               {isStealthMode ? 'HD Stream Player' : '4K Movies & Web Series'}
             </div>
           </div>
         </div>
 
-        {/* Search Bar */}
-        <div className="flex-1 max-w-md relative">
+        {/* Cozy Compact Search Bar */}
+        <div className="w-36 sm:w-48 lg:w-44 xl:w-56 focus-within:w-64 transition-all duration-300 relative shrink-0">
           <div className="relative flex items-center">
-            <Search className="absolute left-3.5 w-4 h-4 text-cyan-400/70 pointer-events-none" />
+            <Search className="absolute left-2.5 w-3.5 h-3.5 text-cyan-400/70 pointer-events-none" />
             <input
               ref={inputRef}
               type="text"
@@ -177,19 +173,19 @@ export default function Navbar({
               autoCapitalize="none"
               spellCheck="false"
               enterKeyHint="search"
-              placeholder="Search movies, Hindi dubbed, series worldwide..."
-              className="w-full bg-[#0b1633]/90 border border-cyan-500/25 rounded-full pl-10 pr-9 py-2 text-sm text-white placeholder-cyan-200/40 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 transition shadow-inner"
+              placeholder="Search..."
+              className="w-full bg-[#0b1633]/90 border border-cyan-500/25 rounded-full pl-7 pr-7 py-1 text-xs text-white placeholder-cyan-200/40 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 transition shadow-inner"
             />
             {localSearch && (
               <>
                 <button 
                   onClick={handleClear}
-                  className="absolute right-3 text-cyan-400/60 hover:text-white cursor-pointer"
+                  className="absolute right-2 text-cyan-400/60 hover:text-white cursor-pointer"
                   type="button"
                   aria-label="Clear search"
                   title="Clear search"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={handleClear}
@@ -203,8 +199,8 @@ export default function Navbar({
           </div>
         </div>
 
-        {/* Desktop Category Navigation */}
-        <nav className="hidden lg:flex items-center gap-1.5 bg-[#0a1329]/80 p-1 rounded-full border border-cyan-500/20">
+        {/* Desktop Category Navigation: shrinks flexibly, internal scroll if tight, NEVER forces parent overflow */}
+        <nav className="hidden lg:flex items-center gap-1 bg-[#0a1329]/80 p-0.5 rounded-full border border-cyan-500/20 min-w-0 shrink overflow-x-auto no-scrollbar">
           {categories.map((cat) => {
             const Icon = cat.icon;
             const isActive = activeCategory === cat.id && !searchQuery;
@@ -212,46 +208,45 @@ export default function Navbar({
               <button
                 key={cat.id}
                 onClick={() => {
-                  if (cat.id === 'studio' && onOpenStudio) onOpenStudio();
                   setActiveCategory(cat.id);
                   setSearchQuery('');
                   setLocalSearch('');
                 }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition ${
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold whitespace-nowrap transition shrink-0 cursor-pointer ${
                   cat.isVault
                     ? isActive
                       ? 'bg-amber-500 text-gray-950 font-bold shadow'
                       : 'text-amber-400 hover:bg-amber-500/10'
                     : isActive
-                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-[0_0_12px_rgba(77,197,249,0.4)]'
+                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-[0_0_10px_rgba(77,197,249,0.4)]'
                     : 'text-cyan-200/70 hover:text-white hover:bg-white/5'
                 }`}
               >
-                <Icon className="w-3.5 h-3.5" />
-                {cat.label}
+                <Icon className="w-3 h-3" />
+                <span>{cat.label}</span>
               </button>
             );
           })}
         </nav>
 
-        {/* Action Controls: Movie Studio, iPhone App, Settings & Secret Master Vault */}
-        <div className="flex items-center gap-2">
+        {/* Action Controls: Movie Studio, Apps, Audio FX, Settings (Pinned inside right margin, zero overflow) */}
+        <div className="flex items-center gap-1 sm:gap-1.5 shrink-0 ml-auto">
           <button
             onClick={onOpenStudio}
             data-testid="studio-btn"
             title="Furina Movie Studio & Content Platform"
-            className="px-3 py-1.5 rounded-full border border-cyan-500/40 bg-gradient-to-r from-cyan-500/20 to-blue-600/20 hover:from-cyan-500/35 hover:to-blue-600/35 text-cyan-300 hover:text-white transition flex items-center gap-1.5 text-xs font-bold cursor-pointer shadow-sm"
+            className="px-2.5 py-1 rounded-full border border-cyan-500/40 bg-gradient-to-r from-cyan-500/20 to-blue-600/20 hover:from-cyan-500/35 hover:to-blue-600/35 text-cyan-300 hover:text-white transition flex items-center gap-1 text-[11px] font-bold cursor-pointer shadow-sm shrink-0"
           >
-            <Film className="w-3.5 h-3.5 text-cyan-400" />
+            <Film className="w-3 h-3 text-cyan-400" />
             <span>🎬 Studio</span>
           </button>
 
           <button
             onClick={onOpenAndroidModal}
             title="Install App on Android (1-Tap Standalone PWA & Native)"
-            className="px-2.5 sm:px-3 py-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/15 text-emerald-300 hover:text-white hover:bg-emerald-500/25 transition flex items-center gap-1.5 text-xs font-bold cursor-pointer"
+            className="px-2 py-1 rounded-full border border-emerald-500/40 bg-emerald-500/15 text-emerald-300 hover:text-white hover:bg-emerald-500/25 transition flex items-center gap-1 text-[11px] font-bold cursor-pointer shrink-0"
           >
-            <Smartphone className="w-3.5 h-3.5 text-emerald-400" />
+            <Smartphone className="w-3 h-3 text-emerald-400" />
             <span className="hidden sm:inline">Android App</span>
             <span className="sm:hidden">App</span>
           </button>
@@ -259,9 +254,9 @@ export default function Navbar({
           <button
             onClick={onOpenIPhoneModal}
             title="Install App on iPhone / iPad (Zero Ads)"
-            className="hidden sm:flex px-3 py-1.5 rounded-full border border-cyan-500/30 bg-[#0b1633] text-cyan-300 hover:text-white hover:bg-white/10 transition items-center gap-1.5 text-xs font-semibold"
+            className="hidden sm:flex px-2 py-1 rounded-full border border-cyan-500/30 bg-[#0b1633] text-cyan-300 hover:text-white hover:bg-white/10 transition items-center gap-1 text-[11px] font-semibold cursor-pointer shrink-0"
           >
-            <Smartphone className="w-3.5 h-3.5 text-cyan-400" />
+            <Smartphone className="w-3 h-3 text-cyan-400" />
             <span>iPhone</span>
           </button>
 
@@ -272,15 +267,15 @@ export default function Navbar({
             }}
             data-testid="cozy-sound-btn"
             title={isSoundOn ? 'Cozy Sound FX: Active (Click to Mute)' : 'Cozy Sound FX: Muted (Click to Enable)'}
-            className={`p-2 rounded-full border transition flex items-center gap-1.5 ${
+            className={`p-1.5 rounded-full border transition flex items-center gap-1 cursor-pointer shrink-0 ${
               isSoundOn
-                ? 'bg-amber-500/20 border-amber-400/40 text-amber-300 hover:bg-amber-500/30 shadow-[0_0_10px_rgba(251,146,60,0.3)]'
+                ? 'bg-amber-500/20 border-amber-400/40 text-amber-300 hover:bg-amber-500/30 shadow-[0_0_8px_rgba(251,146,60,0.3)]'
                 : 'bg-[#0b1633] border-cyan-500/30 text-slate-400 hover:text-white hover:bg-white/10'
             }`}
           >
-            {isSoundOn ? <Volume2 className="w-4 h-4 text-amber-300" /> : <VolumeX className="w-4 h-4 text-slate-400" />}
-            <span className="hidden md:inline text-xs font-semibold">
-              {isSoundOn ? 'Cozy Audio' : 'Muted'}
+            {isSoundOn ? <Volume2 className="w-3.5 h-3.5 text-amber-300" /> : <VolumeX className="w-3.5 h-3.5 text-slate-400" />}
+            <span className="hidden 2xl:inline text-[11px] font-semibold">
+              {isSoundOn ? 'Audio' : 'Muted'}
             </span>
           </button>
 
@@ -288,14 +283,14 @@ export default function Navbar({
             onClick={onOpenSettings}
             data-testid="settings-btn"
             title="Settings & Master Vault"
-            className={`p-2 rounded-full border transition flex items-center gap-1.5 ${
+            className={`px-2 py-1 rounded-full border transition flex items-center gap-1 cursor-pointer shrink-0 ${
               isMasterMode
-                ? 'bg-emerald-500/20 border-emerald-400 text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.5)]'
+                ? 'bg-emerald-500/20 border-emerald-400 text-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.5)]'
                 : 'bg-[#0b1633] border-cyan-500/30 text-cyan-300 hover:text-white hover:bg-white/10'
             }`}
           >
-            {isMasterMode ? <Shield className="w-4 h-4 text-emerald-400" /> : <Settings className="w-4 h-4 text-cyan-400" />}
-            <span className="hidden sm:inline text-xs font-semibold">
+            {isMasterMode ? <Shield className="w-3.5 h-3.5 text-emerald-400" /> : <Settings className="w-3.5 h-3.5 text-cyan-400" />}
+            <span className="hidden sm:inline text-[11px] font-semibold">
               {isMasterMode ? 'VIP Active' : 'Settings'}
             </span>
           </button>
@@ -304,7 +299,7 @@ export default function Navbar({
       </div>
 
       {/* Mobile Category Scrollable Bar */}
-      <div className="flex lg:hidden overflow-x-auto gap-2 pt-2.5 pb-1 no-scrollbar">
+      <div className="flex lg:hidden overflow-x-auto gap-1.5 pt-2 pb-0.5 no-scrollbar">
         {categories.map((cat) => {
           const Icon = cat.icon;
           const isActive = activeCategory === cat.id && !searchQuery;
@@ -312,18 +307,18 @@ export default function Navbar({
             <button
               key={cat.id}
               onClick={() => { setActiveCategory(cat.id); setSearchQuery(''); }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition border ${
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition border ${
                 cat.isVault
                   ? isActive
                     ? 'bg-amber-500 text-gray-950 border-amber-400 font-bold shadow'
                     : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
                   : isActive
-                  ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_10px_rgba(77,197,249,0.3)] font-semibold'
+                  ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_8px_rgba(77,197,249,0.3)] font-semibold'
                   : 'bg-[#0c1836]/60 border-cyan-500/15 text-cyan-200/60'
               }`}
             >
               <Icon className="w-3 h-3" />
-              {cat.label}
+              <span>{cat.label}</span>
             </button>
           );
         })}

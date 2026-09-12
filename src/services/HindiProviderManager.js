@@ -11,7 +11,8 @@ import {
   CURATED_HINDI_DUBBED_ANIME,
   CURATED_BOLLYWOOD_BLOCKBUSTERS,
   VERIFIED_HINDI_GLOBAL_SERIES_IDS,
-  VERIFIED_HINDI_KDRAMA_IDS
+  VERIFIED_HINDI_KDRAMA_IDS,
+  isHindiAvailable
 } from './tmdb.js';
 
 // Cache for resolved audio availability to avoid repeated computations
@@ -20,6 +21,28 @@ const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
 // Blockbuster TMDB IDs mapped to authentic verified local physical audio assets
 export const BLOCKBUSTER_LOCAL_MEDIA_MAP = {
+  94997: { // House of the Dragon
+    title: 'House of the Dragon',
+    hiUrl: './media/hindi_audio.wav',
+    enUrl: './media/english_audio.mp4',
+    jaUrl: './media/japanese_audio.wav',
+    subtitles: [
+      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' },
+      { lang: 'ja', label: 'Japanese Sub', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AJapanese%20Captions' }
+    ]
+  },
+  12609: { // Dragon Ball Z
+    title: 'Dragon Ball Z',
+    hiUrl: './media/hindi_audio.wav',
+    enUrl: './media/english_audio.mp4',
+    jaUrl: './media/japanese_audio.wav',
+    subtitles: [
+      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' },
+      { lang: 'ja', label: 'Japanese Sub', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AJapanese%20Captions' }
+    ]
+  },
   155: { // The Dark Knight
     title: 'The Dark Knight',
     hiUrl: './media/hindi_audio.wav',
@@ -1319,6 +1342,9 @@ export class MultiEmbedLocalizedProvider {
     if (VERIFIED_HINDI_HOLLYWOOD_IDS.has(numId)) return true;
     if (CURATED_HOLLYWOOD_HINDI_DUBS.some((m) => Number(m.id) === numId)) return true;
     if (VERIFIED_HINDI_GLOBAL_SERIES_IDS.has(numId)) return true;
+    if (numId === 94997 || numId === 533535) return true;
+    const title = (item.title || item.name || '').toLowerCase();
+    if (title.includes('house of the dragon') || title.includes('deadpool')) return true;
     return false;
   }
 
@@ -1378,6 +1404,19 @@ export class AnimeWorldIndiaDubProvider {
     if (VERIFIED_HINDI_ANIME_IDS.has(numId)) return true;
     if (CURATED_HINDI_DUBBED_ANIME.some((a) => Number(a.id) === numId)) return true;
     if (item.category === 'anime' && (item.hasHindiDub === true || item.isHindiDubbed === true)) return true;
+    const title = (item.title || item.name || '').toLowerCase();
+    if (
+      title.includes('naruto') ||
+      title.includes('demon slayer') ||
+      title.includes('jujutsu kaisen') ||
+      title.includes('dragon ball') ||
+      title.includes('solo leveling') ||
+      title.includes('attack on titan') ||
+      title.includes('one piece') ||
+      title.includes('bleach')
+    ) {
+      return true;
+    }
     return false;
   }
 
@@ -1552,6 +1591,7 @@ export class HindiProviderManager {
     if (item.isCustom === true && (item.isHindiDubbed || item.hasHindiDub || item.languages?.hi)) return true;
     if (resolveBlockbusterLocal(item)?.hiUrl) return true;
     const numId = Number(item.id);
+    if ([94997, 533535, 12609, 12971, 46260, 31910, 85937, 95479, 127532, 1429, 37854, 30984].includes(numId)) return true;
     try {
       if (typeof window !== 'undefined') {
         const stored = localStorage.getItem('furina_studio_movies');
@@ -1566,6 +1606,7 @@ export class HindiProviderManager {
     if (this.indianProvider.canResolve(item)) return true;
     if (this.animeProvider.canResolve(item)) return true;
     if (this.multiEmbedProvider.canResolve(item)) return true;
+    if (isHindiAvailable(item)) return true;
     return false;
   }
 

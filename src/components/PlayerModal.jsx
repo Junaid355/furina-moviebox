@@ -101,9 +101,10 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   };
 
   // Authentic audio tracks strictly based on physical audio assets, native spoken languages, or verified provider sources
+  const isTopVerifiedHindiTitle = [94997, 533535, 12609, 12971, 46260, 31910, 85937, 95479, 127532, 1429, 37854, 30984].includes(Number(item?.id));
   const hasWorkingHindiSource = isCustom
     ? Boolean(customSources.hi)
-    : (isBollywoodHindi || hindiProviderManager.hasLegitimateHindiSource(item));
+    : (isBollywoodHindi || isTopVerifiedHindiTitle || isHindiAvailable(item) || hindiProviderManager.hasLegitimateHindiSource(item));
 
   const hasWorkingEnglishSource = isBollywoodHindi
     ? false
@@ -209,7 +210,9 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       }
       return (
         availableServers.find((s) => s.id === 'multiembed') ||
+        availableServers.find((s) => s.id === 'one23embed') ||
         availableServers.find((s) => s.id === 'smashy') ||
+        availableServers.find((s) => s.id === 'vidsrc_cc') ||
         availableServers.find((s) => s.id === 'autoembed') ||
         availableServers.find((s) => s.id === 'vidsrc_in') ||
         availableServers[0]
@@ -327,7 +330,9 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     if (newMode === 'hindi') {
       const hindiServer = 
         availableServers.find((s) => s.id === 'multiembed') ||
+        availableServers.find((s) => s.id === 'one23embed') ||
         availableServers.find((s) => s.id === 'smashy') ||
+        availableServers.find((s) => s.id === 'vidsrc_cc') ||
         availableServers.find((s) => s.id === 'autoembed') ||
         availableServers.find((s) => s.id === 'vidsrc_in') ||
         availableServers.find((s) => s.id === 'twoembed_vip') ||

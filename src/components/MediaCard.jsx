@@ -55,7 +55,7 @@ const MediaCard = React.memo(function MediaCard({ item, onPlay, isWatchlisted, o
     <div 
       onClick={() => onPlay(item)}
       data-media-id={item.id}
-      className="group relative rounded-2xl overflow-hidden glass-card cursor-pointer flex flex-col transition-all duration-300 transform hover:-translate-y-1.5 hover:shadow-[0_12px_30px_rgba(56,189,248,0.25)]"
+      className="group relative rounded-xl sm:rounded-2xl overflow-hidden glass-card cursor-pointer flex flex-col transition-all duration-300 transform hover:-translate-y-1 hover:shadow-[0_10px_25px_rgba(56,189,248,0.2)]"
     >
       {/* Poster Image Container */}
       <div className="relative aspect-[2/3] w-full overflow-hidden bg-[#060c1d]">
@@ -108,35 +108,35 @@ const MediaCard = React.memo(function MediaCard({ item, onPlay, isWatchlisted, o
         {/* Cinematic Vignette */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#050b1d] via-transparent to-black/30 pointer-events-none" />
 
-        {/* Quality & Dub Badges */}
-        <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5 z-10">
-          <span className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-[9px] font-black tracking-wider px-2 py-0.5 rounded-md shadow-md backdrop-blur-sm">
+        {/* Quality & Dub Badges (Cozy scale) */}
+        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+          <span className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-[8.5px] font-black tracking-wider px-1.5 py-0.5 rounded shadow-sm backdrop-blur-sm">
             4K UHD
           </span>
           {isHindi && (
-            <span className="bg-gradient-to-r from-amber-500 to-orange-600 text-gray-950 text-[9px] font-black tracking-wider px-2 py-0.5 rounded-md shadow flex items-center gap-1">
+            <span className="bg-gradient-to-r from-amber-500 to-orange-600 text-gray-950 text-[8.5px] font-black tracking-wider px-1.5 py-0.5 rounded shadow-sm flex items-center gap-0.5">
               <span>🇮🇳</span>
               <span>{isAnime ? 'HINDI DUB' : 'HINDI'}</span>
             </span>
           )}
           {isAnime && (
-            <span className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-[9px] font-black tracking-wider px-2 py-0.5 rounded-md shadow flex items-center gap-1">
+            <span className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-[8.5px] font-black tracking-wider px-1.5 py-0.5 rounded shadow-sm flex items-center gap-0.5">
               <span>🇯🇵</span>
               <span>SUB / 🎙️ DUB</span>
             </span>
           )}
           {savedProgress && (
-            <span className="bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 text-[9px] font-black tracking-wider px-2 py-0.5 rounded-md shadow flex items-center gap-1">
+            <span className="bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 text-[8.5px] font-black tracking-wider px-1.5 py-0.5 rounded shadow-sm flex items-center gap-0.5">
               <span>▶</span>
               <span>RESUME {savedProgress}</span>
             </span>
           )}
           {isUpcoming ? (
-            <span className="bg-amber-600/90 text-white text-[9px] font-bold px-2 py-0.5 rounded-md shadow">
+            <span className="bg-amber-600/90 text-white text-[8.5px] font-bold px-1.5 py-0.5 rounded shadow-sm">
               UPCOMING
             </span>
           ) : isSeries ? (
-            <span className="bg-purple-600/90 text-white text-[9px] font-bold px-2 py-0.5 rounded-md shadow">
+            <span className="bg-purple-600/90 text-white text-[8.5px] font-bold px-1.5 py-0.5 rounded shadow-sm">
               SERIES
             </span>
           ) : null}
@@ -175,14 +175,14 @@ const MediaCard = React.memo(function MediaCard({ item, onPlay, isWatchlisted, o
         </div>
       </div>
 
-      {/* Info Container */}
-      <div className="p-3 bg-[#050b1d] border-t border-white/[0.04] flex flex-col justify-between">
-        <h3 className="font-bold text-xs sm:text-sm text-white line-clamp-1 group-hover:text-cyan-300 transition-colors">
+      {/* Info Container (Cozy scale) */}
+      <div className="p-2.5 sm:p-3 bg-[#050b1d] border-t border-white/[0.04] flex flex-col justify-between">
+        <h3 className="font-bold text-xs sm:text-[13px] text-white line-clamp-1 group-hover:text-cyan-300 transition-colors">
           {title}
         </h3>
-        <div className="flex items-center justify-between mt-1 text-[11px] text-slate-400">
+        <div className="flex items-center justify-between mt-1 text-[10px] text-slate-400">
           <span>{year || '2024'}</span>
-          <span className="text-[10px] font-medium text-cyan-400/80">
+          <span className="text-[9.5px] font-medium text-cyan-400/80">
             {isSeries ? 'Series' : 'Movie'}
           </span>
         </div>

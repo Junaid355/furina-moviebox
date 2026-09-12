@@ -90,6 +90,42 @@ export const DEFAULT_SAMPLE_MOVIES = [
     ]
   },
   {
+    id: 'studio_house_of_the_dragon',
+    title: 'House of the Dragon (Hindi Dubbed Master Edition)',
+    name: 'House of the Dragon',
+    overview: 'The Targaryen dynasty is at the apex of its power with dragons under their yoke. Authentic spoken Hindi dialogue audio, English master audio, and Japanese subtitles.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/7QMsOTMUswlwxJP0rTTZfmz2tX2.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/original/etj5CuMuamjhG2ZwKoBGwd7IP8.jpg',
+    media_type: 'tv',
+    vote_average: 8.4,
+    first_air_date: '2022-08-21',
+    category: 'series',
+    genres: ['Action & Adventure', 'Drama', 'Sci-Fi & Fantasy'],
+    isCustom: true,
+    isHindiDubbed: true,
+    languages: {
+      hi: {
+        label: 'Hindi (Authentic Spoken Hindi Dialogue)',
+        url: './media/hindi_audio.wav',
+        type: 'audio/wav'
+      },
+      en: {
+        label: 'English Dub (Official Master Audio)',
+        url: './media/english_audio.mp4',
+        type: 'video/mp4'
+      },
+      ja: {
+        label: 'Japanese Audio',
+        url: './media/japanese_audio.wav',
+        type: 'audio/wav'
+      }
+    },
+    subtitles: [
+      { lang: 'en', label: 'English CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AEnglish%20Captions' },
+      { lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' }
+    ]
+  },
+  {
     id: 'studio_avengers_endgame',
     title: 'Avengers: Endgame (Hindi Dubbed Master Edition)',
     name: 'Avengers: Endgame',
