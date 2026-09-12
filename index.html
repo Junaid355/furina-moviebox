@@ -18,7 +18,11 @@
       // Register modern Service Worker for PWA standalone installation on Android & Desktop
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
-          navigator.serviceWorker.register('./sw.js').catch(function() {});
+          navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
+            .then(function(reg) {
+              reg.update();
+            })
+            .catch(function() {});
         });
       }
       // Capture PWA install prompt event for 1-tap in-app installation button
@@ -27,9 +31,24 @@
         window.deferredInstallPrompt = e;
         window.dispatchEvent(new CustomEvent('furina:can-install'));
       });
+
+      async function hardRecover() {
+        try {
+          if ('serviceWorker' in navigator) {
+            const regs = await navigator.serviceWorker.getRegistrations();
+            for (const r of regs) await r.unregister();
+          }
+          if ('caches' in window) {
+            const keys = await caches.keys();
+            for (const k of keys) await caches.delete(k);
+          }
+          sessionStorage.clear();
+        } catch (e) {}
+        window.location.href = window.location.pathname + '?t=' + Date.now();
+      }
     </script>
-    <script type="module" crossorigin src="./assets/index-DIqzX66N.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BWaqJSoC.css">
+    <script type="module" crossorigin src="./assets/index-wEaqNDRQ.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-DzYCWSiW.css">
   </head>
   <body class="bg-[#030712] text-white select-none overflow-x-hidden antialiased">
     <div id="root">
@@ -42,7 +61,7 @@
         <div style="width: 32px; height: 32px; border: 3px solid rgba(56,189,248,0.2); border-top-color: #38bdf8; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
         <div id="slow-network-fallback" style="display: none; margin-top: 24px;">
           <p style="font-size: 11px; color: #cbd5e1; margin-bottom: 10px;">Taking longer than usual?</p>
-          <button onclick="window.location.reload(true)" style="padding: 8px 18px; border-radius: 9999px; background: #0284c7; color: #fff; border: 0; font-size: 12px; font-weight: 700; cursor: pointer;">🔄 Refresh Page</button>
+          <button onclick="hardRecover()" style="padding: 8px 18px; border-radius: 9999px; background: #0284c7; color: #fff; border: 0; font-size: 12px; font-weight: 700; cursor: pointer;">🔄 Refresh Page</button>
         </div>
       </div>
       <style>
@@ -56,12 +75,12 @@
         if (fallback) fallback.style.display = 'block';
       }, 3500);
 
-      window.addEventListener('error', function(e) {
+      window.addEventListener('error', async function(e) {
         if (e.target && (e.target.tagName === 'SCRIPT' || e.target.tagName === 'LINK')) {
-          console.warn('Asset chunk failed, reloading...', e.target.src || e.target.href);
-          if (!sessionStorage.getItem('furina_auto_reload')) {
-            sessionStorage.setItem('furina_auto_reload', '1');
-            window.location.reload();
+          console.warn('Asset chunk failed, purging caches and recovering...', e.target.src || e.target.href);
+          if (!sessionStorage.getItem('furina_chunk_recovered')) {
+            sessionStorage.setItem('furina_chunk_recovered', '1');
+            await hardRecover();
           }
         }
       }, true);
