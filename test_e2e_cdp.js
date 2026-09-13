@@ -1289,15 +1289,15 @@ async function runQA() {
     recordTest(38, 'Mobile Player Header Layout Collision & Truncation Audit', headerNoCollision,
       headerCollisionCheck.error || `No Avatar Overlap: ${!headerCollisionCheck.overlapsAvatar}, No Close Overlap: ${!headerCollisionCheck.overlapsClose}, Title: "${headerCollisionCheck.titleText}"`);
 
-    console.log('\n--- Running TEST 39: VidLink Parameter Safety (No sub_dub=hindi 500) & Mirror Fallback Row ---');
+    console.log('\n--- Running TEST 39: VidLink Parameter Safety (No sub_dub=hindi 500) & Clean Player Audit ---');
     const vidlinkSafety = await client.eval(`
       (() => {
-        const fallbackBar = Array.from(document.querySelectorAll('button')).filter(b => 
-          ['AutoEmbed', 'VidSrc', '2Embed', 'Smashy', 'Embed.su'].includes(b.textContent.trim())
-        );
+        const mirrorFallbackGone = !document.body.innerText.includes('Mirror Fallback:');
+        const serverMirrorsPresent = Boolean(document.querySelector('button[title*="AutoEmbed"]') || document.body.innerText.includes('Available Server Mirrors:'));
 
         return {
-          fallbackButtonsFound: fallbackBar.map(b => b.textContent.trim())
+          mirrorFallbackGone,
+          serverMirrorsPresent
         };
       })()
     `);
@@ -1310,9 +1310,9 @@ async function runQA() {
     const movieSafe = !movieUrlHindi.includes('&sub_dub=hindi');
     const tvSafe = !tvUrlHindi.includes('&sub_dub=hindi');
 
-    const vidlinkSafetyPassed = movieSafe && tvSafe && vidlinkSafety.fallbackButtonsFound.length >= 4;
-    recordTest(39, 'VidLink Parameter Safety (No sub_dub=hindi 500) & Mirror Fallback Row', vidlinkSafetyPassed,
-      `Movie Safe: ${movieSafe}, TV Safe: ${tvSafe}, Fallback Mirrors: [${vidlinkSafety.fallbackButtonsFound.join(', ')}]`);
+    const vidlinkSafetyPassed = movieSafe && tvSafe && vidlinkSafety.mirrorFallbackGone;
+    recordTest(39, 'VidLink Parameter Safety (No sub_dub=hindi 500) & Clean Player Audit', vidlinkSafetyPassed,
+      `Movie Safe: ${movieSafe}, TV Safe: ${tvSafe}, Floating Fallback Bar Removed: ${vidlinkSafety.mirrorFallbackGone}`);
 
     // Close player modal and reset viewport to desktop
     await client.eval(`

@@ -1939,53 +1939,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                       : 'w-full h-full'
                   }`}
                   allowFullScreen
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 />
-
-                {/* Quick 1-Tap Mirror Fallback Bar (Clean fallback to AutoEmbed, VidSrc, 2Embed, SmashyStream, Embed.su) */}
-                {!isFullscreen && (
-                  <div className="absolute bottom-2 left-2 right-2 z-20 pointer-events-auto flex items-center justify-between gap-1.5 p-1.5 sm:p-2 rounded-xl bg-black/85 backdrop-blur-md border border-cyan-500/30 text-[10px] sm:text-xs">
-                    <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
-                      <span className="text-amber-300 font-bold flex items-center gap-1 shrink-0">
-                        <Zap className="w-3 h-3 text-amber-400" />
-                        <span>Mirror Fallback:</span>
-                      </span>
-                      <div className="flex items-center gap-1 flex-wrap">
-                        {[
-                          { id: 'autoembed', label: 'AutoEmbed' },
-                          { id: 'vidsrc_in', label: 'VidSrc' },
-                          { id: 'twoembed_vip', label: '2Embed' },
-                          { id: 'smashy', label: 'Smashy' },
-                          { id: 'embed_su', label: 'Embed.su' },
-                        ].map((m) => {
-                          const target = availableServers.find((s) => s.id === m.id);
-                          if (!target) return null;
-                          const isCurrent = currentServer.id === target.id;
-                          return (
-                            <button
-                              key={m.id}
-                              onClick={() => setSelectedServer(target)}
-                              title={target.shortName}
-                              className={`px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-bold transition border cursor-pointer ${
-                                isCurrent
-                                  ? 'bg-cyan-500 text-gray-950 border-cyan-300 font-black shadow-sm'
-                                  : 'bg-[#08122c] text-cyan-200/80 border-cyan-500/30 hover:text-white hover:bg-white/10'
-                              }`}
-                            >
-                              {m.label}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                    <button
-                      onClick={handleNextServer}
-                      className="px-2 py-0.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-300 hover:text-white text-[10px] sm:text-[11px] font-bold shrink-0 transition cursor-pointer"
-                    >
-                      Next ↻
-                    </button>
-                  </div>
-                )}
               </>
             )}
           </div>
