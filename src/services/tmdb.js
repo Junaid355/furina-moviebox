@@ -5679,7 +5679,7 @@ export async function searchContent(query, page = 1, includeAdult = false) {
     return false;
   };
 
-  // Search local custom Studio movies (page 1 only)
+  // Search local custom Studio movies (page 1 only, strictly user-created custom productions)
   let studioMatches = [];
   if (page === 1) {
     try {
@@ -5687,8 +5687,19 @@ export async function searchContent(query, page = 1, includeAdult = false) {
       if (rawStudio) {
         const parsedStudio = JSON.parse(rawStudio);
         if (Array.isArray(parsedStudio)) {
+          const legacyBlockbusters = new Set([
+            'studio_deadpool_wolverine',
+            'studio_house_of_the_dragon',
+            'studio_avengers_endgame',
+            'studio_naruto_shippuden',
+            'studio_avatar_way_of_water',
+            'studio_spiderman_no_way_home',
+            'studio_demon_slayer'
+          ]);
           studioMatches = parsedStudio.filter((m) => {
-            if (!m) return false;
+            if (!m || !m.id) return false;
+            if (legacyBlockbusters.has(m.id)) return false;
+            if (m.isUserCreated !== true && m.id !== 'studio_sample_1') return false;
             return isMatch(m.title || m.name || '');
           });
         }
@@ -5722,7 +5733,7 @@ export async function searchContent(query, page = 1, includeAdult = false) {
       cachedFetchJson(`${BASE_URL}/search/tv?api_key=${API_KEY}&query=${encodedQuery}&page=${page}&include_adult=${includeAdult}`).catch(() => ({ results: [] }))
     ]);
 
-    const timeoutMs = (curatedMatches.length > 0 || studioMatches.length > 0) ? 1200 : 3500;
+    const timeoutMs = (curatedMatches.length > 0) ? 1200 : 3500;
     const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve([{ results: [] }, { results: [] }]), timeoutMs));
 
     const [movieRes, tvRes] = await Promise.race([networkPromise, timeoutPromise]);
@@ -5732,7 +5743,8 @@ export async function searchContent(query, page = 1, includeAdult = false) {
 
     const results = [...movies, ...tvs].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
 
-    const merged = page === 1 ? [...studioMatches, ...curatedMatches, ...results] : results;
+    // Curated real movies & live TMDB results ALWAYS take priority over custom studio projects
+    const merged = page === 1 ? [...curatedMatches, ...results, ...studioMatches] : results;
     const finalResults = deduplicateMedia(merged.map(item => ({
       ...item,
       isHindiDubbed: isHindiAvailable(item)

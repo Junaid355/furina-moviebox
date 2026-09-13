@@ -10,8 +10,6 @@ import { fetchSeasonEpisodes, fetchTvDetails, isHindiAvailable, isHindiDubbedAni
 import { permitPopupOnce, getBlockedCount } from '../services/adblocker';
 import DownloadModal from './DownloadModal';
 import hindiProviderManager, { 
-  BLOCKBUSTER_LOCAL_MEDIA_MAP,
-  resolveBlockbusterLocal,
   selectPhysicalAudioTrack, 
   getPrioritizedAudioSources 
 } from '../services/HindiProviderManager';
@@ -53,10 +51,6 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     ((item?.genre_ids?.includes(16) || item?.genres?.some((g) => g.id === 16 || g.name === 'Animation')) && item?.original_language === 'ja')
   );
 
-  const blockbusterLocal = resolveBlockbusterLocal(item);
-  const isBlockbusterLocal = Boolean(blockbusterLocal);
-  const isCustom = Boolean(item?.isCustom || item?.languages || isBlockbusterLocal);
-
   const resolvedTmdbId = useMemo(() => {
     if (typeof item?.id === 'number') return item.id;
     if (item?.tmdb_id) return item.tmdb_id;
@@ -71,12 +65,18 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     if (titleLower.includes('jujutsu')) return 95479;
     if (titleLower.includes('solo leveling')) return 127532;
     if (titleLower.includes('attack on titan')) return 1429;
-    if (titleLower.includes('cyber ronin')) return 603;
     return null;
   }, [item]);
 
+  // Studio playback mode is strictly reserved for custom videos explicitly created in the Movie Studio creator tool or the default demo sample
+  const isCustomMovie = Boolean(
+    !resolvedTmdbId &&
+    (item?.id === 'studio_sample_1' || ((item?.isCustomMovie === true || item?.isCustom === true) && item?.isUserCreated === true))
+  );
+  const isCustom = isCustomMovie;
+
   const hasOnlineStream = Boolean(resolvedTmdbId);
-  const [playerMode, setPlayerMode] = useState(() => (isCustom ? 'studio' : 'stream'));
+  const [playerMode, setPlayerMode] = useState(() => (hasOnlineStream ? 'stream' : (isCustomMovie ? 'studio' : 'stream')));
 
   const isBollywoodHindi = Boolean(
     !isAnime && (
@@ -86,11 +86,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   );
 
   const resolveCustomAudioUrl = (langKey) => {
-    if (isBlockbusterLocal) {
-      if (langKey === 'hi') return blockbusterLocal.hiUrl;
-      if (langKey === 'en') return blockbusterLocal.enUrl;
-      if (langKey === 'ja') return blockbusterLocal.jaUrl;
-    }
+    if (!isCustomMovie) return '';
     const langObj = item?.languages?.[langKey];
     if (langObj?.sources && Array.isArray(langObj.sources) && langObj.sources.length > 0) {
       const sorted = [...langObj.sources].sort((a, b) => (a.priority || 1) - (b.priority || 1));
@@ -810,9 +806,9 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     : (item?.thumbnail || './icon-512.png');
 
   const effectiveSubtitles = useMemo(() => {
-    let baseSubs = (isBlockbusterLocal && blockbusterLocal?.subtitles?.length >= 2)
-      ? blockbusterLocal.subtitles
-      : (item?.subtitles && Array.isArray(item.subtitles) && item.subtitles.length > 0 ? [...item.subtitles] : []);
+    let baseSubs = (item?.subtitles && Array.isArray(item.subtitles) && item.subtitles.length > 0)
+      ? [...item.subtitles]
+      : [];
     
     const hasEn = baseSubs.some((s) => s.lang === 'en');
     const hasHi = baseSubs.some((s) => s.lang === 'hi');
@@ -824,7 +820,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       result.push({ lang: 'hi', label: 'Hindi CC', src: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0A1%0A00:00:01.000%20-->%2000:00:10.000%0AHindi%20Captions' });
     }
     return result;
-  }, [isBlockbusterLocal, blockbusterLocal, item]);
+  }, [item]);
 
   const openInNewWindow = () => {
     permitPopupOnce();
@@ -979,6 +975,49 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 <Subtitles className="w-3.5 h-3.5" />
                 <span>CC: {activeSubtitle.toUpperCase()}</span>
               </button>
+
+              {/* Fullscreen Multi-Dub Quick Switcher */}
+              <div className="flex items-center gap-1 bg-black/80 px-2 py-1 rounded-xl border border-cyan-500/30 shrink-0">
+                {hasWorkingEnglishSource && (
+                  <button
+                    onClick={() => handleAudioChange('english')}
+                    className={`px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-extrabold transition cursor-pointer ${
+                      audioMode === 'english'
+                        ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 shadow-sm'
+                        : 'text-slate-300 hover:text-white'
+                    }`}
+                    title="English Dub Audio Track"
+                  >
+                    🎙️ EN
+                  </button>
+                )}
+                {hasWorkingHindiSource && (
+                  <button
+                    onClick={() => handleAudioChange('hindi')}
+                    className={`px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-extrabold transition cursor-pointer ${
+                      audioMode === 'hindi'
+                        ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-gray-950 shadow-sm'
+                        : 'text-slate-300 hover:text-white'
+                    }`}
+                    title="Hindi Dubbed Audio Track"
+                  >
+                    🇮🇳 HI
+                  </button>
+                )}
+                {hasWorkingJapaneseSource && (
+                  <button
+                    onClick={() => handleAudioChange('sub')}
+                    className={`px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-extrabold transition cursor-pointer ${
+                      audioMode === 'sub'
+                        ? 'bg-gradient-to-r from-purple-400 to-indigo-500 text-white shadow-sm'
+                        : 'text-slate-300 hover:text-white'
+                    }`}
+                    title="Japanese Spoken Audio Track"
+                  >
+                    🇯🇵 JA
+                  </button>
+                )}
+              </div>
 
               {/* Fullscreen Download Button */}
               <button
@@ -1509,6 +1548,26 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   </div>
                 )}
 
+                {/* Helpful Sleek In-Player Audio Guidance Tip in Studio Player (Requirement 2) */}
+                {showAudioTip && !isFutureRelease && !unavailableNotice.show && (
+                  <div 
+                    data-testid="in-player-audio-tip-studio"
+                    className="absolute top-3 left-1/2 -translate-x-1/2 z-40 max-w-2xl w-[94%] sm:w-auto px-3.5 py-1.5 rounded-xl bg-slate-950/90 border border-cyan-500/40 text-cyan-200 text-[11px] sm:text-xs shadow-2xl backdrop-blur-md flex items-center justify-between gap-2.5 pointer-events-auto transition animate-in fade-in slide-in-from-top-2 duration-200"
+                  >
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="font-bold text-cyan-300 shrink-0">🎙️ Multi-Audio:</span>
+                      <span className="font-medium text-slate-100">Click the Gear (⚙️) or Audio icon inside the player to select Hindi / English, or switch to the Hindi Dubbed server mirror below.</span>
+                    </div>
+                    <button
+                      onClick={() => setShowAudioTip(false)}
+                      className="text-slate-400 hover:text-white text-xs px-1.5 py-0.5 rounded hover:bg-white/10 transition shrink-0 cursor-pointer ml-1"
+                      title="Dismiss tip"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+
                 {activeCustomVideoUrl ? (
                   <div className="relative w-full h-full group/player flex items-center justify-center bg-black overflow-hidden" style={subtitleStyleVariables}>
                     {/* Audio-Only Cinematic Visualizer Canvas (eliminates blank black box) */}
@@ -1906,6 +1965,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                             <button
                               key={m.id}
                               onClick={() => setSelectedServer(target)}
+                              title={target.shortName}
                               className={`px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-bold transition border cursor-pointer ${
                                 isCurrent
                                   ? 'bg-cyan-500 text-gray-950 border-cyan-300 font-black shadow-sm'
@@ -1933,7 +1993,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
           {/* ========================================================================= */}
           {/* 6. STREAM RESCUE BAR                                                      */}
           {/* ========================================================================= */}
-          {!isFullscreen && (!isCustom || playerMode === 'stream') && (
+          {!isFullscreen && (hasOnlineStream || !isCustom) && (
             <div className="p-3 bg-[#08122c] border-b border-cyan-500/20 flex flex-col gap-2.5">
               <div className="flex flex-wrap items-center justify-between gap-2.5">
                 <div className="flex items-center gap-2 flex-wrap">
@@ -1944,9 +2004,19 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                       return (
                         <button
                           key={srv.id}
-                          onClick={() => setSelectedServer(srv)}
+                          onClick={() => {
+                            setSelectedServer(srv);
+                            if (playerMode !== 'stream') setPlayerMode('stream');
+                            if (srv.id === 'autoembed' || srv.id === 'one23embed') {
+                              if (audioMode !== 'hindi') handleAudioChange('hindi');
+                            } else if (srv.id === 'vidsrc_to') {
+                              if (audioMode !== 'sub') handleAudioChange('sub');
+                            } else if (srv.id === 'vidlink' || srv.id === 'twoembed_vip' || srv.id === 'vidsrc_cc') {
+                              if (audioMode !== 'english') handleAudioChange('english');
+                            }
+                          }}
                           className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer border ${
-                            isSelected
+                            isSelected && playerMode === 'stream'
                               ? 'bg-cyan-500 text-gray-950 border-cyan-400 shadow-[0_0_10px_rgba(56,189,248,0.5)]'
                               : 'bg-[#060c20] text-cyan-200/70 border-cyan-500/25 hover:bg-white/5 hover:text-white'
                           }`}

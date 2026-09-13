@@ -3,11 +3,24 @@ import { Search, Film, Tv, Flame, Heart, Sparkles, X, Shield, Lock, Settings, Sm
 import soundFx from '../services/soundFx';
 
 export function HanimeIcon({ className = "w-3.5 h-3.5 sm:w-4 sm:h-4", ...props }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  if (imgFailed) {
+    return (
+      <span 
+        className={`inline-flex items-center justify-center rounded-full bg-gradient-to-tr from-pink-600 via-rose-500 to-pink-400 text-white font-black text-[9px] sm:text-[10px] leading-none shadow-[0_0_8px_rgba(244,63,94,0.6)] select-none border border-pink-300/40 shrink-0 ${className}`}
+        title="Hanime Vault"
+        {...props}
+      >
+        H
+      </span>
+    );
+  }
   return (
     <img 
       src="./hanime_icon.png" 
       alt="Hanime Vault" 
-      className={`rounded-full object-contain inline-block filter drop-shadow-[0_0_6px_rgba(255,20,147,0.7)] ${className}`}
+      onError={() => setImgFailed(true)}
+      className={`rounded-full object-contain inline-block filter drop-shadow-[0_0_6px_rgba(255,20,147,0.7)] shrink-0 ${className}`}
       {...props} 
     />
   );

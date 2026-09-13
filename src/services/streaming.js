@@ -3,7 +3,7 @@
 export const SERVERS = [
   {
     id: 'autoembed',
-    name: 'Server 1: AutoEmbed Prime (Instant Play / 1080p HD)',
+    name: '[ 🇮🇳 Server 1 (Hindi Dubbed) ] AutoEmbed Prime (Instant Play / 1080p HD)',
     shortName: '[ 🇮🇳 Server 1 (Hindi Dubbed) ]',
     badge: '1080p Ultra Fast',
     color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
@@ -13,7 +13,7 @@ export const SERVERS = [
   },
   {
     id: 'vidsrc_in',
-    name: 'Server 2: VidSrc 4K (Ultra Fast 0.5s CDN / 4K UHD)',
+    name: '[ 🎧 Server 2 (Multi-Audio / Dual) ] VidSrc 4K (Ultra Fast 0.5s CDN / 4K UHD)',
     shortName: '[ 🎧 Server 2 (Multi-Audio / Dual) ]',
     badge: '4K Ultra HD',
     color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
@@ -23,7 +23,7 @@ export const SERVERS = [
   },
   {
     id: 'vidlink',
-    name: 'Server 3: VidLink Pro (Verified English Dub & Multi-Audio 1080p)',
+    name: '[ 🇬🇧 Server 3 (English Dub) ] VidLink Pro (Verified English Dub & Multi-Audio 1080p)',
     shortName: '[ 🇬🇧 Server 3 (English Dub) ]',
     badge: 'Multi-Audio / Dub',
     color: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
@@ -53,7 +53,7 @@ export const SERVERS = [
   },
   {
     id: 'vidsrc_to',
-    name: 'Server 4: VidSrc TO (Cinema Master / Verified ID)',
+    name: '[ 🇯🇵 Server 4 (Japanese) ] VidSrc TO (Cinema Master / Verified ID)',
     shortName: '[ 🇯🇵 Server 4 (Japanese) ]',
     badge: 'Cinema Master',
     color: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
@@ -63,7 +63,7 @@ export const SERVERS = [
   },
   {
     id: 'twoembed_vip',
-    name: 'Server 5: 2Embed VIP (Direct Playback / Verified)',
+    name: '[ 🇬🇧 Server 5 (English Master) ] 2Embed VIP (Direct Playback / Verified)',
     shortName: '[ 🇬🇧 Server 5 (English Master) ]',
     badge: 'VIP Stream',
     color: 'bg-sky-500/20 text-sky-400 border-sky-500/30',
@@ -73,7 +73,7 @@ export const SERVERS = [
   },
   {
     id: 'one23embed',
-    name: 'Server 6: 123Embed (Multi-Audio & Dub Zero-Captcha)',
+    name: '[ 🇮🇳 Server 6 (Hindi Dubbed) ] 123Embed (Multi-Audio & Dub Zero-Captcha)',
     shortName: '[ 🇮🇳 Server 6 (Hindi Dubbed) ]',
     badge: 'Multi-Audio 1080p',
     color: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
@@ -93,7 +93,7 @@ export const SERVERS = [
   },
   {
     id: 'smashy',
-    name: 'Server 7: SmashyStream (Multi-Language & Hindi Audio)',
+    name: '[ 🎧 Server 7 (Multi-Language) ] SmashyStream (Multi-Language & Hindi Audio)',
     shortName: '[ 🎧 Server 7 (Multi-Language) ]',
     badge: 'Multi-Language',
     color: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
@@ -103,7 +103,7 @@ export const SERVERS = [
   },
   {
     id: 'animeworld_india',
-    name: 'Server 8: Cinema Mirror 2 (Verified High-Speed CDN)',
+    name: '[ 🇮🇳 Server 8 (Hindi CDN) ] Cinema Mirror 2 (Verified High-Speed CDN)',
     shortName: '[ 🇮🇳 Server 8 (Hindi CDN) ]',
     badge: 'High-Speed CDN',
     color: 'bg-orange-500/20 text-orange-300 border-orange-500/40',
@@ -113,27 +113,23 @@ export const SERVERS = [
   },
   {
     id: 'multiembed',
-    name: 'Server 9: VidSrc PM (Fast Multi-Audio & Dual Mirror)',
+    name: '[ 🎧 Server 9 (Dual Audio) ] Smashy Pro (Verified 4K / Dual Audio Mirror)',
     shortName: '[ 🎧 Server 9 (Dual Audio) ]',
     badge: 'Dual Audio Mirror',
     color: 'bg-slate-500/20 text-slate-300 border-slate-500/40',
     supportedAudios: ['english', 'sub', 'hindi'],
-    getMovieUrl: (tmdbId, audioMode = 'english') => {
+    getMovieUrl: (tmdbId) => {
       const cleanId = String(tmdbId).replace(/[^0-9]/g, '');
-      let url = `https://vidsrc.pm/embed/movie/${cleanId}`;
-      if (audioMode === 'hindi') url += '?source=multiembed&audio=hi';
-      return url;
+      return `https://embed.smashystream.com/playere.php?tmdb=${cleanId}`;
     },
-    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'english') => {
+    getTvUrl: (tmdbId, s = 1, e = 1) => {
       const cleanId = String(tmdbId).replace(/[^0-9]/g, '');
-      let url = `https://vidsrc.pm/embed/tv/${cleanId}/${s}/${e}`;
-      if (audioMode === 'hindi') url += '?source=multiembed&audio=hi';
-      return url;
+      return `https://embed.smashystream.com/playere.php?tmdb=${cleanId}&season=${s}&episode=${e}`;
     }
   },
   {
     id: 'vidsrc_cc',
-    name: 'Server 10: VidSrc PM 2 (Fast Multi-Server & Audio Dub)',
+    name: '[ 🇬🇧 Server 10 (English Dub) ] VidSrc PM 2 (Fast Multi-Server & Audio Dub)',
     shortName: '[ 🇬🇧 Server 10 (English Dub) ]',
     badge: 'Multi-Server Fast',
     color: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
@@ -143,7 +139,7 @@ export const SERVERS = [
   },
   {
     id: 'embed_su',
-    name: 'Server 11: 123Embed VIP (VIP Multi-Language Stream)',
+    name: '[ 🎧 Server 11 (Multi-Audio VIP) ] 123Embed VIP (VIP Multi-Language Stream)',
     shortName: '[ 🎧 Server 11 (Multi-Audio VIP) ]',
     badge: 'VIP Multi-Stream',
     color: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40',
@@ -154,7 +150,9 @@ export const SERVERS = [
 ];
 
 export function getStreamUrl(server, tmdbId, type = 'movie', season = 1, episode = 1, audioMode = 'english', isAnime = false, subLang = 'off') {
-  if (!server) server = SERVERS[0];
+  if (!server) {
+    server = SERVERS[0];
+  }
   let url = '';
   if (type === 'tv') {
     url = server.getTvUrl(tmdbId, season, episode, audioMode, isAnime);
@@ -175,7 +173,7 @@ export function getDownloadMirrors(tmdbId, type = 'movie', season = 1, episode =
   const allMirrors = [
     {
       id: 'mirror_vidsrc',
-      name: 'Server 1: VidSrc Cloud (Verified 4K UHD & Multi-Audio)',
+      name: '[ 🎧 Server 1 (Multi-Audio / Dual) ] VidSrc Cloud (Verified 4K UHD)',
       quality: '1080p / 4K UHD',
       badge: audioMode === 'hindi' ? '🇮🇳 Hindi Dub Verified' : 'Fast 4K CDN',
       color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40',
@@ -186,7 +184,7 @@ export function getDownloadMirrors(tmdbId, type = 'movie', season = 1, episode =
     },
     {
       id: 'mirror_autoembed',
-      name: 'Server 2: AutoEmbed Direct Stream Hub',
+      name: '[ 🇮🇳 Server 2 (Hindi Dubbed) ] AutoEmbed Direct Stream Hub',
       quality: '1080p Full HD',
       badge: 'Multi-Thread Instant Play',
       color: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
@@ -197,7 +195,7 @@ export function getDownloadMirrors(tmdbId, type = 'movie', season = 1, episode =
     },
     {
       id: 'mirror_smashy',
-      name: 'Server 3: SmashyStream (Multi-Language & Hindi Audio)',
+      name: '[ 🎧 Server 3 (Multi-Language) ] SmashyStream (Multi-Language & Hindi Audio)',
       quality: '1080p Multi-Language',
       badge: '🇮🇳 Hindi Dub Mirror',
       color: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
@@ -208,7 +206,7 @@ export function getDownloadMirrors(tmdbId, type = 'movie', season = 1, episode =
     },
     {
       id: 'mirror_animeworld',
-      name: 'Server 4: Cinema Mirror 2Embed (High-Speed CDN)',
+      name: '[ 🇮🇳 Server 4 (Hindi CDN) ] Cinema Mirror 2Embed (High-Speed CDN)',
       quality: '1080p High-Speed CDN',
       badge: 'High-Speed Mirror',
       color: 'bg-orange-500/20 text-orange-300 border-orange-500/40',
@@ -219,7 +217,7 @@ export function getDownloadMirrors(tmdbId, type = 'movie', season = 1, episode =
     },
     {
       id: 'mirror_embed_su',
-      name: 'Server 5: VidSrc PM (VIP Multi-Language Stream)',
+      name: '[ 🎧 Server 5 (Dual Audio) ] VidSrc PM (VIP Multi-Language Stream)',
       quality: '1080p VIP Stream',
       badge: 'VIP Multi-Stream',
       color: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40',
@@ -230,7 +228,7 @@ export function getDownloadMirrors(tmdbId, type = 'movie', season = 1, episode =
     },
     {
       id: 'mirror_vidsrc_cc',
-      name: 'Server 6: 2Embed VIP Fast Multi-Server Hub',
+      name: '[ 🇬🇧 Server 6 (English Master) ] 2Embed VIP Fast Multi-Server Hub',
       quality: '1080p High Speed',
       badge: 'Multi-Server',
       color: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
@@ -241,7 +239,7 @@ export function getDownloadMirrors(tmdbId, type = 'movie', season = 1, episode =
     },
     {
       id: 'mirror_vidlink',
-      name: 'Server 7: VidLink Pro Downloader',
+      name: '[ 🇬🇧 Server 7 (English Dub) ] VidLink Pro Downloader',
       quality: '1080p Ultra Clear',
       badge: 'Dub & Sub',
       color: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
