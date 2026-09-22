@@ -1,16 +1,18 @@
 const http = require('http');
+const fs = require('fs');
 const { spawn } = require('child_process');
 
-async function testLive() {
+async function takeScreenshot() {
   const EDGE_PATH = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
-  const PORT = 9889;
+  const PORT = 9891;
   const edge = spawn(EDGE_PATH, [
     '--headless',
     `--remote-debugging-port=${PORT}`,
-    '--user-data-dir=C:\\Users\\User\\.gemini\\antigravity\\scratch\\edge-live-profile',
+    '--user-data-dir=C:\\Users\\User\\.gemini\antigravity\\scratch\\edge-shot-profile',
     '--no-first-run',
     '--no-default-browser-check',
     '--disable-gpu',
+    '--window-size=1280,900',
     'about:blank'
   ]);
 
@@ -43,43 +45,23 @@ async function testLive() {
     ws.send(JSON.stringify({ id: curId, method, params }));
   });
 
-  const errors = [];
-  ws.addEventListener('message', evt => {
-    const msg = JSON.parse(evt.data);
-    if (msg.method === 'Runtime.consoleAPICalled' && msg.params.type === 'error') {
-      errors.push((msg.params.args || []).map(a => a.value || a.description || '').join(' '));
-    }
-  });
-
   await send('Page.enable');
   await send('Runtime.enable');
   await send('Page.navigate', { url: 'https://junaid355.github.io/furina-moviebox/' });
   await new Promise(r => setTimeout(r, 4500));
 
-  const evalRes = await send('Runtime.evaluate', {
-    expression: `(() => {
-      const title = document.title;
-      const cards = document.querySelectorAll('.glass-card').length;
-      const navButtons = document.querySelectorAll('header button').length;
-      const heroPresent = Boolean(document.querySelector('h1'));
-      const imgs = Array.from(document.querySelectorAll('.glass-card img')).slice(0, 10);
-      const sampleSrcs = imgs.map(img => img.src);
-      const fallbackCount = imgs.filter(img => img.src.includes('icon-512.png')).length;
-      const tmdbCount = imgs.filter(img => img.src.includes('image.tmdb.org')).length;
-      return { title, cards, navButtons, heroPresent, sampleSrcs, fallbackCount, tmdbCount };
-    })()`,
-    returnByValue: true
-  });
-
-  console.log('LIVE PAGE AUDIT RESULT:', evalRes.result?.value);
-  console.log('LIVE JS ERRORS:', errors);
+  const shot = await send('Page.captureScreenshot', { format: 'png' });
+  const buf = Buffer.from(shot.data, 'base64');
+  const outPath = 'C:\\Users\\User\\.gemini\\antigravity\\brain\\22d53a87-a0ac-48aa-8f59-9133f63d6b0c\\live_screenshot_fixed.png';
+  fs.writeFileSync(outPath, buf);
+  console.log('SCREENSHOT SAVED TO:', outPath);
 
   ws.close();
   edge.kill();
   process.exit(0);
 }
 
-testLive().catch(err => {
-  console.error('Test Live Failed:', err);
+takeScreenshot().catch(e => {
+  console.error('Screenshot error:', e);
   process.exit(1);
 });

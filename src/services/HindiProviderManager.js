@@ -119,7 +119,7 @@ export class IndianCinemaNativeProvider {
       isDirectAsset: false,
       hindi: {
         available: true,
-        url: type === 'tv' ? `https://vidsrc.in/embed/tv/${tmdbId}/${season}/${episode}` : `https://vidsrc.in/embed/movie/${tmdbId}`,
+        url: type === 'tv' ? `https://vidsrc.pm/embed/tv/${tmdbId}/${season}/${episode}` : `https://vidsrc.pm/embed/movie/${tmdbId}`,
         type: 'embed',
         label: '🇮🇳 Original Native Theatrical Hindi Audio'
       },
@@ -189,13 +189,13 @@ export class MultiEmbedLocalizedProvider {
       isDirectAsset: false,
       hindi: {
         available: true,
-        url: type === 'tv' ? `https://vidsrc.in/embed/tv/${tmdbId}/${season}/${episode}` : `https://vidsrc.in/embed/movie/${tmdbId}`,
+        url: type === 'tv' ? `https://vidsrc.pm/embed/tv/${tmdbId}/${season}/${episode}` : `https://vidsrc.pm/embed/movie/${tmdbId}`,
         type: 'embed',
         label: '🇮🇳 VidSrc Verified Hindi Audio Track'
       },
       english: {
         available: true,
-        url: type === 'tv' ? `https://vidsrc.in/embed/tv/${tmdbId}/${season}/${episode}` : `https://vidsrc.in/embed/movie/${tmdbId}`,
+        url: type === 'tv' ? `https://vidsrc.pm/embed/tv/${tmdbId}/${season}/${episode}` : `https://vidsrc.pm/embed/movie/${tmdbId}`,
         type: 'embed',
         label: '🇺🇸 Original Theatrical English Master Track'
       },

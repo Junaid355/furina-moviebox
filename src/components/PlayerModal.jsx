@@ -188,8 +188,8 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const getInitialServer = () => {
     if (isHanime) {
       return (
-        availableServers.find((s) => s.id === 'vidsrc_in') ||
         availableServers.find((s) => s.id === 'autoembed') ||
+        availableServers.find((s) => s.id === 'vidsrc_in') ||
         availableServers.find((s) => s.id === 'smashy') ||
         availableServers.find((s) => s.id === 'embed_su') ||
         availableServers.find((s) => s.id === 'twoembed_vip') ||
@@ -198,8 +198,8 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     }
     if (audioMode === 'hindi' || userPreferredAudio === 'hindi') {
       return (
-        availableServers.find((s) => s.id === 'vidsrc_in') ||
         availableServers.find((s) => s.id === 'autoembed') ||
+        availableServers.find((s) => s.id === 'vidsrc_in') ||
         availableServers.find((s) => s.id === 'smashy') ||
         availableServers.find((s) => s.id === 'animeworld_india') ||
         availableServers.find((s) => s.id === 'embed_su') ||
@@ -210,14 +210,14 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     if (hasWorkingHindiSource && !isCustom) {
       if (isBollywoodHindi) {
         return (
-          availableServers.find((s) => s.id === 'vidsrc_in') ||
           availableServers.find((s) => s.id === 'autoembed') ||
+          availableServers.find((s) => s.id === 'vidsrc_in') ||
           availableServers[0]
         );
       }
       return (
-        availableServers.find((s) => s.id === 'vidsrc_in') ||
         availableServers.find((s) => s.id === 'autoembed') ||
+        availableServers.find((s) => s.id === 'vidsrc_in') ||
         availableServers.find((s) => s.id === 'smashy') ||
         availableServers.find((s) => s.id === 'animeworld_india') ||
         availableServers.find((s) => s.id === 'embed_su') ||
@@ -226,9 +226,14 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       );
     }
     if (isAnime) {
-      return availableServers.find((s) => s.id === 'vidlink') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0];
+      return (
+        availableServers.find((s) => s.id === 'vidlink') ||
+        availableServers.find((s) => s.id === 'autoembed') ||
+        availableServers.find((s) => s.id === 'vidsrc_in') ||
+        availableServers[0]
+      );
     }
-    const safePreferred = (preferredServerId === 'multiembed' || !preferredServerId) ? 'vidsrc_in' : preferredServerId;
+    const safePreferred = (preferredServerId === 'multiembed' || !preferredServerId) ? 'autoembed' : preferredServerId;
     return availableServers.find((s) => s.id === safePreferred) || availableServers[0];
   };
 
@@ -338,8 +343,8 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
     if (newMode === 'hindi') {
       const hindiServer = 
-        availableServers.find((s) => s.id === 'vidsrc_in') ||
         availableServers.find((s) => s.id === 'autoembed') ||
+        availableServers.find((s) => s.id === 'vidsrc_in') ||
         availableServers.find((s) => s.id === 'smashy') ||
         availableServers.find((s) => s.id === 'animeworld_india') ||
         availableServers.find((s) => s.id === 'embed_su') ||
@@ -348,13 +353,13 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       setSelectedServer(hindiServer);
     } else if (newMode === 'sub') {
       const subServer = isHanime
-        ? (availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0])
-        : (availableServers.find((s) => s.id === 'vidsrc_in') || availableServers.find((s) => s.id === 'vidlink') || availableServers[0]);
+        ? (availableServers.find((s) => s.id === 'autoembed') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0])
+        : (availableServers.find((s) => s.id === 'vidlink') || availableServers.find((s) => s.id === 'autoembed') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0]);
       setSelectedServer(subServer);
     } else {
       const engServer = isHanime
-        ? (availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0])
-        : (availableServers.find((s) => s.id === 'vidlink') || availableServers[0]);
+        ? (availableServers.find((s) => s.id === 'autoembed') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0])
+        : (availableServers.find((s) => s.id === 'vidlink') || availableServers.find((s) => s.id === 'autoembed') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0]);
       setSelectedServer(engServer);
     }
 

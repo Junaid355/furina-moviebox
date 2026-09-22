@@ -18,8 +18,8 @@ export const SERVERS = [
     badge: '4K Ultra HD',
     color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
     supportedAudios: ['english', 'sub', 'hindi'],
-    getMovieUrl: (tmdbId) => `https://vidsrc.in/embed/movie/${tmdbId}`,
-    getTvUrl: (tmdbId, s = 1, e = 1) => `https://vidsrc.in/embed/tv/${tmdbId}/${s}/${e}`
+    getMovieUrl: (tmdbId) => `https://vidsrc.pm/embed/movie/${tmdbId}`,
+    getTvUrl: (tmdbId, s = 1, e = 1) => `https://vidsrc.pm/embed/tv/${tmdbId}/${s}/${e}`
   },
   {
     id: 'vidlink',
@@ -154,8 +154,8 @@ export const SERVERS = [
     badge: '4K MovieBox CDN',
     color: 'bg-teal-500/20 text-teal-300 border-teal-500/40',
     supportedAudios: ['english', 'sub', 'hindi'],
-    getMovieUrl: (tmdbId) => `https://moviesapi.club/movie/${tmdbId}`,
-    getTvUrl: (tmdbId, s = 1, e = 1) => `https://moviesapi.club/tv/${tmdbId}-${s}-${e}`
+    getMovieUrl: (tmdbId) => `https://autoembed.co/movie/tmdb/${tmdbId}`,
+    getTvUrl: (tmdbId, s = 1, e = 1) => `https://autoembed.co/tv/tmdb/${tmdbId}-${s}-${e}`
   },
   {
     id: 'netmirror_cinema',
@@ -164,8 +164,8 @@ export const SERVERS = [
     badge: 'NetMirror Dual-Audio',
     color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
     supportedAudios: ['english', 'sub', 'hindi'],
-    getMovieUrl: (tmdbId) => `https://vidsrc.vip/embed/movie/${tmdbId}`,
-    getTvUrl: (tmdbId, s = 1, e = 1) => `https://vidsrc.vip/embed/tv/${tmdbId}/${s}/${e}`
+    getMovieUrl: (tmdbId) => `https://vidsrc.to/embed/movie/${tmdbId}`,
+    getTvUrl: (tmdbId, s = 1, e = 1) => `https://vidsrc.to/embed/tv/${tmdbId}/${s}/${e}`
   },
   {
     id: 'superembed_cinema',
@@ -174,8 +174,8 @@ export const SERVERS = [
     badge: '4K SuperEmbed',
     color: 'bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/40',
     supportedAudios: ['english', 'sub', 'hindi'],
-    getMovieUrl: (tmdbId) => `https://vidsrc.icu/embed/movie/${tmdbId}`,
-    getTvUrl: (tmdbId, s = 1, e = 1) => `https://vidsrc.icu/embed/tv/${tmdbId}/${s}/${e}`
+    getMovieUrl: (tmdbId) => `https://vidsrc.pm/embed/movie/${tmdbId}`,
+    getTvUrl: (tmdbId, s = 1, e = 1) => `https://vidsrc.pm/embed/tv/${tmdbId}/${s}/${e}`
   }
 ];
 
@@ -209,8 +209,8 @@ export function getDownloadMirrors(tmdbId, type = 'movie', season = 1, episode =
       color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40',
       isHindi: true,
       url: isTv 
-        ? `https://vidsrc.in/embed/tv/${tmdbId}/${season}/${episode}` 
-        : `https://vidsrc.in/embed/movie/${tmdbId}`
+        ? `https://vidsrc.pm/embed/tv/${tmdbId}/${season}/${episode}` 
+        : `https://vidsrc.pm/embed/movie/${tmdbId}`
     },
     {
       id: 'mirror_autoembed',
