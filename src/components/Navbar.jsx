@@ -249,18 +249,18 @@ export default function Navbar({
             onClick={onOpenStudio}
             data-testid="studio-btn"
             title="Furina Movie Studio & Content Platform"
-            className="px-2.5 py-1 rounded-full border border-cyan-500/40 bg-gradient-to-r from-cyan-500/20 to-blue-600/20 hover:from-cyan-500/35 hover:to-blue-600/35 text-cyan-300 hover:text-white transition flex items-center gap-1 text-[11px] font-bold cursor-pointer shadow-sm shrink-0"
+            className="btn-shine px-2.5 py-1 rounded-full border border-cyan-500/40 bg-gradient-to-r from-cyan-500/20 to-blue-600/20 hover:from-cyan-500/35 hover:to-blue-600/35 text-cyan-300 hover:text-white transition-all duration-200 flex items-center gap-1 text-[11px] font-bold cursor-pointer shadow-sm shrink-0 group/studio hover:shadow-[0_0_12px_rgba(6,182,212,0.4)]"
           >
-            <Film className="w-3 h-3 text-cyan-400" />
+            <Film className="w-3 h-3 text-cyan-400 group-hover/studio:scale-110 group-hover/studio:rotate-6 transition-transform duration-200" />
             <span>Studio</span>
           </button>
 
           <button
             onClick={onOpenAndroidModal}
             title="Install App on Android (1-Tap Standalone PWA & Native)"
-            className="px-2 py-1 rounded-full border border-emerald-500/40 bg-emerald-500/15 text-emerald-300 hover:text-white hover:bg-emerald-500/25 transition flex items-center gap-1 text-[11px] font-bold cursor-pointer shrink-0"
+            className="px-2 py-1 rounded-full border border-emerald-500/40 bg-emerald-500/15 text-emerald-300 hover:text-white hover:bg-emerald-500/25 transition-all duration-200 flex items-center gap-1 text-[11px] font-bold cursor-pointer shrink-0 group/android hover:shadow-[0_0_12px_rgba(16,185,129,0.4)]"
           >
-            <Smartphone className="w-3 h-3 text-emerald-400" />
+            <Smartphone className="w-3 h-3 text-emerald-400 group-hover/android:scale-110 transition-transform duration-200" />
             <span className="hidden sm:inline">Android App</span>
             <span className="sm:hidden">App</span>
           </button>
@@ -268,9 +268,9 @@ export default function Navbar({
           <button
             onClick={onOpenIPhoneModal}
             title="Install App on iPhone / iPad (Zero Ads)"
-            className="hidden sm:flex px-2 py-1 rounded-full border border-cyan-500/30 bg-[#0b1633] text-cyan-300 hover:text-white hover:bg-white/10 transition items-center gap-1 text-[11px] font-semibold cursor-pointer shrink-0"
+            className="hidden sm:flex px-2 py-1 rounded-full border border-cyan-500/30 bg-[#0b1633] text-cyan-300 hover:text-white hover:bg-white/10 transition-all duration-200 items-center gap-1 text-[11px] font-semibold cursor-pointer shrink-0 group/iphone hover:border-cyan-400/50"
           >
-            <Smartphone className="w-3 h-3 text-cyan-400" />
+            <Smartphone className="w-3 h-3 text-cyan-400 group-hover/iphone:scale-110 transition-transform duration-200" />
             <span>iPhone</span>
           </button>
 
@@ -281,13 +281,13 @@ export default function Navbar({
             }}
             data-testid="cozy-sound-btn"
             title={isSoundOn ? 'Cozy Sound FX: Active (Click to Mute)' : 'Cozy Sound FX: Muted (Click to Enable)'}
-            className={`p-1.5 rounded-full border transition flex items-center gap-1 cursor-pointer shrink-0 ${
+            className={`p-1.5 rounded-full border transition-all duration-200 flex items-center gap-1 cursor-pointer shrink-0 ${
               isSoundOn
-                ? 'bg-amber-500/20 border-amber-400/40 text-amber-300 hover:bg-amber-500/30 shadow-[0_0_8px_rgba(251,146,60,0.3)]'
+                ? 'bg-amber-500/20 border-amber-400/40 text-amber-300 hover:bg-amber-500/30 shadow-[0_0_10px_rgba(251,146,60,0.35)]'
                 : 'bg-[#0b1633] border-cyan-500/30 text-slate-400 hover:text-white hover:bg-white/10'
             }`}
           >
-            {isSoundOn ? <Volume2 className="w-3.5 h-3.5 text-amber-300" /> : <VolumeX className="w-3.5 h-3.5 text-slate-400" />}
+            {isSoundOn ? <Volume2 className="w-3.5 h-3.5 text-amber-300 animate-pulse" /> : <VolumeX className="w-3.5 h-3.5 text-slate-400" />}
             <span className="hidden 2xl:inline text-[11px] font-semibold">
               {isSoundOn ? 'Audio' : 'Muted'}
             </span>
@@ -297,13 +297,17 @@ export default function Navbar({
             onClick={onOpenSettings}
             data-testid="settings-btn"
             title="Settings & Master Vault"
-            className={`px-2 py-1 rounded-full border transition flex items-center gap-1 cursor-pointer shrink-0 ${
+            className={`px-2 py-1 rounded-full border transition-all duration-200 flex items-center gap-1 cursor-pointer shrink-0 group/settings ${
               isMasterMode
-                ? 'bg-emerald-500/20 border-emerald-400 text-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.5)]'
-                : 'bg-[#0b1633] border-cyan-500/30 text-cyan-300 hover:text-white hover:bg-white/10'
+                ? 'bg-emerald-500/20 border-emerald-400 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.5)]'
+                : 'bg-[#0b1633] border-cyan-500/30 text-cyan-300 hover:text-white hover:bg-white/10 hover:border-cyan-400/50'
             }`}
           >
-            {isMasterMode ? <Shield className="w-3.5 h-3.5 text-emerald-400" /> : <Settings className="w-3.5 h-3.5 text-cyan-400" />}
+            {isMasterMode ? (
+              <Shield className="w-3.5 h-3.5 text-emerald-400 group-hover/settings:scale-110 transition-transform" />
+            ) : (
+              <Settings className="w-3.5 h-3.5 text-cyan-400 group-hover/settings:rotate-90 transition-transform duration-500" />
+            )}
             <span className="hidden sm:inline text-[11px] font-semibold">
               {isMasterMode ? 'VIP Active' : 'Settings'}
             </span>
