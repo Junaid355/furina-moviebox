@@ -57,7 +57,8 @@ const MediaCard = React.memo(function MediaCard({
     return null;
   })();
 
-  const posterSrc = resolvePosterUrl(item.poster_path || item.poster, 'w500');
+  const rawPoster = item.poster_path || item.poster || item.backdrop_path || item.backdrop;
+  const posterSrc = resolvePosterUrl(rawPoster, 'w500');
 
   return (
     <div 

@@ -47,21 +47,41 @@ export function resolvePosterUrl(path, size = 'w500') {
     return DEFAULT_POSTER_FALLBACK;
   }
   const clean = path.trim();
-  if (clean.startsWith('http://') || clean.startsWith('https://') || clean.startsWith('./') || clean.startsWith('/')) {
+  if (clean.startsWith('http://') || clean.startsWith('https://') || clean.startsWith('data:')) {
     return clean;
   }
-  return `https://image.tmdb.org/t/p/${size}${clean.startsWith('/') ? clean : `/${clean}`}`;
+  if (clean === './icon-512.png' || clean === '/icon-512.png' || clean === 'icon-512.png') {
+    return './icon-512.png';
+  }
+  if (clean === './favicon.png' || clean === '/favicon.png' || clean === 'favicon.png') {
+    return './favicon.png';
+  }
+  if (clean.startsWith('./')) {
+    return clean;
+  }
+  const cleanPath = clean.startsWith('/') ? clean : `/${clean}`;
+  return `https://image.tmdb.org/t/p/${size}${cleanPath}`;
 }
 
-export function resolveBackdropUrl(path) {
+export function resolveBackdropUrl(path, size = 'original') {
   if (!path || typeof path !== 'string' || !path.trim()) {
     return DEFAULT_BACKDROP_FALLBACK;
   }
   const clean = path.trim();
-  if (clean.startsWith('http://') || clean.startsWith('https://') || clean.startsWith('./') || clean.startsWith('/')) {
+  if (clean.startsWith('http://') || clean.startsWith('https://') || clean.startsWith('data:')) {
     return clean;
   }
-  return `https://image.tmdb.org/t/p/original${clean.startsWith('/') ? clean : `/${clean}`}`;
+  if (clean === './icon-512.png' || clean === '/icon-512.png' || clean === 'icon-512.png') {
+    return './icon-512.png';
+  }
+  if (clean === './favicon.png' || clean === '/favicon.png' || clean === 'favicon.png') {
+    return './favicon.png';
+  }
+  if (clean.startsWith('./')) {
+    return clean;
+  }
+  const cleanPath = clean.startsWith('/') ? clean : `/${clean}`;
+  return `https://image.tmdb.org/t/p/${size}${cleanPath}`;
 }
 
 export function extractGenres(item) {
