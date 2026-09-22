@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import Navbar, { HanimeIcon } from './components/Navbar';
 import HeroBanner from './components/HeroBanner';
 import MediaCard from './components/MediaCard';
+import MediaShelf from './components/MediaShelf';
+import MediaDetailsModal from './components/MediaDetailsModal';
+import SearchOverlay from './components/SearchOverlay';
 import PlayerModal from './components/PlayerModal';
 import SettingsModal, { getStoredSettings, applyThemeAndAppSettings } from './components/SettingsModal';
 import IPhoneAppModal from './components/IPhoneAppModal';
@@ -19,12 +22,25 @@ import {
   fetchHorrorMovies,
   fetchMatureMovies,
   fetchEcchiAnime,
+  fetchPopularMovies,
+  fetchPopularAnime,
+  fetchLatestMovies,
+  fetchTopRated,
+  fetchMultiAudioHighlights,
+  fetchGenreMovies,
   searchContent,
   deduplicateMedia,
-  isHindiAvailable
+  isHindiAvailable,
+  CURATED_HOLLYWOOD_BLOCKBUSTERS,
+  CURATED_BOLLYWOOD_BLOCKBUSTERS,
+  CURATED_HINDI_DUBBED_ANIME,
+  CURATED_HOLLYWOOD_HINDI_DUBS
 } from './services/tmdb';
 import { SERVERS } from './services/streaming';
-import { Flame, Film, Tv, Sparkles, Heart, RefreshCw, Shield, Settings, ChevronDown, Clock, Play, X } from 'lucide-react';
+import { 
+  Flame, Film, Tv, Sparkles, Heart, RefreshCw, Shield, Settings, 
+  ChevronDown, Clock, Play, X, Star, Volume2, Search 
+} from 'lucide-react';
 
 function getContinueWatchingList() {
   const items = [];
@@ -60,6 +76,52 @@ export default function App() {
   const [retryCount, setRetryCount] = useState(0);
   const [page, setPage] = useState(1);
   const [activeMedia, setActiveMedia] = useState(null);
+  const [detailsItem, setDetailsItem] = useState(null);
+  const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
+
+  // Curated instant-cache & background live-refresh shelves for Homepage
+  const [shelvesData, setShelvesData] = useState({
+    popularMovies: CURATED_HOLLYWOOD_BLOCKBUSTERS.slice(0, 16),
+    popularAnime: [...CURATED_HINDI_DUBBED_ANIME.slice(0, 10), ...CURATED_HINDI_DUBBED_ANIME.slice(10, 16)],
+    hindiDubbed: [...CURATED_BOLLYWOOD_BLOCKBUSTERS.slice(0, 10), ...CURATED_HOLLYWOOD_HINDI_DUBS.slice(0, 10)],
+    multiAudio: CURATED_HOLLYWOOD_HINDI_DUBS.slice(0, 16),
+    series: [],
+    latest: CURATED_HOLLYWOOD_BLOCKBUSTERS.slice(0, 12),
+    topRated: CURATED_HOLLYWOOD_BLOCKBUSTERS.slice(0, 12),
+    action: []
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadShelves = async () => {
+      try {
+        const [popMovies, popAnime, hindi, multi, series, latest, top, action] = await Promise.allSettled([
+          fetchPopularMovies(1),
+          fetchPopularAnime(1),
+          fetchHindiMovies(1),
+          fetchMultiAudioHighlights(),
+          fetchTrendingSeries(1),
+          fetchLatestMovies(1),
+          fetchTopRated(1),
+          fetchGenreMovies(28, 1)
+        ]);
+
+        if (cancelled) return;
+        setShelvesData({
+          popularMovies: popMovies.status === 'fulfilled' && popMovies.value?.length > 0 ? popMovies.value : CURATED_HOLLYWOOD_BLOCKBUSTERS,
+          popularAnime: popAnime.status === 'fulfilled' && popAnime.value?.length > 0 ? popAnime.value : CURATED_HINDI_DUBBED_ANIME,
+          hindiDubbed: hindi.status === 'fulfilled' && hindi.value?.length > 0 ? hindi.value : CURATED_BOLLYWOOD_BLOCKBUSTERS,
+          multiAudio: multi.status === 'fulfilled' && multi.value?.length > 0 ? multi.value : CURATED_HOLLYWOOD_HINDI_DUBS,
+          series: series.status === 'fulfilled' && series.value?.length > 0 ? series.value : [],
+          latest: latest.status === 'fulfilled' && latest.value?.length > 0 ? latest.value : CURATED_HOLLYWOOD_BLOCKBUSTERS,
+          topRated: top.status === 'fulfilled' && top.value?.length > 0 ? top.value : CURATED_HOLLYWOOD_BLOCKBUSTERS,
+          action: action.status === 'fulfilled' && action.value?.length > 0 ? action.value : []
+        });
+      } catch (e) {}
+    };
+    loadShelves();
+    return () => { cancelled = true; };
+  }, []);
 
   const handleRetry = useCallback(() => {
     setError(null);
@@ -326,17 +388,25 @@ export default function App() {
 
       // ESC: Exit fullscreen / close open menus and modals (Requirement 24)
       if (e.key === 'Escape') {
+        if (detailsItem) { setDetailsItem(null); return; }
+        if (isSearchOverlayOpen) { setIsSearchOverlayOpen(false); return; }
         if (isSettingsOpen) { setIsSettingsOpen(false); return; }
         if (isStudioOpen) { setIsStudioOpen(false); return; }
         if (isIPhoneModalOpen) { setIsIPhoneModalOpen(false); return; }
         if (isAndroidModalOpen) { setIsAndroidModalOpen(false); return; }
         return;
       }
+
+      // Quick Search shortcut (Ctrl+K or '/')
+      if ((e.key === 'k' && (e.ctrlKey || e.metaKey)) || e.key === '/') {
+        e.preventDefault();
+        setIsSearchOverlayOpen(true);
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isSettingsOpen, isStudioOpen, isIPhoneModalOpen, isAndroidModalOpen, activeMedia]);
+  }, [isSettingsOpen, isStudioOpen, isIPhoneModalOpen, isAndroidModalOpen, activeMedia, detailsItem, isSearchOverlayOpen]);
 
   return (
     <div className={`min-h-screen ${isStealthMode ? 'bg-[#080b11]' : 'bg-[#030712]'} text-white flex flex-col selection:bg-cyan-500 selection:text-gray-950 pb-20 lg:pb-8 relative overflow-hidden`}>
@@ -360,6 +430,7 @@ export default function App() {
         onOpenIPhoneModal={() => setIsIPhoneModalOpen(true)}
         onOpenAndroidModal={() => setIsAndroidModalOpen(true)}
         onOpenStudio={() => setIsStudioOpen(true)}
+        onOpenSearchOverlay={() => setIsSearchOverlayOpen(true)}
       />
 
       {/* Main Container */}
@@ -387,6 +458,7 @@ export default function App() {
               onPlay={setActiveMedia}
               isWatchlisted={isWatchlisted}
               onToggleWatchlist={toggleWatchlist}
+              onOpenDetails={setDetailsItem}
             />
           </ErrorBoundary>
         )}
@@ -725,18 +797,144 @@ export default function App() {
           </div>
         ) : displayedItems.length > 0 ? (
           <>
-            {/* Media Cards Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-5">
-              {displayedItems.map((item, idx) => (
-                <MediaCard
-                  key={`${item.id}-${idx}`}
-                  item={item}
+            {/* If on Homepage without search or language filter, display Netflix-style streaming shelves */}
+            {!searchQuery.trim() && activeCategory === 'trending' && globalMediaFilter === 'all' ? (
+              <div className="space-y-6 sm:space-y-8">
+                {/* Shelf 1: Trending Worldwide */}
+                <MediaShelf
+                  title="Trending Worldwide"
+                  icon={Flame}
+                  badge="HOT"
+                  items={items}
                   onPlay={setActiveMedia}
-                  isWatchlisted={isWatchlisted(item.id)}
+                  onOpenDetails={setDetailsItem}
+                  isWatchlisted={isWatchlisted}
                   onToggleWatchlist={toggleWatchlist}
                 />
-              ))}
-            </div>
+
+                {/* Shelf 2: Popular Hollywood & Blockbusters */}
+                {shelvesData.popularMovies?.length > 0 && (
+                  <MediaShelf
+                    title="Popular Hollywood & Blockbusters"
+                    icon={Film}
+                    badge="4K UHD"
+                    items={shelvesData.popularMovies}
+                    onPlay={setActiveMedia}
+                    onOpenDetails={setDetailsItem}
+                    isWatchlisted={isWatchlisted}
+                    onToggleWatchlist={toggleWatchlist}
+                    onViewAll={() => setActiveCategory('hollywood')}
+                  />
+                )}
+
+                {/* Shelf 3: Popular Anime (Sub & Dub) */}
+                {shelvesData.popularAnime?.length > 0 && (
+                  <MediaShelf
+                    title="Popular Anime (Sub & Dub)"
+                    icon={Sparkles}
+                    badge="TOP ANIME"
+                    items={shelvesData.popularAnime}
+                    onPlay={setActiveMedia}
+                    onOpenDetails={setDetailsItem}
+                    isWatchlisted={isWatchlisted}
+                    onToggleWatchlist={toggleWatchlist}
+                    onViewAll={() => setActiveCategory('anime')}
+                  />
+                )}
+
+                {/* Shelf 4: Bollywood & Hindi Dubbed */}
+                {shelvesData.hindiDubbed?.length > 0 && (
+                  <MediaShelf
+                    title="Bollywood & Hindi Dubbed"
+                    icon={Sparkles}
+                    badge="HINDI DUB"
+                    items={shelvesData.hindiDubbed}
+                    onPlay={setActiveMedia}
+                    onOpenDetails={setDetailsItem}
+                    isWatchlisted={isWatchlisted}
+                    onToggleWatchlist={toggleWatchlist}
+                    onViewAll={() => setActiveCategory('hindi')}
+                  />
+                )}
+
+                {/* Shelf 5: Multi-Audio & Dual-Audio Hits */}
+                {shelvesData.multiAudio?.length > 0 && (
+                  <MediaShelf
+                    title="Multi-Audio & Dual Audio Hits"
+                    icon={Volume2}
+                    badge="MULTI-DUB"
+                    items={shelvesData.multiAudio}
+                    onPlay={setActiveMedia}
+                    onOpenDetails={setDetailsItem}
+                    isWatchlisted={isWatchlisted}
+                    onToggleWatchlist={toggleWatchlist}
+                  />
+                )}
+
+                {/* Shelf 6: Web Series */}
+                {shelvesData.series?.length > 0 && (
+                  <MediaShelf
+                    title="Binge-Worthy Web Series"
+                    icon={Tv}
+                    badge="SERIES"
+                    items={shelvesData.series}
+                    onPlay={setActiveMedia}
+                    onOpenDetails={setDetailsItem}
+                    isWatchlisted={isWatchlisted}
+                    onToggleWatchlist={toggleWatchlist}
+                    onViewAll={() => setActiveCategory('series')}
+                  />
+                )}
+
+                {/* Shelf 7: Top Rated Cinema Classics */}
+                {shelvesData.topRated?.length > 0 && (
+                  <MediaShelf
+                    title="Top Rated Cinema Classics"
+                    icon={Star}
+                    badge="TOP RATED"
+                    items={shelvesData.topRated}
+                    onPlay={setActiveMedia}
+                    onOpenDetails={setDetailsItem}
+                    isWatchlisted={isWatchlisted}
+                    onToggleWatchlist={toggleWatchlist}
+                  />
+                )}
+
+                {/* Additional Explore Grid */}
+                <div className="pt-4 border-t border-cyan-500/10">
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(56,189,248,0.8)]" />
+                    <h2 className="text-base sm:text-lg font-black text-white">More Trending Titles To Explore</h2>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-5">
+                    {displayedItems.map((item, idx) => (
+                      <MediaCard
+                        key={`home-grid-${item.id}-${idx}`}
+                        item={item}
+                        onPlay={setActiveMedia}
+                        onOpenDetails={setDetailsItem}
+                        isWatchlisted={isWatchlisted(item.id)}
+                        onToggleWatchlist={toggleWatchlist}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* Dedicated Category or Search Responsive Grid */
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-5">
+                {displayedItems.map((item, idx) => (
+                  <MediaCard
+                    key={`${item.id}-${idx}`}
+                    item={item}
+                    onPlay={setActiveMedia}
+                    onOpenDetails={setDetailsItem}
+                    isWatchlisted={isWatchlisted(item.id)}
+                    onToggleWatchlist={toggleWatchlist}
+                  />
+                ))}
+              </div>
+            )}
 
             {/* Pagination: Load More Titles */}
             {activeCategory !== 'watchlist' && (
@@ -831,6 +1029,38 @@ export default function App() {
         onClose={() => setIsStudioOpen(false)}
         onPlayMovie={(movie) => setActiveMedia(movie)}
         onMoviesChanged={() => setStudioVersion((v) => v + 1)}
+      />
+
+      {/* Media Details & Season/Episode Explorer Modal */}
+      {detailsItem && (
+        <MediaDetailsModal
+          item={detailsItem}
+          onClose={() => setDetailsItem(null)}
+          onPlay={(itemToPlay) => {
+            setDetailsItem(null);
+            setActiveMedia(itemToPlay);
+          }}
+          isWatchlisted={isWatchlisted}
+          onToggleWatchlist={toggleWatchlist}
+        />
+      )}
+
+      {/* Global Instant Search & Discovery Modal */}
+      <SearchOverlay
+        isOpen={isSearchOverlayOpen}
+        onClose={() => setIsSearchOverlayOpen(false)}
+        onPlay={(itemToPlay) => {
+          setIsSearchOverlayOpen(false);
+          setActiveMedia(itemToPlay);
+        }}
+        onOpenDetails={(itemToDetail) => {
+          setIsSearchOverlayOpen(false);
+          setDetailsItem(itemToDetail);
+        }}
+        isWatchlisted={isWatchlisted}
+        onToggleWatchlist={toggleWatchlist}
+        isMasterMode={isMasterMode}
+        includeMature={includeMature}
       />
 
       {/* Mobile iOS Style Bottom Navigation Bar */}

@@ -1,12 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Plus, Check, Star, ChevronLeft, ChevronRight } from 'lucide-react';
-import { BACKDROP_BASE, isHindiAvailable } from '../services/tmdb';
+import { Play, Plus, Check, Star, Info, ChevronLeft, ChevronRight } from 'lucide-react';
+import { isHindiAvailable } from '../services/tmdb';
+import { resolveBackdropUrl, extractGenres } from '../services/contentModel';
 
-export default function HeroBanner({ items, item, onPlay, isWatchlisted, onToggleWatchlist }) {
-  // Support both items array or single item prop
+export default function HeroBanner({ 
+  items, 
+  item, 
+  onPlay, 
+  isWatchlisted, 
+  onToggleWatchlist,
+  onOpenDetails 
+}) {
   const list = (Array.isArray(items) && items.length > 0)
-    ? items.filter(Boolean).slice(0, 6)
+    ? items.filter(Boolean).slice(0, 8)
     : (item ? [item] : []);
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -14,7 +22,7 @@ export default function HeroBanner({ items, item, onPlay, isWatchlisted, onToggl
     if (list.length <= 1 || isPaused) return;
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % list.length);
-    }, 6500);
+    }, 7000);
     return () => clearInterval(timer);
   }, [list.length, isPaused]);
 
@@ -22,7 +30,7 @@ export default function HeroBanner({ items, item, onPlay, isWatchlisted, onToggl
   const currentItem = list[currentIndex] || list[0] || {};
 
   const title = currentItem?.title || currentItem?.name || 'Featured Blockbuster';
-  const year = String(currentItem?.release_date || currentItem?.first_air_date || '').substring(0, 4);
+  const year = String(currentItem?.release_date || currentItem?.first_air_date || '').substring(0, 4) || '2024';
   const rating = typeof currentItem?.vote_average === 'number'
     ? currentItem.vote_average.toFixed(1)
     : (currentItem?.vote_average || '8.2');
@@ -38,16 +46,17 @@ export default function HeroBanner({ items, item, onPlay, isWatchlisted, onToggl
     currentItem?.category === 'anime' ||
     currentItem?.category === 'ecchi_anime' ||
     currentItem?.isAnime === true ||
-    currentItem?.original_language === 'ja' ||
-    (Array.isArray(currentItem?.origin_country) && currentItem.origin_country.includes('JP')) ||
-    ((currentItem?.genre_ids?.includes(16) || currentItem?.genres?.some((g) => g.id === 16 || g.name === 'Animation')) && currentItem?.original_language === 'ja')
+    currentItem?.original_language === 'ja'
   );
 
   const isHindi = Boolean(
     currentItem?.languages?.hi?.url ||
+    currentItem?.isHindiDubbed ||
     isHindiAvailable(currentItem)
   );
 
+  const genres = extractGenres(currentItem);
+  const runtime = currentItem?.runtime || (isSeries ? '45m / ep' : '2h 10m');
   const saved = (isWatchlisted && currentItem?.id) ? isWatchlisted(currentItem.id) : false;
 
   return (
@@ -60,7 +69,7 @@ export default function HeroBanner({ items, item, onPlay, isWatchlisted, onToggl
       <div className="absolute inset-0 bg-[#030712]">
         <img
           key={currentItem?.id}
-          src={currentItem?.backdrop_path ? (currentItem.backdrop_path.startsWith('http') ? currentItem.backdrop_path : `${BACKDROP_BASE}${currentItem.backdrop_path}`) : './icon-512.png'}
+          src={resolveBackdropUrl(currentItem?.backdrop_path || currentItem?.poster_path)}
           alt={title}
           onError={(e) => {
             e.currentTarget.onerror = null;
@@ -108,18 +117,31 @@ export default function HeroBanner({ items, item, onPlay, isWatchlisted, onToggl
             <Star className="w-3.5 h-3.5 fill-amber-400" />
             {rating}
           </span>
-          <span className="text-cyan-200/70 text-xs font-semibold px-2 py-0.5 bg-white/5 rounded-full border border-white/5">{year || '2024'}</span>
+          <span className="text-cyan-200/70 text-xs font-semibold px-2 py-0.5 bg-white/5 rounded-full border border-white/5">{year}</span>
+          {runtime && (
+            <span className="text-slate-300 text-xs font-medium px-2 py-0.5 bg-white/5 rounded-full border border-white/5">{runtime}</span>
+          )}
         </div>
 
-        <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-3 leading-tight drop-shadow-lg">
+        <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-2 leading-tight drop-shadow-lg">
           {title}
         </h1>
+
+        {genres.length > 0 && (
+          <div className="flex items-center gap-1.5 mb-3 flex-wrap">
+            {genres.slice(0, 4).map((g) => (
+              <span key={g} className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-cyan-950/60 border border-cyan-800/40 text-cyan-300">
+                {g}
+              </span>
+            ))}
+          </div>
+        )}
 
         <p className="text-xs sm:text-sm text-cyan-100/80 line-clamp-2 sm:line-clamp-3 mb-6 max-w-xl font-medium leading-relaxed drop-shadow">
           {currentItem?.overview}
         </p>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <button
             onClick={() => onPlay(currentItem)}
             className="flex items-center gap-2.5 bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-gray-950 font-black px-7 py-3.5 rounded-full text-sm transition-all duration-300 shadow-[0_0_25px_rgba(56,189,248,0.6)] transform hover:scale-105 active:scale-95 cursor-pointer"
@@ -127,6 +149,16 @@ export default function HeroBanner({ items, item, onPlay, isWatchlisted, onToggl
             <Play className="w-4 h-4 fill-gray-950 ml-0.5" />
             <span>Watch in 4K</span>
           </button>
+
+          {onOpenDetails && (
+            <button
+              onClick={() => onOpenDetails(currentItem)}
+              className="flex items-center gap-2 px-5 py-3.5 rounded-full text-sm font-bold transition-all border backdrop-blur-md bg-[#0e1b3d]/70 border-cyan-500/30 text-white hover:bg-white/10"
+            >
+              <Info className="w-4 h-4 text-cyan-300" />
+              <span>Details</span>
+            </button>
+          )}
 
           <button
             onClick={() => onToggleWatchlist(currentItem)}
@@ -145,7 +177,6 @@ export default function HeroBanner({ items, item, onPlay, isWatchlisted, onToggl
       {/* Carousel Dots & Controls (if more than 1 item) */}
       {list.length > 1 && (
         <div className="absolute bottom-6 right-6 sm:bottom-10 sm:right-12 z-20 flex items-center gap-2">
-          {/* Previous Arrow */}
           <button
             onClick={() => setCurrentIndex((prev) => (prev - 1 + list.length) % list.length)}
             aria-label="Previous Featured Slide"
@@ -154,21 +185,19 @@ export default function HeroBanner({ items, item, onPlay, isWatchlisted, onToggl
             <ChevronLeft className="w-4 h-4" />
           </button>
 
-          {/* Dots Indicator */}
-          <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
+          <div className="flex items-center gap-1.5 px-2">
             {list.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => setCurrentIndex(idx)}
                 aria-label={`Go to slide ${idx + 1}`}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
-                  currentIndex === idx ? 'w-6 bg-cyan-400 shadow-[0_0_8px_rgba(56,189,248,0.8)]' : 'w-1.5 bg-white/30 hover:bg-white/60'
+                className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                  currentIndex === idx ? 'w-6 bg-cyan-400 shadow-[0_0_8px_rgba(56,189,248,0.8)]' : 'w-2 bg-white/30 hover:bg-white/60'
                 }`}
               />
             ))}
           </div>
 
-          {/* Next Arrow */}
           <button
             onClick={() => setCurrentIndex((prev) => (prev + 1) % list.length)}
             aria-label="Next Featured Slide"

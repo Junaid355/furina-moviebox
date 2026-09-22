@@ -1,4 +1,5 @@
 // TMDB Service with live auto-updating & offline curated blockbusters
+import apiManager from './apiManager.js';
 
 const API_KEY = '4e44d9029b1270a757cddc766a1bcb63';
 
@@ -14,42 +15,12 @@ export const BACKDROP_BASE = 'https://image.tmdb.org/t/p/original';
 
 const today = new Date().toISOString().split('T')[0];
 
-// High-speed in-memory LRU API cache and concurrent request deduplication
-const apiCache = new Map();
-const inFlightRequests = new Map();
-
 export async function cachedFetchJson(url, ttlMs = 300000) {
-  const now = Date.now();
-  if (apiCache.has(url)) {
-    const entry = apiCache.get(url);
-    if (now - entry.timestamp < ttlMs) {
-      return entry.data;
-    }
-    apiCache.delete(url);
+  try {
+    return await apiManager.request(url, { ttlMs, timeoutMs: 8000, retries: 1 }, 'tmdb');
+  } catch (err) {
+    throw err;
   }
-  if (inFlightRequests.has(url)) {
-    return await inFlightRequests.get(url);
-  }
-
-  const promise = (async () => {
-    try {
-      const signal = typeof AbortSignal !== 'undefined' && AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined;
-      const res = await fetch(url, { signal });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      if (apiCache.size > 150) {
-        const firstKey = apiCache.keys().next().value;
-        apiCache.delete(firstKey);
-      }
-      apiCache.set(url, { timestamp: Date.now(), data });
-      return data;
-    } finally {
-      inFlightRequests.delete(url);
-    }
-  })();
-
-  inFlightRequests.set(url, promise);
-  return await promise;
 }
 
 
@@ -5845,6 +5816,79 @@ export function getGenreNames(item) {
     };
     return [catLabels[item.category] || item.category];
   }
+  return [];
+}
+
+export async function fetchPopularMovies(page = 1) {
+  try {
+    const data = await cachedFetchJson(`${BASE_URL}/movie/popular?api_key=${API_KEY}&page=${page}`);
+    if (data?.results?.length > 0) {
+      const items = data.results.map((m) => ({
+        ...m,
+        media_type: 'movie',
+        category: 'hollywood',
+        isHindiDubbed: isHindiAvailable(m)
+      }));
+      return deduplicateMedia([...CURATED_HOLLYWOOD_BLOCKBUSTERS.slice(0, 5), ...items]);
+    }
+  } catch (err) {}
+  return deduplicateMedia(CURATED_HOLLYWOOD_BLOCKBUSTERS);
+}
+
+export async function fetchPopularAnime(page = 1) {
+  return await fetchAnime(page, 'all');
+}
+
+export async function fetchLatestMovies(page = 1) {
+  try {
+    const data = await cachedFetchJson(`${BASE_URL}/movie/now_playing?api_key=${API_KEY}&page=${page}`);
+    if (data?.results?.length > 0) {
+      return deduplicateMedia(data.results.map((m) => ({
+        ...m,
+        media_type: 'movie',
+        category: 'hollywood',
+        isHindiDubbed: isHindiAvailable(m)
+      })));
+    }
+  } catch (err) {}
+  return deduplicateMedia(FALLBACK_MEDIA);
+}
+
+export async function fetchTopRated(page = 1) {
+  try {
+    const data = await cachedFetchJson(`${BASE_URL}/movie/top_rated?api_key=${API_KEY}&page=${page}`);
+    if (data?.results?.length > 0) {
+      return deduplicateMedia(data.results.map((m) => ({
+        ...m,
+        media_type: 'movie',
+        category: 'hollywood',
+        isHindiDubbed: isHindiAvailable(m)
+      })));
+    }
+  } catch (err) {}
+  return deduplicateMedia(CURATED_HOLLYWOOD_BLOCKBUSTERS);
+}
+
+export async function fetchMultiAudioHighlights() {
+  const highlights = [
+    ...CURATED_HOLLYWOOD_HINDI_DUBS.slice(0, 10),
+    ...CURATED_HINDI_DUBBED_ANIME.slice(0, 10),
+    ...CURATED_HINDI_KDRAMAS.slice(0, 8)
+  ];
+  return deduplicateMedia(highlights);
+}
+
+export async function fetchGenreMovies(genreId, page = 1) {
+  try {
+    const data = await cachedFetchJson(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${genreId}&sort_by=popularity.desc&page=${page}`);
+    if (data?.results?.length > 0) {
+      return deduplicateMedia(data.results.map((m) => ({
+        ...m,
+        media_type: 'movie',
+        isHindiDubbed: isHindiAvailable(m)
+      })));
+    }
+  } catch (err) {}
   return [];
 }
 

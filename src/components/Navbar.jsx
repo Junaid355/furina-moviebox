@@ -38,7 +38,8 @@ export default function Navbar({
   onOpenSettings,
   onOpenIPhoneModal,
   onOpenAndroidModal,
-  onOpenStudio
+  onOpenStudio,
+  onOpenSearchOverlay
 }) {
   // Base categories: Studio removed from pills to eliminate duplication (available in right actions)
   const baseCategories = [

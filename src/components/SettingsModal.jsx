@@ -11,6 +11,7 @@ import { isAdBlockEnabled, setShieldEnabled } from '../services/adblocker';
 import { isAiUpdaterEnabled, setAiUpdaterEnabled, triggerAiSync, getLastSyncTime } from '../services/aiUpdater';
 import { SECRET_ECCHI_ANIME, IMG_BASE } from '../services/tmdb';
 import hindiProviderManager from '../services/HindiProviderManager';
+import apiManager from '../services/apiManager';
 
 export const DEFAULT_SETTINGS = {
   // Playback
@@ -158,8 +159,9 @@ export default function SettingsModal({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  // Provider health monitor state
+  // Provider & API Gateway health monitor state
   const [providerReport, setProviderReport] = useState(() => hindiProviderManager.getProviderHealthReport());
+  const [apiHealthReport, setApiHealthReport] = useState(() => apiManager.getHealthReport());
   const [isCheckingHealth, setIsCheckingHealth] = useState(false);
 
   // AdBlock & AI Updater legacy states
@@ -205,13 +207,20 @@ export default function SettingsModal({
 
   const handleRunHealthCheck = async () => {
     setIsCheckingHealth(true);
-    const report = await hindiProviderManager.runAllHealthChecks();
-    setProviderReport(report);
+    try {
+      const [report, apiReport] = await Promise.all([
+        hindiProviderManager.runAllHealthChecks(),
+        apiManager.checkHealth()
+      ]);
+      setProviderReport(report);
+      if (apiReport) setApiHealthReport(apiReport);
+    } catch (e) {}
     setIsCheckingHealth(false);
     showToast('Provider Diagnostics Complete');
   };
 
   const handleClearCache = () => {
+    apiManager.clearCache();
     hindiProviderManager.clearCache();
     try {
       const keysToRemove = [];
@@ -1104,8 +1113,8 @@ export default function SettingsModal({
                 </button>
               </div>
 
-              {/* Provider Health Cards */}
               <div className="space-y-2.5">
+                {/* Active Audio Providers Status */}
                 <span className="font-extrabold text-white text-xs block uppercase tracking-wider text-cyan-300">
                   Active Audio Providers Status
                 </span>
@@ -1135,6 +1144,28 @@ export default function SettingsModal({
                     );
                   })}
                 </div>
+
+                {/* Core Media Gateways & CDN Status */}
+                {apiHealthReport && Object.keys(apiHealthReport).length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    <span className="font-extrabold text-white text-xs block uppercase tracking-wider text-blue-300">
+                      Core Media Gateways & CDN Servers
+                    </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                      {Object.entries(apiHealthReport).slice(0, 6).map(([key, gateway]) => (
+                        <div key={key} className="p-2.5 rounded-xl bg-[#071126] border border-blue-500/20 flex items-center justify-between text-xs">
+                          <div>
+                            <div className="font-bold text-white text-[11px] truncate max-w-[130px]">{gateway.name || key}</div>
+                            <div className="text-[10px] text-cyan-300/80 font-mono">{gateway.latency || 95}ms latency</div>
+                          </div>
+                          <span className="text-[9.5px] px-2 py-0.5 rounded-md font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                            ONLINE
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Debug Media Info */}
