@@ -89,17 +89,17 @@ export default function HeroBanner({
       {/* Content */}
       <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-12 max-w-3xl z-10 animate-fade-in" key={`content-${currentItem?.id}`}>
         <div className="flex items-center gap-2 mb-3 flex-wrap">
-          <span className="bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-600 text-gray-950 font-black text-[10px] px-3 py-0.5 rounded-full shadow-lg tracking-wider uppercase">
+          <span className="badge-4k-uhd text-[10px] px-3 py-0.5 rounded-full shadow-lg tracking-wider uppercase border border-cyan-300/40">
             4K Ultra HD
           </span>
           {isHindi && (
-            <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-gray-950 text-[10px] font-black px-2.5 py-0.5 rounded-full shadow flex items-center gap-1">
+            <span className="badge-hindi-gold text-[10px] px-2.5 py-0.5 rounded-full shadow flex items-center gap-1 border border-amber-300/40">
               <span>🇮🇳</span>
               <span>Hindi Audio</span>
             </span>
           )}
           {isAnime && (
-            <span className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full shadow flex items-center gap-1">
+            <span className="badge-fhd text-[10px] px-2.5 py-0.5 rounded-full shadow flex items-center gap-1 border border-purple-300/40">
               <span>🇯🇵</span>
               <span>SUB / 🎙️ DUB</span>
             </span>
@@ -144,7 +144,7 @@ export default function HeroBanner({
         <div className="flex items-center gap-3 flex-wrap">
           <button
             onClick={() => onPlay(currentItem)}
-            className="flex items-center gap-2.5 bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-gray-950 font-black px-7 py-3.5 rounded-full text-sm transition-all duration-300 shadow-[0_0_25px_rgba(56,189,248,0.6)] transform hover:scale-105 active:scale-95 cursor-pointer"
+            className="btn-cinema-4k btn-shine animate-pulse-play flex items-center gap-2.5 px-7 py-3.5 rounded-full text-sm font-black transform hover:scale-105 active:scale-95 cursor-pointer"
           >
             <Play className="w-4 h-4 fill-gray-950 ml-0.5" />
             <span>Watch in 4K</span>
@@ -153,19 +153,19 @@ export default function HeroBanner({
           {onOpenDetails && (
             <button
               onClick={() => onOpenDetails(currentItem)}
-              className="flex items-center gap-2 px-5 py-3.5 rounded-full text-sm font-bold transition-all border backdrop-blur-md bg-[#0e1b3d]/70 border-cyan-500/30 text-white hover:bg-white/10"
+              className="flex items-center gap-2 px-5 py-3.5 rounded-full text-sm font-bold transition-all border backdrop-blur-md bg-[#0e1b3d]/70 border-cyan-500/30 text-white hover:bg-white/10 hover:border-cyan-400/60 cursor-pointer"
             >
-              <Info className="w-4 h-4 text-cyan-300" />
+              <Info className="w-4 h-4 text-cyan-300 bounce-hover" />
               <span>Details</span>
             </button>
           )}
 
           <button
             onClick={() => onToggleWatchlist(currentItem)}
-            className={`flex items-center gap-2 px-5 py-3.5 rounded-full text-sm font-bold transition-all border backdrop-blur-md ${
+            className={`flex items-center gap-2 px-5 py-3.5 rounded-full text-sm font-bold transition-all border backdrop-blur-md cursor-pointer ${
               saved
                 ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_15px_rgba(56,189,248,0.3)]'
-                : 'bg-[#0e1b3d]/70 border-cyan-500/30 text-white hover:bg-white/10'
+                : 'bg-[#0e1b3d]/70 border-cyan-500/30 text-white hover:bg-white/10 hover:border-cyan-400/60'
             }`}
           >
             {saved ? <Check className="w-4 h-4 text-cyan-400" /> : <Plus className="w-4 h-4" />}

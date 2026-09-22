@@ -192,3 +192,166 @@ video::cue {
   margin-bottom: 0 !important;
 }
 
+/* ==========================================================================
+   Furina MovieBox 4K Cinematic UI & Luxury Button Animations
+   ========================================================================== */
+
+/* Button Light Sweep Shine Effect */
+@keyframes buttonShine {
+  0% {
+    left: -100%;
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    left: 200%;
+    opacity: 0;
+  }
+}
+
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-shine::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -100%;
+  width: 50%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    transparent 100%
+  );
+  transform: rotate(25deg);
+  pointer-events: none;
+}
+
+.btn-shine:hover::after {
+  animation: buttonShine 0.9s ease-out;
+}
+
+/* Pulsing Glow for 4K Play Buttons */
+@keyframes pulsePlay {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.5), 0 0 40px rgba(6, 182, 212, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(6, 182, 212, 0.8), 0 0 60px rgba(139, 92, 246, 0.4);
+  }
+}
+
+.animate-pulse-play {
+  animation: pulsePlay 2.6s infinite ease-in-out;
+}
+
+/* Glowing Border Pulse */
+@keyframes borderPulse {
+  0%, 100% {
+    border-color: rgba(6, 182, 212, 0.4);
+  }
+  50% {
+    border-color: rgba(168, 85, 247, 0.7);
+  }
+}
+
+.border-pulse {
+  animation: borderPulse 3s infinite ease-in-out;
+}
+
+/* Metallic Shimmer Badge Ribbon */
+@keyframes ribbonShimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.badge-4k-uhd {
+  background: linear-gradient(90deg, #0284c7, #06b6d4, #38bdf8, #818cf8, #0284c7);
+  background-size: 300% 300%;
+  animation: ribbonShimmer 4s ease infinite;
+  color: #030712;
+  font-weight: 900;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+
+.badge-fhd {
+  background: linear-gradient(90deg, #4f46e5, #7c3aed, #a855f7, #4f46e5);
+  background-size: 300% 300%;
+  animation: ribbonShimmer 5s ease infinite;
+  color: #ffffff;
+  font-weight: 900;
+}
+
+.badge-hindi-gold {
+  background: linear-gradient(90deg, #d97706, #f59e0b, #fbbf24, #d97706);
+  background-size: 300% 300%;
+  animation: ribbonShimmer 4s ease infinite;
+  color: #1a0a00;
+  font-weight: 900;
+}
+
+/* Luxury 4K Cinema Primary Button */
+.btn-cinema-4k {
+  background: linear-gradient(135deg, #06b6d4 0%, #0284c7 50%, #2563eb 100%);
+  color: #050b1d;
+  font-weight: 800;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 20px rgba(6, 182, 212, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.btn-cinema-4k:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 30px rgba(6, 182, 212, 0.65), 0 0 25px rgba(56, 189, 248, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.6);
+  background: linear-gradient(135deg, #22d3ee 0%, #38bdf8 50%, #3b82f6 100%);
+}
+
+/* Glass Pill for Category & Filter Navigation */
+.glass-pill {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.glass-pill:hover {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: rgba(6, 182, 212, 0.4);
+  transform: translateY(-1px);
+}
+
+.glass-pill-active {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.25) 0%, rgba(139, 92, 246, 0.25) 100%);
+  border: 1px solid rgba(6, 182, 212, 0.6);
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.35);
+  color: #ffffff;
+}
+
+/* Smooth Rotation on hover for settings/studio */
+.spin-hover:hover {
+  transform: rotate(45deg);
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Subtle icon bounce on hover */
+.bounce-hover:hover {
+  transform: scale(1.15) translateY(-2px);
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+

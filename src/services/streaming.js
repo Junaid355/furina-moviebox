@@ -146,6 +146,36 @@ export const SERVERS = [
     supportedAudios: ['hindi', 'english', 'sub'],
     getMovieUrl: (tmdbId) => `https://play2.123embed.net/movie/${tmdbId}`,
     getTvUrl: (tmdbId, s = 1, e = 1) => `https://play2.123embed.net/tv/${tmdbId}/${s}/${e}`
+  },
+  {
+    id: 'moviebox_ultra',
+    name: '[ 🎬 Server 12 (MovieBox 4K) ] MovieBox Ultra (High-Speed Multi-CDN / 4K UHD)',
+    shortName: '[ 🎬 Server 12 (MovieBox 4K) ]',
+    badge: '4K MovieBox CDN',
+    color: 'bg-teal-500/20 text-teal-300 border-teal-500/40',
+    supportedAudios: ['english', 'sub', 'hindi'],
+    getMovieUrl: (tmdbId) => `https://moviesapi.club/movie/${tmdbId}`,
+    getTvUrl: (tmdbId, s = 1, e = 1) => `https://moviesapi.club/tv/${tmdbId}-${s}-${e}`
+  },
+  {
+    id: 'netmirror_cinema',
+    name: '[ 🌐 Server 13 (NetMirror Cloud) ] NetMirror Multi-Cloud (Instant Dual-Audio HD)',
+    shortName: '[ 🌐 Server 13 (NetMirror Cloud) ]',
+    badge: 'NetMirror Dual-Audio',
+    color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+    supportedAudios: ['english', 'sub', 'hindi'],
+    getMovieUrl: (tmdbId) => `https://vidsrc.vip/embed/movie/${tmdbId}`,
+    getTvUrl: (tmdbId, s = 1, e = 1) => `https://vidsrc.vip/embed/tv/${tmdbId}/${s}/${e}`
+  },
+  {
+    id: 'superembed_cinema',
+    name: '[ 💎 Server 14 (Cinema SuperEmbed) ] SuperEmbed Prime (4K Dolby Multi-Language)',
+    shortName: '[ 💎 Server 14 (Cinema SuperEmbed) ]',
+    badge: '4K SuperEmbed',
+    color: 'bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/40',
+    supportedAudios: ['english', 'sub', 'hindi'],
+    getMovieUrl: (tmdbId) => `https://vidsrc.icu/embed/movie/${tmdbId}`,
+    getTvUrl: (tmdbId, s = 1, e = 1) => `https://vidsrc.icu/embed/tv/${tmdbId}/${s}/${e}`
   }
 ];
 
@@ -247,6 +277,28 @@ export function getDownloadMirrors(tmdbId, type = 'movie', season = 1, episode =
       url: isTv 
         ? `https://vidlink.pro/tv/${tmdbId}/${season}/${episode}` 
         : `https://vidlink.pro/movie/${tmdbId}`
+    },
+    {
+      id: 'mirror_moviebox',
+      name: '[ 🎬 Server 8 (MovieBox 4K) ] MovieBox Ultra Multi-Thread CDN',
+      quality: '4K UHD / 1080p',
+      badge: 'MovieBox Fast Cloud',
+      color: 'bg-teal-500/20 text-teal-300 border-teal-500/40',
+      isHindi: true,
+      url: isTv 
+        ? `https://moviesapi.club/tv/${tmdbId}-${season}-${episode}` 
+        : `https://moviesapi.club/movie/${tmdbId}`
+    },
+    {
+      id: 'mirror_netmirror',
+      name: '[ 🌐 Server 9 (NetMirror HD) ] NetMirror Dual-Audio Cloud Stream',
+      quality: '1080p Full HD',
+      badge: 'NetMirror Fast',
+      color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+      isHindi: true,
+      url: isTv 
+        ? `https://vidsrc.vip/embed/tv/${tmdbId}/${season}/${episode}` 
+        : `https://vidsrc.vip/embed/movie/${tmdbId}`
     }
   ];
 

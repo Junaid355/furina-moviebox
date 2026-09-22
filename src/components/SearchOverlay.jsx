@@ -304,7 +304,7 @@ export default function SearchOverlay({
                   >
                     <div className="relative aspect-[2/3] w-full bg-[#060c1d] overflow-hidden">
                       <img
-                        src={resolvePosterUrl(item.poster_path, 'w342')}
+                        src={resolvePosterUrl(item.poster_path, 'w500')}
                         alt={title}
                         loading="lazy"
                         onError={(e) => {
@@ -314,13 +314,17 @@ export default function SearchOverlay({
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+                        <span className="badge-4k-uhd text-[8px] px-1.5 py-0.5 rounded shadow-sm border border-cyan-300/30">
+                          4K UHD
+                        </span>
                         {isHindi && (
-                          <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-gray-950 text-[8.5px] font-black px-1.5 py-0.5 rounded shadow-sm">
-                            🇮🇳 HINDI
+                          <span className="badge-hindi-gold text-[8.5px] px-1.5 py-0.5 rounded shadow-sm flex items-center gap-0.5 border border-amber-300/30">
+                            <span>🇮🇳</span>
+                            <span>HINDI</span>
                           </span>
                         )}
                         {isAnime && (
-                          <span className="bg-indigo-600 text-white text-[8.5px] font-black px-1.5 py-0.5 rounded shadow-sm">
+                          <span className="badge-fhd text-[8.5px] px-1.5 py-0.5 rounded shadow-sm border border-purple-300/30">
                             ANIME
                           </span>
                         )}

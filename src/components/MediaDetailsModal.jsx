@@ -116,17 +116,17 @@ export default function MediaDetailsModal({
 
           {/* Floating Badges */}
           <div className="absolute bottom-3 left-4 sm:left-6 flex items-center gap-2 flex-wrap z-10">
-            <span className="bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-sm tracking-wider uppercase">
+            <span className="badge-4k-uhd text-[10px] px-2.5 py-0.5 rounded-full shadow-sm tracking-wider uppercase border border-cyan-300/30">
               4K Ultra HD
             </span>
             {isHindi && (
-              <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-gray-950 text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1">
+              <span className="badge-hindi-gold text-[10px] px-2.5 py-0.5 rounded-full shadow flex items-center gap-1 border border-amber-300/30">
                 <span>🇮🇳</span>
                 <span>Hindi Audio</span>
               </span>
             )}
             {isAnime && (
-              <span className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1">
+              <span className="badge-fhd text-[10px] px-2.5 py-0.5 rounded-full shadow flex items-center gap-1 border border-purple-300/30">
                 <span>🇯🇵</span>
                 <span>Sub & Dub</span>
               </span>
@@ -169,10 +169,10 @@ export default function MediaDetailsModal({
                   onClose();
                   onPlay(item);
                 }}
-                className="flex items-center gap-2 bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-gray-950 font-black px-5 py-2.5 rounded-xl text-xs sm:text-sm transition shadow-[0_0_20px_rgba(56,189,248,0.5)] transform hover:scale-105 active:scale-95 cursor-pointer"
+                className="btn-cinema-4k btn-shine animate-pulse-play flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black transform hover:scale-105 active:scale-95 cursor-pointer"
               >
                 <Play className="w-4 h-4 fill-gray-950 ml-0.5" />
-                <span>Play Now</span>
+                <span>Play Now (4K)</span>
               </button>
 
               <button

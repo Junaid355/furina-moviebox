@@ -57,7 +57,7 @@ const MediaCard = React.memo(function MediaCard({
     return null;
   })();
 
-  const posterSrc = resolvePosterUrl(item.poster_path || item.poster, 'w342');
+  const posterSrc = resolvePosterUrl(item.poster_path || item.poster, 'w500');
 
   return (
     <div 
@@ -119,17 +119,17 @@ const MediaCard = React.memo(function MediaCard({
 
         {/* Quality & Dub Badges */}
         <div className="absolute top-2 left-2 flex flex-col gap-1 z-10 pointer-events-none">
-          <span className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-[8.5px] font-black tracking-wider px-1.5 py-0.5 rounded shadow-sm backdrop-blur-sm">
+          <span className="badge-4k-uhd text-[8.5px] px-1.5 py-0.5 rounded shadow-sm tracking-wider border border-cyan-300/30">
             4K UHD
           </span>
           {isHindi && (
-            <span className="bg-gradient-to-r from-amber-500 to-orange-600 text-gray-950 text-[8.5px] font-black tracking-wider px-1.5 py-0.5 rounded shadow-sm flex items-center gap-0.5">
+            <span className="badge-hindi-gold text-[8.5px] px-1.5 py-0.5 rounded shadow-sm flex items-center gap-0.5 tracking-wider border border-amber-300/30">
               <span>🇮🇳</span>
               <span>{isAnime ? 'HINDI' : 'HINDI'}</span>
             </span>
           )}
           {isAnime && (
-            <span className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-[8.5px] font-black tracking-wider px-1.5 py-0.5 rounded shadow-sm flex items-center gap-0.5">
+            <span className="badge-fhd text-[8.5px] px-1.5 py-0.5 rounded shadow-sm flex items-center gap-0.5 tracking-wider border border-purple-300/30">
               <span>🇯🇵</span>
               <span>SUB / DUB</span>
             </span>
@@ -163,7 +163,7 @@ const MediaCard = React.memo(function MediaCard({
             className={`w-6 h-6 rounded-md flex items-center justify-center backdrop-blur-md transition border cursor-pointer ${
               isWatchlisted
                 ? 'bg-cyan-500 text-gray-950 border-cyan-400 shadow-[0_0_10px_rgba(56,189,248,0.5)]'
-                : 'bg-black/60 text-white/80 border-white/10 hover:text-white hover:bg-black/80'
+                : 'bg-black/60 text-white/80 border-white/10 hover:text-white hover:bg-black/80 hover:border-cyan-400/50'
             }`}
           >
             {isWatchlisted ? <Check className="w-3.5 h-3.5" /> : <Bookmark className="w-3.5 h-3.5" />}
@@ -172,7 +172,7 @@ const MediaCard = React.memo(function MediaCard({
 
         {/* Center Hover Play & Info Overlay */}
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2 backdrop-blur-[2px]">
-          <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-500 text-gray-950 flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.9)] transform scale-75 group-hover:scale-100 transition-transform duration-300">
+          <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-500 text-gray-950 flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.9)] transform scale-75 group-hover:scale-100 transition-transform duration-300 animate-pulse-play">
             <Play className="w-5 h-5 fill-gray-950 ml-0.5" />
           </div>
 
@@ -183,9 +183,9 @@ const MediaCard = React.memo(function MediaCard({
                 onOpenDetails(item);
               }}
               title="View Title Details"
-              className="w-8 h-8 rounded-full bg-black/70 hover:bg-cyan-500 hover:text-gray-950 text-white flex items-center justify-center backdrop-blur-md border border-white/20 transition transform scale-75 group-hover:scale-100"
+              className="w-8 h-8 rounded-full bg-black/70 hover:bg-cyan-500 hover:text-gray-950 text-white flex items-center justify-center backdrop-blur-md border border-white/20 hover:border-cyan-400 transition transform scale-75 group-hover:scale-100 cursor-pointer"
             >
-              <Info className="w-4 h-4" />
+              <Info className="w-4 h-4 bounce-hover" />
             </button>
           )}
         </div>

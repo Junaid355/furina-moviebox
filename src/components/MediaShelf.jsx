@@ -11,8 +11,11 @@ export default function MediaShelf({
   isWatchlisted, 
   onToggleWatchlist,
   onViewAll,
-  badgeText
+  badgeText,
+  badge,
+  onOpenDetails
 }) {
+  const displayBadge = badgeText || badge;
   const scrollRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -57,9 +60,9 @@ export default function MediaShelf({
               <h2 className="text-base sm:text-lg md:text-xl font-black text-white tracking-tight truncate drop-shadow-sm">
                 {title}
               </h2>
-              {badgeText && (
+              {displayBadge && (
                 <span className="hidden sm:inline-block text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
-                  {badgeText}
+                  {displayBadge}
                 </span>
               )}
             </div>
@@ -127,6 +130,7 @@ export default function MediaShelf({
             <MediaCard
               item={item}
               onPlay={onPlay}
+              onOpenDetails={onOpenDetails}
               isWatchlisted={isWatchlisted ? isWatchlisted(item.id) : false}
               onToggleWatchlist={onToggleWatchlist}
             />
