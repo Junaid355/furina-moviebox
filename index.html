@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="./favicon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
     <meta name="theme-color" content="#050811" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -15,6 +15,24 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <style>
+      /* Prevent iOS Safari viewport jump and auto-zoom when typing on iPhone */
+      @supports (-webkit-touch-callout: none) {
+        input, select, textarea {
+          font-size: 16px !important;
+        }
+      }
+      @media screen and (max-width: 768px) {
+        input, select, textarea {
+          font-size: 16px !important;
+          -webkit-text-size-adjust: 100%;
+        }
+      }
+      html, body {
+        overscroll-behavior-y: none;
+        -webkit-overflow-scrolling: touch;
+      }
+    </style>
     <title>Furina MovieBox — 4K Free Movies & Web Series</title>
     <script>
       // Register modern Service Worker for PWA standalone installation on Android & Desktop
@@ -49,8 +67,8 @@
         window.location.href = window.location.pathname + '?t=' + Date.now();
       }
     </script>
-    <script type="module" crossorigin src="./assets/index-CWY4fCXD.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BFyGlMAc.css">
+    <script type="module" crossorigin src="./assets/index-B2z3ikvw.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-7e0UtEQG.css">
   </head>
   <body class="bg-[#030712] text-white select-none overflow-x-hidden antialiased">
     <div id="root">
