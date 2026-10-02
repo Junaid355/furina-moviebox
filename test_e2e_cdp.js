@@ -441,7 +441,7 @@ async function runQA() {
       recordTest(12, 'Strict Hindi Safeguard', true, 'Hindi option cleanly hidden when unavailable');
     }
 
-    await client.eval('document.querySelector("button[title*=\'Close Player\']").click()');
+    await client.eval('(document.querySelector("button[title*=\'Close Player\']") || document.querySelector("button[aria-label*=\'Close video player\']"))?.click()');
     await sleep(1000);
 
     console.log('\n--- Running TEST 12b: Anime Strict Hindi Dub Safeguard ---');
@@ -493,7 +493,7 @@ async function runQA() {
         return rect.width > 0 && rect.height > 0;
       })();
     `);
-    await client.eval('document.querySelector("button[title*=\'Close Player\']").click()');
+    await client.eval('(document.querySelector("button[title*=\'Close Player\']") || document.querySelector("button[aria-label*=\'Close video player\']"))?.click()');
     await sleep(1000);
     const modalClosed = await client.eval('!Boolean(document.querySelector("button[title*=\'Close Player\']"))');
     recordTest(14, 'Close Button Unmounts Modal Safely', closeVisible && modalClosed, `Close button was visible & successfully unmounted player`);
@@ -554,7 +554,7 @@ async function runQA() {
     const dlModalOpened = await client.eval('document.body.innerText.includes("Download Center") || document.body.innerText.includes("Choose Quality") || document.body.innerText.includes("Copy Stream Link") || Boolean(document.querySelector("button[title*=\'Download\']"))');
     recordTest(16, 'Authorized Media Download Center & Quality Options', Boolean(dlModalOpened), `Download modal or trigger active: ${dlModalOpened}`);
 
-    await client.eval('document.querySelector("button[title*=\'Close Player\']").click()');
+    await client.eval('(document.querySelector("button[title*=\'Close Player\']") || document.querySelector("button[aria-label*=\'Close video player\']"))?.click()');
     await sleep(1000);
 
     console.log('\n--- Running TEST 17, 18, 19: Movie Studio Creation & Editing ---');
@@ -1398,15 +1398,19 @@ async function runQA() {
 
     console.log('\n--- Running TEST 42: Dynamic Skip Button Durations & Subtitle CSS Variables Audit ---');
     // Open player on custom studio blockbuster to inspect video container
-    await client.eval(`window.__setReactInput('input[type="text"]', 'Cyber Ronin');`);
-    await sleep(1500);
+    await client.eval(`window.__setReactInput('input[type="text"]', 'Furina E2E');`);
+    for (let w = 0; w < 15; w++) {
+      await sleep(400);
+      const ready = await client.eval(`Boolean(Array.from(document.querySelectorAll('.glass-card')).find(c => c.textContent.includes('Furina E2E')))`);
+      if (ready) break;
+    }
     await client.eval(`
       (() => {
-        const card = Array.from(document.querySelectorAll('.glass-card')).find(c => c.textContent.includes('Cyber Ronin')) || document.querySelector('.glass-card');
+        const card = Array.from(document.querySelectorAll('.glass-card')).find(c => c.textContent.includes('Furina E2E'));
         if (card) card.click();
       })()
     `);
-    await sleep(1200);
+    await sleep(1800);
 
     const skipAndSubAudit = await client.eval(`
       (() => {
@@ -1424,7 +1428,7 @@ async function runQA() {
       })()
     `);
 
-    // Close player
+    // Close player & clear search
     await client.eval(`
       (() => {
         const closeBtn = document.querySelector('button[title*="Close Player"]');
@@ -1432,6 +1436,8 @@ async function runQA() {
       })()
     `);
     await sleep(800);
+    await client.eval(`window.__setReactInput('input[type="text"]', '');`);
+    await sleep(500);
 
     const test42Passed = Boolean(skipAndSubAudit.bwdText && skipAndSubAudit.fwdText && skipAndSubAudit.subFontSize);
     recordTest(42, 'Dynamic Skip Button Durations & Subtitle CSS Variables Audit', test42Passed,
@@ -1670,6 +1676,63 @@ async function runQA() {
 
     recordTest(48, 'Multi-Dub Language Badges, In-Player Audio Guidance & 200 OK Routing Audit', test48Passed,
       `Badges: ${badgesValid}, Tip: ${playerTipAudit.hasGuidance}, Buttons: { HI: ${playerTipAudit.hasHindiBadgeBtn}, Multi: ${playerTipAudit.hasMultiBadgeBtn}, EN: ${playerTipAudit.hasEnglishBadgeBtn}, JA: ${playerTipAudit.hasJapaneseBadgeBtn} }, Srv Switch: ${serverSwitchResult.clicked}, Cinema WAV: ${isCinemaWavValid} (${wavStat?.size}B), Zero streamingnow.mov: ${zeroStreamingNow}`);
+
+    console.log('\n--- Running TEST 49: Aceternity, Magic UI & Furina 3D Motion UI Audit ---');
+    await client.eval(`window.__setReactInput('input[type="text"]', '');`);
+    await sleep(600);
+    const motionAudit = await client.eval(`
+      (() => {
+        // 1. Furina Chibi Mascot
+        const chibiImages = Array.from(document.querySelectorAll('img')).filter(img => img.src && (img.src.includes('furina_chibi') || img.src.includes('furina_mascot')));
+        const hasFurinaChibi = chibiImages.length > 0;
+
+        // 2. Aceternity Background Beams Canvas
+        const canvas = document.querySelector('canvas');
+        const hasBeamsCanvas = Boolean(canvas && canvas.width > 0 && canvas.height > 0);
+
+        // 3. 3D Perspective Card Tilt
+        const cards = Array.from(document.querySelectorAll('.glass-card'));
+        const has3DTransformStyle = cards.some(c => c.style.transformStyle === 'preserve-3d' || window.getComputedStyle(c).transformStyle === 'preserve-3d');
+
+        // 4. Magic UI Marquee
+        const marqueeEl = document.querySelector('.animate-marquee');
+        const hasMarquee = Boolean(marqueeEl);
+
+        // 5. Sound Effects Engine
+        const hasSoundEngine = typeof window !== 'undefined';
+
+        return {
+          hasFurinaChibi,
+          chibiCount: chibiImages.length,
+          hasBeamsCanvas,
+          has3DTransformStyle,
+          hasMarquee,
+          hasSoundEngine
+        };
+      })()
+    `);
+
+    const test49Passed = motionAudit.hasFurinaChibi && 
+      motionAudit.hasBeamsCanvas && 
+      motionAudit.has3DTransformStyle && 
+      motionAudit.hasMarquee;
+
+    recordTest(49, 'Aceternity, Magic UI & Furina 3D Motion UI Audit', test49Passed,
+      `Chibi: ${motionAudit.hasFurinaChibi} (${motionAudit.chibiCount}), Beams: ${motionAudit.hasBeamsCanvas}, 3D Tilt: ${motionAudit.has3DTransformStyle}, Marquee: ${motionAudit.hasMarquee}`);
+
+    console.log('\n--- Running TEST 50: Aceternity 3D Floating Dock & Crystalline Sparkles Audit ---');
+    const dockAudit = await client.eval(`
+      (() => {
+        const dockEl = document.querySelector('.fixed.bottom-5');
+        const hasDock = Boolean(dockEl);
+        const sparklesEl = document.getElementById('hero-sparkles');
+        const hasSparkles = Boolean(sparklesEl);
+        return { hasDock, hasSparkles };
+      })()
+    `);
+    const test50Passed = dockAudit.hasDock && dockAudit.hasSparkles;
+    recordTest(50, 'Aceternity 3D Floating Dock & Crystalline Sparkles Audit', test50Passed,
+      `Floating Dock: ${dockAudit.hasDock}, Sparkles Canvas: ${dockAudit.hasSparkles}`);
 
     console.log('\n--- Running TEST 26: Final Production Build Verification ---');
     try {

@@ -11,6 +11,11 @@ import IPhoneAppModal from './components/IPhoneAppModal';
 import AndroidAppModal from './components/AndroidAppModal';
 import MovieStudioModal, { getStoredStudioMovies } from './components/MovieStudioModal';
 import ErrorBoundary from './components/ErrorBoundary';
+import { BackgroundBeams } from './components/ui/background-beams';
+import { FurinaMascot } from './components/ui/FurinaMascot';
+import { Marquee } from './components/ui/marquee';
+import { FloatingDock } from './components/ui/floating-dock';
+import soundFx from './services/soundFx';
 import { 
   fetchTrendingAll, 
   fetchHollywoodMovies, 
@@ -39,7 +44,7 @@ import {
 import { SERVERS } from './services/streaming';
 import { 
   Flame, Film, Tv, Sparkles, Heart, RefreshCw, Shield, Settings, 
-  ChevronDown, Clock, Play, X, Star, Volume2, Search 
+  ChevronDown, Clock, Play, X, Star, Volume2, VolumeX, Search 
 } from 'lucide-react';
 
 function getContinueWatchingList() {
@@ -78,6 +83,7 @@ export default function App() {
   const [activeMedia, setActiveMedia] = useState(null);
   const [detailsItem, setDetailsItem] = useState(null);
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
+  const [isMuted, setIsMuted] = useState(() => soundFx.isMuted());
 
   // Curated instant-cache & background live-refresh shelves for Homepage
   const [shelvesData, setShelvesData] = useState({
@@ -274,6 +280,7 @@ export default function App() {
       return await searchContent(query.trim(), pageNum, includeMature);
     }
     if (cat === 'trending') return await fetchTrendingAll(pageNum);
+    if (cat === 'new_movies') return await fetchLatestMovies(pageNum);
     if (cat === 'hollywood') {
       if (movieFilter === 'hindi') return await fetchHindiDubbedHollywood(pageNum);
       if (movieFilter === 'popular') return await fetchTrendingAll(pageNum);
@@ -416,6 +423,9 @@ export default function App() {
       <div className="fixed top-1/3 -right-40 w-[550px] h-[550px] bg-blue-600/[0.06] rounded-full blur-[160px] pointer-events-none -z-10 transform-gpu" style={{ transform: 'translateZ(0)' }} />
       <div className="fixed -bottom-40 left-10 w-[600px] h-[600px] bg-indigo-600/[0.05] rounded-full blur-[160px] pointer-events-none -z-10 transform-gpu" style={{ transform: 'translateZ(0)' }} />
       
+      {/* Aceternity Background Beams & Radiant Hydro Light Rays */}
+      <BackgroundBeams />
+      
       {/* Top Navigation */}
       <Navbar
         activeCategory={activeCategory}
@@ -461,6 +471,32 @@ export default function App() {
               onOpenDetails={setDetailsItem}
             />
           </ErrorBoundary>
+        )}
+
+        {/* Magic UI Infinite Marquee for Trending Quick-Picks */}
+        {items && items.length > 0 && (
+          <div className="mb-8 overflow-hidden rounded-2xl bg-[#060e24]/75 border border-cyan-500/25 py-2.5 backdrop-blur-xl shadow-lg">
+            <div className="flex items-center gap-2 px-4 mb-1.5 text-[11px] font-black uppercase tracking-wider text-cyan-300">
+              <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-spin" />
+              <span>Fontaine 4K Live Broadcasts:</span>
+            </div>
+            <Marquee pauseOnHover className="[--duration:32s]">
+              {items.slice(0, 10).map((m) => (
+                <div
+                  key={`marquee-${m.id}`}
+                  onClick={() => {
+                    soundFx.playClick();
+                    setActiveMedia(m);
+                  }}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#081534] border border-cyan-500/30 hover:border-cyan-400 text-xs text-white font-semibold cursor-pointer transition hover:scale-105 mx-1"
+                >
+                  <span className="text-[10px] text-cyan-400">▶</span>
+                  <span className="truncate max-w-[160px]">{m.title || m.name}</span>
+                  <span className="badge-4k-uhd text-[8px] px-1 py-0.2 rounded font-black">4K</span>
+                </div>
+              ))}
+            </Marquee>
+          </div>
         )}
 
         {/* Continue Watching Section */}
@@ -531,6 +567,8 @@ export default function App() {
                   ? `Results for "${searchQuery.trim()}"`
                   : activeCategory === 'trending'
                   ? '🔥 Trending Worldwide (Movies & Series)'
+                  : activeCategory === 'new_movies'
+                  ? '✨ New Movie Releases (In Theaters & 4K Streaming)'
                   : activeCategory === 'hollywood'
                   ? '🎬 Hollywood Cinema (English)'
                   : activeCategory === 'hindi'
@@ -577,6 +615,57 @@ export default function App() {
                 className="px-3 py-1 rounded-full bg-[#0c1836] border border-cyan-500/20 text-cyan-200/70 font-medium whitespace-nowrap hover:text-white transition"
               >
                 Browse All Bollywood / Hindi
+              </button>
+            </div>
+          )}
+
+          {/* New Movies Quick Filter Chips */}
+          {activeCategory === 'new_movies' && !searchQuery.trim() && (
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 text-xs">
+              <span className="text-cyan-200/50 text-[11px] whitespace-nowrap font-medium">New Releases:</span>
+              <button
+                onClick={() => setGlobalMediaFilter('all')}
+                className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border cursor-pointer ${
+                  globalMediaFilter === 'all'
+                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white border-cyan-400 shadow'
+                    : 'bg-cyan-500/15 border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/25'
+                }`}
+              >
+                <span>✨</span>
+                <span>All New Movies</span>
+              </button>
+              <button
+                onClick={() => setGlobalMediaFilter('hindi')}
+                className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border cursor-pointer ${
+                  globalMediaFilter === 'hindi'
+                    ? 'bg-amber-500 text-gray-950 border-amber-400 shadow font-black'
+                    : 'bg-amber-500/15 border-amber-500/30 text-amber-300 hover:bg-amber-500/25'
+                }`}
+              >
+                <span>🇮🇳</span>
+                <span>New in Hindi Dub</span>
+              </button>
+              <button
+                onClick={() => setGlobalMediaFilter('english')}
+                className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border cursor-pointer ${
+                  globalMediaFilter === 'english'
+                    ? 'bg-blue-500 text-white border-blue-400 shadow'
+                    : 'bg-blue-500/15 border-blue-500/30 text-blue-300 hover:bg-blue-500/25'
+                }`}
+              >
+                <span>🎬</span>
+                <span>Hollywood New (English)</span>
+              </button>
+              <button
+                onClick={() => setGlobalMediaFilter('multiaudio')}
+                className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border cursor-pointer ${
+                  globalMediaFilter === 'multiaudio'
+                    ? 'bg-purple-500 text-white border-purple-400 shadow'
+                    : 'bg-purple-500/15 border-purple-500/30 text-purple-300 hover:bg-purple-500/25'
+                }`}
+              >
+                <span>🎧</span>
+                <span>Multi-Audio 4K</span>
               </button>
             </div>
           )}
@@ -764,18 +853,39 @@ export default function App() {
           })}
         </div>
 
-        {/* Skeleton Shimmer Loading Grid */}
+        {/* Skeleton Shimmer Loading Grid with Furina Loading Showcase */}
         {loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-5">
-            {[...Array(10)].map((_, i) => (
-              <div key={i} className="rounded-2xl overflow-hidden glass-card flex flex-col animate-pulse">
-                <div className="aspect-[2/3] w-full skeleton-shimmer" />
-                <div className="p-3 bg-[#050b1d] border-t border-white/[0.04] space-y-2">
-                  <div className="h-3.5 bg-white/10 rounded-md skeleton-shimmer w-3/4" />
-                  <div className="h-2.5 bg-white/5 rounded-md skeleton-shimmer w-1/2" />
+          <div className="space-y-6">
+            <div className="py-6 flex flex-col items-center justify-center text-center">
+              <div className="relative mb-3 flex items-center justify-center">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 border-cyan-400 shadow-[0_0_24px_rgba(56,189,248,0.7)] bg-[#070e24]">
+                  <img
+                    src="./furina_chibi.gif"
+                    alt="Furina Loading"
+                    className="w-full h-full object-cover"
+                    onError={(e) => { e.currentTarget.src = './favicon.png'; }}
+                  />
                 </div>
+                <div className="absolute -inset-1.5 border-2 border-cyan-400/40 border-t-cyan-300 rounded-full animate-spin" />
               </div>
-            ))}
+              <h3 className="text-sm sm:text-base font-bold text-white tracking-wide">
+                Raising the Grand Curtain...
+              </h3>
+              <p className="text-xs text-cyan-300/70">
+                Lady Furina welcomes you to the Fontaine Opera MovieBox
+              </p>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-5">
+              {[...Array(10)].map((_, i) => (
+                <div key={i} className="rounded-2xl overflow-hidden glass-card flex flex-col animate-pulse">
+                  <div className="aspect-[2/3] w-full skeleton-shimmer" />
+                  <div className="p-3 bg-[#050b1d] border-t border-white/[0.04] space-y-2">
+                    <div className="h-3.5 bg-white/10 rounded-md skeleton-shimmer w-3/4" />
+                    <div className="h-2.5 bg-white/5 rounded-md skeleton-shimmer w-1/2" />
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         ) : error && items.length === 0 ? (
           /* Error State with Retry */
@@ -987,7 +1097,8 @@ export default function App() {
               activeMedia?.hasHindiDub === true ||
               (activeCategory === 'anime' && animeAudioFilter === 'hindi') ||
               (activeCategory === 'kdrama' && kdramaFilter === 'hindi') ||
-              (activeCategory === 'hollywood' && movieFilter === 'hindi')
+              (activeCategory === 'hollywood' && movieFilter === 'hindi') ||
+              (activeCategory === 'new_movies' && globalMediaFilter === 'hindi')
             }
             onClose={() => setActiveMedia(null)}
           />
@@ -1062,6 +1173,89 @@ export default function App() {
         isMasterMode={isMasterMode}
         includeMature={includeMature}
       />
+
+      {/* Aceternity UI 3D Floating Dock (Desktop & Large Screens) */}
+      <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 hidden lg:block pointer-events-auto">
+        <FloatingDock
+          items={[
+            {
+              title: "Trending",
+              icon: <Flame className="w-5 h-5" />,
+              onClick: () => {
+                soundFx.playClick();
+                setActiveCategory('trending');
+                setSearchQuery('');
+              },
+              active: activeCategory === 'trending' && !searchQuery
+            },
+            {
+              title: "Hollywood Movies",
+              icon: <Film className="w-5 h-5" />,
+              onClick: () => {
+                soundFx.playClick();
+                setActiveCategory('hollywood');
+                setSearchQuery('');
+              },
+              active: activeCategory === 'hollywood'
+            },
+            {
+              title: "Hindi Hub",
+              icon: <Sparkles className="w-5 h-5 text-amber-300" />,
+              onClick: () => {
+                soundFx.playClick();
+                setActiveCategory('hindi');
+                setSearchQuery('');
+              },
+              active: activeCategory === 'hindi'
+            },
+            {
+              title: "Anime Vault",
+              icon: <Sparkles className="w-5 h-5 text-purple-300" />,
+              onClick: () => {
+                soundFx.playClick();
+                setActiveCategory('anime');
+                setSearchQuery('');
+              },
+              active: activeCategory === 'anime'
+            },
+            {
+              title: "3D Spotlight (Ctrl+K)",
+              icon: <Search className="w-5 h-5 text-cyan-300" />,
+              onClick: () => {
+                soundFx.playSearchBeam();
+                setIsSearchOverlayOpen(true);
+              }
+            },
+            {
+              title: "Movie Studio",
+              icon: <Film className="w-5 h-5 text-emerald-300" />,
+              onClick: () => {
+                soundFx.playClick();
+                setIsStudioOpen(true);
+              }
+            },
+            {
+              title: isMuted ? "Audio Muted" : "Hydro Sound FX Active",
+              icon: isMuted ? <VolumeX className="w-5 h-5 text-rose-400" /> : <Volume2 className="w-5 h-5 text-cyan-300" />,
+              onClick: () => {
+                soundFx.toggleMute();
+                setIsMuted(soundFx.isMuted());
+              }
+            },
+            {
+              title: "Settings",
+              icon: <Settings className="w-5 h-5" />,
+              onClick: () => {
+                soundFx.playClick();
+                setIsSettingsOpen(true);
+              }
+            }
+          ]}
+        />
+      </div>
+
+      {/* Interactive Cute Furina Chibi Mascot Companion */}
+      <FurinaMascot onOpenSearch={() => setIsSearchOverlayOpen(true)} />
 
       {/* Mobile iOS Style Bottom Navigation Bar */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-[#070d1e]/95 backdrop-blur-2xl border-t border-cyan-500/20 px-1 py-2 flex items-center justify-around shadow-[0_-5px_25px_rgba(0,0,0,0.7)]">

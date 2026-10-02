@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Play, Star, Bookmark, Check, Sparkles, Volume2, Film, Tv, Info } from 'lucide-react';
 import { isHindiAvailable } from '../services/tmdb';
 import { resolvePosterUrl } from '../services/contentModel';
@@ -12,6 +12,10 @@ const MediaCard = React.memo(function MediaCard({
 }) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const cardRef = useRef(null);
+  const [transformStyle, setTransformStyle] = useState('perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)');
+  const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 });
+
   if (!item) return null;
 
   const title = item.title || item.name || 'Untitled';
@@ -60,14 +64,56 @@ const MediaCard = React.memo(function MediaCard({
   const rawPoster = item.poster_path || item.poster || item.backdrop_path || item.backdrop;
   const posterSrc = resolvePosterUrl(rawPoster, 'w500');
 
+  // 3D Perspective Tilt on Mouse Movement (Aceternity 3D Card Style)
+  const handleMouseMove = (e) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const rotX = ((y - centerY) / centerY) * -12;
+    const rotY = ((x - centerX) / centerX) * 12;
+
+    setTransformStyle(`perspective(1000px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) translateY(-6px) scale3d(1.02, 1.02, 1.02)`);
+    setGlare({
+      x: Math.round((x / rect.width) * 100),
+      y: Math.round((y / rect.height) * 100),
+      opacity: 0.35
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setTransformStyle('perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px) scale3d(1, 1, 1)');
+    setGlare((prev) => ({ ...prev, opacity: 0 }));
+  };
+
   return (
     <div 
+      ref={cardRef}
       onClick={() => onPlay(item)}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
       data-media-id={item.id}
-      className="group relative rounded-xl sm:rounded-2xl overflow-hidden glass-card cursor-pointer flex flex-col transition-all duration-300 transform hover:-translate-y-1.5 hover:shadow-[0_12px_28px_rgba(56,189,248,0.25)] border border-cyan-500/20 hover:border-cyan-400/60"
+      style={{
+        transform: transformStyle,
+        transformStyle: 'preserve-3d',
+        transition: 'transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1)'
+      }}
+      className="group relative rounded-xl sm:rounded-2xl overflow-hidden glass-card cursor-pointer flex flex-col border border-cyan-500/20 hover:border-cyan-400/80 shadow-[0_8px_24px_rgba(0,0,0,0.6)] hover:shadow-[0_16px_36px_rgba(56,189,248,0.35)]"
     >
+      {/* 3D Glare Reflection Layer */}
+      <div 
+        className="pointer-events-none absolute inset-0 z-30 transition-opacity duration-300 rounded-inherit"
+        style={{
+          opacity: glare.opacity,
+          background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,0.3) 0%, rgba(56,189,248,0.2) 35%, transparent 70%)`
+        }}
+      />
+
       {/* Poster Image Container */}
-      <div className="relative aspect-[2/3] w-full overflow-hidden bg-[#060c1d]">
+      <div className="relative aspect-[2/3] w-full overflow-hidden bg-[#060c1d] [transform-style:preserve-3d]">
         {/* Poster Image */}
         <img
           src={imageError ? './icon-512.png' : posterSrc}
@@ -81,7 +127,7 @@ const MediaCard = React.memo(function MediaCard({
             e.currentTarget.onerror = null;
             e.currentTarget.src = './icon-512.png';
           }}
-          className={`w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105 ${
+          className={`w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-108 ${
             imageLoaded ? 'opacity-100' : 'opacity-0'
           }`}
         />
@@ -114,12 +160,14 @@ const MediaCard = React.memo(function MediaCard({
           </div>
         )}
 
-
         {/* Cinematic Vignette */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#050b1d] via-transparent to-black/30 pointer-events-none" />
 
-        {/* Quality & Dub Badges */}
-        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10 pointer-events-none">
+        {/* Quality & Dub Badges with 3D Depth Layer */}
+        <div 
+          className="absolute top-2 left-2 flex flex-col gap-1 z-20 pointer-events-none transition-transform duration-200"
+          style={{ transform: 'translateZ(26px)' }}
+        >
           <span className="badge-4k-uhd text-[8.5px] px-1.5 py-0.5 rounded shadow-sm tracking-wider border border-cyan-300/30">
             4K UHD
           </span>
@@ -148,8 +196,11 @@ const MediaCard = React.memo(function MediaCard({
           ) : null}
         </div>
 
-        {/* Top Right Actions: Rating, Watchlist, Details */}
-        <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 z-10">
+        {/* Top Right Actions: Rating, Watchlist, Details with 3D Depth */}
+        <div 
+          className="absolute top-2.5 right-2.5 flex items-center gap-1.5 z-20 transition-transform duration-200"
+          style={{ transform: 'translateZ(26px)' }}
+        >
           <div className="bg-black/65 backdrop-blur-md px-2 py-0.5 rounded-md flex items-center gap-1 border border-white/10 shadow">
             <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
             <span className="text-[10px] font-bold text-white">{rating}</span>
@@ -171,9 +222,12 @@ const MediaCard = React.memo(function MediaCard({
           </button>
         </div>
 
-        {/* Center Hover Play & Info Overlay */}
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2 backdrop-blur-[2px]">
-          <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-500 text-gray-950 flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.9)] transform scale-75 group-hover:scale-100 transition-transform duration-300 animate-pulse-play">
+        {/* Center Hover Play & Info Overlay with 3D Pop (translateZ 40px) */}
+        <div 
+          className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2 backdrop-blur-[2px] z-20"
+          style={{ transform: 'translateZ(38px)' }}
+        >
+          <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-500 text-gray-950 flex items-center justify-center shadow-[0_0_24px_rgba(56,189,248,0.9)] transform scale-75 group-hover:scale-100 transition-transform duration-300 animate-pulse-play">
             <Play className="w-5 h-5 fill-gray-950 ml-0.5" />
           </div>
 
@@ -193,7 +247,10 @@ const MediaCard = React.memo(function MediaCard({
       </div>
 
       {/* Card Info Container */}
-      <div className="p-2.5 sm:p-3 bg-[#050b1d] border-t border-white/[0.05] flex flex-col justify-between">
+      <div 
+        className="p-2.5 sm:p-3 bg-[#050b1d] border-t border-white/[0.05] flex flex-col justify-between [transform-style:preserve-3d]"
+        style={{ transform: 'translateZ(14px)' }}
+      >
         <h3 className="font-bold text-xs sm:text-[13px] text-white line-clamp-1 group-hover:text-cyan-300 transition-colors">
           {title}
         </h3>

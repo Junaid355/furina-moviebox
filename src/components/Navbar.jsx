@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Film, Tv, Flame, Heart, Sparkles, X, Shield, Lock, Settings, Smartphone, Skull, Volume2, VolumeX } from 'lucide-react';
+import { Search, Film, Tv, Flame, Heart, Sparkles, X, Shield, Lock, Settings, Smartphone, Skull, Volume2, VolumeX, Command } from 'lucide-react';
 import soundFx from '../services/soundFx';
 
 export function HanimeIcon({ className = "w-3.5 h-3.5 sm:w-4 sm:h-4", ...props }) {
@@ -41,9 +41,9 @@ export default function Navbar({
   onOpenStudio,
   onOpenSearchOverlay
 }) {
-  // Base categories: Studio removed from pills to eliminate duplication (available in right actions)
   const baseCategories = [
     { id: 'trending', label: 'Trending', icon: Flame },
+    { id: 'new_movies', label: 'New Movies', icon: Sparkles },
     { id: 'hollywood', label: 'Hollywood', icon: Film },
     { id: 'hindi', label: 'Hindi', icon: Sparkles },
     { id: 'kdrama', label: 'K-Drama', icon: Tv },
@@ -55,14 +55,13 @@ export default function Navbar({
 
   const categories = isMasterMode
     ? [
-        ...baseCategories.slice(0, 5),
+        ...baseCategories.slice(0, 6),
         { id: 'mature', label: 'Uncut', icon: Flame, isVault: true },
         { id: 'ecchi_anime', label: 'Hanime', icon: HanimeIcon, isVault: true },
-        ...baseCategories.slice(5)
+        ...baseCategories.slice(6)
       ]
     : baseCategories;
 
-  // Local state buffering & caret preservation to eliminate mobile keyboard cursor reset ("backwalk")
   const [localSearch, setLocalSearch] = useState(searchQuery || '');
   const [isSoundOn, setIsSoundOn] = useState(() => !soundFx.isMuted());
   const inputRef = useRef(null);
@@ -71,7 +70,6 @@ export default function Navbar({
   const debounceTimerRef = useRef(null);
   const lastEmittedQueryRef = useRef(searchQuery || '');
 
-  // Synchronize local search with external parent changes
   useEffect(() => {
     if (!isFocusedRef.current) {
       setLocalSearch(searchQuery || '');
@@ -128,21 +126,30 @@ export default function Navbar({
   };
 
   return (
-    <header className="sticky top-0 z-40 glass-nav px-2 sm:px-4 py-2 w-full overflow-hidden">
+    <header className="sticky top-0 z-40 glass-nav px-2 sm:px-4 py-2 pt-[max(0.5rem,env(safe-area-inset-top,0px))] w-full overflow-hidden border-b border-cyan-500/20 backdrop-blur-2xl">
       <div className="w-full max-w-full mx-auto flex items-center justify-between gap-1.5 sm:gap-2">
         
-        {/* Brand Logo - Compact Cozy Scale */}
+        {/* Brand Logo with Cute Furina Chibi Animated Mascot */}
         <div 
-          onClick={() => { setActiveCategory('trending'); setSearchQuery(''); }}
-          className="flex items-center gap-1.5 sm:gap-2 cursor-pointer group shrink-0"
+          onClick={() => { 
+            soundFx.playWaterDrop();
+            setActiveCategory('trending'); 
+            setSearchQuery(''); 
+          }}
+          className="flex items-center gap-1.5 sm:gap-2.5 cursor-pointer group shrink-0"
         >
           {isStealthMode ? (
             <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-slate-700 to-slate-900 border border-slate-600/50 flex items-center justify-center text-cyan-400 font-black text-xs shadow">
               <Film className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400" />
             </div>
           ) : (
-            <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden border border-cyan-400/60 shadow-[0_0_8px_rgba(77,197,249,0.5)] group-hover:scale-105 transition">
-              <img src="./favicon.png" alt="Furina MovieBox" className="w-full h-full object-cover" />
+            <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden border-2 border-cyan-400 shadow-[0_0_14px_rgba(56,189,248,0.7)] group-hover:scale-110 group-active:scale-95 transition-all duration-300 bg-[#060d24]">
+              <img 
+                src="./furina_chibi.gif" 
+                alt="Furina MovieBox" 
+                className="w-full h-full object-cover" 
+                onError={(e) => { e.currentTarget.src = './favicon.png'; }}
+              />
             </div>
           )}
           
@@ -165,8 +172,8 @@ export default function Navbar({
           </div>
         </div>
 
-        {/* Cozy Compact Search Bar */}
-        <div className="w-36 sm:w-48 lg:w-44 xl:w-56 focus-within:w-64 transition-all duration-300 relative shrink-0">
+        {/* Compact Search Bar with 3D Spotlight Overlay Shortcut Trigger */}
+        <div className="w-36 sm:w-48 lg:w-48 xl:w-56 focus-within:w-64 transition-all duration-300 relative shrink-0">
           <div className="relative flex items-center">
             <Search className="absolute left-2.5 w-3.5 h-3.5 text-cyan-400/70 pointer-events-none" />
             <input
@@ -175,7 +182,12 @@ export default function Navbar({
               value={localSearch}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              onFocus={() => { isFocusedRef.current = true; }}
+              onFocus={() => { 
+                isFocusedRef.current = true;
+                if (typeof window !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                  window.scrollTo({ top: 0, behavior: 'instant' });
+                }
+              }}
               onBlur={() => { isFocusedRef.current = false; }}
               onCompositionStart={() => { isComposingRef.current = true; }}
               onCompositionEnd={(e) => {
@@ -188,7 +200,8 @@ export default function Navbar({
               spellCheck="false"
               enterKeyHint="search"
               placeholder="Search..."
-              className="w-full bg-[#0b1633]/90 border border-cyan-500/25 rounded-full pl-7 pr-7 py-1 text-xs text-white placeholder-cyan-200/40 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 transition shadow-inner"
+              style={{ touchAction: 'manipulation' }}
+              className="w-full bg-[#0b1633]/90 border border-cyan-500/25 rounded-full pl-7 pr-7 py-1 text-base sm:text-xs text-white placeholder-cyan-200/40 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 transition shadow-inner"
             />
             {localSearch && (
               <>
@@ -213,7 +226,25 @@ export default function Navbar({
           </div>
         </div>
 
-        {/* Desktop Category Navigation: shrinks flexibly, internal scroll if tight, NEVER forces parent overflow */}
+        {/* 3D Spotlight Launcher Button (Desktop & Tablet) */}
+        {onOpenSearchOverlay && (
+          <button
+            onClick={() => {
+              soundFx.playSearchBeam();
+              onOpenSearchOverlay();
+            }}
+            title="Open 3D Spotlight Search (Ctrl+K or /)"
+            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-300 hover:text-white hover:border-cyan-400 text-xs font-semibold shadow-sm transition shrink-0 cursor-pointer"
+          >
+            <Sparkles className="w-3 h-3 text-cyan-400 animate-pulse" />
+            <span className="hidden xl:inline">Spotlight</span>
+            <kbd className="hidden lg:inline text-[9px] bg-black/50 border border-cyan-500/40 px-1 rounded font-mono text-cyan-200">
+              Ctrl+K
+            </kbd>
+          </button>
+        )}
+
+        {/* Desktop Category Navigation */}
         <nav className="hidden lg:flex items-center gap-1 bg-[#0a1329]/80 p-0.5 rounded-full border border-cyan-500/20 min-w-0 shrink overflow-x-auto no-scrollbar">
           {categories.map((cat) => {
             const Icon = cat.icon;
@@ -222,6 +253,7 @@ export default function Navbar({
               <button
                 key={cat.id}
                 onClick={() => {
+                  soundFx.playClick();
                   setActiveCategory(cat.id);
                   setSearchQuery('');
                   setLocalSearch('');
@@ -243,7 +275,7 @@ export default function Navbar({
           })}
         </nav>
 
-        {/* Action Controls: Movie Studio, Apps, Audio FX, Settings (Pinned inside right margin, zero overflow) */}
+        {/* Action Controls: Movie Studio, Apps, Audio FX, Settings */}
         <div className="flex items-center gap-1 sm:gap-1.5 shrink-0 ml-auto">
           <button
             onClick={onOpenStudio}
@@ -280,7 +312,7 @@ export default function Navbar({
               setIsSoundOn(unmuted);
             }}
             data-testid="cozy-sound-btn"
-            title={isSoundOn ? 'Cozy Sound FX: Active (Click to Mute)' : 'Cozy Sound FX: Muted (Click to Enable)'}
+            title={isSoundOn ? '3D Sound FX: Active (Click to Mute)' : '3D Sound FX: Muted (Click to Enable)'}
             className={`p-1.5 rounded-full border transition-all duration-200 flex items-center gap-1 cursor-pointer shrink-0 ${
               isSoundOn
                 ? 'bg-amber-500/20 border-amber-400/40 text-amber-300 hover:bg-amber-500/30 shadow-[0_0_10px_rgba(251,146,60,0.35)]'
@@ -324,7 +356,11 @@ export default function Navbar({
           return (
             <button
               key={cat.id}
-              onClick={() => { setActiveCategory(cat.id); setSearchQuery(''); }}
+              onClick={() => { 
+                soundFx.playClick();
+                setActiveCategory(cat.id); 
+                setSearchQuery(''); 
+              }}
               className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition border ${
                 cat.isVault
                   ? isActive

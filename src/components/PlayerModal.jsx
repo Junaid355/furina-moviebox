@@ -342,25 +342,39 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     }
 
     if (newMode === 'hindi') {
-      const hindiServer = 
-        availableServers.find((s) => s.id === 'autoembed') ||
-        availableServers.find((s) => s.id === 'vidsrc_in') ||
-        availableServers.find((s) => s.id === 'smashy') ||
-        availableServers.find((s) => s.id === 'animeworld_india') ||
-        availableServers.find((s) => s.id === 'embed_su') ||
-        availableServers.find((s) => s.id === 'vidsrc_cc') ||
-        availableServers[0];
-      setSelectedServer(hindiServer);
+      setSelectedServer((prevSrv) => {
+        if (prevSrv && prevSrv.supportedAudios?.includes('hindi')) {
+          return prevSrv;
+        }
+        return (
+          availableServers.find((s) => s.id === 'autoembed') ||
+          availableServers.find((s) => s.id === 'vidsrc_in') ||
+          availableServers.find((s) => s.id === 'one23embed') ||
+          availableServers.find((s) => s.id === 'animeworld_india') ||
+          availableServers.find((s) => s.id === 'smashy') ||
+          availableServers.find((s) => s.id === 'embed_su') ||
+          availableServers.find((s) => s.id === 'vidsrc_cc') ||
+          availableServers[0]
+        );
+      });
     } else if (newMode === 'sub') {
-      const subServer = isHanime
-        ? (availableServers.find((s) => s.id === 'autoembed') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0])
-        : (availableServers.find((s) => s.id === 'vidlink') || availableServers.find((s) => s.id === 'autoembed') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0]);
-      setSelectedServer(subServer);
+      setSelectedServer((prevSrv) => {
+        if (prevSrv && prevSrv.supportedAudios?.includes('sub')) {
+          return prevSrv;
+        }
+        return isHanime
+          ? (availableServers.find((s) => s.id === 'autoembed') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0])
+          : (availableServers.find((s) => s.id === 'vidlink') || availableServers.find((s) => s.id === 'autoembed') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0]);
+      });
     } else {
-      const engServer = isHanime
-        ? (availableServers.find((s) => s.id === 'autoembed') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0])
-        : (availableServers.find((s) => s.id === 'vidlink') || availableServers.find((s) => s.id === 'autoembed') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0]);
-      setSelectedServer(engServer);
+      setSelectedServer((prevSrv) => {
+        if (prevSrv && prevSrv.supportedAudios?.includes('english')) {
+          return prevSrv;
+        }
+        return isHanime
+          ? (availableServers.find((s) => s.id === 'autoembed') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0])
+          : (availableServers.find((s) => s.id === 'vidlink') || availableServers.find((s) => s.id === 'autoembed') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0]);
+      });
     }
 
     setTimeout(() => {
@@ -1905,12 +1919,37 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   </div>
                 )}
 
-                {/* Hindi Dub Multi-Server Guidance Banner */}
+                {/* Hindi Dub Multi-Server Guidance Banner with 1-Tap Quick Switches */}
                 {audioMode === 'hindi' && hasWorkingHindiSource && !unavailableNotice.show && (
-                  <div className={`absolute ${showAudioTip ? 'top-12' : 'top-3'} left-1/2 -translate-x-1/2 z-40 max-w-lg px-3.5 py-1.5 rounded-xl bg-amber-950/80 border border-amber-500/40 text-amber-200 text-[11px] shadow-xl backdrop-blur-md flex items-center justify-between gap-2.5 animate-in fade-in slide-in-from-top-2 duration-200 pointer-events-auto`}>
-                    <div className="flex items-center gap-1.5">
+                  <div className={`absolute ${showAudioTip ? 'top-12' : 'top-3'} left-1/2 -translate-x-1/2 z-40 max-w-xl w-[94%] sm:w-auto px-3.5 py-1.5 rounded-xl bg-amber-950/90 border border-amber-500/50 text-amber-200 text-[11px] shadow-2xl backdrop-blur-md flex flex-wrap items-center justify-between gap-2 animate-in fade-in slide-in-from-top-2 duration-200 pointer-events-auto`}>
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="text-amber-400 font-bold">🇮🇳</span>
-                      <span>Hindi Multi-Audio Active ({selectedServer?.shortName || 'MultiEmbed'}).</span>
+                      <span><strong>Hindi Audio:</strong> Select Hindi track in player settings (⚙️) or switch mirror:</span>
+                    </div>
+                    <div className="flex items-center gap-1 flex-wrap">
+                      {[
+                        { id: 'autoembed', label: 'AutoEmbed' },
+                        { id: 'vidsrc_in', label: 'VidSrc 4K' },
+                        { id: 'one23embed', label: '123Embed' },
+                        { id: 'animeworld_india', label: 'Hindi CDN' }
+                      ].map((sObj) => {
+                        const targetSrv = availableServers.find((s) => s.id === sObj.id);
+                        if (!targetSrv) return null;
+                        const isCurrent = currentServer.id === sObj.id;
+                        return (
+                          <button
+                            key={sObj.id}
+                            onClick={() => setSelectedServer(targetSrv)}
+                            className={`px-2 py-0.5 rounded text-[10px] font-bold transition cursor-pointer border ${
+                              isCurrent
+                                ? 'bg-amber-400 text-gray-950 border-amber-300 font-black shadow-sm'
+                                : 'bg-black/50 text-amber-200 hover:bg-amber-500/30 border-amber-500/30'
+                            }`}
+                          >
+                            {sObj.label}
+                          </button>
+                        );
+                      })}
                     </div>
                     {isCustom && playerMode === 'stream' && (
                       <button
@@ -1925,10 +1964,24 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 )}
 
                 {iframeLoading && (
-                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#050b1d]/90 backdrop-blur-sm pointer-events-none">
-                    <div className="w-10 h-10 border-3 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin mb-3" />
-                    <span className="text-xs font-bold text-cyan-300 tracking-wide">
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#050b1d]/95 backdrop-blur-md pointer-events-none p-4 text-center">
+                    <div className="relative mb-3 flex items-center justify-center">
+                      <div className="absolute -inset-2 rounded-full bg-cyan-500/25 blur-md animate-pulse" />
+                      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-cyan-400 shadow-[0_0_20px_rgba(56,189,248,0.7)] bg-[#070e24] relative z-10">
+                        <img
+                          src="./furina_chibi.gif"
+                          alt="Furina Loading"
+                          className="w-full h-full object-cover"
+                          onError={(e) => { e.currentTarget.src = './favicon.png'; }}
+                        />
+                      </div>
+                      <div className="absolute -inset-1 border-2 border-cyan-400/30 border-t-cyan-300 rounded-full animate-spin" />
+                    </div>
+                    <span className="text-xs sm:text-sm font-black text-cyan-300 tracking-wide">
                       Connecting to {selectedServer.shortName}...
+                    </span>
+                    <span className="text-[11px] text-cyan-200/70 font-medium mt-1">
+                      Furina is preparing your Fontaine Premiere ✨
                     </span>
                   </div>
                 )}
@@ -1966,12 +2019,12 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                           onClick={() => {
                             setSelectedServer(srv);
                             if (playerMode !== 'stream') setPlayerMode('stream');
-                            if (srv.id === 'autoembed' || srv.id === 'one23embed') {
-                              if (audioMode !== 'hindi') handleAudioChange('hindi');
+                            if (srv.id === 'one23embed') {
+                              if (audioMode !== 'hindi' && hasWorkingHindiSource) setAudioMode('hindi');
                             } else if (srv.id === 'vidsrc_to') {
-                              if (audioMode !== 'sub') handleAudioChange('sub');
+                              if (audioMode !== 'sub' && hasWorkingJapaneseSource) setAudioMode('sub');
                             } else if (srv.id === 'vidlink' || srv.id === 'twoembed_vip' || srv.id === 'vidsrc_cc') {
-                              if (audioMode !== 'english') handleAudioChange('english');
+                              if (audioMode !== 'english' && hasWorkingEnglishSource) setAudioMode('english');
                             }
                           }}
                           className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer border ${

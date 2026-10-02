@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Plus, Check, Star, Info, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Play, Plus, Check, Star, Info, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { isHindiAvailable } from '../services/tmdb';
 import { resolveBackdropUrl, extractGenres } from '../services/contentModel';
+import soundFx from '../services/soundFx';
+import { BorderBeam } from './ui/border-beam';
+import { Spotlight } from './ui/spotlight';
+import { SparklesCore } from './ui/sparkles';
+import { Ripple } from './ui/ripple';
 
 export default function HeroBanner({ 
   items, 
@@ -59,12 +64,23 @@ export default function HeroBanner({
   const runtime = currentItem?.runtime || (isSeries ? '45m / ep' : '2h 10m');
   const saved = (isWatchlisted && currentItem?.id) ? isWatchlisted(currentItem.id) : false;
 
+  const handlePlayClick = () => {
+    soundFx.playStartChime();
+    onPlay(currentItem);
+  };
+
   return (
     <div 
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="relative w-full h-[52vh] sm:h-[65vh] max-h-[580px] overflow-hidden rounded-3xl mb-8 border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.85)] group"
+      className="relative w-full h-[54vh] sm:h-[65vh] max-h-[590px] overflow-hidden rounded-3xl mb-8 border border-cyan-500/25 shadow-[0_20px_60px_rgba(0,0,0,0.85),0_0_40px_rgba(56,189,248,0.15)] group"
     >
+      {/* Magic UI Animated Border Beam */}
+      <BorderBeam size={260} duration={12} colorFrom="#38bdf8" colorTo="#2563eb" borderWidth={2} />
+
+      {/* Aceternity 3D Spotlight */}
+      <Spotlight className="-top-36 left-10 md:left-40 md:-top-20" fill="rgba(56, 189, 248, 0.28)" />
+
       {/* Background Poster Image with smooth crossfade */}
       <div className="absolute inset-0 bg-[#030712]">
         <img
@@ -83,12 +99,31 @@ export default function HeroBanner({
       <div className="absolute inset-0 bg-gradient-to-t from-[#030712] via-[#030712]/60 to-transparent pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-r from-[#030712] via-[#030712]/80 to-transparent max-w-4xl pointer-events-none" />
 
-      {/* Ambient hydro lighting */}
+      {/* Ambient hydro lighting and sparkles */}
       <div className="absolute top-1/4 left-10 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+      <SparklesCore
+        id="hero-sparkles"
+        particleDensity={25}
+        particleColor="#38bdf8"
+        minSize={0.6}
+        maxSize={2.0}
+        className="opacity-60"
+      />
 
       {/* Content */}
       <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-12 max-w-3xl z-10 animate-fade-in" key={`content-${currentItem?.id}`}>
+        
+        {/* Furina Mascot Top Premiere Tag */}
         <div className="flex items-center gap-2 mb-3 flex-wrap">
+          <div className="flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-cyan-950/85 border border-cyan-400/50 shadow-[0_0_12px_rgba(56,189,248,0.4)] backdrop-blur-md">
+            <img 
+              src="./furina_chibi.gif" 
+              alt="Furina Chibi" 
+              className="w-4 h-4 rounded-full object-cover border border-cyan-300"
+            />
+            <span className="text-[9.5px] font-black uppercase tracking-wider text-cyan-300">Furina Premiere</span>
+          </div>
+
           <span className="badge-4k-uhd text-[10px] px-3 py-0.5 rounded-full shadow-lg tracking-wider uppercase border border-cyan-300/40">
             4K Ultra HD
           </span>
@@ -143,8 +178,8 @@ export default function HeroBanner({
 
         <div className="flex items-center gap-3 flex-wrap">
           <button
-            onClick={() => onPlay(currentItem)}
-            className="btn-cinema-4k btn-shine animate-pulse-play flex items-center gap-2.5 px-7 py-3.5 rounded-full text-sm font-black transform hover:scale-105 active:scale-95 cursor-pointer"
+            onClick={handlePlayClick}
+            className="btn-cinema-4k btn-shine animate-pulse-play flex items-center gap-2.5 px-7 py-3.5 rounded-full text-sm font-black transform hover:scale-105 active:scale-95 cursor-pointer shadow-[0_0_25px_rgba(6,182,212,0.6)]"
           >
             <Play className="w-4 h-4 fill-gray-950 ml-0.5" />
             <span>Watch in 4K</span>

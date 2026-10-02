@@ -1,7 +1,7 @@
 // ============================================================================
-// Furina MovieBox — Cozy Web Audio API Sound Synthesizer
+// Furina MovieBox — 3D Spatial Web Audio Synthesizer & Hydro Sound Engine
 // Pure procedural Web Audio synthesis — zero external mp3/wav files required!
-// Cozy, warm, cinematic clicks, bubble pops, and harmonic chimes.
+// Rich 3D spatial clicks, crystal bubble pops, hydro chimes & modal whooshes.
 // ============================================================================
 
 class SoundEffectsEngine {
@@ -55,9 +55,23 @@ class SoundEffectsEngine {
   }
 
   /**
-   * Cozy Tactile Pill / Card Click — Warm wooden bubble pop
+   * Helper to create stereo panner node for true 3D spatial positioning
    */
-  playClick() {
+  createSpatialPanner(ctx, pan = 0) {
+    const clampedPan = Math.max(-1, Math.min(1, pan));
+    if (ctx.createStereoPanner) {
+      const panner = ctx.createStereoPanner();
+      panner.pan.setValueAtTime(clampedPan, ctx.currentTime);
+      return panner;
+    }
+    return null;
+  }
+
+  /**
+   * 3D Spatial Tactile Pill / Card Click — Warm hydro bubble pop with stereo panning
+   * @param {number} pan - Stereo balance from -1.0 (left) to 1.0 (right)
+   */
+  playClick(pan = 0) {
     if (this.muted) return;
     const ctx = this.getAudioContext();
     if (!ctx) return;
@@ -66,31 +80,45 @@ class SoundEffectsEngine {
       const now = ctx.currentTime;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
+      const panner = this.createSpatialPanner(ctx, pan);
 
       osc.type = 'sine';
-      // Pitch drop from 520Hz down to 240Hz for a cozy, soft tactile pop
-      osc.frequency.setValueAtTime(520, now);
-      osc.frequency.exponentialRampToValueAtTime(240, now + 0.045);
+      // Pitch drop from 580Hz down to 220Hz for a crisp, tactile hydro pop
+      osc.frequency.setValueAtTime(580, now);
+      osc.frequency.exponentialRampToValueAtTime(220, now + 0.05);
 
-      gain.gain.setValueAtTime(0.09, now);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.055);
 
-      osc.connect(gain);
-      gain.connect(ctx.destination);
+      if (panner) {
+        osc.connect(gain);
+        gain.connect(panner);
+        panner.connect(ctx.destination);
+      } else {
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+      }
 
       osc.start(now);
-      osc.stop(now + 0.055);
+      osc.stop(now + 0.06);
     } catch (e) {}
   }
 
   /**
-   * Cozy Hover Micro-tick — Ultra-soft airy responsive feedback
+   * Direct 3D Spatial Click alias
+   */
+  play3DSpatialClick(pan = 0) {
+    this.playClick(pan);
+  }
+
+  /**
+   * Cozy Hydro Hover Micro-tick / Bubble Pop — Ultra-soft responsive crystal feedback
    */
   playHover() {
     if (this.muted) return;
     const nowMs = Date.now();
     // Debounce hover to avoid rapid-fire noise
-    if (nowMs - this.lastHoverTime < 75) return;
+    if (nowMs - this.lastHoverTime < 70) return;
     this.lastHoverTime = nowMs;
 
     const ctx = this.getAudioContext();
@@ -102,17 +130,46 @@ class SoundEffectsEngine {
       const gain = ctx.createGain();
 
       osc.type = 'triangle';
-      osc.frequency.setValueAtTime(880, now);
-      osc.frequency.exponentialRampToValueAtTime(600, now + 0.02);
+      osc.frequency.setValueAtTime(960, now);
+      osc.frequency.exponentialRampToValueAtTime(680, now + 0.022);
 
-      gain.gain.setValueAtTime(0.02, now);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.025);
+      gain.gain.setValueAtTime(0.022, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.028);
 
       osc.connect(gain);
       gain.connect(ctx.destination);
 
       osc.start(now);
-      osc.stop(now + 0.03);
+      osc.stop(now + 0.032);
+    } catch (e) {}
+  }
+
+  /**
+   * Hydro Water Droplet — Distinctive Furina water drop chime
+   */
+  playWaterDrop() {
+    if (this.muted) return;
+    const ctx = this.getAudioContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1200, now);
+      osc.frequency.exponentialRampToValueAtTime(1800, now + 0.03);
+      osc.frequency.exponentialRampToValueAtTime(900, now + 0.09);
+
+      gain.gain.setValueAtTime(0.07, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.1);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.11);
     } catch (e) {}
   }
 
@@ -156,7 +213,7 @@ class SoundEffectsEngine {
   }
 
   /**
-   * Cozy Modal / Player Open Swell — Ambient warm glass chime chord
+   * Cinematic Modal Open Whoosh & Harmonic Glass Chord
    */
   playModalOpen() {
     if (this.muted) return;
@@ -165,28 +222,41 @@ class SoundEffectsEngine {
 
     try {
       const now = ctx.currentTime;
-      // C5 (523Hz), G5 (784Hz), C6 (1046Hz) triad
+      // 1. Airy whoosh sweep
+      const whooshOsc = ctx.createOscillator();
+      const whooshGain = ctx.createGain();
+      whooshOsc.type = 'sine';
+      whooshOsc.frequency.setValueAtTime(180, now);
+      whooshOsc.frequency.exponentialRampToValueAtTime(420, now + 0.12);
+      whooshGain.gain.setValueAtTime(0.04, now);
+      whooshGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
+      whooshOsc.connect(whooshGain);
+      whooshGain.connect(ctx.destination);
+      whooshOsc.start(now);
+      whooshOsc.stop(now + 0.15);
+
+      // 2. C5 (523Hz), G5 (784Hz), C6 (1046Hz) hydro triad
       const notes = [523.25, 783.99, 1046.5];
       notes.forEach((freq, idx) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, now + idx * 0.03);
+        osc.frequency.setValueAtTime(freq, now + 0.04 + idx * 0.03);
 
-        gain.gain.setValueAtTime(0.05, now + idx * 0.03);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.28 + idx * 0.03);
+        gain.gain.setValueAtTime(0.05, now + 0.04 + idx * 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.32 + idx * 0.03);
 
         osc.connect(gain);
         gain.connect(ctx.destination);
 
-        osc.start(now + idx * 0.03);
-        osc.stop(now + 0.32 + idx * 0.03);
+        osc.start(now + 0.04 + idx * 0.03);
+        osc.stop(now + 0.36 + idx * 0.03);
       });
     } catch (e) {}
   }
 
   /**
-   * Cozy Modal Close — Soft subtle descending tone
+   * Cozy Modal Close Whoosh — Soft subtle descending tone
    */
   playModalClose() {
     if (this.muted) return;
@@ -199,22 +269,80 @@ class SoundEffectsEngine {
       const gain = ctx.createGain();
 
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(440, now);
-      osc.frequency.exponentialRampToValueAtTime(220, now + 0.09);
+      osc.frequency.setValueAtTime(480, now);
+      osc.frequency.exponentialRampToValueAtTime(200, now + 0.1);
 
       gain.gain.setValueAtTime(0.05, now);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.1);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.11);
 
       osc.connect(gain);
       gain.connect(ctx.destination);
 
       osc.start(now);
-      osc.stop(now + 0.11);
+      osc.stop(now + 0.12);
     } catch (e) {}
   }
 
   /**
-   * Cozy Success / Action Complete — Soft harp arpeggio
+   * Cinematic Play Start Chime — Fontaine Opera Premiere Fanfare Chord
+   */
+  playStartChime() {
+    if (this.muted) return;
+    const ctx = this.getAudioContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      // Majestic hydro chord: F4 (349Hz), A4 (440Hz), C5 (523Hz), F5 (698Hz), A5 (880Hz)
+      const chord = [349.23, 440.00, 523.25, 698.46, 880.00];
+      chord.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now + i * 0.035);
+
+        gain.gain.setValueAtTime(0.055, now + i * 0.035);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.45 + i * 0.035);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(now + i * 0.035);
+        osc.stop(now + 0.5 + i * 0.035);
+      });
+    } catch (e) {}
+  }
+
+  /**
+   * 3D Spotlight Search Beam Sound Effect
+   */
+  playSearchBeam() {
+    if (this.muted) return;
+    const ctx = this.getAudioContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(320, now);
+      osc.frequency.exponentialRampToValueAtTime(840, now + 0.09);
+
+      gain.gain.setValueAtTime(0.04, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.13);
+    } catch (e) {}
+  }
+
+  /**
+   * Action Complete / Success / Watchlist Added
    */
   playSuccess() {
     if (this.muted) return;
@@ -223,7 +351,7 @@ class SoundEffectsEngine {
 
     try {
       const now = ctx.currentTime;
-      const notes = [440, 554.37, 659.25, 880]; // A major
+      const notes = [440, 554.37, 659.25, 880]; // A major arpeggio
       notes.forEach((f, idx) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -243,19 +371,21 @@ class SoundEffectsEngine {
 export const soundFx = new SoundEffectsEngine();
 
 /**
- * Initializes global click and hover sound listeners across the app
+ * Initializes global click and hover sound listeners with 3D spatial panning
  */
 export function initGlobalSoundListeners() {
   if (typeof window === 'undefined') return;
 
-  // Global click delegate for buttons, links, cards, and tabs
+  // Global click delegate for buttons, links, cards, and tabs with spatial audio
   document.addEventListener('click', (e) => {
     const target = e.target;
     if (!target) return;
 
     const interactiveEl = target.closest('button, a, .glass-card, [role="button"], input[type="checkbox"], input[type="radio"]');
     if (interactiveEl) {
-      soundFx.playClick();
+      // Calculate 3D stereo panning based on mouse position on screen
+      const pan = window.innerWidth ? Math.max(-1, Math.min(1, (e.clientX / window.innerWidth) * 2 - 1)) : 0;
+      soundFx.playClick(pan);
     }
   }, { passive: true });
 
