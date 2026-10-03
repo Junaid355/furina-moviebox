@@ -38,8 +38,13 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   // Accurate Anime, Hanime & Hindi classification
   const isHanime = Boolean(
     item?.category === 'ecchi_anime' || 
+    item?.category === 'mature' ||
     item?.is_mature === true || 
-    item?.isVault === true
+    item?.isMature === true ||
+    item?.isVault === true ||
+    Number(item?.id) === 1033051 ||
+    Number(item?.tmdb_id) === 1033051 ||
+    String(item?.id).includes('1033051')
   );
 
   const isAnime = Boolean(
@@ -179,20 +184,20 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const savedVolumeRef = useRef(1);
   const savedMutedRef = useRef(false);
 
-  // Filter servers: Hanime content is strictly NOT hosted on VidLink (causes Next.js 500 error Digest 4082599258)
+  // Filter servers: Hanime/mature content is strictly NOT hosted on VidLink (causes Next.js 500)
+  // and AutoEmbed returns 404 Content Not Found on mature/vault titles (e.g. TMDB 1033051)
   const availableServers = isHanime
-    ? SERVERS.filter((s) => s.id !== 'vidlink')
+    ? SERVERS.filter((s) => s.id !== 'vidlink' && s.id !== 'autoembed')
     : SERVERS;
 
   // Determine initial server — route to fast, verified 200 OK servers
   const getInitialServer = () => {
     if (isHanime) {
       return (
-        availableServers.find((s) => s.id === 'autoembed') ||
+        availableServers.find((s) => s.id === 'twoembed_vip') ||
+        availableServers.find((s) => s.id === 'animeworld_india') ||
         availableServers.find((s) => s.id === 'vidsrc_in') ||
         availableServers.find((s) => s.id === 'smashy') ||
-        availableServers.find((s) => s.id === 'embed_su') ||
-        availableServers.find((s) => s.id === 'twoembed_vip') ||
         availableServers[0]
       );
     }
@@ -240,6 +245,34 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const [selectedServer, setSelectedServer] = useState(getInitialServer);
   const [iframeLoading, setIframeLoading] = useState(true);
   const [showAudioTip, setShowAudioTip] = useState(true);
+
+  // Furina Ad-Shield Mode: Sandboxes iframe to block popups, redirects & clickjacking
+  const [adShieldActive, setAdShieldActive] = useState(() => {
+    try {
+      const saved = localStorage.getItem('furina_adshield_active');
+      return saved === null ? true : saved === 'true';
+    } catch {
+      return true;
+    }
+  });
+  const [blockedAdsCount, setBlockedAdsCount] = useState(() => getBlockedCount());
+
+  useEffect(() => {
+    const handleBlocked = (e) => {
+      setBlockedAdsCount(e.detail?.count || getBlockedCount());
+    };
+    window.addEventListener('furina-ad-blocked', handleBlocked);
+    return () => window.removeEventListener('furina-ad-blocked', handleBlocked);
+  }, []);
+
+  const toggleAdShield = () => {
+    const nextVal = !adShieldActive;
+    setAdShieldActive(nextVal);
+    try {
+      localStorage.setItem('furina_adshield_active', String(nextVal));
+    } catch {}
+    soundFx.playClick();
+  };
 
   // Episodes & Season State with Watch Progress Persistence
   const getSavedProgress = () => {
@@ -1211,6 +1244,26 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 </span>
               </button>
 
+              {/* Furina 3D Ad-Shield Toggle */}
+              <button
+                onClick={toggleAdShield}
+                title={adShieldActive ? `🛡️ Furina Ad-Shield Active (${blockedAdsCount} blocked). Strict sandbox blocks all popups & redirects.` : "Ad-Shield Disabled: Click to enable 100% ad and popup protection"}
+                className={`flex items-center gap-1.5 p-1.5 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold transition shadow-sm cursor-pointer shrink-0 border ${
+                  adShieldActive
+                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/50 shadow-[0_0_12px_rgba(16,185,129,0.4)]'
+                    : 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                }`}
+              >
+                <ShieldCheck className={`w-3.5 h-3.5 ${adShieldActive ? 'text-emerald-400 animate-pulse' : 'text-rose-400'}`} />
+                <span className="hidden sm:inline">Ad-Shield:</span>
+                <span className="font-black">{adShieldActive ? 'ON' : 'OFF'}</span>
+                {blockedAdsCount > 0 && (
+                  <span className="hidden lg:inline text-[9px] px-1.5 py-0.2 rounded-full bg-emerald-950/80 text-emerald-300 font-mono border border-emerald-500/30">
+                    {blockedAdsCount}
+                  </span>
+                )}
+              </button>
+
               {!isCustom && (
                 <button
                   onClick={handleNextServer}
@@ -1986,7 +2039,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   </div>
                 )}
                 <iframe
-                  key={`${currentServer.id}-${season}-${episode}-${audioMode}-${reloadKey}`}
+                  key={`${currentServer.id}-${season}-${episode}-${audioMode}-${reloadKey}-${adShieldActive ? 'shield' : 'standard'}`}
                   src={streamUrl}
                   title={title}
                   onLoad={() => setIframeLoading(false)}
@@ -1996,6 +2049,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                       ? 'w-full h-full aspect-video max-w-[calc(100vh*16/9)] max-h-[calc(100vw*9/16)] shadow-2xl' 
                       : 'w-full h-full'
                   }`}
+                  sandbox={adShieldActive ? "allow-scripts allow-same-origin allow-forms allow-presentation" : "allow-scripts allow-same-origin allow-forms allow-presentation allow-popups allow-popups-to-escape-sandbox"}
                   allowFullScreen
                 />
               </>

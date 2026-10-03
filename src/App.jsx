@@ -1175,7 +1175,7 @@ export default function App() {
       />
 
       {/* Aceternity UI 3D Floating Dock (Desktop & Large Screens) */}
-      <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 hidden lg:block pointer-events-auto">
+      <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 hidden md:block pointer-events-auto">
         <FloatingDock
           items={[
             {
@@ -1258,7 +1258,7 @@ export default function App() {
       <FurinaMascot onOpenSearch={() => setIsSearchOverlayOpen(true)} />
 
       {/* Mobile iOS Style Bottom Navigation Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-[#070d1e]/95 backdrop-blur-2xl border-t border-cyan-500/20 px-1 py-2 flex items-center justify-around shadow-[0_-5px_25px_rgba(0,0,0,0.7)]">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-[#070d1e]/95 backdrop-blur-2xl border-t border-cyan-500/20 px-1 py-2 flex items-center justify-around shadow-[0_-5px_25px_rgba(0,0,0,0.7)]">
         {[
           { id: 'trending', label: 'Trending', icon: Flame },
           { id: 'hollywood', label: 'Movies', icon: Film },

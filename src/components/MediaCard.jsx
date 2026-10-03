@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react';
 import { Play, Star, Bookmark, Check, Sparkles, Volume2, Film, Tv, Info } from 'lucide-react';
 import { isHindiAvailable } from '../services/tmdb';
 import { resolvePosterUrl } from '../services/contentModel';
+import soundFx from '../services/soundFx';
+import { BorderBeam } from './ui/border-beam';
 
 const MediaCard = React.memo(function MediaCard({ 
   item, 
@@ -15,6 +17,7 @@ const MediaCard = React.memo(function MediaCard({
   const cardRef = useRef(null);
   const [transformStyle, setTransformStyle] = useState('perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)');
   const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 });
+  const [isHovered, setIsHovered] = useState(false);
 
   if (!item) return null;
 
@@ -67,24 +70,26 @@ const MediaCard = React.memo(function MediaCard({
   // 3D Perspective Tilt on Mouse Movement (Aceternity 3D Card Style)
   const handleMouseMove = (e) => {
     if (!cardRef.current) return;
+    setIsHovered(true);
     const rect = cardRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
 
-    const rotX = ((y - centerY) / centerY) * -12;
-    const rotY = ((x - centerX) / centerX) * 12;
+    const rotX = ((y - centerY) / centerY) * -13;
+    const rotY = ((x - centerX) / centerX) * 13;
 
-    setTransformStyle(`perspective(1000px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) translateY(-6px) scale3d(1.02, 1.02, 1.02)`);
+    setTransformStyle(`perspective(1000px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) translateY(-8px) scale3d(1.025, 1.025, 1.025)`);
     setGlare({
       x: Math.round((x / rect.width) * 100),
       y: Math.round((y / rect.height) * 100),
-      opacity: 0.35
+      opacity: 0.38
     });
   };
 
   const handleMouseLeave = () => {
+    setIsHovered(false);
     setTransformStyle('perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px) scale3d(1, 1, 1)');
     setGlare((prev) => ({ ...prev, opacity: 0 }));
   };
@@ -92,7 +97,10 @@ const MediaCard = React.memo(function MediaCard({
   return (
     <div 
       ref={cardRef}
-      onClick={() => onPlay(item)}
+      onClick={() => {
+        soundFx.playClick();
+        onPlay(item);
+      }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       data-media-id={item.id}
@@ -101,19 +109,30 @@ const MediaCard = React.memo(function MediaCard({
         transformStyle: 'preserve-3d',
         transition: 'transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1)'
       }}
-      className="group relative rounded-xl sm:rounded-2xl overflow-hidden glass-card cursor-pointer flex flex-col border border-cyan-500/20 hover:border-cyan-400/80 shadow-[0_8px_24px_rgba(0,0,0,0.6)] hover:shadow-[0_16px_36px_rgba(56,189,248,0.35)]"
+      className="group relative rounded-xl sm:rounded-2xl overflow-hidden glass-card cursor-pointer flex flex-col border border-cyan-500/25 hover:border-cyan-400/90 shadow-[0_10px_28px_rgba(0,0,0,0.7)] hover:shadow-[0_18px_45px_rgba(0,0,0,0.9),0_0_30px_rgba(0,242,254,0.45)] [transform-style:preserve-3d]"
     >
-      {/* 3D Glare Reflection Layer */}
+      {/* Magic UI Border Beam on Hover */}
+      <div className={`transition-opacity duration-300 pointer-events-none ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
+        <BorderBeam size={130} duration={4} colorFrom="#00f2fe" colorTo="#38bdf8" borderWidth={2} />
+      </div>
+
+      {/* 3D Specular Glare Reflection Layer following cursor */}
       <div 
-        className="pointer-events-none absolute inset-0 z-30 transition-opacity duration-300 rounded-inherit"
+        className="pointer-events-none absolute inset-0 z-30 transition-opacity duration-200 rounded-inherit"
         style={{
           opacity: glare.opacity,
-          background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,0.3) 0%, rgba(56,189,248,0.2) 35%, transparent 70%)`
+          background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,0.38) 0%, rgba(0,242,254,0.2) 35%, transparent 70%)`
         }}
       />
 
-      {/* Poster Image Container */}
-      <div className="relative aspect-[2/3] w-full overflow-hidden bg-[#060c1d] [transform-style:preserve-3d]">
+      {/* Poster Image Container with 3D Pop (translateZ 40px) */}
+      <div 
+        className="relative aspect-[2/3] w-full overflow-hidden bg-[#04091c] transition-transform duration-300 ease-out"
+        style={{ 
+          transform: isHovered ? 'translateZ(40px) scale(1.04)' : 'translateZ(0px)',
+          transformStyle: 'preserve-3d'
+        }}
+      >
         {/* Poster Image */}
         <img
           src={imageError ? './icon-512.png' : posterSrc}

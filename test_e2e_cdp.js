@@ -1734,6 +1734,36 @@ async function runQA() {
     recordTest(50, 'Aceternity 3D Floating Dock & Crystalline Sparkles Audit', test50Passed,
       `Floating Dock: ${dockAudit.hasDock}, Sparkles Canvas: ${dockAudit.hasSparkles}`);
 
+    console.log('\n--- Capturing Dramatic 3D Preview Screenshot to artifacts/dramatic_3d_preview.png ---');
+    try {
+      await client.send('Emulation.setDeviceMetricsOverride', {
+        width: 1280,
+        height: 900,
+        deviceScaleFactor: 1,
+        mobile: false
+      });
+      await client.eval(`window.scrollTo({ top: 0, behavior: 'instant' });`);
+      await sleep(1500);
+
+      const artifactsDir = path.resolve(process.cwd(), 'artifacts');
+      if (!fs.existsSync(artifactsDir)) {
+        fs.mkdirSync(artifactsDir, { recursive: true });
+      }
+
+      const screenshot = await client.send('Page.captureScreenshot', {
+        format: 'png',
+        captureBeyondViewport: false
+      });
+
+      if (screenshot && screenshot.data) {
+        const previewPath = path.join(artifactsDir, 'dramatic_3d_preview.png');
+        fs.writeFileSync(previewPath, Buffer.from(screenshot.data, 'base64'));
+        console.log(`📸 Dramatic 3D Preview Screenshot saved to: ${previewPath}`);
+      }
+    } catch (e) {
+      console.error('Failed to capture preview screenshot:', e.message);
+    }
+
     console.log('\n--- Running TEST 26: Final Production Build Verification ---');
     try {
       execSync('npm.cmd run build', { cwd: process.cwd(), stdio: 'pipe' });

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Play, Plus, Check, Star, Info, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { isHindiAvailable } from '../services/tmdb';
 import { resolveBackdropUrl, extractGenres } from '../services/contentModel';
@@ -7,6 +7,8 @@ import { BorderBeam } from './ui/border-beam';
 import { Spotlight } from './ui/spotlight';
 import { SparklesCore } from './ui/sparkles';
 import { Ripple } from './ui/ripple';
+import { ShimmerButton } from './ui/shimmer-button';
+import { GlowEffect } from './ui/glow-effect';
 
 export default function HeroBanner({ 
   items, 
@@ -22,6 +24,9 @@ export default function HeroBanner({
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const cardRef = useRef(null);
+  const [transformStyle, setTransformStyle] = useState('perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)');
+  const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 });
 
   useEffect(() => {
     if (list.length <= 1 || isPaused) return;
@@ -30,6 +35,32 @@ export default function HeroBanner({
     }, 7000);
     return () => clearInterval(timer);
   }, [list.length, isPaused]);
+
+  // 3D Perspective Tilt on Mouse Movement (Aceternity 3D Hero Stage)
+  const handleMouseMove = (e) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const rotX = ((y - centerY) / centerY) * -6;
+    const rotY = ((x - centerX) / centerX) * 6;
+
+    setTransformStyle(`perspective(1200px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) scale3d(1.008, 1.008, 1.008)`);
+    setGlare({
+      x: Math.round((x / rect.width) * 100),
+      y: Math.round((y / rect.height) * 100),
+      opacity: 0.28
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setIsPaused(false);
+    setTransformStyle('perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)');
+    setGlare((prev) => ({ ...prev, opacity: 0 }));
+  };
 
   if (list.length === 0) return null;
   const currentItem = list[currentIndex] || list[0] || {};
@@ -71,15 +102,43 @@ export default function HeroBanner({
 
   return (
     <div 
+      ref={cardRef}
       onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-      className="relative w-full h-[54vh] sm:h-[65vh] max-h-[590px] overflow-hidden rounded-3xl mb-8 border border-cyan-500/25 shadow-[0_20px_60px_rgba(0,0,0,0.85),0_0_40px_rgba(56,189,248,0.15)] group"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        transform: transformStyle,
+        transformStyle: 'preserve-3d',
+        transition: 'transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1)'
+      }}
+      className="relative w-full h-[54vh] sm:h-[65vh] max-h-[590px] overflow-hidden rounded-3xl mb-8 border-2 border-cyan-400/50 shadow-[0_25px_70px_rgba(0,0,0,0.92),0_0_45px_rgba(0,242,254,0.35),inset_0_0_35px_rgba(0,242,254,0.15)] group [transform-style:preserve-3d]"
     >
-      {/* Magic UI Animated Border Beam */}
-      <BorderBeam size={260} duration={12} colorFrom="#38bdf8" colorTo="#2563eb" borderWidth={2} />
+      {/* Theatrical Overhead Stage Lamp Fixture with radiant cyan hydro lighting */}
+      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-transparent via-[#00f2fe] to-transparent z-20 shadow-[0_0_35px_#00f2fe,0_0_15px_#38bdf8]" />
+      <div className="absolute -top-1 left-1/4 -translate-x-1/2 w-48 sm:w-80 h-3 bg-cyan-400/50 rounded-full blur-md z-20 pointer-events-none" />
+      <div className="absolute -top-16 left-8 md:left-32 w-80 h-80 bg-[#00f2fe]/25 rounded-full blur-3xl pointer-events-none z-10" />
 
-      {/* Aceternity 3D Spotlight */}
-      <Spotlight className="-top-36 left-10 md:left-40 md:-top-20" fill="rgba(56, 189, 248, 0.28)" />
+      {/* Dual Animated Moving Border Beams tracing the perimeter */}
+      <BorderBeam size={340} duration={8} colorFrom="#00f2fe" colorTo="#38bdf8" borderWidth={2.5} />
+      <BorderBeam size={240} duration={12} delay={4} colorFrom="#38bdf8" colorTo="#2563eb" borderWidth={2} />
+
+      {/* Aceternity Overhead Glowing Lamp / Spotlight Cone illuminating Title */}
+      <div 
+        className="absolute -top-10 left-0 sm:left-12 w-full max-w-2xl h-[420px] pointer-events-none z-10 opacity-80 mix-blend-screen"
+        style={{
+          background: 'radial-gradient(ellipse 60% 70% at 30% 0%, rgba(0, 242, 254, 0.45) 0%, rgba(56, 189, 248, 0.22) 40%, rgba(37, 99, 235, 0.08) 65%, transparent 85%)'
+        }}
+      />
+      <Spotlight className="-top-28 left-2 md:left-20 md:-top-16" fill="rgba(0, 242, 254, 0.6)" />
+
+      {/* 3D Specular Glare Reflection Layer */}
+      <div 
+        className="pointer-events-none absolute inset-0 z-20 transition-opacity duration-300 rounded-3xl"
+        style={{
+          opacity: glare.opacity,
+          background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,0.22) 0%, rgba(0,242,254,0.15) 30%, transparent 65%)`
+        }}
+      />
 
       {/* Background Poster Image with smooth crossfade */}
       <div className="absolute inset-0 bg-[#030712]">
@@ -96,25 +155,69 @@ export default function HeroBanner({
       </div>
 
       {/* Cinematic Vignette Gradients */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#030712] via-[#030712]/60 to-transparent pointer-events-none" />
-      <div className="absolute inset-0 bg-gradient-to-r from-[#030712] via-[#030712]/80 to-transparent max-w-4xl pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-[#020617]/65 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#020617] via-[#020617]/85 to-transparent max-w-4xl pointer-events-none" />
 
       {/* Ambient hydro lighting and sparkles */}
-      <div className="absolute top-1/4 left-10 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/4 left-10 w-96 h-96 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
       <SparklesCore
         id="hero-sparkles"
-        particleDensity={25}
+        particleDensity={28}
         particleColor="#38bdf8"
         minSize={0.6}
-        maxSize={2.0}
-        className="opacity-60"
+        maxSize={2.2}
+        className="opacity-75 z-10"
       />
 
+      {/* Theatrical Fontaine Opera Stage: Lady Furina Performing Prominently */}
+      <div 
+        className="hidden md:flex absolute top-7 right-8 z-30 flex-col items-center p-3.5 rounded-2xl bg-gradient-to-b from-[#091a42]/90 via-[#050f29]/95 to-[#03081a]/95 border-2 border-cyan-400/50 shadow-[0_12px_35px_rgba(0,0,0,0.85),0_0_25px_rgba(0,242,254,0.4)] backdrop-blur-xl group/stage hover:scale-105 transition-all duration-300 pointer-events-auto cursor-pointer"
+        style={{ transform: 'translateZ(55px)' }}
+        onClick={() => soundFx.playWaterDrop()}
+        title="Lady Furina's Fontaine Theatrical Stage"
+      >
+        {/* Stage Spotlight Glow */}
+        <div className="absolute -top-3 w-20 h-20 bg-cyan-400/30 rounded-full blur-xl pointer-events-none" />
+        
+        {/* Top Stage Header with Gold Trim */}
+        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/25 via-cyan-500/20 to-blue-500/25 border border-amber-300/40 text-amber-300 text-[10px] font-black tracking-wider uppercase mb-2 shadow">
+          <span>👑</span>
+          <span>Fontaine Opera Stage</span>
+        </div>
+
+        {/* Animated Furina Mascot Dancing on Platform */}
+        <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-cyan-300 shadow-[0_0_22px_rgba(0,242,254,0.75)] bg-[#040a1c] mb-2">
+          <img
+            src="./furina_chibi.gif"
+            alt="Furina Chibi Mascot Stage Performance"
+            className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-200"
+          />
+          <div className="absolute bottom-0 inset-x-0 h-4 bg-gradient-to-t from-cyan-400/50 to-transparent pointer-events-none" />
+        </div>
+
+        {/* Stage Dialogue Pill */}
+        <div className="px-2.5 py-1 rounded-xl bg-cyan-950/85 border border-cyan-400/40 text-center max-w-[155px]">
+          <span className="text-[10px] font-extrabold text-cyan-200 flex items-center justify-center gap-1">
+            <span className="animate-spin text-xs">✨</span>
+            <span>Furina Premiere</span>
+          </span>
+          <p className="text-[8.5px] text-cyan-300/90 mt-0.5 font-medium leading-tight">
+            "Behold, Fontaine's finest 4K cinema!"
+          </p>
+        </div>
+      </div>
+
       {/* Content */}
-      <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-12 max-w-3xl z-10 animate-fade-in" key={`content-${currentItem?.id}`}>
+      <div 
+        className="absolute bottom-0 left-0 right-0 p-6 sm:p-12 max-w-3xl z-10 animate-fade-in [transform-style:preserve-3d]" 
+        key={`content-${currentItem?.id}`}
+      >
         
         {/* Furina Mascot Top Premiere Tag */}
-        <div className="flex items-center gap-2 mb-3 flex-wrap">
+        <div 
+          className="flex items-center gap-2 mb-3 flex-wrap transition-transform duration-200"
+          style={{ transform: 'translateZ(36px)' }}
+        >
           <div className="flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-cyan-950/85 border border-cyan-400/50 shadow-[0_0_12px_rgba(56,189,248,0.4)] backdrop-blur-md">
             <img 
               src="./furina_chibi.gif" 
@@ -158,37 +261,58 @@ export default function HeroBanner({
           )}
         </div>
 
-        <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-2 leading-tight drop-shadow-lg">
+        <h1 
+          className="text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-2 leading-tight drop-shadow-[0_4px_18px_rgba(0,242,254,0.45)] transition-transform duration-200"
+          style={{ transform: 'translateZ(50px)' }}
+        >
           {title}
         </h1>
 
         {genres.length > 0 && (
-          <div className="flex items-center gap-1.5 mb-3 flex-wrap">
+          <div 
+            className="flex items-center gap-1.5 mb-3 flex-wrap transition-transform duration-200"
+            style={{ transform: 'translateZ(34px)' }}
+          >
             {genres.slice(0, 4).map((g) => (
-              <span key={g} className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-cyan-950/60 border border-cyan-800/40 text-cyan-300">
+              <span key={g} className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-cyan-950/70 border border-cyan-500/40 text-cyan-300">
                 {g}
               </span>
             ))}
           </div>
         )}
 
-        <p className="text-xs sm:text-sm text-cyan-100/80 line-clamp-2 sm:line-clamp-3 mb-6 max-w-xl font-medium leading-relaxed drop-shadow">
+        <p 
+          className="text-xs sm:text-sm text-cyan-100/90 line-clamp-2 sm:line-clamp-3 mb-6 max-w-xl font-medium leading-relaxed drop-shadow transition-transform duration-200"
+          style={{ transform: 'translateZ(28px)' }}
+        >
           {currentItem?.overview}
         </p>
 
-        <div className="flex items-center gap-3 flex-wrap">
-          <button
-            onClick={handlePlayClick}
-            className="btn-cinema-4k btn-shine animate-pulse-play flex items-center gap-2.5 px-7 py-3.5 rounded-full text-sm font-black transform hover:scale-105 active:scale-95 cursor-pointer shadow-[0_0_25px_rgba(6,182,212,0.6)]"
-          >
-            <Play className="w-4 h-4 fill-gray-950 ml-0.5" />
-            <span>Watch in 4K</span>
-          </button>
+        <div 
+          className="flex items-center gap-3.5 flex-wrap transition-transform duration-200"
+          style={{ transform: 'translateZ(60px)' }}
+        >
+          <div className="relative group/playbtn">
+            <GlowEffect mode="rotate" blur="medium" scale={1.05} duration={3} colors={['#00f2fe', '#38bdf8', '#2563eb', '#7c3aed']} />
+            <ShimmerButton
+              onClick={handlePlayClick}
+              shimmerColor="#ffffff"
+              shimmerDuration="2.5s"
+              background="linear-gradient(135deg, #00f2fe 0%, #0284c7 50%, #2563eb 100%)"
+              className="text-gray-950 font-black text-sm px-8 py-3.5 shadow-[0_0_35px_rgba(0,242,254,0.85)] border-2 border-white/60 hover:scale-105 active:scale-95 transition-all"
+            >
+              <Play className="w-4 h-4 fill-gray-950 ml-0.5" />
+              <span className="tracking-wide">Watch in 4K</span>
+            </ShimmerButton>
+          </div>
 
           {onOpenDetails && (
             <button
-              onClick={() => onOpenDetails(currentItem)}
-              className="flex items-center gap-2 px-5 py-3.5 rounded-full text-sm font-bold transition-all border backdrop-blur-md bg-[#0e1b3d]/70 border-cyan-500/30 text-white hover:bg-white/10 hover:border-cyan-400/60 cursor-pointer"
+              onClick={() => {
+                soundFx.playClick();
+                onOpenDetails(currentItem);
+              }}
+              className="flex items-center gap-2 px-6 py-3.5 rounded-full text-sm font-bold transition-all border backdrop-blur-xl bg-slate-950/80 border-cyan-400/40 text-cyan-200 hover:text-white hover:bg-cyan-500/20 hover:border-cyan-300 shadow-[0_0_15px_rgba(56,189,248,0.2)] hover:scale-105 active:scale-95 cursor-pointer"
             >
               <Info className="w-4 h-4 text-cyan-300 bounce-hover" />
               <span>Details</span>
@@ -196,14 +320,17 @@ export default function HeroBanner({
           )}
 
           <button
-            onClick={() => onToggleWatchlist(currentItem)}
-            className={`flex items-center gap-2 px-5 py-3.5 rounded-full text-sm font-bold transition-all border backdrop-blur-md cursor-pointer ${
+            onClick={() => {
+              soundFx.playClick();
+              onToggleWatchlist(currentItem);
+            }}
+            className={`flex items-center gap-2 px-6 py-3.5 rounded-full text-sm font-bold transition-all border backdrop-blur-xl cursor-pointer hover:scale-105 active:scale-95 ${
               saved
-                ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_15px_rgba(56,189,248,0.3)]'
-                : 'bg-[#0e1b3d]/70 border-cyan-500/30 text-white hover:bg-white/10 hover:border-cyan-400/60'
+                ? 'bg-cyan-500/25 border-cyan-400 text-cyan-200 shadow-[0_0_20px_rgba(56,189,248,0.4)]'
+                : 'bg-slate-950/80 border-cyan-400/30 text-slate-200 hover:text-white hover:bg-cyan-500/20 hover:border-cyan-300'
             }`}
           >
-            {saved ? <Check className="w-4 h-4 text-cyan-400" /> : <Plus className="w-4 h-4" />}
+            {saved ? <Check className="w-4 h-4 text-cyan-400" /> : <Plus className="w-4 h-4 text-cyan-300" />}
             <span>{saved ? 'Saved' : '+ Watchlist'}</span>
           </button>
         </div>

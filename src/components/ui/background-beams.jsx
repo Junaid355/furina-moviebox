@@ -20,64 +20,126 @@ export const BackgroundBeams = ({ className = "" }) => {
     };
     window.addEventListener("resize", handleResize);
 
-    // Hydro water particles & glowing ambient rays
-    const particleCount = 42;
-    const particles = Array.from({ length: particleCount }, () => ({
+    // Fontaine Hydro Water Bubbles & Twinkling Crystalline Sparkles
+    const bubbleCount = 65;
+    const bubbles = Array.from({ length: bubbleCount }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      size: Math.random() * 2.5 + 0.8,
-      speedX: (Math.random() - 0.5) * 0.4,
-      speedY: -Math.random() * 0.5 - 0.2, // gently float upward like bubbles
-      opacity: Math.random() * 0.6 + 0.2,
-      pulse: Math.random() * Math.PI,
-      hue: Math.random() > 0.4 ? 199 : 217 // Fontaine cyan & royal hydro blue
+      radius: Math.random() * 3.5 + 1.2,
+      speedX: (Math.random() - 0.5) * 0.5,
+      speedY: -Math.random() * 0.8 - 0.35, // Float upwards
+      opacity: Math.random() * 0.6 + 0.3,
+      pulse: Math.random() * Math.PI * 2,
+      pulseSpeed: Math.random() * 0.03 + 0.015,
+      isSparkle: Math.random() > 0.65
     }));
 
     let time = 0;
     const render = () => {
-      time += 0.015;
+      time += 0.012;
       ctx.clearRect(0, 0, width, height);
 
-      // Draw subtle radiant hydro water rays
-      const ray1X = width * 0.25 + Math.sin(time * 0.5) * 60;
-      const ray2X = width * 0.75 + Math.cos(time * 0.4) * 80;
+      // 1. Radiant Fontaine Aurora & Theatrical Hydro Light Rays
+      const ray1X = width * 0.28 + Math.sin(time * 0.4) * 120;
+      const ray2X = width * 0.72 + Math.cos(time * 0.35) * 140;
+      const ray3X = width * 0.50 + Math.sin(time * 0.25) * 90;
 
-      const grad1 = ctx.createRadialGradient(ray1X, 0, 10, ray1X, height * 0.6, width * 0.5);
-      grad1.addColorStop(0, "rgba(56, 189, 248, 0.045)");
-      grad1.addColorStop(0.5, "rgba(37, 99, 235, 0.02)");
+      // Primary Cyan Hydro Ray
+      const grad1 = ctx.createRadialGradient(ray1X, -20, 20, ray1X, height * 0.75, width * 0.55);
+      grad1.addColorStop(0, "rgba(0, 242, 254, 0.16)");
+      grad1.addColorStop(0.35, "rgba(56, 189, 248, 0.09)");
+      grad1.addColorStop(0.7, "rgba(37, 99, 235, 0.04)");
       grad1.addColorStop(1, "transparent");
       ctx.fillStyle = grad1;
       ctx.fillRect(0, 0, width, height);
 
-      const grad2 = ctx.createRadialGradient(ray2X, 0, 10, ray2X, height * 0.7, width * 0.6);
-      grad2.addColorStop(0, "rgba(103, 232, 249, 0.035)");
-      grad2.addColorStop(0.5, "rgba(59, 130, 246, 0.015)");
+      // Deep Sapphire / Royal Hydro Ray
+      const grad2 = ctx.createRadialGradient(ray2X, -40, 30, ray2X, height * 0.85, width * 0.6);
+      grad2.addColorStop(0, "rgba(56, 189, 248, 0.14)");
+      grad2.addColorStop(0.4, "rgba(30, 64, 175, 0.08)");
+      grad2.addColorStop(0.8, "rgba(147, 51, 234, 0.03)");
       grad2.addColorStop(1, "transparent");
       ctx.fillStyle = grad2;
       ctx.fillRect(0, 0, width, height);
 
-      // Render floating hydro bubbles / particles
-      particles.forEach((p) => {
-        p.x += p.speedX;
-        p.y += p.speedY;
-        p.pulse += 0.025;
+      // Center Stage Hydro Glow
+      const grad3 = ctx.createRadialGradient(ray3X, 80, 10, ray3X, height * 0.5, width * 0.4);
+      grad3.addColorStop(0, "rgba(103, 232, 249, 0.11)");
+      grad3.addColorStop(0.5, "rgba(37, 99, 235, 0.05)");
+      grad3.addColorStop(1, "transparent");
+      ctx.fillStyle = grad3;
+      ctx.fillRect(0, 0, width, height);
 
-        // Wrap around
-        if (p.y < -10) {
-          p.y = height + 10;
-          p.x = Math.random() * width;
+      // 2. Caustic Water Shimmer Waves at Upper Header
+      const causticPoints = 5;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      for (let i = 0; i <= causticPoints; i++) {
+        const x = (width / causticPoints) * i;
+        const y = Math.sin(time + i * 1.2) * 25 + 35;
+        ctx.lineTo(x, y);
+      }
+      ctx.lineTo(width, 0);
+      ctx.closePath();
+      const waveGrad = ctx.createLinearGradient(0, 0, 0, 70);
+      waveGrad.addColorStop(0, "rgba(0, 242, 254, 0.08)");
+      waveGrad.addColorStop(1, "transparent");
+      ctx.fillStyle = waveGrad;
+      ctx.fill();
+      ctx.restore();
+
+      // 3. Render Floating Hydro Bubbles & Crystalline Sparkles
+      bubbles.forEach((b) => {
+        b.x += b.speedX + Math.sin(time + b.pulse) * 0.25;
+        b.y += b.speedY;
+        b.pulse += b.pulseSpeed;
+
+        // Wrap around smoothly
+        if (b.y < -20) {
+          b.y = height + 15;
+          b.x = Math.random() * width;
         }
-        if (p.x < -10) p.x = width + 10;
-        if (p.x > width + 10) p.x = -10;
+        if (b.x < -20) b.x = width + 20;
+        if (b.x > width + 20) b.x = -20;
 
-        const currentOpacity = Math.max(0.1, (Math.sin(p.pulse) * 0.3 + 0.5) * p.opacity);
+        const currentOpacity = Math.max(0.15, (Math.sin(b.pulse) * 0.4 + 0.6) * b.opacity);
 
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(${p.hue}, 95%, 65%, ${currentOpacity})`;
-        ctx.shadowColor = `hsla(${p.hue}, 95%, 65%, 0.8)`;
-        ctx.shadowBlur = 8;
-        ctx.fill();
+        ctx.save();
+        if (b.isSparkle) {
+          // 4-pointed Fontaine Crystalline Star
+          const size = b.radius * 1.8;
+          ctx.translate(b.x, b.y);
+          ctx.beginPath();
+          ctx.moveTo(0, -size);
+          ctx.quadraticCurveTo(0, 0, size, 0);
+          ctx.quadraticCurveTo(0, 0, 0, size);
+          ctx.quadraticCurveTo(0, 0, -size, 0);
+          ctx.quadraticCurveTo(0, 0, 0, -size);
+          ctx.fillStyle = `rgba(186, 230, 253, ${currentOpacity})`;
+          ctx.shadowColor = "rgba(0, 242, 254, 0.85)";
+          ctx.shadowBlur = 10;
+          ctx.fill();
+        } else {
+          // Translucent Hydro Bubble with Specular Highlight
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(56, 189, 248, ${currentOpacity * 0.35})`;
+          ctx.strokeStyle = `rgba(186, 230, 253, ${currentOpacity * 0.85})`;
+          ctx.lineWidth = 0.8;
+          ctx.shadowColor = "rgba(0, 242, 254, 0.9)";
+          ctx.shadowBlur = 8;
+          ctx.fill();
+          ctx.stroke();
+
+          // White specular dot on bubble top-left
+          ctx.beginPath();
+          ctx.arc(b.x - b.radius * 0.35, b.y - b.radius * 0.35, b.radius * 0.28, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 255, 255, ${currentOpacity * 0.95})`;
+          ctx.shadowBlur = 0;
+          ctx.fill();
+        }
+        ctx.restore();
       });
 
       animationFrameId = requestAnimationFrame(render);
@@ -94,7 +156,7 @@ export const BackgroundBeams = ({ className = "" }) => {
   return (
     <canvas
       ref={canvasRef}
-      className={`pointer-events-none fixed inset-0 z-0 h-full w-full opacity-70 ${className}`}
+      className={`pointer-events-none fixed inset-0 z-0 h-full w-full opacity-90 ${className}`}
     />
   );
 };

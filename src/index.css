@@ -9,14 +9,15 @@
   }
 
   body {
-    background-color: #060813;
+    background-color: #030819;
     background-image: 
-      radial-gradient(at 0% 0%, rgba(249, 115, 22, 0.04) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.05) 0px, transparent 50%),
-      radial-gradient(at 50% 50%, rgba(14, 165, 233, 0.03) 0px, transparent 60%),
-      radial-gradient(at 50% 100%, rgba(244, 63, 94, 0.03) 0px, transparent 50%);
+      radial-gradient(at 20% 0%, rgba(0, 242, 254, 0.1) 0px, transparent 55%),
+      radial-gradient(at 80% 0%, rgba(37, 99, 235, 0.14) 0px, transparent 60%),
+      radial-gradient(at 50% 40%, rgba(56, 189, 248, 0.08) 0px, transparent 60%),
+      radial-gradient(at 50% 100%, rgba(20, 184, 166, 0.05) 0px, transparent 55%),
+      radial-gradient(at 85% 90%, rgba(147, 51, 234, 0.06) 0px, transparent 50%);
     background-attachment: fixed;
-    color: #f8fafc;
+    color: #f0f9ff;
     font-family: "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     -webkit-tap-highlight-color: transparent;
     overflow-x: hidden;
@@ -33,60 +34,61 @@
   }
 }
 
-/* Cozy Warm Amber & Violet Scrollbar */
+/* Fontaine Hydro Cyan & Deep Sapphire Scrollbar */
 ::-webkit-scrollbar {
   width: 7px;
   height: 7px;
 }
 ::-webkit-scrollbar-track {
-  background: #060914;
+  background: #030819;
 }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #1e1b4b 0%, #311c47 50%, #1e1e38 100%);
+  background: linear-gradient(180deg, #0f2757 0%, #1e3a8a 50%, #0369a1 100%);
   border-radius: 9999px;
-  border: 1px solid rgba(251, 146, 60, 0.15);
+  border: 1px solid rgba(0, 242, 254, 0.25);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #4338ca 0%, #7c3aed 50%, #d97706 100%);
-  box-shadow: 0 0 14px rgba(251, 146, 60, 0.4);
+  background: linear-gradient(180deg, #0284c7 0%, #00f2fe 50%, #38bdf8 100%);
+  box-shadow: 0 0 14px rgba(0, 242, 254, 0.5);
 }
 
-/* Glassmorphic Cozy Navbar with specular highlight */
+/* Glassmorphic Fontaine Navbar with specular cyan highlight */
 .glass-nav {
-  background: rgba(8, 11, 24, 0.82);
+  background: rgba(4, 11, 32, 0.86);
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 36px rgba(0, 0, 0, 0.65), 0 1px 0 rgba(251, 146, 60, 0.08);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+  box-shadow: 0 8px 36px rgba(0, 0, 0, 0.75), 0 1px 0 rgba(0, 242, 254, 0.15);
 }
 
-/* Cozy Frosted Glass Panel */
+/* Fontaine Frosted Glass Panel */
 .glass-panel {
-  background: rgba(12, 16, 36, 0.82);
+  background: rgba(6, 15, 42, 0.86);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.8), 0 0 25px rgba(0, 242, 254, 0.18);
 }
 
-/* Ultra-Smooth Cozy Glass Media Card (Warm ambient undertones & micro-glow) */
+/* Ultra-Smooth 3D Fontaine Glass Media Card (Deep Sapphire with hydro cyan glow & gold trim) */
 .glass-card {
-  background: linear-gradient(180deg, #0e1633 0%, #090e24 70%, #0e0e22 100%);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: linear-gradient(180deg, rgba(8, 20, 52, 0.85) 0%, rgba(4, 11, 31, 0.92) 70%, rgba(3, 8, 24, 0.96) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.22);
   contain: content;
   content-visibility: auto;
   contain-intrinsic-size: 320px;
+  transform-style: preserve-3d;
   transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.28s ease;
   will-change: transform;
 }
 
 .glass-card:hover {
-  transform: translateY(-5px) scale(1.018);
-  border-color: rgba(251, 146, 60, 0.45);
+  transform: translateY(-6px) scale(1.02);
+  border-color: rgba(0, 242, 254, 0.7);
   box-shadow: 
-    0 18px 36px -8px rgba(0, 0, 0, 0.85),
-    0 0 24px -2px rgba(251, 146, 60, 0.25),
-    0 0 14px 1px rgba(168, 85, 247, 0.2);
+    0 20px 45px -8px rgba(0, 0, 0, 0.9),
+    0 0 28px rgba(0, 242, 254, 0.4),
+    0 0 14px rgba(56, 189, 248, 0.25);
 }
 
 /* Skeleton Shimmer Loading Effect with Cozy Undertone */
@@ -352,6 +354,57 @@ video::cue {
 .bounce-hover:hover {
   transform: scale(1.15) translateY(-2px);
   transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* ==========================================================================
+   Mobile & iPhone Optimization (Safe Areas & 16px Font Zoom Prevention)
+   ========================================================================== */
+@media screen and (max-width: 768px) {
+  input[type="text"],
+  input[type="number"],
+  input[type="search"],
+  textarea,
+  select {
+    font-size: 16px !important; /* Prevents auto-zoom on iOS Safari */
+  }
+}
+
+.safe-top {
+  padding-top: max(0.75rem, env(safe-area-inset-top, 0px));
+}
+
+.safe-bottom {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+}
+
+/* Shimmer Button Keyframes */
+@keyframes shimmerSlide {
+  to {
+    transform: translate(calc(100cqw - 100%), 0);
+  }
+}
+
+@keyframes spinAround {
+  0% {
+    transform: translateZ(0) rotate(0);
+  }
+  15%, 35% {
+    transform: translateZ(0) rotate(90deg);
+  }
+  65%, 85% {
+    transform: translateZ(0) rotate(270deg);
+  }
+  100% {
+    transform: translateZ(0) rotate(360deg);
+  }
+}
+
+.animate-shimmer-slide {
+  animation: shimmerSlide var(--speed) ease-in-out infinite alternate;
+}
+
+.animate-spin-around {
+  animation: spinAround calc(var(--speed) * 2) infinite linear;
 }
 
 

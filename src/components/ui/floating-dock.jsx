@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from "framer-motion";
+import soundFx from "../../services/soundFx";
 
 /**
  * Aceternity UI Floating Dock Component
@@ -26,7 +27,7 @@ const FloatingDockMobile = ({ items, className = "" }) => {
         {open && (
           <motion.div
             layoutId="nav"
-            className="absolute bottom-full mb-2 inset-x-0 flex flex-col gap-2 p-2 bg-[#060e24]/95 backdrop-blur-xl border border-cyan-500/30 rounded-2xl shadow-[0_0_20px_rgba(56,189,248,0.25)]"
+            className="absolute bottom-full mb-2 inset-x-0 flex flex-col gap-2 p-2 bg-[#040d28]/95 backdrop-blur-xl border border-cyan-400/40 rounded-2xl shadow-[0_0_25px_rgba(0,242,254,0.35)]"
           >
             {items.map((item, idx) => (
               <motion.div
@@ -45,7 +46,7 @@ const FloatingDockMobile = ({ items, className = "" }) => {
                     item.onClick?.();
                     setOpen(false);
                   }}
-                  className="w-10 h-10 rounded-full bg-[#0a1533] border border-cyan-400/30 flex items-center justify-center text-cyan-300 hover:text-white hover:bg-cyan-500/20 transition cursor-pointer"
+                  className="w-10 h-10 rounded-full bg-[#061233] border border-cyan-400/40 flex items-center justify-center text-cyan-300 hover:text-white hover:bg-cyan-500/25 transition cursor-pointer"
                   title={item.title}
                 >
                   <div className="w-5 h-5 flex items-center justify-center">
@@ -59,7 +60,7 @@ const FloatingDockMobile = ({ items, className = "" }) => {
       </AnimatePresence>
       <button
         onClick={() => setOpen(!open)}
-        className="w-10 h-10 rounded-full bg-[#0a1533] border border-cyan-400/40 flex items-center justify-center text-cyan-300 shadow-[0_0_15px_rgba(56,189,248,0.35)] cursor-pointer"
+        className="w-10 h-10 rounded-full bg-[#061233] border border-cyan-400/50 flex items-center justify-center text-cyan-300 shadow-[0_0_18px_rgba(0,242,254,0.4)] cursor-pointer"
       >
         <span className="text-xs font-black">⚓</span>
       </button>
@@ -73,7 +74,7 @@ const FloatingDockDesktop = ({ items, className = "" }) => {
     <motion.div
       onMouseMove={(e) => mouseX.set(e.pageX)}
       onMouseLeave={() => mouseX.set(Infinity)}
-      className={`mx-auto hidden md:flex h-14 gap-3 items-end rounded-2xl bg-[#060e24]/90 backdrop-blur-2xl px-3 pb-2.5 border border-cyan-500/30 shadow-[0_10px_35px_rgba(0,0,0,0.6),0_0_25px_rgba(56,189,248,0.2)] ${className}`}
+      className={`mx-auto hidden md:flex h-15 gap-3.5 items-end rounded-2xl bg-[#040d28]/92 backdrop-blur-2xl px-4 pb-2.5 pt-2 border-2 border-cyan-400/50 shadow-[0_15px_45px_rgba(0,0,0,0.85),0_0_30px_rgba(0,242,254,0.3)] ring-1 ring-amber-400/25 ${className}`}
     >
       {items.map((item) => (
         <IconContainer mouseX={mouseX} key={item.title} {...item} />
@@ -125,13 +126,16 @@ function IconContainer({ mouseX, title, icon, onClick, active }) {
       <motion.button
         ref={ref}
         style={{ width, height }}
-        onMouseEnter={() => setHovered(true)}
+        onMouseEnter={() => {
+          setHovered(true);
+          soundFx.playHover?.();
+        }}
         onMouseLeave={() => setHovered(false)}
         onClick={onClick}
         className={`aspect-square rounded-full flex items-center justify-center relative cursor-pointer transition-colors duration-200 ${
           active
-            ? "bg-gradient-to-tr from-cyan-500 to-blue-600 text-white shadow-[0_0_15px_rgba(56,189,248,0.5)] border border-cyan-300"
-            : "bg-[#0b1633] text-cyan-300 hover:text-white hover:bg-cyan-500/20 border border-cyan-500/30"
+            ? "bg-gradient-to-tr from-cyan-400 via-sky-500 to-blue-600 text-gray-950 font-black shadow-[0_0_20px_rgba(0,242,254,0.8)] border-2 border-cyan-200"
+            : "bg-[#08153d] text-cyan-300 hover:text-white hover:bg-cyan-500/25 border border-cyan-500/40"
         }`}
       >
         <AnimatePresence>
