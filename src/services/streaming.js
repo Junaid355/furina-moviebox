@@ -154,8 +154,8 @@ export const SERVERS = [
     badge: '4K MovieBox CDN',
     color: 'bg-teal-500/20 text-teal-300 border-teal-500/40',
     supportedAudios: ['english', 'sub', 'hindi'],
-    getMovieUrl: (tmdbId) => `https://autoembed.co/movie/tmdb/${tmdbId}`,
-    getTvUrl: (tmdbId, s = 1, e = 1) => `https://autoembed.co/tv/tmdb/${tmdbId}-${s}-${e}`
+    getMovieUrl: (tmdbId) => `https://vidsrc.pm/embed/movie/${tmdbId}`,
+    getTvUrl: (tmdbId, s = 1, e = 1) => `https://vidsrc.pm/embed/tv/${tmdbId}/${s}/${e}`
   },
   {
     id: 'netmirror_cinema',
