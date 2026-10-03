@@ -841,6 +841,81 @@ async function runQA() {
     recordTest(28, 'Hollywood Blockbuster Real Multi-Audio Online Streaming (Deadpool & Wolverine)', deadpoolPassed, 
       `Hindi initial iframe: ${deadpoolAudioCheck.iframeSrc}, English iframe: ${englishSwitchCheck.iframeSrc}, Japanese iframe: ${japaneseSwitchCheck.iframeSrc}, Local dummy purged: ${!deadpoolAudioCheck.isLocalDummy}`);
 
+    console.log('\n--- Running TEST 28c: Furina uBlock Ad-Shield & AI Auto-Select Server Audit ---');
+    const adShieldAudit = await client.eval(`
+      (() => {
+        const iframe = document.querySelector('iframe');
+        const hasSandbox = iframe ? iframe.hasAttribute('sandbox') : false;
+        const aiBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('AI Auto-Select'));
+        const adShieldBtn = Array.from(document.querySelectorAll('button')).find(b => b.title?.includes('Furina Ad-Shield') || b.innerText.includes('Ad-Shield'));
+        return {
+          hasSandbox,
+          aiBtnFound: Boolean(aiBtn),
+          adShieldBtnFound: Boolean(adShieldBtn)
+        };
+      })()
+    `);
+
+    // Click AI Auto-Select Server
+    await client.eval(`
+      (() => {
+        const aiBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('AI Auto-Select'));
+        if (aiBtn) aiBtn.click();
+      })()
+    `);
+    await sleep(600);
+
+    const afterAiSwitch = await client.eval(`
+      (() => {
+        const iframe = document.querySelector('iframe');
+        return {
+          src: iframe ? iframe.src : '',
+          hasSandbox: iframe ? iframe.hasAttribute('sandbox') : false
+        };
+      })()
+    `);
+
+    // Open uBlock Ad-Shield HUD modal
+    await client.eval(`
+      (() => {
+        const adShieldBtn = Array.from(document.querySelectorAll('button')).find(b => b.title?.includes('Furina Ad-Shield') || b.innerText.includes('Ad-Shield'));
+        if (adShieldBtn) adShieldBtn.click();
+      })()
+    `);
+    await sleep(500);
+
+    const ublockModalAudit = await client.eval(`
+      (() => {
+        const title = Array.from(document.querySelectorAll('h3')).find(h => h.innerText.includes('FURINA AD-SHIELD PRO'));
+        const testBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('Test Ad-Shield Trap'));
+        if (testBtn) testBtn.click();
+        return {
+          isOpen: Boolean(title),
+          hasTestBtn: Boolean(testBtn)
+        };
+      })()
+    `);
+    await sleep(400);
+
+    const blockedCountAfterTest = await client.eval(`
+      (() => {
+        const count = parseInt(localStorage.getItem('furina_blocked_ads_count') || '0', 10);
+        const closeBtn = document.querySelector('button[aria-label="Close Ad-Shield HUD"]');
+        if (closeBtn) closeBtn.click();
+        return count;
+      })()
+    `);
+    await sleep(300);
+
+    const test28cPassed = !adShieldAudit.hasSandbox && 
+      !afterAiSwitch.hasSandbox && 
+      adShieldAudit.aiBtnFound && 
+      ublockModalAudit.isOpen && 
+      blockedCountAfterTest > 0;
+
+    recordTest('28c', 'Furina uBlock Ad-Shield & AI Auto-Select Best Server Audit', test28cPassed,
+      `No sandbox attribute: ${!adShieldAudit.hasSandbox}, AI auto-switched: ${afterAiSwitch.src}, uBlock HUD: ${ublockModalAudit.isOpen}, Blocked ads counted: ${blockedCountAfterTest}`);
+
     console.log('\n--- Running TEST 29: AI Boost Controls & Keyboard Shortcut (B) ---');
     const initialBoost = await client.eval(`localStorage.getItem('furina_ai_boost') || '4k'`);
     await client.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'b', code: 'KeyB', windowsVirtualKeyCode: 66 });

@@ -7,8 +7,14 @@ import {
 } from 'lucide-react';
 import { SERVERS, getStreamUrl, getDownloadUrl } from '../services/streaming';
 import { fetchSeasonEpisodes, fetchTvDetails, isHindiAvailable, isHindiDubbedAnime, getGenreNames, BACKDROP_BASE, IMG_BASE, POSTER_THUMB_BASE } from '../services/tmdb';
-import { permitPopupOnce, getBlockedCount } from '../services/adblocker';
+import { 
+  permitPopupOnce, getBlockedCount, isAdBlockEnabled, 
+  setShieldEnabled, getShieldMode, setShieldMode, setPlayerActive 
+} from '../services/adblocker';
+import { evaluateServers, isAutoAiServerEnabled } from '../services/aiServerSelector';
+import soundFx from '../services/soundFx';
 import DownloadModal from './DownloadModal';
+import UBlockShieldModal from './UBlockShieldModal';
 import hindiProviderManager, { 
   selectPhysicalAudioTrack, 
   getPrioritizedAudioSources 
@@ -203,8 +209,8 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     }
     if (audioMode === 'hindi' || userPreferredAudio === 'hindi') {
       return (
-        availableServers.find((s) => s.id === 'autoembed') ||
         availableServers.find((s) => s.id === 'vidsrc_in') ||
+        availableServers.find((s) => s.id === 'autoembed') ||
         availableServers.find((s) => s.id === 'smashy') ||
         availableServers.find((s) => s.id === 'animeworld_india') ||
         availableServers.find((s) => s.id === 'embed_su') ||
@@ -215,14 +221,14 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     if (hasWorkingHindiSource && !isCustom) {
       if (isBollywoodHindi) {
         return (
-          availableServers.find((s) => s.id === 'autoembed') ||
           availableServers.find((s) => s.id === 'vidsrc_in') ||
+          availableServers.find((s) => s.id === 'autoembed') ||
           availableServers[0]
         );
       }
       return (
-        availableServers.find((s) => s.id === 'autoembed') ||
         availableServers.find((s) => s.id === 'vidsrc_in') ||
+        availableServers.find((s) => s.id === 'autoembed') ||
         availableServers.find((s) => s.id === 'smashy') ||
         availableServers.find((s) => s.id === 'animeworld_india') ||
         availableServers.find((s) => s.id === 'embed_su') ||
@@ -246,40 +252,85 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const [iframeLoading, setIframeLoading] = useState(true);
   const [showAudioTip, setShowAudioTip] = useState(true);
 
-  // Furina Ad-Shield Mode: Sandboxes iframe to block popups, redirects & clickjacking
-  const [adShieldActive, setAdShieldActive] = useState(() => {
-    try {
-      const saved = localStorage.getItem('furina_adshield_active');
-      if (saved !== null) return saved === 'true';
-      const s = JSON.parse(localStorage.getItem('furina_settings') || '{}');
-      if (typeof s.adShieldMode === 'boolean') return s.adShieldMode;
-      return true;
-    } catch {
-      return true;
-    }
-  });
+  // Furina uBlock Ad-Shield Pro & AI Server Selection
+  const [adShieldActive, setAdShieldActive] = useState(() => isAdBlockEnabled());
+  const [shieldMode, setShieldModeState] = useState(() => getShieldMode());
   const [blockedAdsCount, setBlockedAdsCount] = useState(() => getBlockedCount());
+  const [isUBlockModalOpen, setIsUBlockModalOpen] = useState(false);
+  const [aiSelecting, setAiSelecting] = useState(false);
+  const [aiServerToast, setAiServerToast] = useState(null);
+
+  // Set player active state for top-navigation & focus retention guards
+  useEffect(() => {
+    setPlayerActive(true);
+    return () => setPlayerActive(false);
+  }, []);
 
   useEffect(() => {
     const handleBlocked = (e) => {
       setBlockedAdsCount(e.detail?.count || getBlockedCount());
     };
+    const handleShieldMode = (e) => {
+      setShieldModeState(e.detail?.mode || getShieldMode());
+    };
     window.addEventListener('furina-ad-blocked', handleBlocked);
-    return () => window.removeEventListener('furina-ad-blocked', handleBlocked);
+    window.addEventListener('furina-shield-mode-changed', handleShieldMode);
+    return () => {
+      window.removeEventListener('furina-ad-blocked', handleBlocked);
+      window.removeEventListener('furina-shield-mode-changed', handleShieldMode);
+    };
   }, []);
 
   const toggleAdShield = () => {
     const nextVal = !adShieldActive;
     setAdShieldActive(nextVal);
-    try {
-      localStorage.setItem('furina_adshield_active', String(nextVal));
-      const s = JSON.parse(localStorage.getItem('furina_settings') || '{}');
-      s.adShieldMode = nextVal;
-      localStorage.setItem('furina_settings', JSON.stringify(s));
-      window.dispatchEvent(new CustomEvent('furina:settings-changed', { detail: s }));
-    } catch {}
-    soundFx.playClick();
+    setShieldEnabled(nextVal);
+    soundFx.playClick?.();
   };
+
+  // AI Smart Server Chooser handler
+  const handleAiAutoSelectServer = useCallback((notify = true) => {
+    setAiSelecting(true);
+    soundFx.playClick?.();
+    setTimeout(() => {
+      const evaluation = evaluateServers({
+        servers: availableServers,
+        audioMode,
+        isAnime,
+        isHanime,
+        tmdbId: resolvedTmdbId
+      });
+      if (evaluation.bestServer) {
+        setSelectedServer(evaluation.bestServer);
+        if (playerMode !== 'stream') setPlayerMode('stream');
+        if (notify) {
+          setAiServerToast({
+            serverName: evaluation.bestServer.shortName,
+            badge: evaluation.bestDetails?.badge || '4K Ultra HD',
+            rationale: evaluation.bestDetails?.rationale || 'Clean CDN'
+          });
+          setTimeout(() => setAiServerToast(null), 4500);
+        }
+      }
+      setAiSelecting(false);
+    }, 300);
+  }, [availableServers, audioMode, isAnime, isHanime, resolvedTmdbId, playerMode]);
+
+  // Auto AI Server Selection on Mount if enabled in settings
+  useEffect(() => {
+    if (isAutoAiServerEnabled() && !preferredServerId && hasOnlineStream) {
+      const evaluation = evaluateServers({
+        servers: availableServers,
+        audioMode,
+        isAnime,
+        isHanime,
+        tmdbId: resolvedTmdbId
+      });
+      if (evaluation.bestServer && evaluation.bestServer.id !== selectedServer.id) {
+        setSelectedServer(evaluation.bestServer);
+      }
+    }
+  }, []);
 
   // Episodes & Season State with Watch Progress Persistence
   const getSavedProgress = () => {
@@ -670,6 +721,10 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
       if (e.key === 'Escape') {
         e.stopPropagation();
+        if (isUBlockModalOpen) {
+          setIsUBlockModalOpen(false);
+          return;
+        }
         if (isShortcutsHelpOpen) {
           setIsShortcutsHelpOpen(false);
           return;
@@ -767,7 +822,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isFullscreen, onClose, isShortcutsHelpOpen, isDownloadModalOpen, showUBlockGuide, unavailableNotice.show, aiBoostMode, cycleSubtitles, appSettings]);
+  }, [isFullscreen, onClose, isShortcutsHelpOpen, isDownloadModalOpen, isUBlockModalOpen, showUBlockGuide, unavailableNotice.show, aiBoostMode, cycleSubtitles, appSettings]);
 
   const togglePictureInPicture = async () => {
     try {
@@ -1266,10 +1321,13 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 </span>
               </button>
 
-              {/* Furina 3D Ad-Shield Toggle */}
+              {/* Furina uBlock Ad-Shield HUD Trigger */}
               <button
-                onClick={toggleAdShield}
-                title={adShieldActive ? `🛡️ Furina Ad-Shield Active (${blockedAdsCount} blocked). Strict sandbox blocks all popups & redirects.` : "Ad-Shield Disabled: Click to enable 100% ad and popup protection"}
+                onClick={() => {
+                  setIsUBlockModalOpen(true);
+                  soundFx.playClick?.();
+                }}
+                title={`🛡️ Furina Ad-Shield (${shieldMode === 'smart' ? 'Smart Shield' : 'Strict Sandbox'} - ${adShieldActive ? 'ON' : 'OFF'}, ${blockedAdsCount} blocked). Click to open uBlock HUD.`}
                 className={`flex items-center gap-1.5 p-1.5 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold transition shadow-sm cursor-pointer shrink-0 border ${
                   adShieldActive
                     ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/50 shadow-[0_0_12px_rgba(16,185,129,0.4)]'
@@ -1280,7 +1338,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 <span className="hidden sm:inline">Ad-Shield:</span>
                 <span className="font-black">{adShieldActive ? 'ON' : 'OFF'}</span>
                 {blockedAdsCount > 0 && (
-                  <span className="hidden lg:inline text-[9px] px-1.5 py-0.2 rounded-full bg-emerald-950/80 text-emerald-300 font-mono border border-emerald-500/30">
+                  <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-emerald-950/80 text-emerald-300 font-mono border border-emerald-500/30">
                     {blockedAdsCount}
                   </span>
                 )}
@@ -2061,7 +2119,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   </div>
                 )}
                 <iframe
-                  key={`${currentServer.id}-${season}-${episode}-${audioMode}-${reloadKey}-${adShieldActive ? 'shield' : 'standard'}`}
+                  key={`${currentServer.id}-${season}-${episode}-${audioMode}-${reloadKey}-${adShieldActive ? 'shield' : 'standard'}-${shieldMode}`}
                   src={streamUrl}
                   title={title}
                   onLoad={() => setIframeLoading(false)}
@@ -2071,7 +2129,8 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                       ? 'w-full h-full aspect-video max-w-[calc(100vh*16/9)] max-h-[calc(100vw*9/16)] shadow-2xl' 
                       : 'w-full h-full'
                   }`}
-                  sandbox={adShieldActive ? "allow-scripts allow-same-origin allow-forms allow-presentation" : "allow-scripts allow-same-origin allow-forms allow-presentation allow-popups allow-popups-to-escape-sandbox"}
+                  sandbox={adShieldActive && shieldMode === 'strict' ? "allow-scripts allow-same-origin allow-forms allow-presentation allow-popups" : undefined}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
                   allowFullScreen
                 />
               </>
@@ -2083,9 +2142,38 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
           {/* ========================================================================= */}
           {!isFullscreen && (hasOnlineStream || !isCustom) && (
             <div className="p-3 bg-[#08122c] border-b border-cyan-500/20 flex flex-col gap-2.5">
+              {/* AI Auto-Selected Server Notification Banner */}
+              {aiServerToast && (
+                <div className="w-full flex items-center justify-between px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-950/90 via-blue-950/90 to-cyan-950/90 border border-cyan-400/50 text-cyan-200 text-xs shadow-lg animate-in fade-in slide-in-from-top-1 duration-200">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    <span className="font-extrabold text-white">AI Auto-Selected:</span>
+                    <span className="font-black text-cyan-300">{aiServerToast.serverName}</span>
+                    <span className="text-[10px] text-slate-300 font-mono">({aiServerToast.badge} • {aiServerToast.rationale})</span>
+                  </div>
+                  <span className="text-[10px] text-emerald-400 font-bold">✓ Best Mirror Joined</span>
+                </div>
+              )}
+
               <div className="flex flex-wrap items-center justify-between gap-2.5">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-[11px] font-bold text-cyan-300/80">Available Server Mirrors:</span>
+                  
+                  {/* AI Smart Server Chooser Button */}
+                  <button
+                    onClick={() => handleAiAutoSelectServer(true)}
+                    disabled={aiSelecting}
+                    title="✨ AI analyzes 14 mirrors: benchmarks latency, ad reputation & audio streams to auto-join the best server"
+                    className="px-2.5 py-1 rounded-lg text-xs font-black transition flex items-center gap-1.5 cursor-pointer bg-gradient-to-r from-amber-500/25 to-cyan-500/25 hover:from-amber-500/40 hover:to-cyan-500/40 text-amber-300 border border-amber-400/40 shadow-[0_0_12px_rgba(245,158,11,0.25)] hover:scale-105 active:scale-95"
+                  >
+                    {aiSelecting ? (
+                      <Loader2 className="w-3 h-3 animate-spin text-amber-400" />
+                    ) : (
+                      <Sparkles className="w-3 h-3 text-amber-400 animate-pulse" />
+                    )}
+                    <span>{aiSelecting ? 'AI Scanning...' : '✨ AI Auto-Select Server'}</span>
+                  </button>
+
                   <div className="flex items-center gap-1.5 flex-wrap">
                     {availableServers.map((srv) => {
                       const isSelected = currentServer.id === srv.id;
@@ -2326,6 +2414,14 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
         audioMode={audioMode}
         isSeries={isSeries}
         activeCustomVideoUrl={activeCustomVideoUrl}
+      />
+
+      {/* Furina uBlock-Grade Ad-Shield HUD Modal */}
+      <UBlockShieldModal
+        isOpen={isUBlockModalOpen}
+        onClose={() => setIsUBlockModalOpen(false)}
+        onRunAiServerBenchmark={() => handleAiAutoSelectServer(true)}
+        currentServer={currentServer}
       />
     </div>
   );
