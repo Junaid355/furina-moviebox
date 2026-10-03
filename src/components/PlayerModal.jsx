@@ -198,6 +198,22 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
   // Determine initial server — route to fast, verified 200 OK servers
   const getInitialServer = () => {
+    // If AI Auto Server is enabled and no explicit override is passed, let AI evaluate immediately
+    if (isAutoAiServerEnabled() && !preferredServerId && hasOnlineStream) {
+      try {
+        const evaluation = evaluateServers({
+          servers: availableServers,
+          audioMode,
+          isAnime,
+          isHanime,
+          tmdbId: resolvedTmdbId
+        });
+        if (evaluation?.bestServer) {
+          return evaluation.bestServer;
+        }
+      } catch (e) {}
+    }
+
     if (isHanime) {
       return (
         availableServers.find((s) => s.id === 'twoembed_vip') ||
@@ -304,17 +320,20 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
         setSelectedServer(evaluation.bestServer);
         if (playerMode !== 'stream') setPlayerMode('stream');
         if (notify) {
+          const isAlreadyOnBest = selectedServer?.id === evaluation.bestServer.id;
           setAiServerToast({
             serverName: evaluation.bestServer.shortName,
             badge: evaluation.bestDetails?.badge || '4K Ultra HD',
-            rationale: evaluation.bestDetails?.rationale || 'Clean CDN'
+            rationale: isAlreadyOnBest
+              ? 'Optimal mirror already active (Rank #1 Cleanest)'
+              : (evaluation.bestDetails?.rationale || 'Clean CDN')
           });
           setTimeout(() => setAiServerToast(null), 4500);
         }
       }
       setAiSelecting(false);
     }, 300);
-  }, [availableServers, audioMode, isAnime, isHanime, resolvedTmdbId, playerMode]);
+  }, [availableServers, audioMode, isAnime, isHanime, resolvedTmdbId, playerMode, selectedServer]);
 
   // Auto AI Server Selection on Mount if enabled in settings
   useEffect(() => {
@@ -326,8 +345,17 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
         isHanime,
         tmdbId: resolvedTmdbId
       });
-      if (evaluation.bestServer && evaluation.bestServer.id !== selectedServer.id) {
-        setSelectedServer(evaluation.bestServer);
+      if (evaluation.bestServer) {
+        if (evaluation.bestServer.id !== selectedServer.id) {
+          setSelectedServer(evaluation.bestServer);
+        }
+        setAiServerToast({
+          serverName: evaluation.bestServer.shortName,
+          badge: evaluation.bestDetails?.badge || '4K Ultra HD',
+          rationale: evaluation.bestDetails?.rationale || 'Clean CDN'
+        });
+        const timer = setTimeout(() => setAiServerToast(null), 4500);
+        return () => clearTimeout(timer);
       }
     }
   }, []);
@@ -2152,6 +2180,27 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                     <span className="text-[10px] text-slate-300 font-mono">({aiServerToast.badge} • {aiServerToast.rationale})</span>
                   </div>
                   <span className="text-[10px] text-emerald-400 font-bold">✓ Best Mirror Joined</span>
+                </div>
+              )}
+
+              {/* Strict Sandbox Warning & 1-Click Rescue Banner */}
+              {shieldMode === 'strict' && adShieldActive && (
+                <div className="w-full flex items-center justify-between px-3 py-1.5 rounded-lg bg-amber-950/80 border border-amber-500/40 text-amber-200 text-xs shadow-md animate-in fade-in duration-200">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <span>Strict Sandbox active. If player shows <strong className="text-amber-100">'Playback blocked'</strong>, switch to Smart Shield.</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShieldMode('smart');
+                      setShieldModeState('smart');
+                      soundFx.playClick?.();
+                    }}
+                    className="px-2.5 py-0.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-300 font-bold text-[10px] cursor-pointer shrink-0 transition"
+                  >
+                    ⚡ Switch to Smart Shield (Recommended)
+                  </button>
                 </div>
               )}
 

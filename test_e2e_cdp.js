@@ -916,6 +916,115 @@ async function runQA() {
     recordTest('28c', 'Furina uBlock Ad-Shield & AI Auto-Select Best Server Audit', test28cPassed,
       `No sandbox attribute: ${!adShieldAudit.hasSandbox}, AI auto-switched: ${afterAiSwitch.src}, uBlock HUD: ${ublockModalAudit.isOpen}, Blocked ads counted: ${blockedCountAfterTest}`);
 
+    console.log('\n--- Running TEST 28d: Ad-Shield Proxy Defusal, Capture Trap & Sandbox Rescue Audit ---');
+    const shieldRobustness = await client.eval(`
+      (() => {
+        const countBefore = parseInt(localStorage.getItem('furina_blocked_ads_count') || '0', 10);
+        let proxyWorks = false;
+        let captureWorks = false;
+        let downloadExempt = false;
+
+        // 1. Test Window.open Proxy Defusal (methods that used to crash)
+        try {
+          const win = window.open('https://popads.net/serve/ad?c=casino', '_blank');
+          if (win) {
+            win.document.write('<div>ad</div>');
+            win.document.createElement('div');
+            win.location.replace('https://scam.com');
+            win.location.assign('https://scam.com');
+            win.focus();
+            win.close();
+            proxyWorks = true;
+          }
+        } catch (e) {
+          proxyWorks = false;
+        }
+
+        // 2. Test Capture Click Trap on scam overlay
+        try {
+          const scamLink = document.createElement('a');
+          scamLink.href = 'https://highperformancegate.com/redirect?id=scam';
+          scamLink.target = '_blank';
+          document.body.appendChild(scamLink);
+          const clickEvt = new MouseEvent('click', { bubbles: true, cancelable: true });
+          scamLink.dispatchEvent(clickEvt);
+          captureWorks = clickEvt.defaultPrevented;
+          scamLink.remove();
+        } catch (e) {
+          captureWorks = false;
+        }
+
+        // 3. Test Download Exemption
+        try {
+          const dlLink = document.createElement('a');
+          dlLink.href = 'blob:http://127.0.0.1:4173/test-video';
+          dlLink.setAttribute('download', 'movie.mp4');
+          document.body.appendChild(dlLink);
+          const dlEvt = new MouseEvent('click', { bubbles: true, cancelable: true });
+          dlLink.dispatchEvent(dlEvt);
+          downloadExempt = !dlEvt.defaultPrevented;
+          dlLink.remove();
+        } catch (e) {
+          downloadExempt = false;
+        }
+
+        const countAfter = parseInt(localStorage.getItem('furina_blocked_ads_count') || '0', 10);
+
+        return {
+          proxyWorks,
+          captureWorks,
+          downloadExempt,
+          interceptedCount: countAfter - countBefore
+        };
+      })()
+    `);
+
+    // 4. Test Strict Sandbox Warning & 1-Click Rescue Switch in Player
+    await client.eval(`
+      (() => {
+        localStorage.setItem('furina_adshield_mode', 'strict');
+        window.dispatchEvent(new CustomEvent('furina-shield-mode-changed', { detail: { mode: 'strict' } }));
+      })()
+    `);
+    await sleep(400);
+
+    const strictCheck = await client.eval(`
+      (() => {
+        const rescueBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('Switch to Smart Shield'));
+        const iframe = document.querySelector('iframe');
+        const hasStrictSandbox = iframe ? iframe.hasAttribute('sandbox') : false;
+        if (rescueBtn) rescueBtn.click();
+        return {
+          rescueBtnFound: Boolean(rescueBtn),
+          hasStrictSandbox
+        };
+      })()
+    `);
+    await sleep(400);
+
+    const smartRestoredCheck = await client.eval(`
+      (() => {
+        const iframe = document.querySelector('iframe');
+        const hasSandbox = iframe ? iframe.hasAttribute('sandbox') : false;
+        const currentMode = localStorage.getItem('furina_adshield_mode');
+        return {
+          hasSandbox,
+          currentMode
+        };
+      })()
+    `);
+
+    const test28dPassed = shieldRobustness.proxyWorks && 
+      shieldRobustness.captureWorks && 
+      shieldRobustness.downloadExempt && 
+      shieldRobustness.interceptedCount >= 2 && 
+      strictCheck.rescueBtnFound && 
+      !smartRestoredCheck.hasSandbox && 
+      smartRestoredCheck.currentMode === 'smart';
+
+    recordTest('28d', 'Ad-Shield Proxy Defusal, Capture Trap & Sandbox Rescue Audit', test28dPassed,
+      `Proxy works: ${shieldRobustness.proxyWorks}, Capture intercepted: ${shieldRobustness.captureWorks}, Download exempt: ${shieldRobustness.downloadExempt}, Rescue UI: ${strictCheck.rescueBtnFound}, Smart restored: ${!smartRestoredCheck.hasSandbox}`);
+
     console.log('\n--- Running TEST 29: AI Boost Controls & Keyboard Shortcut (B) ---');
     const initialBoost = await client.eval(`localStorage.getItem('furina_ai_boost') || '4k'`);
     await client.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'b', code: 'KeyB', windowsVirtualKeyCode: 66 });

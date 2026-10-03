@@ -19,7 +19,8 @@ const AD_PATTERNS = [
   /outbrain/i, /taboola/i, /mgid/i, /track(?:er)?\./i, /redirect\./i, /affiliate/i,
   /robot-verify/i, /captcha-check/i, /bonus-win/i, /prize-alert/i, /download-now\./i,
   /joywin/i, /cardiacrystal/i, /borojeet/i, /slots/i, /jackpot/i, /gamble/i, /win88/i,
-  /gussiessmutchy/i, /paidmed/i, /utm_campaign/i
+  /gussiessmutchy/i, /paidmed/i, /utm_campaign/i, /clck\./i, /shorturl\./i, /bit\.ly/i,
+  /telegram\.me/i, /t\.me\/(?:\+|(?:joinchat))/i, /vividbreeze/i, /whistlebreeze/i
 ];
 
 function getInitialBlockedCount() {
@@ -160,17 +161,57 @@ function isAdUrl(url) {
   return AD_PATTERNS.some(p => p.test(url));
 }
 
-// Dummy window proxy returned by window.open so embed scripts don't crash
-const dummyWindowProxy = {
-  closed: true,
-  opener: null,
-  focus: () => {},
-  blur: () => {},
-  close: () => {},
-  postMessage: () => {},
-  document: null,
-  location: { href: 'about:blank' }
-};
+// Bulletproof Proxy-based dummy window that absorbs all calls and properties safely without crashing embed scripts
+export function createDummyWindow() {
+  const dummyDoc = new Proxy({}, {
+    get: (target, prop) => {
+      if (prop === 'location') return dummyLoc;
+      if (prop === 'write' || prop === 'writeln' || prop === 'open' || prop === 'close') return () => {};
+      if (prop === 'createElement') return () => ({ setAttribute: () => {}, style: {}, appendChild: () => {} });
+      if (prop === 'getElementById' || prop === 'querySelector' || prop === 'querySelectorAll') return () => null;
+      if (prop === 'body' || prop === 'documentElement' || prop === 'head') return { appendChild: () => {}, removeChild: () => {}, style: {} };
+      return () => {};
+    }
+  });
+
+  const dummyLoc = new Proxy({ href: 'about:blank', origin: 'about:blank', pathname: '', search: '', hash: '' }, {
+    get: (target, prop) => {
+      if (prop in target) return target[prop];
+      if (prop === 'replace' || prop === 'assign' || prop === 'reload') return () => {};
+      return () => {};
+    },
+    set: (target, prop, val) => {
+      target[prop] = val;
+      return true;
+    }
+  });
+
+  const dummyWin = {
+    closed: false,
+    opener: null,
+    document: dummyDoc,
+    location: dummyLoc,
+    focus: () => {},
+    blur: () => {},
+    close: function() { this.closed = true; },
+    postMessage: () => {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => true
+  };
+
+  dummyWin.window = dummyWin;
+  dummyWin.self = dummyWin;
+  dummyWin.top = dummyWin;
+  dummyWin.parent = dummyWin;
+
+  return new Proxy(dummyWin, {
+    get: (target, prop) => {
+      if (prop in target) return target[prop];
+      return () => {};
+    }
+  });
+}
 
 export function initAdBlocker() {
   if (typeof window === 'undefined') return;
@@ -202,15 +243,48 @@ export function initAdBlocker() {
 
       // Otherwise, block the rogue popup attempt
       recordBlockedEvent('popup', urlStr || 'about:blank', 'Anti-Popunder Trap');
-      return dummyWindowProxy;
+      return createDummyWindow();
     };
 
-    // 2. CLICK HIJACK & POP-UNDER NEUTRALIZER: Trap dynamic anchor clicks
+    // 2. CAPTURE-PHASE CLICK TRAP: Intercept physical clicks on invisible overlays & scam links
+    document.addEventListener('click', (e) => {
+      if (!isShieldEnabled) return;
+      const target = e.target;
+      const anchor = target && typeof target.closest === 'function' ? target.closest('a') : null;
+      if (anchor && anchor.href) {
+        // Exempt legitimate downloads and blob/data URLs
+        if (anchor.hasAttribute('download') || 
+            anchor.href.startsWith('blob:') || 
+            anchor.href.startsWith('data:') || 
+            allowNextPopup) {
+          return;
+        }
+        const href = anchor.href;
+        const isInternal = href.includes(window.location.hostname);
+        const isLegitService = href.includes('youtube.com') || href.includes('github.com') || href.includes('themoviedb.org');
+
+        if (isAdUrl(href) || (playerIsActive && anchor.target === '_blank' && !isInternal && !isLegitService)) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          recordBlockedEvent('clickjack', href, 'Invisible Overlay Neutralizer');
+        }
+      }
+    }, true);
+
+    // 2b. CLICK HIJACK & POP-UNDER NEUTRALIZER: Trap programmatic dynamic anchor clicks
     const originalAnchorClick = HTMLAnchorElement.prototype.click;
     HTMLAnchorElement.prototype.click = function() {
       if (isShieldEnabled && this.href) {
+        // Exempt legitimate downloads and blob URLs
+        if (this.hasAttribute('download') || this.href.startsWith('blob:') || this.href.startsWith('data:') || allowNextPopup) {
+          return originalAnchorClick.apply(this, arguments);
+        }
         const href = this.href;
-        if (isAdUrl(href) || (playerIsActive && this.target === '_blank' && !allowNextPopup && !href.includes(window.location.hostname))) {
+        const isInternal = href.includes(window.location.hostname);
+        const isLegitService = href.includes('youtube.com') || href.includes('github.com') || href.includes('themoviedb.org');
+
+        if (isAdUrl(href) || (playerIsActive && this.target === '_blank' && !isInternal && !isLegitService)) {
           recordBlockedEvent('clickjack', href, 'Invisible Overlay Neutralizer');
           return;
         }

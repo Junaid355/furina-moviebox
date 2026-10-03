@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { SERVERS } from '../services/streaming';
 import { isAdBlockEnabled, setShieldEnabled } from '../services/adblocker';
+import { isAutoAiServerEnabled, setAutoAiServerEnabled } from '../services/aiServerSelector';
 import { isAiUpdaterEnabled, setAiUpdaterEnabled, triggerAiSync, getLastSyncTime } from '../services/aiUpdater';
 import { SECRET_ECCHI_ANIME, IMG_BASE } from '../services/tmdb';
 import hindiProviderManager from '../services/HindiProviderManager';
@@ -979,9 +980,9 @@ export default function SettingsModal({
                 <div>
                   <span className="font-bold text-white flex items-center gap-1.5">
                     <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                    <span>Furina Ad-Shield Mode</span>
+                    <span>Furina Ad-Shield Pro</span>
                   </span>
-                  <p className="text-[11px] text-slate-400">Strictly sandbox streaming iframes to block popups, redirect ads, and clickjacking overlays.</p>
+                  <p className="text-[11px] text-slate-400">Built-in uBlock-grade shield: intercepts popup tabs, scam redirects, and invisible clickjacking overlays with zero sandbox errors.</p>
                 </div>
                 <input
                   type="checkbox"
@@ -989,11 +990,30 @@ export default function SettingsModal({
                   onChange={(e) => {
                     const nextVal = e.target.checked;
                     updateSetting('adShieldMode', nextVal);
-                    try {
-                      localStorage.setItem('furina_adshield_active', String(nextVal));
-                    } catch {}
+                    setShieldEnabled(nextVal);
                   }}
                   className="w-4 h-4 accent-emerald-400 cursor-pointer"
+                />
+              </div>
+
+              {/* AI Auto-Select Best Server */}
+              <div className="p-4 rounded-2xl bg-[#09142e] border border-cyan-500/20 flex items-center justify-between">
+                <div>
+                  <span className="font-bold text-white flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-amber-400" />
+                    <span>AI Auto-Select Best Server</span>
+                  </span>
+                  <p className="text-[11px] text-slate-400">Automatically analyze CDN latency & ad reputation to auto-join the cleanest mirror.</p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={settings.autoAiServer !== false}
+                  onChange={(e) => {
+                    const nextVal = e.target.checked;
+                    updateSetting('autoAiServer', nextVal);
+                    setAutoAiServerEnabled(nextVal);
+                  }}
+                  className="w-4 h-4 accent-amber-400 cursor-pointer"
                 />
               </div>
 
