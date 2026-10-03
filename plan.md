@@ -56,5 +56,13 @@ Completely rebuild and elevate the Furina MovieBox streaming interface into an u
    - Fix mature title 404 by routing to `twoembed_vip` / `animeworld_india`.
 6. **Verify & Test**:
    - Run `npm.cmd run build` to verify clean compilation.
-   - Run `node test_e2e_cdp.js` across all 59 tests to ensure 100% pass rate.
+   - Run `node test_e2e_cdp.js` across all 61 tests to ensure 100% pass rate.
    - Deploy compiled bundle and source code using `deploy_github.py`.
+
+---
+
+## 5. Skeptical Code Review & Peer Hardening
+- **Mature Audio Change Fallback**: Fixed `handleAudioChange` in `PlayerModal.jsx` where selecting Japanese Sub, English Dub, or Hindi Audio on mature/vault content mistakenly attempted to query `autoembed` (which is filtered out) instead of defaulting to `twoembed_vip` or `animeworld_india`.
+- **Mature Download Mirrors Safeguard**: Updated `getDownloadMirrors` in `streaming.js` and `DownloadModal.jsx` to omit 404/500 providers (`mirror_autoembed`, `mirror_vidlink`) for adult/vault content (TMDB 1033051) and prioritize 2Embed VIP and Cinema Mirror 2.
+- **Global Settings Ad-Shield Integration**: Added `adShieldMode: true` to `DEFAULT_SETTINGS` and embedded the Ad-Shield toggle inside `SettingsModal.jsx` Player Behavior settings to synchronize seamlessly with `PlayerModal.jsx` and localStorage.
+- **Mobile Ergnomics & Safe Areas**: Added `safe-bottom` padding to the fixed mobile bottom navigation bar in `App.jsx` to respect `env(safe-area-inset-bottom)` on iPhones, and increased `<main>` container padding to `pb-24 md:pb-8` to prevent content occlusion.

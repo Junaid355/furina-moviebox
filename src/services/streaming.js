@@ -198,8 +198,9 @@ export function getStreamUrl(server, tmdbId, type = 'movie', season = 1, episode
   return url;
 }
 
-export function getDownloadMirrors(tmdbId, type = 'movie', season = 1, episode = 1, audioMode = 'english') {
+export function getDownloadMirrors(tmdbId, type = 'movie', season = 1, episode = 1, audioMode = 'english', isHanime = false) {
   const isTv = type === 'tv';
+  const isMature = Boolean(isHanime || Number(tmdbId) === 1033051 || String(tmdbId).includes('1033051'));
   const allMirrors = [
     {
       id: 'mirror_vidsrc',
@@ -301,6 +302,16 @@ export function getDownloadMirrors(tmdbId, type = 'movie', season = 1, episode =
         : `https://vidsrc.vip/embed/movie/${tmdbId}`
     }
   ];
+
+  if (isMature) {
+    return [
+      allMirrors.find((m) => m.id === 'mirror_vidsrc_cc'),
+      allMirrors.find((m) => m.id === 'mirror_animeworld'),
+      allMirrors.find((m) => m.id === 'mirror_vidsrc'),
+      allMirrors.find((m) => m.id === 'mirror_smashy'),
+      allMirrors.find((m) => m.id === 'mirror_embed_su')
+    ].filter(Boolean);
+  }
 
   if (audioMode === 'hindi') {
     return [

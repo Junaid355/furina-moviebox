@@ -444,7 +444,7 @@ export default function App() {
       />
 
       {/* Main Container */}
-      <main className="max-w-7xl mx-auto w-full px-4 sm:px-8 py-6 flex-1 relative z-10">
+      <main className="max-w-7xl mx-auto w-full px-4 sm:px-8 pt-6 pb-24 md:pb-8 flex-1 relative z-10">
         
         {/* Stealth Mode Indicator */}
         {isStealthMode && (
@@ -1258,7 +1258,7 @@ export default function App() {
       <FurinaMascot onOpenSearch={() => setIsSearchOverlayOpen(true)} />
 
       {/* Mobile iOS Style Bottom Navigation Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-[#070d1e]/95 backdrop-blur-2xl border-t border-cyan-500/20 px-1 py-2 flex items-center justify-around shadow-[0_-5px_25px_rgba(0,0,0,0.7)]">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-[#070d1e]/95 backdrop-blur-2xl border-t border-cyan-500/20 px-1 py-2 safe-bottom flex items-center justify-around shadow-[0_-5px_25px_rgba(0,0,0,0.7)]">
         {[
           { id: 'trending', label: 'Trending', icon: Flame },
           { id: 'hollywood', label: 'Movies', icon: Film },

@@ -250,7 +250,10 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const [adShieldActive, setAdShieldActive] = useState(() => {
     try {
       const saved = localStorage.getItem('furina_adshield_active');
-      return saved === null ? true : saved === 'true';
+      if (saved !== null) return saved === 'true';
+      const s = JSON.parse(localStorage.getItem('furina_settings') || '{}');
+      if (typeof s.adShieldMode === 'boolean') return s.adShieldMode;
+      return true;
     } catch {
       return true;
     }
@@ -270,6 +273,10 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     setAdShieldActive(nextVal);
     try {
       localStorage.setItem('furina_adshield_active', String(nextVal));
+      const s = JSON.parse(localStorage.getItem('furina_settings') || '{}');
+      s.adShieldMode = nextVal;
+      localStorage.setItem('furina_settings', JSON.stringify(s));
+      window.dispatchEvent(new CustomEvent('furina:settings-changed', { detail: s }));
     } catch {}
     soundFx.playClick();
   };
@@ -377,7 +384,18 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     if (newMode === 'hindi') {
       setSelectedServer((prevSrv) => {
         if (prevSrv && prevSrv.supportedAudios?.includes('hindi')) {
-          return prevSrv;
+          if (!isHanime || (prevSrv.id !== 'autoembed' && prevSrv.id !== 'vidlink')) {
+            return prevSrv;
+          }
+        }
+        if (isHanime) {
+          return (
+            availableServers.find((s) => s.id === 'animeworld_india') ||
+            availableServers.find((s) => s.id === 'twoembed_vip') ||
+            availableServers.find((s) => s.id === 'smashy') ||
+            availableServers.find((s) => s.id === 'vidsrc_in') ||
+            availableServers[0]
+          );
         }
         return (
           availableServers.find((s) => s.id === 'autoembed') ||
@@ -393,19 +411,23 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     } else if (newMode === 'sub') {
       setSelectedServer((prevSrv) => {
         if (prevSrv && prevSrv.supportedAudios?.includes('sub')) {
-          return prevSrv;
+          if (!isHanime || (prevSrv.id !== 'autoembed' && prevSrv.id !== 'vidlink')) {
+            return prevSrv;
+          }
         }
         return isHanime
-          ? (availableServers.find((s) => s.id === 'autoembed') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0])
+          ? (availableServers.find((s) => s.id === 'twoembed_vip') || availableServers.find((s) => s.id === 'animeworld_india') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0])
           : (availableServers.find((s) => s.id === 'vidlink') || availableServers.find((s) => s.id === 'autoembed') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0]);
       });
     } else {
       setSelectedServer((prevSrv) => {
         if (prevSrv && prevSrv.supportedAudios?.includes('english')) {
-          return prevSrv;
+          if (!isHanime || (prevSrv.id !== 'autoembed' && prevSrv.id !== 'vidlink')) {
+            return prevSrv;
+          }
         }
         return isHanime
-          ? (availableServers.find((s) => s.id === 'autoembed') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0])
+          ? (availableServers.find((s) => s.id === 'twoembed_vip') || availableServers.find((s) => s.id === 'animeworld_india') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0])
           : (availableServers.find((s) => s.id === 'vidlink') || availableServers.find((s) => s.id === 'autoembed') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0]);
       });
     }
@@ -415,7 +437,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       setAudioSwitchFeedback(`✓ ${newMode === 'hindi' ? 'Hindi' : newMode === 'sub' ? 'Japanese' : 'English'} Audio Active${physicalSwitched ? ' (Hardware Track)' : ''}`);
       setTimeout(() => setAudioSwitchFeedback(''), 2500);
     }, 350);
-  }, [audioMode, isCustom, isBollywoodHindi, isAnime, availableServers, item?.id]);
+  }, [audioMode, isCustom, isBollywoodHindi, isAnime, isHanime, availableServers, item?.id]);
 
   // Prioritized audio sources for custom / owned / blockbuster content
   const currentLangSources = useMemo(() => {

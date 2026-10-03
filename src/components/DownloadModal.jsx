@@ -39,7 +39,16 @@ export default function DownloadModal({
 
   const title = item.title || item.name || 'Title';
   const isCustom = Boolean(item.isCustom);
-  const mirrors = getDownloadMirrors(item.id, isSeries ? 'tv' : 'movie', season, episode, audioMode);
+  const isHanime = Boolean(
+    item.category === 'ecchi_anime' ||
+    item.category === 'mature' ||
+    item.is_mature === true ||
+    item.isMature === true ||
+    item.isVault === true ||
+    Number(item.id) === 1033051 ||
+    String(item.id).includes('1033051')
+  );
+  const mirrors = getDownloadMirrors(item.id, isSeries ? 'tv' : 'movie', season, episode, audioMode, isHanime);
 
   const posterSrc = item.poster_path 
     ? (item.poster_path.startsWith('http') ? item.poster_path : `${POSTER_THUMB_BASE}${item.poster_path}`)

@@ -1734,6 +1734,37 @@ async function runQA() {
     recordTest(50, 'Aceternity 3D Floating Dock & Crystalline Sparkles Audit', test50Passed,
       `Floating Dock: ${dockAudit.hasDock}, Sparkles Canvas: ${dockAudit.hasSparkles}`);
 
+    console.log('\n--- Running TEST 51: Mature/Vault Content 404 (TMDB 1033051) Safe Routing Audit ---');
+    const matureDownloadMirrors = streamingMod.getDownloadMirrors('1033051', 'movie', 1, 1, 'english', true);
+    const matureHasBrokenAutoembed = matureDownloadMirrors.some(m => m.id === 'mirror_autoembed');
+    const matureHasBrokenVidlink = matureDownloadMirrors.some(m => m.id === 'mirror_vidlink');
+    const matureHasWorkingVip = matureDownloadMirrors.some(m => m.id === 'mirror_vidsrc_cc');
+    const matureHasWorkingMirror = matureDownloadMirrors.some(m => m.id === 'mirror_animeworld');
+    const test51Passed = !matureHasBrokenAutoembed && !matureHasBrokenVidlink && matureHasWorkingVip && matureHasWorkingMirror;
+    recordTest(51, 'Mature Content 404 (TMDB 1033051) Safe Mirror Routing Audit', test51Passed,
+      `No AutoEmbed 404: ${!matureHasBrokenAutoembed}, No VidLink 500: ${!matureHasBrokenVidlink}, 2Embed VIP Top: ${matureHasWorkingVip}, Cinema Mirror: ${matureHasWorkingMirror}`);
+
+    console.log('\n--- Running TEST 52: Furina Ad-Shield Mode & Mobile Safe-Area Navigation Audit ---');
+    const mobileAudit = await client.eval(`
+      (() => {
+        const bottomNav = document.querySelector('nav.fixed.bottom-0');
+        const hasSafeBottom = bottomNav ? bottomNav.classList.contains('safe-bottom') : false;
+        const mainEl = document.querySelector('main');
+        const mainClasses = mainEl ? mainEl.className : '';
+        const hasMainMobilePadding = mainClasses.includes('pb-24') || mainClasses.includes('pb-28');
+        const adShieldSaved = localStorage.getItem('furina_adshield_active');
+        const adShieldActiveByDefault = adShieldSaved === null || adShieldSaved === 'true';
+        return {
+          hasSafeBottom,
+          hasMainMobilePadding,
+          adShieldActiveByDefault
+        };
+      })()
+    `);
+    const test52Passed = mobileAudit.hasSafeBottom && mobileAudit.hasMainMobilePadding && mobileAudit.adShieldActiveByDefault;
+    recordTest(52, 'Furina Ad-Shield Mode & Mobile Safe-Area Navigation Audit', test52Passed,
+      `Safe Bottom Nav: ${mobileAudit.hasSafeBottom}, Main Mobile Padding: ${mobileAudit.hasMainMobilePadding}, Ad-Shield Active Default: ${mobileAudit.adShieldActiveByDefault}`);
+
     console.log('\n--- Capturing Dramatic 3D Preview Screenshot to artifacts/dramatic_3d_preview.png ---');
     try {
       await client.send('Emulation.setDeviceMetricsOverride', {

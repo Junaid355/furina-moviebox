@@ -54,6 +54,7 @@ export const DEFAULT_SETTINGS = {
   autoHideControls: 3,
   keyboardShortcuts: true,
   fullscreenBehavior: 'cinema',
+  adShieldMode: true,
 
   // Mobile
   mobileControls: 'touch_optimized',
@@ -970,6 +971,29 @@ export default function SettingsModal({
                   checked={settings.keyboardShortcuts}
                   onChange={(e) => updateSetting('keyboardShortcuts', e.target.checked)}
                   className="w-4 h-4 accent-cyan-400 cursor-pointer"
+                />
+              </div>
+
+              {/* Furina Ad-Shield Mode Toggle */}
+              <div className="p-4 rounded-2xl bg-[#09142e] border border-cyan-500/20 flex items-center justify-between">
+                <div>
+                  <span className="font-bold text-white flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                    <span>Furina Ad-Shield Mode</span>
+                  </span>
+                  <p className="text-[11px] text-slate-400">Strictly sandbox streaming iframes to block popups, redirect ads, and clickjacking overlays.</p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={settings.adShieldMode !== false}
+                  onChange={(e) => {
+                    const nextVal = e.target.checked;
+                    updateSetting('adShieldMode', nextVal);
+                    try {
+                      localStorage.setItem('furina_adshield_active', String(nextVal));
+                    } catch {}
+                  }}
+                  className="w-4 h-4 accent-emerald-400 cursor-pointer"
                 />
               </div>
 
