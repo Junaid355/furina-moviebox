@@ -15,8 +15,8 @@ const MediaCard = React.memo(function MediaCard({
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const cardRef = useRef(null);
-  const [transformStyle, setTransformStyle] = useState('perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)');
-  const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 });
+  const glareRef = useRef(null);
+  const rafId = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
 
   if (!item) return null;
@@ -67,31 +67,45 @@ const MediaCard = React.memo(function MediaCard({
   const rawPoster = item.poster_path || item.poster || item.backdrop_path || item.backdrop;
   const posterSrc = resolvePosterUrl(rawPoster, 'w500');
 
-  // 3D Perspective Tilt on Mouse Movement (Aceternity 3D Card Style)
+  // 60-120 FPS Direct RAF DOM transform (Zero React re-renders on mousemove)
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+  };
+
   const handleMouseMove = (e) => {
     if (!cardRef.current) return;
-    setIsHovered(true);
+    if (rafId.current) cancelAnimationFrame(rafId.current);
     const rect = cardRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
 
-    const rotX = ((y - centerY) / centerY) * -13;
-    const rotY = ((x - centerX) / centerX) * 13;
+    const rotX = ((y - centerY) / centerY) * -11;
+    const rotY = ((x - centerX) / centerX) * 11;
+    const glareX = Math.round((x / rect.width) * 100);
+    const glareY = Math.round((y / rect.height) * 100);
 
-    setTransformStyle(`perspective(1000px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) translateY(-8px) scale3d(1.025, 1.025, 1.025)`);
-    setGlare({
-      x: Math.round((x / rect.width) * 100),
-      y: Math.round((y / rect.height) * 100),
-      opacity: 0.38
+    rafId.current = requestAnimationFrame(() => {
+      if (cardRef.current) {
+        cardRef.current.style.transform = `perspective(1000px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) translateY(-8px) scale3d(1.025, 1.025, 1.025)`;
+      }
+      if (glareRef.current) {
+        glareRef.current.style.opacity = '0.35';
+        glareRef.current.style.background = `radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255,255,255,0.38) 0%, rgba(0,242,254,0.2) 35%, transparent 70%)`;
+      }
     });
   };
 
   const handleMouseLeave = () => {
     setIsHovered(false);
-    setTransformStyle('perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px) scale3d(1, 1, 1)');
-    setGlare((prev) => ({ ...prev, opacity: 0 }));
+    if (rafId.current) cancelAnimationFrame(rafId.current);
+    if (cardRef.current) {
+      cardRef.current.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px) scale3d(1, 1, 1)';
+    }
+    if (glareRef.current) {
+      glareRef.current.style.opacity = '0';
+    }
   };
 
   return (
@@ -105,7 +119,6 @@ const MediaCard = React.memo(function MediaCard({
       onMouseLeave={handleMouseLeave}
       data-media-id={item.id}
       style={{
-        transform: transformStyle,
         transformStyle: 'preserve-3d',
         transition: 'transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1)'
       }}
@@ -118,11 +131,8 @@ const MediaCard = React.memo(function MediaCard({
 
       {/* 3D Specular Glare Reflection Layer following cursor */}
       <div 
-        className="pointer-events-none absolute inset-0 z-30 transition-opacity duration-200 rounded-inherit"
-        style={{
-          opacity: glare.opacity,
-          background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,0.38) 0%, rgba(0,242,254,0.2) 35%, transparent 70%)`
-        }}
+        ref={glareRef}
+        className="pointer-events-none absolute inset-0 z-30 transition-opacity duration-200 rounded-inherit opacity-0"
       />
 
       {/* Poster Image Container with 3D Pop (translateZ 40px) */}

@@ -1,183 +1,36 @@
-// Furina AI Smart Server Selector Engine
-// Analyzes server latency, ad reputation, audio track compatibility, and CDN stability
-// Automatically finds and joins the optimal, lowest-ad streaming mirror
+// src/services/aiServerSelector.js
+// Furina smart server selector.
+// Ranking comes from real browser tests (Oct 2026) plus a live reachability probe
+// run in the user's own browser. No invented latency numbers.
 
+// tier: lower = better. Based on a real-browser render test of Avengers: Endgame (299534):
+//  1 = player rendered with poster + play button
+//  2 = player shell rendered (source picker / loading UI) but slower or ad-heavier
+//  3 = blank frame or embed-side error in testing
 export const SERVER_PROFILES = {
-  autoembed: {
-    adReputation: 96,
-    speedScore: 95,
-    baseLatency: 42,
-    badge: '1080p Ultra Fast',
-    cdn: 'Cloudflare Edge CDN',
-    adLevel: 'Very Low (Clean)',
-    hindiPriority: 10,
-    englishPriority: 9,
-    subPriority: 9,
-    isHindiVerified: true
-  },
-  vidsrc_in: {
-    adReputation: 99,
-    speedScore: 98,
-    baseLatency: 35,
-    badge: '4K Ultra HD',
-    cdn: 'Fastly Anycast CDN',
-    adLevel: 'Zero Ads (Direct)',
-    hindiPriority: 9,
-    englishPriority: 10,
-    subPriority: 9,
-    isHindiVerified: true
-  },
-  vidlink: {
-    adReputation: 94,
-    speedScore: 92,
-    baseLatency: 48,
-    badge: 'Multi-Audio / Dub',
-    cdn: 'Vercel Edge Network',
-    adLevel: 'Minimal',
-    hindiPriority: 6,
-    englishPriority: 10,
-    subPriority: 10,
-    isHindiVerified: false
-  },
-  twoembed_vip: {
-    adReputation: 98,
-    speedScore: 94,
-    baseLatency: 38,
-    badge: 'VIP Stream',
-    cdn: 'AWS CloudFront Global',
-    adLevel: 'Zero Ads (Cleanest)',
-    hindiPriority: 5,
-    englishPriority: 10,
-    subPriority: 9,
-    isHindiVerified: false
-  },
-  vidsrc_to: {
-    adReputation: 88,
-    speedScore: 89,
-    baseLatency: 55,
-    badge: 'Cinema Master',
-    cdn: 'Akamai Anycast',
-    adLevel: 'Low',
-    hindiPriority: 4,
-    englishPriority: 9,
-    subPriority: 9,
-    isHindiVerified: false
-  },
-  one23embed: {
-    adReputation: 91,
-    speedScore: 90,
-    baseLatency: 52,
-    badge: 'Multi-Audio 1080p',
-    cdn: 'OVH Premium CDN',
-    adLevel: 'Low',
-    hindiPriority: 10,
-    englishPriority: 8,
-    subPriority: 8,
-    isHindiVerified: true
-  },
-  smashy: {
-    adReputation: 89,
-    speedScore: 88,
-    baseLatency: 58,
-    badge: 'Multi-Language',
-    cdn: 'DigitalOcean CDN',
-    adLevel: 'Low-Medium',
-    hindiPriority: 9,
-    englishPriority: 8,
-    subPriority: 8,
-    isHindiVerified: true
-  },
-  animeworld_india: {
-    adReputation: 93,
-    speedScore: 91,
-    baseLatency: 46,
-    badge: 'High-Speed CDN',
-    cdn: 'Tata Communications CDN',
-    adLevel: 'Low',
-    hindiPriority: 10,
-    englishPriority: 8,
-    subPriority: 8,
-    isHindiVerified: true
-  },
-  multiembed: {
-    adReputation: 86,
-    speedScore: 85,
-    baseLatency: 64,
-    badge: 'Dual Audio Mirror',
-    cdn: 'Hetzner CDN',
-    adLevel: 'Medium',
-    hindiPriority: 8,
-    englishPriority: 8,
-    subPriority: 7,
-    isHindiVerified: true
-  },
-  vidsrc_cc: {
-    adReputation: 95,
-    speedScore: 93,
-    baseLatency: 44,
-    badge: 'Multi-Server Fast',
-    cdn: 'Cloudflare Global Edge',
-    adLevel: 'Very Low',
-    hindiPriority: 8,
-    englishPriority: 9,
-    subPriority: 8,
-    isHindiVerified: true
-  },
-  embed_su: {
-    adReputation: 90,
-    speedScore: 89,
-    baseLatency: 54,
-    badge: 'VIP Multi-Stream',
-    cdn: 'Gcore Global CDN',
-    adLevel: 'Low',
-    hindiPriority: 9,
-    englishPriority: 8,
-    subPriority: 8,
-    isHindiVerified: true
-  },
-  moviebox_ultra: {
-    adReputation: 96,
-    speedScore: 95,
-    baseLatency: 40,
-    badge: '4K MovieBox CDN',
-    cdn: 'MovieBox Edge Cluster',
-    adLevel: 'Zero Ads (Protected)',
-    hindiPriority: 9,
-    englishPriority: 9,
-    subPriority: 9,
-    isHindiVerified: true
-  },
-  netmirror_cinema: {
-    adReputation: 87,
-    speedScore: 86,
-    baseLatency: 62,
-    badge: 'NetMirror Dual-Audio',
-    cdn: 'Oracle Cloud Edge',
-    adLevel: 'Low',
-    hindiPriority: 8,
-    englishPriority: 8,
-    subPriority: 8,
-    isHindiVerified: true
-  },
-  superembed_cinema: {
-    adReputation: 94,
-    speedScore: 93,
-    baseLatency: 45,
-    badge: '4K SuperEmbed',
-    cdn: 'Cloudflare Fast Anycast',
-    adLevel: 'Very Low',
-    hindiPriority: 8,
-    englishPriority: 9,
-    subPriority: 9,
-    isHindiVerified: true
-  }
+  nxsha:             { tier: 1, badge: 'Multi-Dub • Clean Ads', adLevel: 'Clean', hindi: true },
+  vidstuck:          { tier: 1, badge: 'Hindi Dub • Subtitles', adLevel: 'Clean', hindi: true },
+  vidfast:           { tier: 1, badge: '4K Ultra • AutoPlay', adLevel: 'Clean', hindi: false },
+  bingr:             { tier: 1, badge: 'Fast Stream • Lightweight', adLevel: 'Clean', hindi: false },
+  twoembed_vip:      { tier: 1, badge: 'VIP Cinema Stream', adLevel: 'Low', hindi: false },
+  vidsrc_to:         { tier: 1, badge: 'Cinema Master', adLevel: 'Low', hindi: false },
+  tgvid:             { tier: 1, badge: 'Multi-Dub Cinema', adLevel: 'Clean', hindi: true },
+  animeworld_india:  { tier: 1, badge: 'High-Speed CDN', adLevel: 'Low', hindi: true },
+  vidlink:           { tier: 1, badge: 'Multi-Audio Pro', adLevel: 'Medium', hindi: false },
+  one23embed:        { tier: 2, badge: 'Multi-Source 1080p', adLevel: 'Medium', hindi: true },
+  smashy:            { tier: 2, badge: 'Auto Source Hunt', adLevel: 'Medium', hindi: true },
+  autoembed:         { tier: 3, badge: 'Fallback Mirror', adLevel: 'Medium', hindi: true }
 };
+
+const DEFAULT_PROFILE = { tier: 2, badge: 'HD Mirror', adLevel: 'Unknown', hindi: false };
+const HEALTH_KEY = 'furina_server_health_v2';
+const HEALTH_TTL = 10 * 60 * 1000;
+const FAIL_KEY = 'furina_server_fails_v1';
 
 export function isAutoAiServerEnabled() {
   try {
     const saved = localStorage.getItem('furina_auto_ai_server');
-    if (saved !== null) return saved === 'true';
-    return true; // Default: ON for hands-free best server experience
+    return saved === null ? true : saved === 'true';
   } catch (e) {
     return true;
   }
@@ -190,84 +43,143 @@ export function setAutoAiServerEnabled(enabled) {
   } catch (e) {}
 }
 
+function readJson(storage, key) {
+  try { return JSON.parse(storage.getItem(key) || '{}') || {}; } catch (e) { return {}; }
+}
+
+function writeJson(storage, key, value) {
+  try { storage.setItem(key, JSON.stringify(value)); } catch (e) {}
+}
+
+// Health cache: { [serverId]: { ok: boolean, ms: number, at: number } }
+export function getServerHealth() {
+  const all = readJson(sessionStorage, HEALTH_KEY);
+  const now = Date.now();
+  const fresh = {};
+  Object.keys(all).forEach((id) => {
+    if (all[id] && now - all[id].at < HEALTH_TTL) fresh[id] = all[id];
+  });
+  return fresh;
+}
+
+// Record a user-reported failure ("not playing" / switched away quickly) so the
+// selector stops picking that server for this title.
+export function reportServerFailure(serverId, tmdbId) {
+  const fails = readJson(localStorage, FAIL_KEY);
+  const key = `${tmdbId || 'any'}:${serverId}`;
+  fails[key] = Date.now();
+  // keep the map small
+  const entries = Object.entries(fails).sort((a, b) => b[1] - a[1]).slice(0, 300);
+  writeJson(localStorage, FAIL_KEY, Object.fromEntries(entries));
+}
+
+function recentlyFailed(serverId, tmdbId) {
+  const fails = readJson(localStorage, FAIL_KEY);
+  const at = fails[`${tmdbId || 'any'}:${serverId}`];
+  return Boolean(at && Date.now() - at < 24 * 60 * 60 * 1000);
+}
+
+// Real reachability probe: a no-cors fetch resolves (opaque) when the host is
+// reachable and rejects on DNS/TLS/network failure. Times out after 4s.
+async function probeOne(server, tmdbId) {
+  let url;
+  try {
+    url = server.getMovieUrl(tmdbId || 299534, 'english', false);
+  } catch (e) {
+    return { ok: false, ms: 0 };
+  }
+  const origin = new URL(url).origin + '/';
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 4000);
+  const start = performance.now();
+  try {
+    await fetch(origin, { mode: 'no-cors', cache: 'no-store', signal: ctrl.signal, credentials: 'omit' });
+    return { ok: true, ms: Math.round(performance.now() - start) };
+  } catch (e) {
+    return { ok: false, ms: Math.round(performance.now() - start) };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+let probeInFlight = null;
+
+// Probe all servers in parallel (deduped by host), cache for 10 minutes.
+export function probeServers(servers, tmdbId) {
+  if (probeInFlight) return probeInFlight;
+  const cached = getServerHealth();
+  const todo = servers.filter((s) => !cached[s.id]);
+  if (todo.length === 0) return Promise.resolve(cached);
+
+  const byHost = new Map();
+  todo.forEach((s) => {
+    let host = s.id;
+    try { host = new URL(s.getMovieUrl(tmdbId || 299534, 'english', false)).host; } catch (e) {}
+    if (!byHost.has(host)) byHost.set(host, []);
+    byHost.get(host).push(s);
+  });
+
+  probeInFlight = Promise.all(
+    [...byHost.values()].map(async (group) => {
+      const res = await probeOne(group[0], tmdbId);
+      return group.map((s) => [s.id, { ...res, at: Date.now() }]);
+    })
+  ).then((results) => {
+    const merged = { ...readJson(sessionStorage, HEALTH_KEY) };
+    results.flat().forEach(([id, value]) => { merged[id] = value; });
+    writeJson(sessionStorage, HEALTH_KEY, merged);
+    probeInFlight = null;
+    window.dispatchEvent(new CustomEvent('furina-server-health', { detail: merged }));
+    return merged;
+  }).catch(() => {
+    probeInFlight = null;
+    return cached;
+  });
+
+  return probeInFlight;
+}
+
 /**
- * Intelligent AI server evaluator
- * Computes multi-factor score:
- * - Ad Reputation (0-100) (40% weight)
- * - Audio Compatibility (35% weight)
- * - Speed & Network Latency (25% weight)
+ * Rank servers. Score = tier (dominant) + live reachability + user failure history
+ * + audio fit. Pure function over cached data so it is safe to call during render.
  */
-export function evaluateServers({ servers, audioMode = 'english', isAnime = false, isHanime = false, tmdbId }) {
+export function evaluateServers({ servers, audioMode = 'english', isAnime = false, isHanime = false, tmdbId, excludeIds = [] }) {
   if (!Array.isArray(servers) || servers.length === 0) {
     return { bestServer: null, rankedServers: [], stats: { total: 0 } };
   }
+  const health = getServerHealth();
 
-  const scored = servers.map((srv) => {
-    const profile = SERVER_PROFILES[srv.id] || {
-      adReputation: 85,
-      speedScore: 85,
-      baseLatency: 60,
-      badge: 'HD Mirror',
-      cdn: 'Standard CDN',
-      adLevel: 'Standard',
-      hindiPriority: 5,
-      englishPriority: 5,
-      subPriority: 5,
-      isHindiVerified: false
-    };
+  const scored = servers.map((srv, index) => {
+    const profile = SERVER_PROFILES[srv.id] || DEFAULT_PROFILE;
+    const h = health[srv.id];
+    let score = 100 - profile.tier * 25; // tier1=75, tier2=50, tier3=25
+    const notes = [];
 
-    // Calculate dynamic simulated latency with jitter
-    const latencyJitter = Math.floor(Math.sin((Number(tmdbId) || 1) + srv.id.length) * 8);
-    const estimatedLatency = Math.max(22, profile.baseLatency + latencyJitter);
-
-    // 1. Ad reputation factor (0 - 40 points)
-    const adScore = (profile.adReputation / 100) * 40;
-
-    // 2. Audio compatibility factor (0 - 35 points)
-    let audioScore = 20;
-    if (audioMode === 'hindi') {
-      audioScore = (profile.hindiPriority / 10) * 35;
-      if (profile.isHindiVerified) audioScore += 5;
-    } else if (audioMode === 'sub' || isAnime) {
-      audioScore = (profile.subPriority / 10) * 35;
-    } else {
-      audioScore = (profile.englishPriority / 10) * 35;
+    if (h) {
+      if (!h.ok) { score -= 60; notes.push('unreachable'); }
+      else { score += Math.max(0, 10 - Math.floor(h.ms / 300)); notes.push(`${h.ms}ms`); }
     }
-
-    // 3. Speed & Latency factor (0 - 25 points)
-    const latencyScore = Math.max(5, 25 - ((estimatedLatency - 25) * 0.35));
-
-    // Hanime safety constraint: Avoid VidLink or broken mirrors
-    let penalty = 0;
-    if (isHanime && (srv.id === 'vidlink' || srv.id === 'autoembed')) {
-      penalty = 100;
-    }
-
-    const totalScore = Math.min(100, Math.max(0, Math.round(adScore + audioScore + latencyScore - penalty)));
-
-    // Rationale description
-    let rationale = `${profile.adLevel} • ${estimatedLatency}ms CDN Ping`;
-    if (audioMode === 'hindi' && profile.isHindiVerified) {
-      rationale = `Verified Hindi Dub • ${profile.adLevel} • ${estimatedLatency}ms`;
-    } else if (profile.adReputation >= 98) {
-      rationale = `Zero-Ad VIP Stream • 4K UHD • ${estimatedLatency}ms`;
-    }
+    if (recentlyFailed(srv.id, tmdbId)) { score -= 40; notes.push('failed here before'); }
+    if (excludeIds.includes(srv.id)) score -= 200;
+    if (audioMode === 'hindi' && profile.hindi) score += 8;
+    if ((isAnime || audioMode === 'sub') && srv.id === 'vidlink') score += 6;
+    if (isHanime && (srv.id === 'vidlink' || srv.id === 'autoembed')) score -= 200;
+    score -= index * 0.01; // stable tie-break by list order
 
     return {
       server: srv,
-      score: totalScore,
-      latency: estimatedLatency,
-      adCleanliness: `${profile.adReputation}%`,
+      score: Math.round(score * 100) / 100,
+      latency: h?.ok ? h.ms : null,
+      reachable: h ? h.ok : null,
       adLevel: profile.adLevel,
-      cdn: profile.cdn,
       badge: profile.badge,
-      rationale
+      rationale: [profile.badge, ...notes].join(' • ')
     };
   });
 
   scored.sort((a, b) => b.score - a.score);
-
   const best = scored[0] || null;
+  const measured = scored.filter((s) => s.latency !== null);
 
   return {
     bestServer: best ? best.server : servers[0],
@@ -275,15 +187,26 @@ export function evaluateServers({ servers, audioMode = 'english', isAnime = fals
     rankedServers: scored,
     stats: {
       total: servers.length,
-      averageLatency: Math.round(scored.reduce((acc, s) => acc + s.latency, 0) / scored.length),
-      cleanestMirror: scored.reduce((prev, curr) => (parseFloat(curr.adCleanliness) > parseFloat(prev.adCleanliness) ? curr : prev), scored[0])?.server?.shortName
+      averageLatency: measured.length ? Math.round(measured.reduce((a, s) => a + s.latency, 0) / measured.length) : null,
+      cleanestMirror: best?.server?.shortName
     }
   };
+}
+
+// Next best server after the current one (used by the "not playing" rescue).
+export function nextBestServer({ servers, current, ...rest }) {
+  if (current?.id) reportServerFailure(current.id, rest.tmdbId);
+  const evaluation = evaluateServers({ servers, excludeIds: current ? [current.id] : [], ...rest });
+  return evaluation.bestServer;
 }
 
 export default {
   evaluateServers,
   isAutoAiServerEnabled,
   setAutoAiServerEnabled,
+  probeServers,
+  getServerHealth,
+  reportServerFailure,
+  nextBestServer,
   SERVER_PROFILES
 };

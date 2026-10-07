@@ -11,16 +11,19 @@ let blockedLogs = [];
 
 const MAX_LOGS = 50;
 
-// Known intrusive ad networks, scam redirects, and malicious trackers
+// Known intrusive ad networks, scam redirects, trackers, and uBlock Origin filter rules
 const AD_PATTERNS = [
   /popads/i, /adsterra/i, /propeller/i, /clickadu/i, /juicyads/i, /exoclick/i,
-  /monetag/i, /hilltopads/i, /highperformancegate/i, /syndication/i, /bet365/i,
+  /monetag/i, /hilltopads/i, /highperformance/i, /highrevenue/i, /syndication/i, /bet365/i,
   /1xbet/i, /casino/i, /onclick/i, /trafficjunky/i, /doubleclick/i, /adservice/i,
   /outbrain/i, /taboola/i, /mgid/i, /track(?:er)?\./i, /redirect\./i, /affiliate/i,
   /robot-verify/i, /captcha-check/i, /bonus-win/i, /prize-alert/i, /download-now\./i,
   /joywin/i, /cardiacrystal/i, /borojeet/i, /slots/i, /jackpot/i, /gamble/i, /win88/i,
   /gussiessmutchy/i, /paidmed/i, /utm_campaign/i, /clck\./i, /shorturl\./i, /bit\.ly/i,
-  /telegram\.me/i, /t\.me\/(?:\+|(?:joinchat))/i, /vividbreeze/i, /whistlebreeze/i
+  /telegram\.me/i, /t\.me\/(?:\+|(?:joinchat))/i, /vividbreeze/i, /whistlebreeze/i,
+  /histats\.com/i, /deloton\.com/i, /profitablegate\.com/i, /onclickmega\.com/i,
+  /alwingulla\.com/i, /whos\.amung\.us/i, /adskeeper\.com/i, /adnxs\.com/i,
+  /adform\.net/i, /bidswitch\.net/i, /rubiconproject\.com/i, /coinhive\.com/i
 ];
 
 function getInitialBlockedCount() {
@@ -315,7 +318,54 @@ export function initAdBlocker() {
       }, 80);
     });
 
-    console.log('[Furina Ad-Shield Pro] Engine active: Window.open trap, Anti-Redirect & Overlay Neutralizer initialized 🛡️');
+    // 5. uBlock Origin COSMETIC ELEMENT HIDING: Inject CSS rules to hide ad containers
+    if (!document.getElementById('ublock-cosmetic-shield')) {
+      const style = document.createElement('style');
+      style.id = 'ublock-cosmetic-shield';
+      style.textContent = `
+        [id*="histats"], [class*="histats"],
+        [class*="popunder"], [id*="popunder"],
+        [class*="ad-overlay"], [id*="ad-overlay"],
+        [id*="ad-banner"], [class*="ad-banner"],
+        a[href*="bet365"], a[href*="1xbet"],
+        a[href*="highperformance"], a[href*="highrevenue"],
+        iframe[src*="histats"], iframe[src*="adsterra"] {
+          display: none !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
+          opacity: 0 !important;
+          height: 0 !important;
+          width: 0 !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    // 6. NETWORK INTERCEPTION: Filter malicious ad network calls in fetch and XHR
+    if (typeof window.fetch === 'function') {
+      const originalFetch = window.fetch;
+      window.fetch = function(resource, init) {
+        const url = typeof resource === 'string' ? resource : resource?.url;
+        if (isShieldEnabled && url && isAdUrl(url)) {
+          recordBlockedEvent('network-fetch', url, 'uBlock Network Filter');
+          return Promise.reject(new Error('Blocked by Furina uBlock Shield'));
+        }
+        return originalFetch.apply(this, arguments);
+      };
+    }
+
+    if (typeof window.XMLHttpRequest === 'function') {
+      const originalOpen = XMLHttpRequest.prototype.open;
+      XMLHttpRequest.prototype.open = function(method, url) {
+        if (isShieldEnabled && url && typeof url === 'string' && isAdUrl(url)) {
+          recordBlockedEvent('network-xhr', url, 'uBlock Network Filter');
+          return;
+        }
+        return originalOpen.apply(this, arguments);
+      };
+    }
+
+    console.log('[Furina Ad-Shield Pro] Engine active: uBlock Filters, Anti-Redirect & Overlay Neutralizer initialized 🛡️');
   } catch (err) {
     console.warn('[Furina Ad-Shield Pro] Initialization warning:', err);
   }

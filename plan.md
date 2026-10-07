@@ -1,68 +1,68 @@
-# Furina MovieBox - Full 3D Motion & Premium UI Architecture Plan
+# Furina MovieBox — Performance, Multi-Dub & Ad-Shield Overhaul Plan
 
-## 1. Executive Summary
-Completely rebuild and elevate the Furina MovieBox streaming interface into an ultra-premium, paid-tier 3D cinematic experience utilizing Aceternity UI, Motion Primitives, and Magic UI MCP servers. Deliver an immaculate Fontaine Hydro visual identity, eliminate disruptive ads via an intelligent Iframe Ad-Shield system, resolve mature title 404 routing, and optimize mobile/iPhone viewport ergonomics.
-
----
-
-## 2. Visual Architecture & Design Language (Fontaine Royal Hydro)
-- **Palette**: Deep Obsidian `#030712`, Crystalline Fontaine Cyan `#38bdf8`, Royal Hydro Blue `#2563eb`, Luminous Neon Hydro `#00f2fe`, Deep Amethyst `#7c3aed`, and Fontaine Gold `#f59e0b`.
-- **Glassmorphism & Depth**: Multi-layer frosted acrylic panels (`backdrop-blur-2xl bg-slate-950/80 border border-cyan-500/25`), specular light glares, and real-time GPU-rendered 3D perspective transforms.
-- **Components from MCP Servers**:
-  - **Magic UI**: `ShimmerButton` (perimeter laser shine for primary actions), `MagicCard` (mouse-following spotlight and specular border reflection), `Marquee` (infinite smooth broadcast reel), `BorderBeam` (dual rotating gradient beams).
-  - **Motion Primitives**: `Tilt` (spring-physics 3D perspective tilt), `GlowEffect` (color-shifting volumetric hydro glow), `BorderTrail` (active track highlighting).
-  - **Aceternity UI**: `BackgroundBeams` (ethereal background canvas), `SparklesCore` (Fontaine hydro sparkle particles), `FloatingDock` (magnified desktop floating dock), `3d-card` (perspective stage layers).
+## 1. Overview
+Comprehensive overhaul of Furina MovieBox based on architectural inspection of `https://theogpiratebot.online/movie`, addressing UI lag, RAM overhead, multi-audio dubbing, streaming server reliability, and ad protection.
 
 ---
 
-## 3. Core Functional Enhancements & Bug Fixes
-
-### A. Furina Ad-Shield & Clean Player Routing
-- **Iframe Sandbox Security**:
-  - Implement active Ad-Shield mode in `PlayerModal.jsx`.
-  - When enabled, apply `sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"` (omits `allow-popups` and `allow-top-navigation` to defeat intrusive popups, new-tab hijacking, and background redirects).
-  - Provide an interactive Ad-Shield toggle button on the player header with live status indication (Active / Standard).
-  - Display live blocked popup counter from `adblocker.js`.
-- **Clean Mirror Prioritization**:
-  - Prioritize clean, low-ad servers (VidSrc PM, AutoEmbed, 2Embed VIP) in streaming engine.
-
-### B. Mature / Vault Content 404 Resolution (e.g. TMDB 1033051)
-- For mature/vault/hanime titles (such as TMDB ID 1033051):
-  - AutoEmbed returns 404 and VidLink returns 500.
-  - Automatically route these items to `twoembed_vip` (Server 5) or `animeworld_india` (Server 8) which return HTTP 200 with active streaming.
-  - Filter out incompatible servers for mature items in `availableServers`.
-
-### C. iPhone & Mobile Viewport Perfection
-- Enforce `text-base sm:text-xs` (minimum 16px font-size) on all form and search inputs to prevent iOS Safari auto-zoom.
-- Respect `env(safe-area-inset-top)` on header and `env(safe-area-inset-bottom)` on floating navigation dock.
-- Prevent accidental gesture-based browser navigation or horizontal overflow.
-
----
-
-## 4. Implementation Steps
-1. **Add MCP UI Components**:
-   - Create `src/components/ui/shimmer-button.jsx` (Magic UI).
-   - Create `src/components/ui/glow-effect.jsx` (Motion Primitives).
-   - Create `src/components/ui/tilt.jsx` (Motion Primitives spring physics).
-2. **Re-architect HeroBanner.jsx**:
-   - Transform hero banner into a true 3D floating stage with ShimmerButton CTAs, spring tilt, Fontaine Opera Stage performance showcase, and multi-layer depth parallax.
-3. **Re-architect MediaCard.jsx**:
-   - Upgrade media cards with spring physics tilt, mouse-following spotlight glare, holographic badge chips, and smooth hover overlay.
-4. **Re-architect Navbar.jsx**:
-   - Sleek floating frosted navigation with spring hover effects, Furina mascot animation, 3D spotlight shortcut, and responsive layout.
-5. **Upgrade PlayerModal.jsx & streaming.js**:
-   - Implement Ad-Shield mode with strict iframe sandboxing.
-   - Add Ad-Shield toggle button and blocked popup counter in player header.
-   - Fix mature title 404 by routing to `twoembed_vip` / `animeworld_india`.
-6. **Verify & Test**:
-   - Run `npm.cmd run build` to verify clean compilation.
-   - Run `node test_e2e_cdp.js` across all 61 tests to ensure 100% pass rate.
-   - Deploy compiled bundle and source code using `deploy_github.py`.
+## 2. Reverse-Engineered Server Architecture (from TheOGPirateBot)
+Inspection of `theogpiratebot.online` bundle revealed working multi-dub and low-ad streaming providers:
+- **NxSha Prime (Multi-Dub / Clean)**:
+  - Movie: `https://nxsha.space/embed/movie/${tmdbId}?lang=${lang}&disable_app_ad=true`
+  - TV: `https://nxsha.space/embed/tv/${tmdbId}/${season}/${episode}?lang=${lang}&disable_app_ad=true`
+  - Tested: HTTP 200, zero X-Frame-Options, native multi-dub with `disable_app_ad=true`.
+- **VidStuck Pro (Multi-Dub)**:
+  - Movie: `https://vidstuck.xyz/embed/movie/${tmdbId}?dubLang=${dubLang}&subtitle=english`
+  - TV: `https://vidstuck.xyz/embed/tv/${tmdbId}/${season}/${episode}?dubLang=${dubLang}&subtitle=english`
+  - Tested: HTTP 200, zero X-Frame-Options, multi-audio.
+- **VidFast Ultra (4K High Bitrate)**:
+  - Movie: `https://vidfast.vc/movie/${tmdbId}?autoPlay=true`
+  - TV: `https://vidfast.vc/tv/${tmdbId}/${season}/${episode}?autoPlay=true`
+  - Tested: HTTP 200, zero X-Frame-Options, fast 4K playback.
+- **Bingr Stream (Fast Clean Stream)**:
+  - Movie: `https://bingr.one/watch/movie/${tmdbId}`
+  - TV: `https://bingr.one/watch/tv/${tmdbId}/${season}/${episode}`
+  - Tested: HTTP 200, lightweight, zero bloat.
+- **TgVid Cinema (Multi-Dub)**:
+  - Movie: `https://tgvid.lovable.app/embed/movie/${tmdbId}?lang=${lang}`
+  - TV: `https://tgvid.lovable.app/embed/tv/${tmdbId}/${season}/${episode}?lang=${lang}`
+  - Tested: HTTP 200.
 
 ---
 
-## 5. Skeptical Code Review & Peer Hardening
-- **Mature Audio Change Fallback**: Fixed `handleAudioChange` in `PlayerModal.jsx` where selecting Japanese Sub, English Dub, or Hindi Audio on mature/vault content mistakenly attempted to query `autoembed` (which is filtered out) instead of defaulting to `twoembed_vip` or `animeworld_india`.
-- **Mature Download Mirrors Safeguard**: Updated `getDownloadMirrors` in `streaming.js` and `DownloadModal.jsx` to omit 404/500 providers (`mirror_autoembed`, `mirror_vidlink`) for adult/vault content (TMDB 1033051) and prioritize 2Embed VIP and Cinema Mirror 2.
-- **Global Settings Ad-Shield Integration**: Added `adShieldMode: true` to `DEFAULT_SETTINGS` and embedded the Ad-Shield toggle inside `SettingsModal.jsx` Player Behavior settings to synchronize seamlessly with `PlayerModal.jsx` and localStorage.
-- **Mobile Ergnomics & Safe Areas**: Added `safe-bottom` padding to the fixed mobile bottom navigation bar in `App.jsx` to respect `env(safe-area-inset-bottom)` on iPhones, and increased `<main>` container padding to `pb-24 md:pb-8` to prevent content occlusion.
+## 3. Real uBlock-Grade In-Browser Ad-Shield
+Integrate official uBlock Origin filter rules directly into `src/services/adblocker.js`:
+- **Domain Blacklist (250+ domains)**:
+  - Block requests to `highperformanceformat.com`, `highrevenueformat.com`, `histats.com`, `deloton.com`, `onclickmega.com`, `profitablegate.com`, `alwingulla.com`, `bet365`, `1xbet`, etc.
+- **Cosmetic CSS Element Hiding**:
+  - Global CSS injection targeting popup overlays, Histats badges, floating scam banners, and clickjack anchors (`[id*="histats"]`, `[class*="popunder"]`, `[id*="ad-banner"]`).
+- **Network Interception**:
+  - Override `window.fetch` and `XMLHttpRequest.prototype.open` to abort blacklisted ad endpoints.
+- **Window.open & Navigation Trap**:
+  - Resilient recursive Proxy window defusing `document.write`, `location.replace`, and clickjack anchor clicks.
+
+---
+
+## 4. UI Lag & RAM Optimization (60-120 FPS Fluidity)
+- **MediaCard.jsx**:
+  - Remove `setState` inside `onMouseMove`. Use direct DOM style transform mutation via `requestAnimationFrame` to eliminate 60+ React component re-renders per second.
+  - Remove synchronous `localStorage` lookups on every render pass; memoize watch progress.
+- **BackgroundBeams.jsx**:
+  - Replace CPU-heavy full-screen canvas gradient repaints with hardware-accelerated CSS aurora gradients.
+  - Pause particle animation when video player or modals are open and when tab is in background.
+- **SparklesCore.jsx**:
+  - Limit particle density to 25-30 on mobile and 45 on desktop; pause animation with `IntersectionObserver`.
+
+---
+
+## 5. Player UI Polish & Mobile/iPhone Optimization
+- Declutter the player modal: cleaner layout, high-contrast controls.
+- Provide a dedicated, prominent **"Not playing? Next server"** rescue button that immediately switches to the next best verified mirror.
+- Mobile/iPhone: Ensure safe area padding (`env(safe-area-inset-bottom)`), prevent auto-zoom with 16px text on inputs, and lock horizontal overflow.
+
+---
+
+## 6. Verification & Deployment
+- Automated browser testing via CDP with Microsoft Edge.
+- Production Vite compilation (`npm run build`).
+- Full deployment to GitHub Pages (`gh-pages`) and `main` branch.

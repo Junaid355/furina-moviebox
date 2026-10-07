@@ -11,7 +11,7 @@ import {
   permitPopupOnce, getBlockedCount, isAdBlockEnabled, 
   setShieldEnabled, getShieldMode, setShieldMode, setPlayerActive 
 } from '../services/adblocker';
-import { evaluateServers, isAutoAiServerEnabled } from '../services/aiServerSelector';
+import { evaluateServers, isAutoAiServerEnabled, probeServers, nextBestServer } from '../services/aiServerSelector';
 import soundFx from '../services/soundFx';
 import DownloadModal from './DownloadModal';
 import UBlockShieldModal from './UBlockShieldModal';
@@ -198,70 +198,23 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
   // Determine initial server — route to fast, verified 200 OK servers
   const getInitialServer = () => {
-    // If AI Auto Server is enabled and no explicit override is passed, let AI evaluate immediately
-    if (isAutoAiServerEnabled() && !preferredServerId && hasOnlineStream) {
-      try {
-        const evaluation = evaluateServers({
-          servers: availableServers,
-          audioMode,
-          isAnime,
-          isHanime,
-          tmdbId: resolvedTmdbId
-        });
-        if (evaluation?.bestServer) {
-          return evaluation.bestServer;
-        }
-      } catch (e) {}
+    // Explicit request (e.g. from a "Hindi server" link) wins, except the dead multiembed host.
+    if (preferredServerId && preferredServerId !== 'multiembed') {
+      const explicit = availableServers.find((s) => s.id === preferredServerId);
+      if (explicit) return explicit;
     }
-
-    if (isHanime) {
-      return (
-        availableServers.find((s) => s.id === 'twoembed_vip') ||
-        availableServers.find((s) => s.id === 'animeworld_india') ||
-        availableServers.find((s) => s.id === 'vidsrc_in') ||
-        availableServers.find((s) => s.id === 'smashy') ||
-        availableServers[0]
-      );
-    }
-    if (audioMode === 'hindi' || userPreferredAudio === 'hindi') {
-      return (
-        availableServers.find((s) => s.id === 'vidsrc_in') ||
-        availableServers.find((s) => s.id === 'autoembed') ||
-        availableServers.find((s) => s.id === 'smashy') ||
-        availableServers.find((s) => s.id === 'animeworld_india') ||
-        availableServers.find((s) => s.id === 'embed_su') ||
-        availableServers.find((s) => s.id === 'vidsrc_cc') ||
-        availableServers[0]
-      );
-    }
-    if (hasWorkingHindiSource && !isCustom) {
-      if (isBollywoodHindi) {
-        return (
-          availableServers.find((s) => s.id === 'vidsrc_in') ||
-          availableServers.find((s) => s.id === 'autoembed') ||
-          availableServers[0]
-        );
-      }
-      return (
-        availableServers.find((s) => s.id === 'vidsrc_in') ||
-        availableServers.find((s) => s.id === 'autoembed') ||
-        availableServers.find((s) => s.id === 'smashy') ||
-        availableServers.find((s) => s.id === 'animeworld_india') ||
-        availableServers.find((s) => s.id === 'embed_su') ||
-        availableServers.find((s) => s.id === 'vidsrc_cc') ||
-        availableServers[0]
-      );
-    }
-    if (isAnime) {
-      return (
-        availableServers.find((s) => s.id === 'vidlink') ||
-        availableServers.find((s) => s.id === 'autoembed') ||
-        availableServers.find((s) => s.id === 'vidsrc_in') ||
-        availableServers[0]
-      );
-    }
-    const safePreferred = (preferredServerId === 'multiembed' || !preferredServerId) ? 'autoembed' : preferredServerId;
-    return availableServers.find((s) => s.id === safePreferred) || availableServers[0];
+    // Otherwise use the ranked list: real-test tiers + cached live reachability + failure history.
+    try {
+      const evaluation = evaluateServers({
+        servers: availableServers,
+        audioMode,
+        isAnime,
+        isHanime,
+        tmdbId: resolvedTmdbId
+      });
+      if (evaluation?.bestServer) return evaluation.bestServer;
+    } catch (e) {}
+    return availableServers[0];
   };
 
   const [selectedServer, setSelectedServer] = useState(getInitialServer);
@@ -304,61 +257,67 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     soundFx.playClick?.();
   };
 
-  // AI Smart Server Chooser handler
-  const handleAiAutoSelectServer = useCallback((notify = true) => {
+  // Tracks whether the user picked a server by hand, so background ranking never overrides them.
+  const manualPickRef = useRef(false);
+
+  const showServerToast = (server, details, note) => {
+    setAiServerToast({
+      serverName: server.shortName,
+      badge: details?.badge || 'HD Mirror',
+      rationale: note || details?.rationale || ''
+    });
+    setTimeout(() => setAiServerToast(null), 4500);
+  };
+
+  // Smart server chooser: live probe (cached 10 min) then rank.
+  const handleAiAutoSelectServer = useCallback(async (notify = true) => {
     setAiSelecting(true);
     soundFx.playClick?.();
-    setTimeout(() => {
-      const evaluation = evaluateServers({
-        servers: availableServers,
-        audioMode,
-        isAnime,
-        isHanime,
-        tmdbId: resolvedTmdbId
-      });
-      if (evaluation.bestServer) {
-        setSelectedServer(evaluation.bestServer);
-        if (playerMode !== 'stream') setPlayerMode('stream');
-        if (notify) {
-          const isAlreadyOnBest = selectedServer?.id === evaluation.bestServer.id;
-          setAiServerToast({
-            serverName: evaluation.bestServer.shortName,
-            badge: evaluation.bestDetails?.badge || '4K Ultra HD',
-            rationale: isAlreadyOnBest
-              ? 'Optimal mirror already active (Rank #1 Cleanest)'
-              : (evaluation.bestDetails?.rationale || 'Clean CDN')
-          });
-          setTimeout(() => setAiServerToast(null), 4500);
-        }
-      }
-      setAiSelecting(false);
-    }, 300);
-  }, [availableServers, audioMode, isAnime, isHanime, resolvedTmdbId, playerMode, selectedServer]);
-
-  // Auto AI Server Selection on Mount if enabled in settings
-  useEffect(() => {
-    if (isAutoAiServerEnabled() && !preferredServerId && hasOnlineStream) {
-      const evaluation = evaluateServers({
-        servers: availableServers,
-        audioMode,
-        isAnime,
-        isHanime,
-        tmdbId: resolvedTmdbId
-      });
-      if (evaluation.bestServer) {
-        if (evaluation.bestServer.id !== selectedServer.id) {
-          setSelectedServer(evaluation.bestServer);
-        }
-        setAiServerToast({
-          serverName: evaluation.bestServer.shortName,
-          badge: evaluation.bestDetails?.badge || '4K Ultra HD',
-          rationale: evaluation.bestDetails?.rationale || 'Clean CDN'
-        });
-        const timer = setTimeout(() => setAiServerToast(null), 4500);
-        return () => clearTimeout(timer);
-      }
+    try {
+      await probeServers(availableServers, resolvedTmdbId);
+    } catch (e) {}
+    const evaluation = evaluateServers({
+      servers: availableServers,
+      audioMode,
+      isAnime,
+      isHanime,
+      tmdbId: resolvedTmdbId
+    });
+    if (evaluation.bestServer) {
+      manualPickRef.current = false;
+      setSelectedServer(evaluation.bestServer);
+      if (playerMode !== 'stream') setPlayerMode('stream');
+      if (notify) showServerToast(evaluation.bestServer, evaluation.bestDetails);
     }
-  }, []);
+    setAiSelecting(false);
+  }, [availableServers, audioMode, isAnime, isHanime, resolvedTmdbId, playerMode]);
+
+  // "Not playing?" rescue: remember this server failed for this title, jump to the next best one.
+  const handleNotPlaying = useCallback(() => {
+    soundFx.playClick?.();
+    const next = nextBestServer({
+      servers: availableServers,
+      current: selectedServer,
+      audioMode,
+      isAnime,
+      isHanime,
+      tmdbId: resolvedTmdbId
+    });
+    if (next && next.id !== selectedServer?.id) {
+      manualPickRef.current = true;
+      setSelectedServer(next);
+      if (playerMode !== 'stream') setPlayerMode('stream');
+      showServerToast(next, null, `Switched from ${selectedServer?.shortName || 'previous server'}`);
+    }
+  }, [availableServers, selectedServer, audioMode, isAnime, isHanime, resolvedTmdbId, playerMode]);
+
+  // On open: probe hosts in the background to warm cache without tearing down active playback
+  useEffect(() => {
+    if (!hasOnlineStream) return undefined;
+    let cancelled = false;
+    probeServers(availableServers, resolvedTmdbId).catch(() => {});
+    return () => { cancelled = true; };
+  }, [availableServers, hasOnlineStream, resolvedTmdbId]);
 
   // Episodes & Season State with Watch Progress Persistence
   const getSavedProgress = () => {
@@ -385,12 +344,12 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const [reloadKey, setReloadKey] = useState(0);
   const handleReload = () => setReloadKey((k) => k + 1);
 
-  // Auto-clear loading spinner after reasonable connection window
+  // Auto-clear loading spinner quickly so video controls and stream are interactive
   useEffect(() => {
     setIframeLoading(true);
     const timer = setTimeout(() => {
       setIframeLoading(false);
-    }, 4500);
+    }, 2200);
     return () => clearTimeout(timer);
   }, [selectedServer?.id, season, episode, audioMode, reloadKey]);
 
@@ -460,56 +419,21 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       physicalSwitched = selectPhysicalAudioTrack(videoRef.current, newMode);
     }
 
-    if (newMode === 'hindi') {
-      setSelectedServer((prevSrv) => {
-        if (prevSrv && prevSrv.supportedAudios?.includes('hindi')) {
-          if (!isHanime || (prevSrv.id !== 'autoembed' && prevSrv.id !== 'vidlink')) {
-            return prevSrv;
-          }
-        }
-        if (isHanime) {
-          return (
-            availableServers.find((s) => s.id === 'animeworld_india') ||
-            availableServers.find((s) => s.id === 'twoembed_vip') ||
-            availableServers.find((s) => s.id === 'smashy') ||
-            availableServers.find((s) => s.id === 'vidsrc_in') ||
-            availableServers[0]
-          );
-        }
-        return (
-          availableServers.find((s) => s.id === 'autoembed') ||
-          availableServers.find((s) => s.id === 'vidsrc_in') ||
-          availableServers.find((s) => s.id === 'one23embed') ||
-          availableServers.find((s) => s.id === 'animeworld_india') ||
-          availableServers.find((s) => s.id === 'smashy') ||
-          availableServers.find((s) => s.id === 'embed_su') ||
-          availableServers.find((s) => s.id === 'vidsrc_cc') ||
-          availableServers[0]
-        );
+    // Keep the current server if it is still a good pick for the new audio mode;
+    // otherwise re-rank (this avoids jumping onto known-blank mirrors).
+    setSelectedServer((prevSrv) => {
+      const evaluation = evaluateServers({
+        servers: availableServers,
+        audioMode: newMode,
+        isAnime,
+        isHanime,
+        tmdbId: resolvedTmdbId
       });
-    } else if (newMode === 'sub') {
-      setSelectedServer((prevSrv) => {
-        if (prevSrv && prevSrv.supportedAudios?.includes('sub')) {
-          if (!isHanime || (prevSrv.id !== 'autoembed' && prevSrv.id !== 'vidlink')) {
-            return prevSrv;
-          }
-        }
-        return isHanime
-          ? (availableServers.find((s) => s.id === 'twoembed_vip') || availableServers.find((s) => s.id === 'animeworld_india') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0])
-          : (availableServers.find((s) => s.id === 'vidlink') || availableServers.find((s) => s.id === 'autoembed') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0]);
-      });
-    } else {
-      setSelectedServer((prevSrv) => {
-        if (prevSrv && prevSrv.supportedAudios?.includes('english')) {
-          if (!isHanime || (prevSrv.id !== 'autoembed' && prevSrv.id !== 'vidlink')) {
-            return prevSrv;
-          }
-        }
-        return isHanime
-          ? (availableServers.find((s) => s.id === 'twoembed_vip') || availableServers.find((s) => s.id === 'animeworld_india') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0])
-          : (availableServers.find((s) => s.id === 'vidlink') || availableServers.find((s) => s.id === 'autoembed') || availableServers.find((s) => s.id === 'vidsrc_in') || availableServers[0]);
-      });
-    }
+      const prevRank = evaluation.rankedServers.find((r) => r.server.id === prevSrv?.id);
+      const best = evaluation.rankedServers[0];
+      if (prevRank && best && prevRank.score >= best.score - 10) return prevSrv;
+      return evaluation.bestServer || prevSrv;
+    });
 
     setTimeout(() => {
       setIsSwitchingAudio(false);
@@ -711,12 +635,6 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     };
   }, []);
 
-  // Iframe loading reset & safety timer
-  useEffect(() => {
-    setIframeLoading(true);
-    const timer = setTimeout(() => setIframeLoading(false), 5000);
-    return () => clearTimeout(timer);
-  }, [selectedServer?.id, season, episode, audioMode, reloadKey]);
 
   // Sync isFullscreen with native document fullscreen changes
   useEffect(() => {
@@ -1805,14 +1723,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                             <button
                               onClick={() => {
                                 if (audioMode === 'hindi') {
-                                  const hindiServer = 
-                                    availableServers.find((s) => s.id === 'vidsrc_in') ||
-                                    availableServers.find((s) => s.id === 'autoembed') ||
-                                    availableServers.find((s) => s.id === 'smashy') ||
-                                    availableServers.find((s) => s.id === 'animeworld_india') ||
-                                    availableServers.find((s) => s.id === 'embed_su') ||
-                                    availableServers.find((s) => s.id === 'vidsrc_cc') ||
-                                    availableServers[0];
+                                  const hindiServer = evaluateServers({ servers: availableServers, audioMode: 'hindi', isAnime, isHanime, tmdbId: resolvedTmdbId }).bestServer || availableServers[0];
                                   setSelectedServer(hindiServer);
                                 }
                                 setPlayerMode('stream');
@@ -2089,10 +2000,10 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                     </div>
                     <div className="flex items-center gap-1 flex-wrap">
                       {[
-                        { id: 'autoembed', label: 'AutoEmbed' },
-                        { id: 'vidsrc_in', label: 'VidSrc 4K' },
+                        { id: 'animeworld_india', label: 'Hindi CDN' },
                         { id: 'one23embed', label: '123Embed' },
-                        { id: 'animeworld_india', label: 'Hindi CDN' }
+                        { id: 'smashy', label: 'Smashy' },
+                        { id: 'autoembed', label: 'AutoEmbed' }
                       ].map((sObj) => {
                         const targetSrv = availableServers.find((s) => s.id === sObj.id);
                         if (!targetSrv) return null;
@@ -2124,11 +2035,27 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   </div>
                 )}
 
+                {/* Floating Quick Mirror Switcher (Top Right of Player Container - works in windowed & fullscreen) */}
+                <div className="absolute top-2.5 right-2.5 z-30 flex items-center gap-1.5 bg-slate-950/80 backdrop-blur-md px-2.5 py-1 rounded-lg border border-cyan-500/30 text-white shadow-xl pointer-events-auto">
+                  <span className="text-[10px] text-cyan-300 font-mono hidden sm:inline">
+                    {currentServer.shortName}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleNotPlaying}
+                    className="px-2 py-0.5 rounded bg-rose-500/25 hover:bg-rose-500/40 text-rose-200 border border-rose-400/50 text-[10px] font-bold flex items-center gap-1 transition cursor-pointer active:scale-95 shadow-sm"
+                    title="If video is stuck or buffering, click to immediately switch to next mirror"
+                  >
+                    <RefreshCw className="w-2.5 h-2.5" />
+                    <span>Next Server</span>
+                  </button>
+                </div>
+
                 {iframeLoading && (
-                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#050b1d]/95 backdrop-blur-md pointer-events-none p-4 text-center">
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#050b1d]/75 backdrop-blur-sm pointer-events-none p-4 text-center transition-opacity duration-300">
                     <div className="relative mb-3 flex items-center justify-center">
                       <div className="absolute -inset-2 rounded-full bg-cyan-500/25 blur-md animate-pulse" />
-                      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-cyan-400 shadow-[0_0_20px_rgba(56,189,248,0.7)] bg-[#070e24] relative z-10">
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden border-2 border-cyan-400 shadow-[0_0_20px_rgba(56,189,248,0.7)] bg-[#070e24] relative z-10">
                         <img
                           src="./furina_chibi.gif"
                           alt="Furina Loading"
@@ -2157,7 +2084,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                       ? 'w-full h-full aspect-video max-w-[calc(100vh*16/9)] max-h-[calc(100vw*9/16)] shadow-2xl' 
                       : 'w-full h-full'
                   }`}
-                  sandbox={adShieldActive && shieldMode === 'strict' ? "allow-scripts allow-same-origin allow-forms allow-presentation allow-popups" : undefined}
+                  sandbox={adShieldActive && shieldMode === 'strict' ? "allow-scripts allow-same-origin allow-forms allow-presentation" : undefined}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
                   allowFullScreen
                 />
@@ -2220,7 +2147,19 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                     ) : (
                       <Sparkles className="w-3 h-3 text-amber-400 animate-pulse" />
                     )}
-                    <span>{aiSelecting ? 'AI Scanning...' : '✨ AI Auto-Select Server'}</span>
+                    <span>{aiSelecting ? 'Checking servers...' : '✨ AI Auto-Select Best Server'}</span>
+                  </button>
+
+                  {/* One-tap rescue when the player is blank or shows an error */}
+                  <button
+                    type="button"
+                    onClick={handleNotPlaying}
+                    data-testid="not-playing-btn"
+                    title="Blank screen or error? Jump to the next best server"
+                    className="px-3 py-1 rounded-lg text-xs font-black transition flex items-center gap-1.5 cursor-pointer bg-rose-500/15 hover:bg-rose-500/30 text-rose-200 border border-rose-400/40 active:scale-95"
+                  >
+                    <AlertTriangle className="w-3 h-3 text-rose-300" />
+                    <span>Not playing? Next server</span>
                   </button>
 
                   <div className="flex items-center gap-1.5 flex-wrap">
@@ -2230,6 +2169,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                         <button
                           key={srv.id}
                           onClick={() => {
+                            manualPickRef.current = true;
                             setSelectedServer(srv);
                             if (playerMode !== 'stream') setPlayerMode('stream');
                             if (srv.id === 'one23embed') {
