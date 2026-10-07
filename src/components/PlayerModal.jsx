@@ -2174,8 +2174,8 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                             if (playerMode !== 'stream') setPlayerMode('stream');
                             if (srv.id === 'one23embed') {
                               if (audioMode !== 'hindi' && hasWorkingHindiSource) setAudioMode('hindi');
-                            } else if (srv.id === 'vidsrc_to') {
-                              if (audioMode !== 'sub' && hasWorkingJapaneseSource) setAudioMode('sub');
+                            } else if (srv.id === 'zxcstream' || srv.id === 'tgvid') {
+                              if (audioMode !== 'sub' && hasWorkingJapaneseSource && isAnime) setAudioMode('sub');
                             } else if (srv.id === 'vidlink' || srv.id === 'twoembed_vip' || srv.id === 'vidsrc_cc') {
                               if (audioMode !== 'english' && hasWorkingEnglishSource) setAudioMode('english');
                             }

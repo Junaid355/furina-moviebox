@@ -4,10 +4,78 @@
 
 export const SERVERS = [
   {
+    id: 'tgvid',
+    name: '[ 🌸 Server 1 (Ad-Free Cinema) ] TgVid Prime (Ad-Free • Multi-Language / HD)',
+    shortName: '[ 🌸 Server 1 (Ad-Free) ]',
+    badge: 'Ad-Free • Multi-Lang',
+    color: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
+    supportedAudios: ['hindi', 'english', 'sub'],
+    getMovieUrl: (tmdbId, audioMode = 'english') => {
+      const lang = audioMode === 'hindi' ? 'hi' : 'en';
+      return `https://tgvid.lovable.app/embed/movie/${tmdbId}?color=38bdf8&back=true&lang=${lang}`;
+    },
+    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'english') => {
+      const lang = audioMode === 'hindi' ? 'hi' : 'en';
+      return `https://tgvid.lovable.app/embed/tv/${tmdbId}/${s}/${e}?color=38bdf8&back=true&lang=${lang}&episodeSelector=false&autoplayNextEp=false`;
+    }
+  },
+  {
+    id: 'vidstuck',
+    name: '[ 🇮🇳 Server 2 (Hindi Dub / CC) ] VidStuck Pro (Centaurus • Multi-Dub • 1080p)',
+    shortName: '[ 🇮🇳 Server 2 (Hindi Dub) ]',
+    badge: 'Multi-Dub • Centaurus',
+    color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+    supportedAudios: ['hindi', 'english', 'sub'],
+    getMovieUrl: (tmdbId, audioMode = 'english') => {
+      const dub = audioMode === 'hindi' ? 'hi' : 'en';
+      return `https://vidstuck.xyz/embed/movie/${tmdbId}?branding=FurinaMovieBox&server=centaurus&overlay=true&color=38bdf8&dubLang=${dub}&subtitle=english&loading=2`;
+    },
+    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'english') => {
+      const dub = audioMode === 'hindi' ? 'hi' : 'en';
+      return `https://vidstuck.xyz/embed/tv/${tmdbId}/${s}/${e}?branding=FurinaMovieBox&server=centaurus&overlay=true&color=38bdf8&dubLang=${dub}&subtitle=english&loading=2`;
+    }
+  },
+  {
+    id: 'bingr',
+    name: '[ 🌐 Server 3 (Clean Stream) ] Bingr Stream (High Bitrate • Ultra-Light)',
+    shortName: '[ 🌐 Server 3 (Clean Stream) ]',
+    badge: 'High Bitrate • Light',
+    color: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
+    supportedAudios: ['english', 'sub', 'hindi'],
+    getMovieUrl: (tmdbId) => `https://bingr.one/watch/movie/${tmdbId}`,
+    getTvUrl: (tmdbId, s = 1, e = 1) => `https://bingr.one/watch/tv/${tmdbId}/${s}/${e}`
+  },
+  {
+    id: 'zxcstream',
+    name: '[ ⚡ Server 4 (Roxy Stream) ] ZXC Roxy (Fast Streams • Zero Captcha)',
+    shortName: '[ ⚡ Server 4 (Roxy) ]',
+    badge: 'Fast Streams',
+    color: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
+    supportedAudios: ['english', 'sub', 'hindi'],
+    getMovieUrl: (tmdbId, audioMode = 'english') => {
+      const lang = audioMode === 'hindi' ? 'hi' : 'en';
+      return `https://zxcstream.xyz/player/movie/${tmdbId}?dubLang=${lang}&server=0`;
+    },
+    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'english') => {
+      const lang = audioMode === 'hindi' ? 'hi' : 'en';
+      return `https://zxcstream.xyz/player/tv/${tmdbId}/${s}/${e}?dubLang=${lang}&server=0`;
+    }
+  },
+  {
+    id: 'vidfast',
+    name: '[ ⚡ Server 5 (4K Ultra Fast) ] VidFast Ultra (Instant AutoPlay • 4K UHD)',
+    shortName: '[ ⚡ Server 5 (4K Ultra) ]',
+    badge: '4K Ultra Fast',
+    color: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+    supportedAudios: ['english', 'sub', 'hindi'],
+    getMovieUrl: (tmdbId) => `https://vidfast.vc/movie/${tmdbId}?autoPlay=true`,
+    getTvUrl: (tmdbId, s = 1, e = 1) => `https://vidfast.vc/tv/${tmdbId}/${s}/${e}?autoPlay=true`
+  },
+  {
     id: 'nxsha',
-    name: '[ 🎧 Server 1 (Multi-Dub Clean) ] NxSha Prime (Clean Ads • Multi-Dub / 4K)',
-    shortName: '[ 🎧 Server 1 (Multi-Dub) ]',
-    badge: 'Multi-Dub • Clean',
+    name: '[ 🎧 Server 6 (Dual Audio) ] NxSha Prime (Clean Ads • Dual Audio / 4K)',
+    shortName: '[ 🎧 Server 6 (Dual Audio) ]',
+    badge: 'Dual Audio • 4K',
     color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
     supportedAudios: ['hindi', 'english', 'sub'],
     getMovieUrl: (tmdbId, audioMode = 'english') => {
@@ -20,76 +88,14 @@ export const SERVERS = [
     }
   },
   {
-    id: 'vidstuck',
-    name: '[ 🇮🇳 Server 2 (Hindi Dub / CC) ] VidStuck Pro (Hindi Dubbed • Subtitles • 1080p)',
-    shortName: '[ 🇮🇳 Server 2 (Hindi Dub) ]',
-    badge: 'Hindi Dub • Subtitles',
-    color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-    supportedAudios: ['hindi', 'english', 'sub'],
-    getMovieUrl: (tmdbId, audioMode = 'english') => {
-      const dub = audioMode === 'hindi' ? 'hi' : 'en';
-      return `https://vidstuck.xyz/embed/movie/${tmdbId}?dubLang=${dub}&subtitle=english`;
-    },
-    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'english') => {
-      const dub = audioMode === 'hindi' ? 'hi' : 'en';
-      return `https://vidstuck.xyz/embed/tv/${tmdbId}/${s}/${e}?dubLang=${dub}&subtitle=english`;
-    }
-  },
-  {
-    id: 'vidfast',
-    name: '[ ⚡ Server 3 (4K Ultra Fast) ] VidFast Ultra (Instant AutoPlay • 4K UHD)',
-    shortName: '[ ⚡ Server 3 (4K Ultra) ]',
-    badge: '4K Ultra Fast',
-    color: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
-    supportedAudios: ['english', 'sub', 'hindi'],
-    getMovieUrl: (tmdbId) => `https://vidfast.vc/movie/${tmdbId}?autoPlay=true`,
-    getTvUrl: (tmdbId, s = 1, e = 1) => `https://vidfast.vc/tv/${tmdbId}/${s}/${e}?autoPlay=true`
-  },
-  {
-    id: 'bingr',
-    name: '[ 🌐 Server 4 (Clean Stream) ] Bingr Stream (Ultra-Light • Zero Buffering)',
-    shortName: '[ 🌐 Server 4 (Clean Stream) ]',
-    badge: 'Lightweight Stream',
-    color: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
-    supportedAudios: ['english', 'sub', 'hindi'],
-    getMovieUrl: (tmdbId) => `https://bingr.one/watch/movie/${tmdbId}`,
-    getTvUrl: (tmdbId, s = 1, e = 1) => `https://bingr.one/watch/tv/${tmdbId}/${s}/${e}`
-  },
-  {
     id: 'twoembed_vip',
-    name: '[ 👑 Server 5 (VIP Stream) ] 2Embed VIP (Direct Playback / High Bitrate)',
-    shortName: '[ 👑 Server 5 (VIP Stream) ]',
+    name: '[ 👑 Server 7 (VIP Stream) ] 2Embed VIP (Direct Playback / High Bitrate)',
+    shortName: '[ 👑 Server 7 (VIP Stream) ]',
     badge: 'VIP Stream',
     color: 'bg-sky-500/20 text-sky-400 border-sky-500/30',
     supportedAudios: ['english', 'sub'],
     getMovieUrl: (tmdbId) => `https://www.2embed.cc/embed/${tmdbId}`,
     getTvUrl: (tmdbId, s = 1, e = 1) => `https://www.2embed.cc/embedtv/${tmdbId}&s=${s}&e=${e}`
-  },
-  {
-    id: 'vidsrc_to',
-    name: '[ 🇯🇵 Server 6 (Cinema Master) ] VidSrc TO (Cinema Master / High Bitrate)',
-    shortName: '[ 🇯🇵 Server 6 (Cinema Master) ]',
-    badge: 'Cinema Master',
-    color: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
-    supportedAudios: ['english', 'sub'],
-    getMovieUrl: (tmdbId) => `https://vidsrc.to/embed/movie/${tmdbId}`,
-    getTvUrl: (tmdbId, s = 1, e = 1) => `https://vidsrc.to/embed/tv/${tmdbId}/${s}/${e}`
-  },
-  {
-    id: 'tgvid',
-    name: '[ 🌸 Server 7 (Multi-Dub Cinema) ] TgVid Cinema (Multi-Dub • Fontaine Stream)',
-    shortName: '[ 🌸 Server 7 (Multi-Dub) ]',
-    badge: 'Multi-Dub Cinema',
-    color: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
-    supportedAudios: ['hindi', 'english', 'sub'],
-    getMovieUrl: (tmdbId, audioMode = 'english') => {
-      const lang = audioMode === 'hindi' ? 'hi' : 'en';
-      return `https://tgvid.lovable.app/embed/movie/${tmdbId}?color=38bdf8&lang=${lang}`;
-    },
-    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'english') => {
-      const lang = audioMode === 'hindi' ? 'hi' : 'en';
-      return `https://tgvid.lovable.app/embed/tv/${tmdbId}/${s}/${e}?color=38bdf8&lang=${lang}`;
-    }
   },
   {
     id: 'animeworld_india',
@@ -195,8 +201,30 @@ export function getDownloadMirrors(tmdbId, type = 'movie', season = 1, episode =
   const isMature = Boolean(isHanime || Number(tmdbId) === 1033051 || String(tmdbId).includes('1033051'));
   const allMirrors = [
     {
+      id: 'mirror_tgvid',
+      name: '[ 🌸 Server 1 (Ad-Free Cinema) ] TgVid Direct Cloud',
+      quality: '1080p Full HD',
+      badge: audioMode === 'hindi' ? '🌸 Ad-Free • Hindi Dub' : '🌸 Ad-Free Multi-Lang',
+      color: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
+      isHindi: true,
+      url: isTv 
+        ? `https://tgvid.lovable.app/embed/tv/${tmdbId}/${season}/${episode}?color=38bdf8&back=true&lang=${audioMode === 'hindi' ? 'hi' : 'en'}` 
+        : `https://tgvid.lovable.app/embed/movie/${tmdbId}?color=38bdf8&back=true&lang=${audioMode === 'hindi' ? 'hi' : 'en'}`
+    },
+    {
+      id: 'mirror_vidstuck',
+      name: '[ 🇮🇳 Server 2 (Hindi Dubbed) ] VidStuck Centaurus Cloud',
+      quality: '1080p Full HD',
+      badge: 'Hindi Dubbed • Centaurus',
+      color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+      isHindi: true,
+      url: isTv 
+        ? `https://vidstuck.xyz/embed/tv/${tmdbId}/${season}/${episode}?branding=FurinaMovieBox&server=centaurus&overlay=true&color=38bdf8&dubLang=${audioMode === 'hindi' ? 'hi' : 'en'}&subtitle=english&loading=2` 
+        : `https://vidstuck.xyz/embed/movie/${tmdbId}?branding=FurinaMovieBox&server=centaurus&overlay=true&color=38bdf8&dubLang=${audioMode === 'hindi' ? 'hi' : 'en'}&subtitle=english&loading=2`
+    },
+    {
       id: 'mirror_nxsha',
-      name: '[ 🎧 Server 1 (Multi-Dub Clean) ] NxSha Direct Cloud',
+      name: '[ 🎧 Server 3 (Dual Audio) ] NxSha Direct Cloud',
       quality: '1080p / 4K UHD',
       badge: audioMode === 'hindi' ? '🇮🇳 Hindi Dub Verified' : 'Fast 4K Stream',
       color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40',
@@ -204,17 +232,6 @@ export function getDownloadMirrors(tmdbId, type = 'movie', season = 1, episode =
       url: isTv 
         ? `https://nxsha.space/embed/tv/${tmdbId}/${season}/${episode}?lang=${audioMode === 'hindi' ? 'hi' : 'en'}&disable_app_ad=true` 
         : `https://nxsha.space/embed/movie/${tmdbId}?lang=${audioMode === 'hindi' ? 'hi' : 'en'}&disable_app_ad=true`
-    },
-    {
-      id: 'mirror_vidstuck',
-      name: '[ 🇮🇳 Server 2 (Hindi Dubbed) ] VidStuck Pro Multi-Audio',
-      quality: '1080p Full HD',
-      badge: 'Hindi Dubbed Stream',
-      color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
-      isHindi: true,
-      url: isTv 
-        ? `https://vidstuck.xyz/embed/tv/${tmdbId}/${season}/${episode}?dubLang=${audioMode === 'hindi' ? 'hi' : 'en'}&subtitle=english` 
-        : `https://vidstuck.xyz/embed/movie/${tmdbId}?dubLang=${audioMode === 'hindi' ? 'hi' : 'en'}&subtitle=english`
     },
     {
       id: 'mirror_vidfast',

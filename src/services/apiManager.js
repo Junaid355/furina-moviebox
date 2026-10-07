@@ -13,15 +13,18 @@ class APIManager {
       tmdb: { name: 'TMDB Primary Gateway', status: 'online', latency: 85, lastChecked: Date.now(), errors: 0, successes: 1 },
       curated: { name: 'Furina Curated Catalog', status: 'online', latency: 1, lastChecked: Date.now(), errors: 0, successes: 1 },
       studio: { name: 'Local Studio Repository', status: 'online', latency: 1, lastChecked: Date.now(), errors: 0, successes: 1 },
-      autoembed: { name: 'AutoEmbed Prime', status: 'online', latency: 120, lastChecked: Date.now(), errors: 0, successes: 1 },
-      vidsrc_in: { name: 'VidSrc 4K CDN', status: 'online', latency: 95, lastChecked: Date.now(), errors: 0, successes: 1 },
-      vidlink: { name: 'VidLink Pro', status: 'online', latency: 110, lastChecked: Date.now(), errors: 0, successes: 1 },
-      vidsrc_to: { name: 'VidSrc TO Cinema', status: 'online', latency: 140, lastChecked: Date.now(), errors: 0, successes: 1 },
-      twoembed_vip: { name: '2Embed VIP', status: 'online', latency: 130, lastChecked: Date.now(), errors: 0, successes: 1 },
+      tgvid: { name: 'TgVid Cinema (Ad-Free)', status: 'online', latency: 85, lastChecked: Date.now(), errors: 0, successes: 1 },
+      vidstuck: { name: 'VidStuck Centaurus (Multi-Dub)', status: 'online', latency: 90, lastChecked: Date.now(), errors: 0, successes: 1 },
+      bingr: { name: 'Bingr Stream (Ultra-Light)', status: 'online', latency: 80, lastChecked: Date.now(), errors: 0, successes: 1 },
+      zxcstream: { name: 'ZXC Roxy Fast Stream', status: 'online', latency: 95, lastChecked: Date.now(), errors: 0, successes: 1 },
+      vidfast: { name: 'VidFast 4K Ultra', status: 'online', latency: 100, lastChecked: Date.now(), errors: 0, successes: 1 },
+      nxsha: { name: 'NxSha Prime Dual-Audio', status: 'online', latency: 110, lastChecked: Date.now(), errors: 0, successes: 1 },
+      twoembed_vip: { name: '2Embed VIP Cinema', status: 'online', latency: 130, lastChecked: Date.now(), errors: 0, successes: 1 },
+      animeworld_india: { name: 'Cinema Mirror 2 (High-Speed CDN)', status: 'online', latency: 120, lastChecked: Date.now(), errors: 0, successes: 1 },
+      vidlink: { name: 'VidLink Pro Multi-Audio', status: 'online', latency: 115, lastChecked: Date.now(), errors: 0, successes: 1 },
       one23embed: { name: '123Embed Multi-Audio', status: 'online', latency: 125, lastChecked: Date.now(), errors: 0, successes: 1 },
       smashy: { name: 'SmashyStream Dual-Audio', status: 'online', latency: 115, lastChecked: Date.now(), errors: 0, successes: 1 },
-      embed_su: { name: 'Embed.su 4K', status: 'online', latency: 105, lastChecked: Date.now(), errors: 0, successes: 1 },
-      server_9_multi: { name: 'Smashy Pro', status: 'online', latency: 118, lastChecked: Date.now(), errors: 0, successes: 1 }
+      autoembed: { name: 'AutoEmbed Prime', status: 'online', latency: 120, lastChecked: Date.now(), errors: 0, successes: 1 }
     };
   }
 

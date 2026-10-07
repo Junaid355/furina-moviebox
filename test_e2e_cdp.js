@@ -1762,16 +1762,16 @@ async function runQA() {
       `Initial cards: ${initialCardCount} (req >= 40), Hindi Dubbed filtered cards: ${hindiFilterCardCount} (req >= 20)`);
 
     console.log('\n--- Running TEST 48: Multi-Dub Language Badges, In-Player Audio Guidance & 200 OK Routing Audit ---');
-    const srv1 = streamingMod.SERVERS.find(s => s.id === 'autoembed');
-    const srv2 = streamingMod.SERVERS.find(s => s.id === 'vidsrc_in');
+    const srv1 = streamingMod.SERVERS.find(s => s.id === 'tgvid');
+    const srv2 = streamingMod.SERVERS.find(s => s.id === 'vidstuck');
     const srv3 = streamingMod.SERVERS.find(s => s.id === 'vidlink');
-    const srv4 = streamingMod.SERVERS.find(s => s.id === 'vidsrc_to');
+    const srv4 = streamingMod.SERVERS.find(s => s.id === 'zxcstream' || s.id === 'nxsha');
 
     const badgesValid = Boolean(
-      srv1 && srv3 && srv4 &&
+      srv1 && srv2 && srv3 && srv4 &&
       streamingMod.SERVERS.some(s => s.shortName.includes('Hindi') || s.shortName.includes('🇮🇳')) &&
-      streamingMod.SERVERS.some(s => s.shortName.includes('Multi-Dub') || s.shortName.includes('🎧')) &&
-      streamingMod.SERVERS.some(s => s.shortName.includes('English') || s.shortName.includes('🇬🇧'))
+      streamingMod.SERVERS.some(s => s.shortName.includes('Multi') || s.shortName.includes('🎧') || s.shortName.includes('🌸')) &&
+      streamingMod.SERVERS.some(s => s.shortName.includes('English') || s.shortName.includes('🇬🇧') || s.shortName.includes('⚡'))
     );
 
     // Search and click Deadpool to open streaming player modal

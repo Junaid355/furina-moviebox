@@ -8,15 +8,15 @@
 //  2 = player shell rendered (source picker / loading UI) but slower or ad-heavier
 //  3 = blank frame or embed-side error in testing
 export const SERVER_PROFILES = {
-  nxsha:             { tier: 1, badge: 'Multi-Dub • Clean Ads', adLevel: 'Clean', hindi: true },
-  vidstuck:          { tier: 1, badge: 'Hindi Dub • Subtitles', adLevel: 'Clean', hindi: true },
+  tgvid:             { tier: 1, badge: 'Ad-Free • Multi-Lang', adLevel: 'Clean', hindi: true },
+  vidstuck:          { tier: 1, badge: 'Multi-Dub • Centaurus', adLevel: 'Clean', hindi: true },
+  bingr:             { tier: 1, badge: 'High Bitrate • Light', adLevel: 'Clean', hindi: false },
+  zxcstream:         { tier: 1, badge: 'Fast Stream • Roxy', adLevel: 'Clean', hindi: true },
   vidfast:           { tier: 1, badge: '4K Ultra • AutoPlay', adLevel: 'Clean', hindi: false },
-  bingr:             { tier: 1, badge: 'Fast Stream • Lightweight', adLevel: 'Clean', hindi: false },
-  twoembed_vip:      { tier: 1, badge: 'VIP Cinema Stream', adLevel: 'Low', hindi: false },
-  vidsrc_to:         { tier: 1, badge: 'Cinema Master', adLevel: 'Low', hindi: false },
-  tgvid:             { tier: 1, badge: 'Multi-Dub Cinema', adLevel: 'Clean', hindi: true },
-  animeworld_india:  { tier: 1, badge: 'High-Speed CDN', adLevel: 'Low', hindi: true },
-  vidlink:           { tier: 1, badge: 'Multi-Audio Pro', adLevel: 'Medium', hindi: false },
+  nxsha:             { tier: 1, badge: 'Dual Audio • 4K', adLevel: 'Clean', hindi: true },
+  twoembed_vip:      { tier: 2, badge: 'VIP Cinema Stream', adLevel: 'Low', hindi: false },
+  animeworld_india:  { tier: 2, badge: 'High-Speed CDN', adLevel: 'Low', hindi: true },
+  vidlink:           { tier: 2, badge: 'Multi-Audio Pro', adLevel: 'Medium', hindi: false },
   one23embed:        { tier: 2, badge: 'Multi-Source 1080p', adLevel: 'Medium', hindi: true },
   smashy:            { tier: 2, badge: 'Auto Source Hunt', adLevel: 'Medium', hindi: true },
   autoembed:         { tier: 3, badge: 'Fallback Mirror', adLevel: 'Medium', hindi: true }
