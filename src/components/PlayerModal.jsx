@@ -116,9 +116,10 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   // Authentic audio tracks strictly based on physical audio assets, native spoken languages, or verified provider sources
   const verifiedId = Number(item?.id) || Number(item?.tmdb_id) || Number(resolvedTmdbId);
   const isTopVerifiedHindiTitle = [94997, 533535, 12609, 12971, 46260, 31910, 85937, 95479, 127532, 1429, 37854, 30984].includes(verifiedId);
+  const isResidentEvilMovie = (item?.title || item?.name || item?.original_title || '').toLowerCase().includes('resident evil');
   const hasWorkingHindiSource = (isCustom && playerMode === 'studio')
     ? Boolean(customSources.hi)
-    : (Boolean(customSources.hi) || isBollywoodHindi || isTopVerifiedHindiTitle || isHindiAvailable(item) || hindiProviderManager.hasLegitimateHindiSource(item));
+    : (Boolean(customSources.hi) || isBollywoodHindi || isTopVerifiedHindiTitle || isResidentEvilMovie || isHindiAvailable(item) || hindiProviderManager.hasLegitimateHindiSource(item));
 
   const hasWorkingEnglishSource = isBollywoodHindi
     ? false
@@ -219,7 +220,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
   const [selectedServer, setSelectedServer] = useState(getInitialServer);
   const [iframeLoading, setIframeLoading] = useState(true);
-  const [showAudioTip, setShowAudioTip] = useState(true);
+  const [showAudioTip, setShowAudioTip] = useState(false);
 
   // Furina uBlock Ad-Shield Pro & AI Server Selection
   const [adShieldActive, setAdShieldActive] = useState(() => isAdBlockEnabled());
@@ -229,10 +230,18 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const [aiSelecting, setAiSelecting] = useState(false);
   const [aiServerToast, setAiServerToast] = useState(null);
 
-  // Set player active state for top-navigation & focus retention guards
+  // Set player active state for top-navigation & focus retention guards + PC performance mode
   useEffect(() => {
     setPlayerActive(true);
-    return () => setPlayerActive(false);
+    if (typeof document !== 'undefined') {
+      document.body.classList.add('furina-player-active');
+    }
+    return () => {
+      setPlayerActive(false);
+      if (typeof document !== 'undefined') {
+        document.body.classList.remove('furina-player-active');
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -963,8 +972,8 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
         onTouchStart={handleUserActivity}
         className={`relative flex flex-col bg-[#050b1d] border-0 sm:border sm:border-cyan-500/35 overflow-hidden transition-all duration-300 ${
           isFullscreen
-            ? 'fixed inset-0 z-[99999] w-screen h-screen rounded-none max-w-none max-h-none p-0 bg-black overflow-hidden select-none'
-            : 'w-full max-w-5xl h-[100dvh] sm:h-[92vh] max-h-[100dvh] sm:max-h-[92vh] rounded-none sm:rounded-2xl shadow-[0_0_80px_rgba(56,189,248,0.35)] animate-fade-in'
+            ? 'fixed inset-0 z-[999999] w-screen h-screen rounded-none max-w-none max-h-none p-0 bg-black overflow-hidden select-none'
+            : 'w-full max-w-[97vw] xl:max-w-7xl 2xl:max-w-[1600px] h-[100dvh] sm:h-[95vh] max-h-[100dvh] sm:max-h-[96vh] rounded-none sm:rounded-2xl shadow-[0_0_80px_rgba(56,189,248,0.35)] animate-fade-in'
         }`}
         onClick={(e) => e.stopPropagation()}
       >
@@ -1475,6 +1484,43 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   ))}
                 </div>
               </div>
+
+              {/* Integrated AI Boost Filter Switcher */}
+              <div className="flex items-center gap-1 bg-black/50 p-0.5 rounded-full border border-cyan-500/30">
+                <span className="flex items-center gap-1 px-2 py-0.5 text-cyan-300 font-extrabold text-[10px]">
+                  <Sparkles className="w-3 h-3 text-cyan-400 animate-pulse" />
+                  <span>AI Boost:</span>
+                </span>
+                {[
+                  { id: 'off', label: 'Off', desc: 'Raw stream' },
+                  { id: '4k', label: '💎 4K', desc: 'Sharpening & micro-contrast' },
+                  { id: 'hdr', label: '🌈 HDR', desc: 'Dolby-grade dynamic vibrance' },
+                  { id: 'night', label: '🌙 Night', desc: 'Shadow booster' },
+                ].map((mode) => (
+                  <button
+                    key={mode.id}
+                    onClick={() => changeAiBoost(mode.id)}
+                    title={mode.desc}
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold transition cursor-pointer ${
+                      aiBoostMode === mode.id
+                        ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 shadow-[0_0_10px_rgba(56,189,248,0.6)] font-black'
+                        : 'text-slate-300 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    {mode.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Quick Cinema Fullscreen Button */}
+              <button
+                onClick={toggleFullscreen}
+                className="text-[11px] text-cyan-300 hover:text-white font-bold flex items-center gap-1 bg-cyan-500/15 border border-cyan-500/30 px-2.5 py-1 rounded-lg transition cursor-pointer ml-auto"
+                title="Cinema Fullscreen (F)"
+              >
+                <Maximize2 className="w-3 h-3" />
+                <span className="hidden sm:inline">Cinema Mode (F)</span>
+              </button>
             </div>
 
             {/* Audio Mode Active Guidance Badge & Hardware Track Detection */}
@@ -1520,55 +1566,14 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
         {/* ========================================================================= */}
         {/* 4. SCROLLABLE INNER BODY - Video, Rescue Bar, Audio Info & Episodes        */}
         {/* ========================================================================= */}
-        <div className={`flex-1 ${isFullscreen ? 'w-full h-full flex flex-col items-center justify-center bg-black overflow-hidden p-0 m-0' : 'overflow-y-auto overscroll-contain'}`}>
-          
-          {/* AI Boost Filter Switcher */}
-          {!isFullscreen && (
-            <div className="px-3 sm:px-4 py-2 bg-[#061127] border-b border-cyan-500/25 flex flex-wrap items-center justify-between gap-2.5 text-xs">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 font-extrabold text-[11px]">
-                  <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-                  <span>AI Video Boost:</span>
-                </span>
-                <div className="flex items-center gap-1 bg-black/50 p-1 rounded-xl border border-cyan-500/30">
-                  {[
-                    { id: 'off', label: 'Off', desc: 'Raw stream' },
-                    { id: '4k', label: '💎 4K Clarity', desc: 'Sharpening & micro-contrast' },
-                    { id: 'hdr', label: '🌈 HDR Cinema', desc: 'Dolby-grade dynamic vibrance' },
-                    { id: 'night', label: '🌙 Dark Scene', desc: 'Shadow booster' },
-                  ].map((mode) => (
-                    <button
-                      key={mode.id}
-                      onClick={() => changeAiBoost(mode.id)}
-                      title={mode.desc}
-                      className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold transition cursor-pointer ${
-                        aiBoostMode === mode.id
-                          ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 shadow-[0_0_12px_rgba(56,189,248,0.6)] scale-105'
-                          : 'text-slate-300 hover:text-white hover:bg-white/10'
-                      }`}
-                    >
-                      {mode.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <button
-                onClick={toggleFullscreen}
-                className="text-[11px] text-cyan-300 hover:text-white font-bold flex items-center gap-1 bg-cyan-500/15 border border-cyan-500/30 px-2.5 py-1 rounded-lg transition cursor-pointer"
-              >
-                <Maximize2 className="w-3 h-3" />
-                <span>Switch to Fullscreen (F)</span>
-              </button>
-            </div>
-          )}
+        <div className={`flex-1 flex flex-col ${isFullscreen ? 'w-full h-full items-center justify-center bg-black overflow-hidden p-0 m-0' : 'overflow-y-auto overscroll-contain'}`}>
 
           {/* ========================================================================= */}
           {/* 5. VIDEO PLAYER AREA (CUSTOM VIDEO OR STRICT IFRAME STREAM)               */}
           {/* ========================================================================= */}
           <div 
             className={`relative w-full bg-black flex items-center justify-center overflow-hidden ${
-              isFullscreen ? 'w-full h-full flex-1 max-w-full max-h-full' : 'aspect-video'
+              isFullscreen ? 'w-full h-full flex-1 max-w-full max-h-full' : 'w-full flex-1 min-h-[460px] sm:min-h-[580px] md:min-h-[660px] lg:min-h-[740px]'
             }`}
             style={AI_BOOST_STYLES[aiBoostMode] || {}}
           >
@@ -2088,6 +2093,17 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
                   allowFullScreen
                 />
+
+                {/* 1-Tap Mobile & Desktop True Cinema Fullscreen Toggle Floating Button */}
+                <button
+                  type="button"
+                  onClick={toggleFullscreen}
+                  className="absolute bottom-3 right-3 z-30 p-2 sm:px-3 sm:py-1.5 rounded-xl bg-black/85 hover:bg-black/95 text-cyan-300 hover:text-white border border-cyan-500/40 shadow-[0_0_15px_rgba(56,189,248,0.4)] backdrop-blur-md transition active:scale-95 flex items-center gap-1.5 text-xs font-bold pointer-events-auto cursor-pointer"
+                  title={isFullscreen ? "Exit Fullscreen (Esc)" : "Cinema Fullscreen (F)"}
+                >
+                  {isFullscreen ? <Minimize2 className="w-4 h-4 text-cyan-400" /> : <Maximize2 className="w-4 h-4 text-cyan-400" />}
+                  <span className="text-[11px] font-extrabold">{isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}</span>
+                </button>
               </>
             )}
           </div>

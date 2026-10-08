@@ -36,6 +36,11 @@ export const BackgroundBeams = ({ className = "" }) => {
 
     let time = 0;
     const render = () => {
+      if (typeof document !== 'undefined' && (document.hidden || document.body.classList.contains('furina-player-active'))) {
+        // Sleep animation while modal/player is active to keep CPU/GPU at 0% and eliminate lag
+        animationFrameId = requestAnimationFrame(render);
+        return;
+      }
       time += 0.012;
       ctx.clearRect(0, 0, width, height);
 

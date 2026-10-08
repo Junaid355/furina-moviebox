@@ -3630,6 +3630,26 @@ export const VERIFIED_HINDI_HOLLYWOOD_IDS = new Set([
   284054, // Black Panther
   299537, // Captain Marvel
   579974, // RRR
+  // Resident Evil Franchise (Official Hindi Dubs)
+  1576,   // Resident Evil (2002)
+  4376,   // Resident Evil: Apocalypse (2004)
+  9377,   // Resident Evil: Extinction (2007)
+  9378,   // Resident Evil: Afterlife (2010)
+  9379,   // Resident Evil: Retribution (2012)
+  345940, // Resident Evil: The Final Chapter (2016)
+  460458, // Resident Evil: Welcome to Raccoon City (2021)
+  1083862,// Resident Evil: Death Island (2023)
+  408220, // Resident Evil: Vendetta (2017)
+  111821, // Resident Evil: Damnation (2012)
+  13494,  // Resident Evil: Degeneration (2008)
+  1184918,// The Wild Robot (2024)
+  519182, // Despicable Me 4 (2024)
+  933260, // The Substance (2024)
+  1034541,// Terrifier 3 (2024)
+  929590, // Civil War (2024)
+  653346, // Kingdom of the Planet of the Apes (2024)
+  786892, // Furiosa: A Mad Max Saga (2024)
+  829557, // Smile 2 (2024)
 ]);
 
 export function isHindiAvailable(item) {
@@ -3668,9 +3688,11 @@ export function isHindiAvailable(item) {
   if (CURATED_HINDI_DUBBED_ANIME.some((a) => Number(a.id) === id)) return true;
   if (item.category === 'anime' && (item.hasHindiDub === true || item.isHindiDubbed === true)) return true;
 
-  // Title fallback matching for blockbusters
+  // Title fallback matching for blockbusters & franchises
   const itemTitle = (item.title || item.name || item.original_title || item.original_name || '').toLowerCase().trim();
   if (itemTitle) {
+    if (itemTitle.includes('resident evil')) return true;
+    if (itemTitle.includes('deadpool') || itemTitle.includes('avengers') || itemTitle.includes('spider-man') || itemTitle.includes('batman')) return true;
     if (CURATED_HOLLYWOOD_HINDI_DUBS.some((m) => {
       const mTitle = (m.title || m.name || '').toLowerCase().trim();
       return mTitle && (itemTitle === mTitle || itemTitle.includes(mTitle) || mTitle.includes(itemTitle));
