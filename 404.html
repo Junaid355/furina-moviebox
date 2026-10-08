@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Furina MovieBox</title>
+    <script type="text/javascript">
+      // GitHub Pages SPA redirect
+      // Single Page Apps for GitHub Pages
+      // MIT License
+      // https://github.com/rafgraph/spa-github-pages
+      var pathSegmentsToKeep = 1;
+
+      var l = window.location;
+      var repoPrefix = l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/');
+      var query = l.search ? l.search : '';
+      var hash = l.hash || '';
+
+      // Redirect directly to base index with preserved query parameters
+      window.location.replace(
+        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+        repoPrefix + '/' + query + hash
+      );
+    </script>
+  </head>
+  <body>
+    <p>Redirecting to Furina MovieBox...</p>
+  </body>
+</html>
