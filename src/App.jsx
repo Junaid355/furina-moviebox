@@ -133,7 +133,8 @@ export default function App() {
   useEffect(() => {
     try {
       if (typeof window === 'undefined') return;
-      const params = new URLSearchParams(window.location.search);
+      const searchStr = window.location.search || (window.location.hash.includes('?') ? window.location.hash.slice(window.location.hash.indexOf('?')) : '');
+      const params = new URLSearchParams(searchStr);
       const urlId = params.get('id');
       const urlType = params.get('type') || 'movie';
       const urlServer = params.get('server');
@@ -234,7 +235,7 @@ export default function App() {
         return saved;
       }
     } catch (e) {}
-    return 'vidsrc_in';
+    return 'tgvid';
   });
 
   useEffect(() => {

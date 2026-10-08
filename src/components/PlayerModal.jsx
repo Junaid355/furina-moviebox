@@ -179,7 +179,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     }
     if (isBollywoodHindi && hasWorkingHindiSource) return 'hindi';
     if (isAnime) return 'sub';
-    if ((isResidentEvilMovie || isTopVerifiedHindiTitle || item?.isHindiDubbed) && hasWorkingHindiSource) {
+    if (hasWorkingHindiSource) {
       return 'hindi';
     }
     return 'english';
@@ -1554,14 +1554,6 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   Priority {activeSourcePriority}/{currentLangSources.length}
                 </span>
               )}
-            </div>
-
-            {/* In-Player Audio Guidance Tip Pill */}
-            <div 
-              data-testid="audio-guidance-pill"
-              className="mt-1 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-950/60 border border-cyan-500/30 text-cyan-200 text-[11px]"
-            >
-              <span className="font-semibold">🎙️ Multi-Audio: Click the Gear (⚙️) or Audio icon inside the player to select Hindi / English, or switch to the Hindi Dubbed server mirror below.</span>
             </div>
           </div>
         )}

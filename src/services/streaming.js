@@ -10,16 +10,16 @@ export const SERVERS = [
     badge: 'Ad-Free • Multi-Lang',
     color: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
     supportedAudios: ['hindi', 'english', 'sub'],
-    getMovieUrl: (tmdbId, audioMode = 'english', isAnime = false) => {
-      const lang = (audioMode === 'hindi' || audioMode === 'hi') ? 'hi' : 'en';
+    getMovieUrl: (tmdbId, audioMode = 'hindi', isAnime = false) => {
+      const lang = audioMode === 'english' ? 'en' : 'hi';
       let url = `https://tgvid.lovable.app/embed/movie/${tmdbId}?color=38bdf8&back=true&lang=${lang}`;
       if (audioMode === 'sub' || isAnime) {
         url += '&sub_lang=ja';
       }
       return url;
     },
-    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'english', isAnime = false) => {
-      const lang = (audioMode === 'hindi' || audioMode === 'hi') ? 'hi' : 'en';
+    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'hindi', isAnime = false) => {
+      const lang = audioMode === 'english' ? 'en' : 'hi';
       let url = `https://tgvid.lovable.app/embed/tv/${tmdbId}/${s}/${e}?color=38bdf8&back=true&lang=${lang}&episodeSelector=false&autoplayNextEp=false`;
       if (audioMode === 'sub' || isAnime) {
         url += '&sub_lang=ja';
@@ -34,12 +34,12 @@ export const SERVERS = [
     badge: 'Multi-Dub • Centaurus',
     color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
     supportedAudios: ['hindi', 'english', 'sub'],
-    getMovieUrl: (tmdbId, audioMode = 'english') => {
-      const dub = audioMode === 'hindi' ? 'hi' : 'en';
+    getMovieUrl: (tmdbId, audioMode = 'hindi') => {
+      const dub = audioMode === 'english' ? 'en' : 'hi';
       return `https://vidstuck.xyz/embed/movie/${tmdbId}?branding=FurinaMovieBox&server=centaurus&overlay=true&color=38bdf8&dubLang=${dub}&subtitle=english&loading=2`;
     },
-    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'english') => {
-      const dub = audioMode === 'hindi' ? 'hi' : 'en';
+    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'hindi') => {
+      const dub = audioMode === 'english' ? 'en' : 'hi';
       return `https://vidstuck.xyz/embed/tv/${tmdbId}/${s}/${e}?branding=FurinaMovieBox&server=centaurus&overlay=true&color=38bdf8&dubLang=${dub}&subtitle=english&loading=2`;
     }
   },
@@ -60,12 +60,12 @@ export const SERVERS = [
     badge: 'Fast Streams',
     color: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
     supportedAudios: ['english', 'sub', 'hindi'],
-    getMovieUrl: (tmdbId, audioMode = 'english') => {
-      const lang = audioMode === 'hindi' ? 'hi' : 'en';
+    getMovieUrl: (tmdbId, audioMode = 'hindi') => {
+      const lang = audioMode === 'english' ? 'en' : 'hi';
       return `https://zxcstream.xyz/player/movie/${tmdbId}?dubLang=${lang}&server=0`;
     },
-    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'english') => {
-      const lang = audioMode === 'hindi' ? 'hi' : 'en';
+    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'hindi') => {
+      const lang = audioMode === 'english' ? 'en' : 'hi';
       return `https://zxcstream.xyz/player/tv/${tmdbId}/${s}/${e}?dubLang=${lang}&server=0`;
     }
   },
@@ -86,12 +86,12 @@ export const SERVERS = [
     badge: 'Dual Audio • 4K',
     color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
     supportedAudios: ['hindi', 'english', 'sub'],
-    getMovieUrl: (tmdbId, audioMode = 'english') => {
-      const lang = audioMode === 'hindi' ? 'hi' : audioMode === 'sub' ? 'ja' : 'en';
+    getMovieUrl: (tmdbId, audioMode = 'hindi') => {
+      const lang = audioMode === 'english' ? 'en' : audioMode === 'sub' ? 'ja' : 'hi';
       return `https://nxsha.space/embed/movie/${tmdbId}?lang=${lang}&disable_app_ad=true`;
     },
-    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'english') => {
-      const lang = audioMode === 'hindi' ? 'hi' : audioMode === 'sub' ? 'ja' : 'en';
+    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'hindi') => {
+      const lang = audioMode === 'english' ? 'en' : audioMode === 'sub' ? 'ja' : 'hi';
       return `https://nxsha.space/embed/tv/${tmdbId}/${s}/${e}?lang=${lang}&disable_app_ad=true`;
     }
   },
@@ -185,7 +185,7 @@ export const SERVERS = [
   }
 ];
 
-export function getStreamUrl(server, tmdbId, type = 'movie', season = 1, episode = 1, audioMode = 'english', isAnime = false, subLang = 'off') {
+export function getStreamUrl(server, tmdbId, type = 'movie', season = 1, episode = 1, audioMode = 'hindi', isAnime = false, subLang = 'off') {
   if (!server) {
     server = SERVERS[0];
   }
@@ -204,7 +204,7 @@ export function getStreamUrl(server, tmdbId, type = 'movie', season = 1, episode
   return url;
 }
 
-export function getDownloadMirrors(tmdbId, type = 'movie', season = 1, episode = 1, audioMode = 'english', isHanime = false) {
+export function getDownloadMirrors(tmdbId, type = 'movie', season = 1, episode = 1, audioMode = 'hindi', isHanime = false) {
   const isTv = type === 'tv';
   const isMature = Boolean(isHanime || Number(tmdbId) === 1033051 || String(tmdbId).includes('1033051'));
   const allMirrors = [
@@ -216,8 +216,8 @@ export function getDownloadMirrors(tmdbId, type = 'movie', season = 1, episode =
       color: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
       isHindi: true,
       url: isTv 
-        ? `https://tgvid.lovable.app/embed/tv/${tmdbId}/${season}/${episode}?color=38bdf8&back=true&lang=${audioMode === 'hindi' ? 'hi' : 'en'}` 
-        : `https://tgvid.lovable.app/embed/movie/${tmdbId}?color=38bdf8&back=true&lang=${audioMode === 'hindi' ? 'hi' : 'en'}`
+        ? `https://tgvid.lovable.app/embed/tv/${tmdbId}/${season}/${episode}?color=38bdf8&back=true&lang=${audioMode === 'english' ? 'en' : 'hi'}` 
+        : `https://tgvid.lovable.app/embed/movie/${tmdbId}?color=38bdf8&back=true&lang=${audioMode === 'english' ? 'en' : 'hi'}`
     },
     {
       id: 'mirror_vidstuck',
@@ -227,8 +227,8 @@ export function getDownloadMirrors(tmdbId, type = 'movie', season = 1, episode =
       color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
       isHindi: true,
       url: isTv 
-        ? `https://vidstuck.xyz/embed/tv/${tmdbId}/${season}/${episode}?branding=FurinaMovieBox&server=centaurus&overlay=true&color=38bdf8&dubLang=${audioMode === 'hindi' ? 'hi' : 'en'}&subtitle=english&loading=2` 
-        : `https://vidstuck.xyz/embed/movie/${tmdbId}?branding=FurinaMovieBox&server=centaurus&overlay=true&color=38bdf8&dubLang=${audioMode === 'hindi' ? 'hi' : 'en'}&subtitle=english&loading=2`
+        ? `https://vidstuck.xyz/embed/tv/${tmdbId}/${season}/${episode}?branding=FurinaMovieBox&server=centaurus&overlay=true&color=38bdf8&dubLang=${audioMode === 'english' ? 'en' : 'hi'}&subtitle=english&loading=2` 
+        : `https://vidstuck.xyz/embed/movie/${tmdbId}?branding=FurinaMovieBox&server=centaurus&overlay=true&color=38bdf8&dubLang=${audioMode === 'english' ? 'en' : 'hi'}&subtitle=english&loading=2`
     },
     {
       id: 'mirror_nxsha',
@@ -238,8 +238,8 @@ export function getDownloadMirrors(tmdbId, type = 'movie', season = 1, episode =
       color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40',
       isHindi: true,
       url: isTv 
-        ? `https://nxsha.space/embed/tv/${tmdbId}/${season}/${episode}?lang=${audioMode === 'hindi' ? 'hi' : 'en'}&disable_app_ad=true` 
-        : `https://nxsha.space/embed/movie/${tmdbId}?lang=${audioMode === 'hindi' ? 'hi' : 'en'}&disable_app_ad=true`
+        ? `https://nxsha.space/embed/tv/${tmdbId}/${season}/${episode}?lang=${audioMode === 'english' ? 'en' : 'hi'}&disable_app_ad=true` 
+        : `https://nxsha.space/embed/movie/${tmdbId}?lang=${audioMode === 'english' ? 'en' : 'hi'}&disable_app_ad=true`
     },
     {
       id: 'mirror_vidfast',
@@ -295,6 +295,39 @@ export function getDownloadMirrors(tmdbId, type = 'movie', season = 1, episode =
       url: isTv 
         ? `https://embed.smashystream.com/playere.php?tmdb=${tmdbId}&season=${season}&episode=${episode}` 
         : `https://embed.smashystream.com/playere.php?tmdb=${tmdbId}`
+    },
+    {
+      id: 'mirror_megaplay',
+      name: '[ 🌸 Server 7 (MegaPlay Multi-Dub) ] MegaPlay Direct',
+      quality: '1080p Multi-Dub',
+      badge: 'MegaPlay Sub/Dub',
+      color: 'bg-pink-500/20 text-pink-300 border-pink-500/40',
+      isHindi: false,
+      url: isTv
+        ? `https://megaplay.buzz/stream/ani/${tmdbId}/${episode}/${audioMode === 'english' ? 'dub' : 'sub'}?autoplay=true`
+        : `https://megaplay.buzz/stream/ani/${tmdbId}/1/${audioMode === 'english' ? 'dub' : 'sub'}?autoplay=true`
+    },
+    {
+      id: 'mirror_zokoanime',
+      name: '[ ⚡ Server 8 (ZokoAnime Multi-Dub) ] ZokoAnime Direct',
+      quality: '1080p Ultra',
+      badge: 'Zoko Direct Stream',
+      color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+      isHindi: false,
+      url: isTv
+        ? `https://zokoanime.video/stream/ani/${tmdbId}/${episode}/${audioMode === 'english' ? 'dub' : 'sub'}`
+        : `https://zokoanime.video/stream/ani/${tmdbId}/1/${audioMode === 'english' ? 'dub' : 'sub'}`
+    },
+    {
+      id: 'mirror_4animo',
+      name: '[ 🎬 Server 9 (4Animo HD-3) ] 4Animo Multi-Dub CDN',
+      quality: '1080p HD-3',
+      badge: '4Animo Multi-Dub',
+      color: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40',
+      isHindi: false,
+      url: isTv
+        ? `https://cdn.4animo.xyz/embed/hd-3/ani/${tmdbId}/${episode}/${audioMode === 'english' ? 'dub' : 'sub'}?k=1&autoplay=1`
+        : `https://cdn.4animo.xyz/embed/hd-3/ani/${tmdbId}/1/${audioMode === 'english' ? 'dub' : 'sub'}?k=1&autoplay=1`
     }
   ];
 
