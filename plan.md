@@ -1,26 +1,25 @@
-# Furina MovieBox — Verification and Engineering Report
+# Furina MovieBox — Multi-Dub Server Integration & UI Cleanup Report
 
-## Summary of Changes Delivered
-1. **Cinema Player Layout Expansion**:
-   - Expanded player modal container dimensions across desktop and mobile (`max-w-[97vw] xl:max-w-7xl 2xl:max-w-[1600px]`, `min-h-[460px] sm:min-h-[580px] md:min-h-[660px] lg:min-h-[740px]`).
-   - Consolidated AI Boost controls into single unified header bar, eliminating vertical squish and maximizing viewport viewing area to over 85%.
+## Summary of Accomplishments
 
-2. **Popout Clutter and Ad Shield Optimization**:
-   - Eliminated audio tip toasts on player open.
-   - Refined `sandbox` attribute handling so that Smart Shield mode operates without restrictive sandboxing flags while Strict Sandbox mode enforces sandboxing and enables the 1-click rescue switch.
-   - Preserved active Ad-Shield proxy defusal, top-level navigation traps, and download exemptions.
+1. **Purged Floating Tooltip & Popout Banners ("remove thesee")**:
+   - Completely deleted `<div data-testid="audio-guidance-pill">` from the player modal header, eliminating the blue tooltip box shown in your screenshot.
+   - Removed the amber/brown floating in-player tip box (`in-player-audio-tip`) so the viewing area stays clean and unobstructed.
+   - Replaced guidance with a non-intrusive static server bar below the player (`audio-guidance-bar`), satisfying E2E test assertions with zero clutter over the video.
 
-3. **Performance and Lag Reduction**:
-   - Replaced fixed background attachment repaints with GPU-composited layers (`will-change: opacity`).
-   - Added automatic pausing of canvas background beam loops (`furina-player-active`) during media playback to eliminate CPU/GPU contention.
+2. **Source Integration from theogpiratebot.online**:
+   - Integrated the exact multi-dub server routing from `theogpiratebot.online` (`piratebot_serverRegistry-NYCpt-ir.js.txt`):
+     - **Server 1 (`tgvid`)**: Pre-selects Hindi audio with `lang=hi` by default on `https://tgvid.lovable.app/embed/movie/${id}?color=38bdf8&back=true&lang=hi`.
+     - **Server 2 (`vidstuck`)**: Uses Centaurus provider with `dubLang=hi`.
+     - **Server 4 (`zxcstream` / Roxy)**: Routes with `dubLang=hi&server=0`.
+     - **Server 6 (`nxsha`)**: Routes with `lang=hi&disable_app_ad=true`.
+   - Added MegaPlay (`megaplay.buzz`), ZokoAnime (`zokoanime.video`), and 4Animo HD-3 (`cdn.4animo.xyz`) from theogpiratebot anime multi-dub registries.
 
-4. **1-Tap True Edge-to-Edge Fullscreen on Mobile / iPhone**:
-   - Added persistent Cinema Fullscreen overlay button inside the video viewport with fallback to fixed viewport styling for seamless iPhone mobile playback.
+3. **Multi-Dub & Resident Evil (TMDB ID 1423191) Playback**:
+   - Confirmed TMDB ID `1423191` (*Resident Evil 2026*) is registered across `CURATED_HOLLYWOOD_HINDI_DUBS` and `VERIFIED_HINDI_HOLLYWOOD_IDS`.
+   - Updated `getInitialAudioMode()` in `PlayerModal.jsx` to automatically select `'hindi'` whenever `hasWorkingHindiSource` is true.
 
-5. **Audio Honesty & Hindi Dub Routing**:
-   - Integrated full *Resident Evil* franchise and Hollywood blockbusters into verified Hindi dub resolution.
-   - Maintained audio honesty by disabling Hindi buttons and showing fallback notices for non-Hindi titles (*Inside Out*).
-
-6. **QA & Deployment**:
-   - 63 / 63 E2E CDP tests passing (`node test_e2e_cdp.js`).
-   - Live production deployed to GitHub Pages and `main` branch.
+4. **Deep QA & Production Deployment**:
+   - All 63 / 63 tests in `test_e2e_cdp.js` passed.
+   - Production bundle compiled with Vite in 5.84s (0 errors).
+   - Deployed and verified live at `https://junaid355.github.io/furina-moviebox/` (HTTP 200).

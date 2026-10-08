@@ -12,7 +12,8 @@ export const SERVERS = [
     supportedAudios: ['hindi', 'english', 'sub'],
     getMovieUrl: (tmdbId, audioMode = 'hindi', isAnime = false) => {
       const lang = audioMode === 'english' ? 'en' : 'hi';
-      let url = `https://tgvid.lovable.app/embed/movie/${tmdbId}?color=38bdf8&back=true&lang=${lang}`;
+      const serverParam = audioMode === 'hindi' ? '&server=hindi' : (audioMode === 'english' ? '&server=english' : '');
+      let url = `https://tgvid.lovable.app/embed/movie/${tmdbId}?color=38bdf8&back=true${serverParam}&lang=${lang}`;
       if (audioMode === 'sub' || isAnime) {
         url += '&sub_lang=ja';
       }
@@ -20,7 +21,8 @@ export const SERVERS = [
     },
     getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'hindi', isAnime = false) => {
       const lang = audioMode === 'english' ? 'en' : 'hi';
-      let url = `https://tgvid.lovable.app/embed/tv/${tmdbId}/${s}/${e}?color=38bdf8&back=true&lang=${lang}&episodeSelector=false&autoplayNextEp=false`;
+      const serverParam = audioMode === 'hindi' ? '&server=hindi' : (audioMode === 'english' ? '&server=english' : '');
+      let url = `https://tgvid.lovable.app/embed/tv/${tmdbId}/${s}/${e}?color=38bdf8&back=true${serverParam}&lang=${lang}&episodeSelector=false&autoplayNextEp=false`;
       if (audioMode === 'sub' || isAnime) {
         url += '&sub_lang=ja';
       }
@@ -216,8 +218,8 @@ export function getDownloadMirrors(tmdbId, type = 'movie', season = 1, episode =
       color: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
       isHindi: true,
       url: isTv 
-        ? `https://tgvid.lovable.app/embed/tv/${tmdbId}/${season}/${episode}?color=38bdf8&back=true&lang=${audioMode === 'english' ? 'en' : 'hi'}` 
-        : `https://tgvid.lovable.app/embed/movie/${tmdbId}?color=38bdf8&back=true&lang=${audioMode === 'english' ? 'en' : 'hi'}`
+        ? `https://tgvid.lovable.app/embed/tv/${tmdbId}/${season}/${episode}?color=38bdf8&back=true&server=${audioMode === 'english' ? 'english' : 'hindi'}&lang=${audioMode === 'english' ? 'en' : 'hi'}` 
+        : `https://tgvid.lovable.app/embed/movie/${tmdbId}?color=38bdf8&back=true&server=${audioMode === 'english' ? 'english' : 'hindi'}&lang=${audioMode === 'english' ? 'en' : 'hi'}`
     },
     {
       id: 'mirror_vidstuck',
