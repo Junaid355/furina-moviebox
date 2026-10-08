@@ -166,7 +166,7 @@ export class MultiEmbedLocalizedProvider {
     if (VERIFIED_HINDI_GLOBAL_SERIES_IDS.has(numId)) return true;
     if (VERIFIED_HINDI_ANIME_IDS.has(numId)) return true;
     if (CURATED_HINDI_DUBBED_ANIME.some((a) => Number(a.id) === numId)) return true;
-    if (numId === 94997 || numId === 533535) return true;
+    if (numId === 94997 || numId === 533535 || numId === 1423191) return true;
     const title = (item.title || item.name || '').toLowerCase();
     if (
       title.includes('house of the dragon') ||
@@ -427,7 +427,7 @@ export class HindiProviderManager {
     if (!item) return false;
     if (item.isUserCreated && (item.languages?.hi?.url || item.audio_hi_url)) return true;
     const numId = Number(item.id);
-    if ([94997, 533535, 12609, 12971, 46260, 31910, 85937, 95479, 127532, 1429, 37854, 30984].includes(numId)) return true;
+    if ([94997, 533535, 12609, 12971, 46260, 31910, 85937, 95479, 127532, 1429, 37854, 30984, 1423191].includes(numId)) return true;
     try {
       if (typeof window !== 'undefined') {
         const stored = localStorage.getItem('furina_studio_movies');

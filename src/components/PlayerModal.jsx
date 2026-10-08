@@ -76,6 +76,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     if (titleLower.includes('jujutsu')) return 95479;
     if (titleLower.includes('solo leveling')) return 127532;
     if (titleLower.includes('attack on titan')) return 1429;
+    if (titleLower.includes('resident evil')) return 1423191;
     return null;
   }, [item]);
 
@@ -115,8 +116,8 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
   // Authentic audio tracks strictly based on physical audio assets, native spoken languages, or verified provider sources
   const verifiedId = Number(item?.id) || Number(item?.tmdb_id) || Number(resolvedTmdbId);
-  const isTopVerifiedHindiTitle = [94997, 533535, 12609, 12971, 46260, 31910, 85937, 95479, 127532, 1429, 37854, 30984].includes(verifiedId);
-  const isResidentEvilMovie = (item?.title || item?.name || item?.original_title || '').toLowerCase().includes('resident evil');
+  const isTopVerifiedHindiTitle = [94997, 533535, 12609, 12971, 46260, 31910, 85937, 95479, 127532, 1429, 37854, 30984, 1423191].includes(verifiedId);
+  const isResidentEvilMovie = (item?.title || item?.name || item?.original_title || '').toLowerCase().includes('resident evil') || verifiedId === 1423191;
   const hasWorkingHindiSource = (isCustom && playerMode === 'studio')
     ? Boolean(customSources.hi)
     : (Boolean(customSources.hi) || isBollywoodHindi || isTopVerifiedHindiTitle || isResidentEvilMovie || isHindiAvailable(item) || hindiProviderManager.hasLegitimateHindiSource(item));
@@ -178,6 +179,9 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     }
     if (isBollywoodHindi && hasWorkingHindiSource) return 'hindi';
     if (isAnime) return 'sub';
+    if ((isResidentEvilMovie || isTopVerifiedHindiTitle || item?.isHindiDubbed) && hasWorkingHindiSource) {
+      return 'hindi';
+    }
     return 'english';
   };
 
@@ -220,7 +224,6 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
   const [selectedServer, setSelectedServer] = useState(getInitialServer);
   const [iframeLoading, setIframeLoading] = useState(true);
-  const [showAudioTip, setShowAudioTip] = useState(false);
 
   // Furina uBlock Ad-Shield Pro & AI Server Selection
   const [adShieldActive, setAdShieldActive] = useState(() => isAdBlockEnabled());
@@ -1651,26 +1654,6 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   </div>
                 )}
 
-                {/* Helpful Sleek In-Player Audio Guidance Tip in Studio Player (Requirement 2) */}
-                {showAudioTip && !isFutureRelease && !unavailableNotice.show && (
-                  <div 
-                    data-testid="in-player-audio-tip-studio"
-                    className="absolute top-3 left-1/2 -translate-x-1/2 z-40 max-w-2xl w-[94%] sm:w-auto px-3.5 py-1.5 rounded-xl bg-slate-950/90 border border-cyan-500/40 text-cyan-200 text-[11px] sm:text-xs shadow-2xl backdrop-blur-md flex items-center justify-between gap-2.5 pointer-events-auto transition animate-in fade-in slide-in-from-top-2 duration-200"
-                  >
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <span className="font-bold text-cyan-300 shrink-0">🎙️ Multi-Audio:</span>
-                      <span className="font-medium text-slate-100">Click the Gear (⚙️) or Audio icon inside the player to select Hindi / English, or switch to the Hindi Dubbed server mirror below.</span>
-                    </div>
-                    <button
-                      onClick={() => setShowAudioTip(false)}
-                      className="text-slate-400 hover:text-white text-xs px-1.5 py-0.5 rounded hover:bg-white/10 transition shrink-0 cursor-pointer ml-1"
-                      title="Dismiss tip"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                )}
-
                 {activeCustomVideoUrl ? (
                   <div className="relative w-full h-full group/player flex items-center justify-center bg-black overflow-hidden" style={subtitleStyleVariables}>
                     {/* Audio-Only Cinematic Visualizer Canvas (eliminates blank black box) */}
@@ -1973,70 +1956,6 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                     >
                       Switch
                     </button>
-                  </div>
-                )}
-
-                {/* Helpful Sleek In-Player Audio Guidance Tip (Requirement 2) */}
-                {showAudioTip && !isFutureRelease && !unavailableNotice.show && (
-                  <div 
-                    data-testid="in-player-audio-tip"
-                    className="absolute top-3 left-1/2 -translate-x-1/2 z-40 max-w-2xl w-[94%] sm:w-auto px-3.5 py-1.5 rounded-xl bg-slate-950/90 border border-cyan-500/40 text-cyan-200 text-[11px] sm:text-xs shadow-2xl backdrop-blur-md flex items-center justify-between gap-2.5 pointer-events-auto transition animate-in fade-in slide-in-from-top-2 duration-200"
-                  >
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <span className="font-bold text-cyan-300 shrink-0">🎙️ Multi-Audio:</span>
-                      <span className="font-medium text-slate-100">Click the Gear (⚙️) or Audio icon inside the player to select Hindi / English, or switch to the Hindi Dubbed server mirror below.</span>
-                    </div>
-                    <button
-                      onClick={() => setShowAudioTip(false)}
-                      className="text-slate-400 hover:text-white text-xs px-1.5 py-0.5 rounded hover:bg-white/10 transition shrink-0 cursor-pointer ml-1"
-                      title="Dismiss tip"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                )}
-
-                {/* Hindi Dub Multi-Server Guidance Banner with 1-Tap Quick Switches */}
-                {audioMode === 'hindi' && hasWorkingHindiSource && !unavailableNotice.show && (
-                  <div className={`absolute ${showAudioTip ? 'top-12' : 'top-3'} left-1/2 -translate-x-1/2 z-40 max-w-xl w-[94%] sm:w-auto px-3.5 py-1.5 rounded-xl bg-amber-950/90 border border-amber-500/50 text-amber-200 text-[11px] shadow-2xl backdrop-blur-md flex flex-wrap items-center justify-between gap-2 animate-in fade-in slide-in-from-top-2 duration-200 pointer-events-auto`}>
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="text-amber-400 font-bold">🇮🇳</span>
-                      <span><strong>Hindi Audio:</strong> Select Hindi track in player settings (⚙️) or switch mirror:</span>
-                    </div>
-                    <div className="flex items-center gap-1 flex-wrap">
-                      {[
-                        { id: 'animeworld_india', label: 'Hindi CDN' },
-                        { id: 'one23embed', label: '123Embed' },
-                        { id: 'smashy', label: 'Smashy' },
-                        { id: 'autoembed', label: 'AutoEmbed' }
-                      ].map((sObj) => {
-                        const targetSrv = availableServers.find((s) => s.id === sObj.id);
-                        if (!targetSrv) return null;
-                        const isCurrent = currentServer.id === sObj.id;
-                        return (
-                          <button
-                            key={sObj.id}
-                            onClick={() => setSelectedServer(targetSrv)}
-                            className={`px-2 py-0.5 rounded text-[10px] font-bold transition cursor-pointer border ${
-                              isCurrent
-                                ? 'bg-amber-400 text-gray-950 border-amber-300 font-black shadow-sm'
-                                : 'bg-black/50 text-amber-200 hover:bg-amber-500/30 border-amber-500/30'
-                            }`}
-                          >
-                            {sObj.label}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    {isCustom && playerMode === 'stream' && (
-                      <button
-                        onClick={() => setPlayerMode('studio')}
-                        className="px-2 py-0.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold text-[10px] transition cursor-pointer whitespace-nowrap"
-                        title="Switch to verified studio Hindi track"
-                      >
-                        🎙️ Studio Track
-                      </button>
-                    )}
                   </div>
                 )}
 

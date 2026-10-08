@@ -129,6 +129,46 @@ export default function App() {
     return () => { cancelled = true; };
   }, []);
 
+  // Handle direct player URL navigation (e.g., /player?id=1423191&type=movie&server=0 or ?id=1423191)
+  useEffect(() => {
+    try {
+      if (typeof window === 'undefined') return;
+      const params = new URLSearchParams(window.location.search);
+      const urlId = params.get('id');
+      const urlType = params.get('type') || 'movie';
+      const urlServer = params.get('server');
+      if (urlId) {
+        const numId = Number(urlId);
+        const isResidentEvil = numId === 1423191;
+        const matchedItem = isResidentEvil ? {
+          id: 1423191,
+          title: 'Resident Evil',
+          name: 'Resident Evil',
+          media_type: 'movie',
+          category: 'hollywood',
+          isHindiDubbed: true,
+          poster_path: '/i7UyjfPio0VFHB9rBUZSFyhOoM8.jpg',
+          backdrop_path: '/3icyRAqgakNcQn6aDVz9libFmBA.jpg',
+          release_date: '2026-09-16'
+        } : (
+          CURATED_HOLLYWOOD_HINDI_DUBS.find((m) => Number(m.id) === numId) ||
+          CURATED_HOLLYWOOD_BLOCKBUSTERS.find((m) => Number(m.id) === numId) || {
+            id: numId || urlId,
+            media_type: urlType,
+            isHindiDubbed: isHindiAvailable({ id: numId || urlId })
+          }
+        );
+        setActiveMedia(matchedItem);
+        if (urlServer !== null) {
+          const srvIdx = parseInt(urlServer, 10);
+          if (!isNaN(srvIdx) && SERVERS[srvIdx]) {
+            setPreferredServer(SERVERS[srvIdx].id);
+          }
+        }
+      }
+    } catch (e) {}
+  }, []);
+
   const handleRetry = useCallback(() => {
     setError(null);
     setLoading(true);

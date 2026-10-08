@@ -10,13 +10,21 @@ export const SERVERS = [
     badge: 'Ad-Free • Multi-Lang',
     color: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
     supportedAudios: ['hindi', 'english', 'sub'],
-    getMovieUrl: (tmdbId, audioMode = 'english') => {
-      const lang = audioMode === 'hindi' ? 'hi' : 'en';
-      return `https://tgvid.lovable.app/embed/movie/${tmdbId}?color=38bdf8&back=true&lang=${lang}`;
+    getMovieUrl: (tmdbId, audioMode = 'english', isAnime = false) => {
+      const lang = (audioMode === 'hindi' || audioMode === 'hi') ? 'hi' : 'en';
+      let url = `https://tgvid.lovable.app/embed/movie/${tmdbId}?color=38bdf8&back=true&lang=${lang}`;
+      if (audioMode === 'sub' || isAnime) {
+        url += '&sub_lang=ja';
+      }
+      return url;
     },
-    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'english') => {
-      const lang = audioMode === 'hindi' ? 'hi' : 'en';
-      return `https://tgvid.lovable.app/embed/tv/${tmdbId}/${s}/${e}?color=38bdf8&back=true&lang=${lang}&episodeSelector=false&autoplayNextEp=false`;
+    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'english', isAnime = false) => {
+      const lang = (audioMode === 'hindi' || audioMode === 'hi') ? 'hi' : 'en';
+      let url = `https://tgvid.lovable.app/embed/tv/${tmdbId}/${s}/${e}?color=38bdf8&back=true&lang=${lang}&episodeSelector=false&autoplayNextEp=false`;
+      if (audioMode === 'sub' || isAnime) {
+        url += '&sub_lang=ja';
+      }
+      return url;
     }
   },
   {

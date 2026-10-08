@@ -2708,10 +2708,21 @@ export async function fetchMatureMovies(page = 1) {
 // Verified Hollywood Blockbusters with official Hindi dubs in theaters/OTT
 
 export const CURATED_HOLLYWOOD_HINDI_DUBS = [
-
-{
-
-  "id": 168259,
+  {
+    "id": 1423191,
+    "title": "Resident Evil",
+    "name": "Resident Evil",
+    "overview": "Medical courier Bryan unwittingly finds himself fighting for survival as one fateful, horrifying night collapses around him in chaos. Official Multi-Audio & Hindi Dubbed stream.",
+    "poster_path": "/i7UyjfPio0VFHB9rBUZSFyhOoM8.jpg",
+    "backdrop_path": "/3icyRAqgakNcQn6aDVz9libFmBA.jpg",
+    "media_type": "movie",
+    "vote_average": 7.3,
+    "release_date": "2026-09-16",
+    "category": "hollywood",
+    "isHindiDubbed": true
+  },
+  {
+    "id": 168259,
 
   "title": "Furious 7",
 
@@ -3631,6 +3642,7 @@ export const VERIFIED_HINDI_HOLLYWOOD_IDS = new Set([
   299537, // Captain Marvel
   579974, // RRR
   // Resident Evil Franchise (Official Hindi Dubs)
+  1423191,// Resident Evil (2026)
   1576,   // Resident Evil (2002)
   4376,   // Resident Evil: Apocalypse (2004)
   9377,   // Resident Evil: Extinction (2007)
