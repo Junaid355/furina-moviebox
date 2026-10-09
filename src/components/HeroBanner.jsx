@@ -36,11 +36,20 @@ export default function HeroBanner({
     return () => clearInterval(timer);
   }, [list.length, isPaused]);
 
+  const cardRectRef = useRef(null);
+
+  const handleMouseEnter = () => {
+    setIsPaused(true);
+    if (cardRef.current) {
+      cardRectRef.current = cardRef.current.getBoundingClientRect();
+    }
+  };
+
   // 60-120 FPS Direct RAF DOM transform (Zero React re-renders on mousemove)
   const handleMouseMove = (e) => {
     if (!cardRef.current) return;
     if (rafId.current) cancelAnimationFrame(rafId.current);
-    const rect = cardRef.current.getBoundingClientRect();
+    const rect = cardRectRef.current || cardRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     const centerX = rect.width / 2;
@@ -65,6 +74,7 @@ export default function HeroBanner({
 
   const handleMouseLeave = () => {
     setIsPaused(false);
+    cardRectRef.current = null;
     if (rafId.current) cancelAnimationFrame(rafId.current);
     if (cardRef.current) {
       cardRef.current.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)';
@@ -116,13 +126,13 @@ export default function HeroBanner({
   return (
     <div 
       ref={cardRef}
-      onMouseEnter={() => setIsPaused(true)}
+      onMouseEnter={handleMouseEnter}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{
         transformStyle: 'preserve-3d'
       }}
-      className="relative w-full h-[40vh] sm:h-[65vh] max-h-[580px] overflow-hidden rounded-2xl sm:rounded-3xl mb-5 sm:mb-8 border-2 border-cyan-400/50 shadow-[0_25px_70px_rgba(0,0,0,0.92),0_0_45px_rgba(0,242,254,0.35),inset_0_0_35px_rgba(0,242,254,0.15)] group [transform-style:preserve-3d]"
+      className="relative w-full h-[36vh] sm:h-[65vh] max-h-[580px] min-h-[300px] overflow-hidden rounded-2xl sm:rounded-3xl mb-4 sm:mb-8 border-2 border-cyan-400/50 shadow-[0_25px_70px_rgba(0,0,0,0.92),0_0_45px_rgba(0,242,254,0.35),inset_0_0_35px_rgba(0,242,254,0.15)] group [transform-style:preserve-3d]"
     >
       {/* Theatrical Overhead Stage Lamp Fixture with radiant cyan hydro lighting */}
       <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-transparent via-[#00f2fe] to-transparent z-20 shadow-[0_0_35px_#00f2fe,0_0_15px_#38bdf8]" />
@@ -346,23 +356,23 @@ export default function HeroBanner({
 
       {/* Carousel Dots & Controls (if more than 1 item) */}
       {list.length > 1 && (
-        <div className="hidden xs:flex absolute bottom-3 right-3 sm:bottom-10 sm:right-12 z-20 items-center gap-1.5 sm:gap-2">
+        <div className="flex absolute top-3 right-3 sm:top-auto sm:bottom-10 sm:right-12 z-20 items-center gap-1.5 sm:gap-2">
           <button
             onClick={() => setCurrentIndex((prev) => (prev - 1 + list.length) % list.length)}
             aria-label="Previous Featured Slide"
-            className="w-8 h-8 rounded-full bg-black/50 hover:bg-black/80 border border-white/10 text-white flex items-center justify-center backdrop-blur-md transition hover:scale-110 active:scale-95 cursor-pointer"
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/60 hover:bg-black/80 border border-white/15 text-white flex items-center justify-center backdrop-blur-md transition hover:scale-110 active:scale-95 cursor-pointer shadow-md"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
 
-          <div className="flex items-center gap-1.5 px-2">
+          <div className="flex items-center gap-1 sm:gap-1.5 px-1 sm:px-2">
             {list.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => setCurrentIndex(idx)}
                 aria-label={`Go to slide ${idx + 1}`}
-                className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
-                  currentIndex === idx ? 'w-6 bg-cyan-400 shadow-[0_0_8px_rgba(56,189,248,0.8)]' : 'w-2 bg-white/30 hover:bg-white/60'
+                className={`h-1.5 sm:h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                  currentIndex === idx ? 'w-5 sm:w-6 bg-cyan-400 shadow-[0_0_8px_rgba(56,189,248,0.8)]' : 'w-1.5 sm:w-2 bg-white/30 hover:bg-white/60'
                 }`}
               />
             ))}
@@ -371,9 +381,9 @@ export default function HeroBanner({
           <button
             onClick={() => setCurrentIndex((prev) => (prev + 1) % list.length)}
             aria-label="Next Featured Slide"
-            className="w-8 h-8 rounded-full bg-black/50 hover:bg-black/80 border border-white/10 text-white flex items-center justify-center backdrop-blur-md transition hover:scale-110 active:scale-95 cursor-pointer"
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/60 hover:bg-black/80 border border-white/15 text-white flex items-center justify-center backdrop-blur-md transition hover:scale-110 active:scale-95 cursor-pointer shadow-md"
           >
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
         </div>
       )}

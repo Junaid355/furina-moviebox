@@ -560,7 +560,7 @@ export default function App() {
                   <div
                     key={cw.id}
                     onClick={() => setActiveMedia(cw)}
-                    className="relative flex-shrink-0 w-36 sm:w-44 bg-[#081534] border border-cyan-500/30 hover:border-cyan-400 rounded-xl overflow-hidden cursor-pointer group transition shadow-md"
+                    className="relative flex-shrink-0 w-28 xs:w-36 sm:w-44 bg-[#081534] border border-cyan-500/30 hover:border-cyan-400 rounded-xl overflow-hidden cursor-pointer group transition shadow-md"
                   >
                     <div className="aspect-[16/10] w-full bg-[#050c20] relative overflow-hidden">
                       <img

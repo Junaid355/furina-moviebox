@@ -12,7 +12,7 @@ const FURINA_QUOTES = [
 
 export const FurinaMascot = ({ onOpenSearch }) => {
   const [quoteIndex, setQuoteIndex] = useState(0);
-  const [showBubble, setShowBubble] = useState(true);
+  const [showBubble, setShowBubble] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
   const [isMinimized, setIsMinimized] = useState(false);
   const [hearts, setHearts] = useState([]);
 
@@ -59,7 +59,7 @@ export const FurinaMascot = ({ onOpenSearch }) => {
   return (
     <aside 
       aria-label="Furina Chibi Mascot Companion"
-      className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 flex flex-col items-end pointer-events-none select-none"
+      className="fixed bottom-20 right-3 md:bottom-6 md:right-6 z-40 flex flex-col items-end pointer-events-none select-none"
     >
       {/* Floating Hearts */}
       {hearts.map((h) => (
@@ -74,7 +74,7 @@ export const FurinaMascot = ({ onOpenSearch }) => {
 
       {/* Interactive Speech Bubble */}
       {showBubble && (
-        <div className="pointer-events-auto relative mb-3 max-w-[240px] sm:max-w-[280px] p-3 rounded-2xl bg-[#040d28]/95 border-2 border-cyan-400/50 shadow-[0_12px_35px_rgba(0,0,0,0.85),0_0_25px_rgba(0,242,254,0.35)] backdrop-blur-xl text-cyan-100 text-[11.5px] leading-relaxed animate-in fade-in zoom-in-95 duration-200">
+        <div className="pointer-events-auto relative mb-2.5 max-w-[230px] sm:max-w-[280px] p-2.5 sm:p-3 rounded-2xl bg-[#040d28]/95 border-2 border-cyan-400/50 shadow-[0_12px_35px_rgba(0,0,0,0.85),0_0_25px_rgba(0,242,254,0.35)] backdrop-blur-xl text-cyan-100 text-[11px] sm:text-[11.5px] leading-relaxed animate-in fade-in zoom-in-95 duration-200">
           <button
             onClick={() => setShowBubble(false)}
             className="absolute top-2 right-2 p-0.5 text-slate-400 hover:text-white rounded-full cursor-pointer"
@@ -82,7 +82,7 @@ export const FurinaMascot = ({ onOpenSearch }) => {
           >
             <X className="w-3.5 h-3.5" />
           </button>
-          <div className="flex items-center gap-1.5 text-[11px] font-black text-cyan-300 uppercase tracking-wider mb-1.5 pb-1 border-b border-cyan-400/20">
+          <div className="flex items-center gap-1.5 text-[10.5px] sm:text-[11px] font-black text-cyan-300 uppercase tracking-wider mb-1.5 pb-1 border-b border-cyan-400/20">
             <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-spin" />
             <span>Lady Furina's Cinema Companion</span>
           </div>
@@ -104,15 +104,15 @@ export const FurinaMascot = ({ onOpenSearch }) => {
 
       {/* Cute Animated Furina Chibi GIF Avatar with 3D Float */}
       <div className="pointer-events-auto relative group cursor-pointer" onClick={handleTap}>
-        <div className="absolute -inset-2.5 rounded-full bg-gradient-to-r from-cyan-400 via-sky-500 to-blue-600 blur-md group-hover:blur-xl transition-all duration-300 animate-pulse" />
-        <div className="relative w-16 h-16 sm:w-18 sm:h-18 rounded-full overflow-hidden border-2 border-cyan-300 shadow-[0_0_25px_rgba(0,242,254,0.8)] group-hover:scale-110 group-active:scale-95 transition-all duration-200 bg-[#040d28]">
+        <div className="absolute -inset-2 rounded-full bg-gradient-to-r from-cyan-400 via-sky-500 to-blue-600 blur-md group-hover:blur-xl transition-all duration-300 animate-pulse" />
+        <div className="relative w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-cyan-300 shadow-[0_0_20px_rgba(0,242,254,0.7)] group-hover:scale-110 group-active:scale-95 transition-all duration-200 bg-[#040d28]">
           <img
             src="./furina_chibi.gif"
             alt="Cute Furina Mascot"
             className="w-full h-full object-cover"
           />
         </div>
-        <div className="absolute -bottom-1 -right-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-gray-950 font-black text-[8.5px] tracking-wider uppercase border border-white/60 shadow">
+        <div className="absolute -bottom-1 -right-1 px-1.5 py-0.2 sm:px-2 sm:py-0.5 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-gray-950 font-black text-[7.5px] sm:text-[8.5px] tracking-wider uppercase border border-white/60 shadow">
           HYDRO 👑
         </div>
       </div>

@@ -17,7 +17,6 @@ const MediaCard = React.memo(function MediaCard({
   const cardRef = useRef(null);
   const glareRef = useRef(null);
   const rafId = useRef(null);
-  const [isHovered, setIsHovered] = useState(false);
 
   if (!item) return null;
 
@@ -67,15 +66,19 @@ const MediaCard = React.memo(function MediaCard({
   const rawPoster = item.poster_path || item.poster || item.backdrop_path || item.backdrop;
   const posterSrc = resolvePosterUrl(rawPoster, 'w500');
 
+  const cardRectRef = useRef(null);
+
   // 60-120 FPS Direct RAF DOM transform (Zero React re-renders on mousemove)
   const handleMouseEnter = () => {
-    setIsHovered(true);
+    if (cardRef.current) {
+      cardRectRef.current = cardRef.current.getBoundingClientRect();
+    }
   };
 
   const handleMouseMove = (e) => {
     if (!cardRef.current) return;
     if (rafId.current) cancelAnimationFrame(rafId.current);
-    const rect = cardRef.current.getBoundingClientRect();
+    const rect = cardRectRef.current || cardRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     const centerX = rect.width / 2;
@@ -99,7 +102,7 @@ const MediaCard = React.memo(function MediaCard({
   };
 
   const handleMouseLeave = () => {
-    setIsHovered(false);
+    cardRectRef.current = null;
     if (rafId.current) cancelAnimationFrame(rafId.current);
     if (cardRef.current) {
       cardRef.current.style.transition = 'transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1)';
@@ -117,6 +120,7 @@ const MediaCard = React.memo(function MediaCard({
         soundFx.playClick();
         onPlay(item);
       }}
+      onMouseEnter={handleMouseEnter}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       data-media-id={item.id}
@@ -127,7 +131,7 @@ const MediaCard = React.memo(function MediaCard({
       className="group relative rounded-xl sm:rounded-2xl overflow-hidden glass-card cursor-pointer flex flex-col border border-cyan-500/25 hover:border-cyan-400/90 shadow-[0_10px_28px_rgba(0,0,0,0.7)] hover:shadow-[0_18px_45px_rgba(0,0,0,0.9),0_0_30px_rgba(0,242,254,0.45)] [transform-style:preserve-3d]"
     >
       {/* Magic UI Border Beam on Hover */}
-      <div className={`transition-opacity duration-300 pointer-events-none ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
+      <div className="transition-opacity duration-300 pointer-events-none opacity-0 group-hover:opacity-100">
         <BorderBeam size={130} duration={4} colorFrom="#00f2fe" colorTo="#38bdf8" borderWidth={2} />
       </div>
 
@@ -139,9 +143,8 @@ const MediaCard = React.memo(function MediaCard({
 
       {/* Poster Image Container with 3D Pop (translateZ 40px) */}
       <div 
-        className="relative aspect-[2/3] w-full overflow-hidden bg-[#04091c] transition-transform duration-300 ease-out"
+        className="relative aspect-[2/3] w-full overflow-hidden bg-[#04091c] transition-transform duration-300 ease-out group-hover:scale-104"
         style={{ 
-          transform: isHovered ? 'translateZ(40px) scale(1.04)' : 'translateZ(0px)',
           transformStyle: 'preserve-3d'
         }}
       >

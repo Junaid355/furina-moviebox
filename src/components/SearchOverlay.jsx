@@ -199,12 +199,18 @@ export default function SearchOverlay({
             <input
               ref={inputRef}
               type="text"
+              inputMode="search"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="none"
+              spellCheck="false"
+              enterKeyHint="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.stopPropagation()}
               placeholder="Search 10,000+ movies, anime, series, & Hindi dubs..."
               style={{ touchAction: 'manipulation' }}
-              className="w-full bg-[#050b1a] border border-cyan-500/40 rounded-2xl pl-11 pr-11 py-3 text-sm sm:text-base text-white placeholder-cyan-200/40 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/30 transition shadow-inner font-medium"
+              className="w-full bg-[#050b1a] border border-cyan-500/40 rounded-2xl pl-11 pr-11 py-3 text-base sm:text-sm text-white placeholder-cyan-200/40 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/30 transition shadow-inner font-medium"
             />
             {query && (
               <button
