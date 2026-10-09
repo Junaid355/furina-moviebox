@@ -121,13 +121,13 @@ export default function MediaShelf({
         <div
           ref={scrollRef}
           onScroll={checkScroll}
-          className="flex gap-3 sm:gap-4 overflow-x-auto scrollbar-none scroll-smooth pb-2 pt-1 px-1 snap-x snap-mandatory"
+          className="flex gap-2 sm:gap-4 overflow-x-auto scrollbar-none scroll-smooth pb-2 pt-1 px-1 snap-x snap-mandatory"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {items.map((item) => (
             <div
               key={`shelf-${item.id}-${item.title}`}
-              className="w-[140px] sm:w-[170px] md:w-[190px] lg:w-[205px] shrink-0 snap-start"
+              className="w-[115px] xs:w-[135px] sm:w-[170px] md:w-[190px] lg:w-[205px] shrink-0 snap-start"
             >
               <MediaCard
                 item={item}

@@ -1161,9 +1161,9 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
         {/* 2. REGULAR HEADER (STICKY AT TOP OF MODAL CARD - CANNOT SCROLL AWAY)     */}
         {/* ========================================================================= */}
         {!isFullscreen && (
-          <div className="flex items-center justify-between p-2.5 sm:p-4 border-b border-cyan-500/30 bg-[#050b1d] shrink-0 z-30 shadow-md">
-            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 pr-2">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden border-2 border-cyan-400/60 shadow-[0_0_12px_rgba(56,189,248,0.45)] shrink-0">
+          <div className="flex items-center justify-between p-2 sm:p-4 border-b border-cyan-500/30 bg-[#050b1d] shrink-0 z-30 shadow-md">
+            <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 flex-1 pr-1.5 sm:pr-2">
+              <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full overflow-hidden border-2 border-cyan-400/60 shadow-[0_0_12px_rgba(56,189,248,0.45)] shrink-0">
                 <img src="./favicon.png" alt="Furina" className="w-full h-full object-cover" />
               </div>
               <div className="min-w-0 flex-1">
@@ -1346,9 +1346,9 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 onClick={handleSafeClose}
                 aria-label="Close video player modal"
                 title="Close Player (Esc)"
-                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-rose-600 hover:bg-rose-500 text-white border-2 border-rose-400/80 hover:border-white flex items-center justify-center transition shadow-[0_0_18px_rgba(244,63,94,0.7)] hover:shadow-[0_0_28px_rgba(244,63,94,0.95)] shrink-0 ml-1 transform hover:scale-105 active:scale-90 touch-manipulation cursor-pointer"
+                className="w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-rose-600 hover:bg-rose-500 text-white border-2 border-rose-400/80 hover:border-white flex items-center justify-center transition shadow-[0_0_18px_rgba(244,63,94,0.7)] hover:shadow-[0_0_28px_rgba(244,63,94,0.95)] shrink-0 ml-1 transform hover:scale-105 active:scale-90 touch-manipulation cursor-pointer"
               >
-                <X className="w-4 h-4 sm:w-5 sm:h-5 font-black stroke-[3]" />
+                <X className="w-3.5 h-3.5 sm:w-5 sm:h-5 font-black stroke-[3]" />
               </button>
             </div>
           </div>
@@ -1358,33 +1358,33 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
         {/* 3. DEDICATED AUDIO TRACK & SUBTITLES SELECTOR BAR                         */}
         {/* ========================================================================= */}
         {!isFullscreen && (
-          <div className="px-3 sm:px-4 py-2.5 bg-gradient-to-r from-[#070e24] via-[#09153a] to-[#070e24] border-b border-cyan-500/20 flex flex-wrap items-center justify-between gap-2.5 text-xs">
-            <div className="flex items-center gap-4 flex-wrap">
+          <div className="px-2 sm:px-4 py-1.5 sm:py-2.5 bg-gradient-to-r from-[#070e24] via-[#09153a] to-[#070e24] border-b border-cyan-500/20 flex flex-wrap items-center justify-between gap-1.5 sm:gap-2.5 text-[11px] sm:text-xs">
+            <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
               {/* Audio Track Selector */}
-              <div className="flex items-center gap-2">
-                <span className="flex items-center gap-1.5 font-extrabold text-cyan-300 text-[11px] uppercase tracking-wider">
-                  <Volume2 className="w-3.5 h-3.5 text-cyan-400" />
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="flex items-center gap-1 sm:gap-1.5 font-extrabold text-cyan-300 text-[10px] sm:text-[11px] uppercase tracking-wider">
+                  <Volume2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-cyan-400" />
                   Audio Track:
                 </span>
                 {isSwitchingAudio && (
-                  <span className="text-[10px] text-amber-300 font-bold flex items-center gap-1 animate-pulse px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20">
+                  <span className="text-[9px] sm:text-[10px] text-amber-300 font-bold flex items-center gap-1 animate-pulse px-1.5 sm:px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20">
                     <Loader2 className="w-3 h-3 animate-spin" />
                     <span>Switching audio...</span>
                   </span>
                 )}
                 {audioSwitchFeedback && !isSwitchingAudio && (
-                  <span className="text-[10px] text-emerald-300 font-bold flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 animate-in fade-in duration-200">
+                  <span className="text-[9px] sm:text-[10px] text-emerald-300 font-bold flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 animate-in fade-in duration-200">
                     <span>{audioSwitchFeedback}</span>
                   </span>
                 )}
-                <div className="flex items-center gap-1.5 bg-black/40 p-0.5 rounded-full border border-white/10">
+                <div className="flex items-center gap-1 sm:gap-1.5 bg-black/40 p-0.5 rounded-full border border-white/10">
                   {/* English Dub Option */}
                   {hasWorkingEnglishSource ? (
                     <button
                       data-testid="audio-btn-english"
                       onClick={() => handleAudioChange('english')}
                       disabled={isSwitchingAudio}
-                      className={`px-3 py-1 rounded-full text-xs font-extrabold transition flex items-center gap-1 border cursor-pointer ${
+                      className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10.5px] sm:text-xs font-extrabold transition flex items-center gap-1 border cursor-pointer ${
                         audioMode === 'english'
                           ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 border-cyan-300 shadow-[0_0_12px_rgba(56,189,248,0.5)] scale-105'
                           : 'bg-cyan-500/10 text-cyan-200/70 border-transparent hover:text-white'

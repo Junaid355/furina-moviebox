@@ -457,7 +457,7 @@ export default function App() {
   }, [isSettingsOpen, isStudioOpen, isIPhoneModalOpen, isAndroidModalOpen, activeMedia, detailsItem, isSearchOverlayOpen]);
 
   return (
-    <div className={`min-h-screen ${isStealthMode ? 'bg-[#080b11]' : 'bg-[#030712]'} text-white flex flex-col selection:bg-cyan-500 selection:text-gray-950 pb-20 lg:pb-8 relative overflow-hidden`}>
+    <div className={`min-h-screen ${isStealthMode ? 'bg-[#080b11]' : 'bg-[#030712]'} text-white flex flex-col selection:bg-cyan-500 selection:text-gray-950 pb-20 lg:pb-8 relative overflow-x-hidden`}>
       
       {/* Background Ambient Hydro Glow Blobs (GPU Layered) */}
       <div className="fixed -top-40 left-1/4 w-[650px] h-[650px] bg-cyan-500/[0.07] rounded-full blur-[160px] pointer-events-none -z-10 transform-gpu" style={{ transform: 'translateZ(0)' }} />
@@ -1057,7 +1057,7 @@ export default function App() {
                     <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(56,189,248,0.8)]" />
                     <h2 className="text-base sm:text-lg font-black text-white">More Trending Titles To Explore</h2>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-5">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-5">
                     {displayedItems.map((item, idx) => (
                       <MediaCard
                         key={`home-grid-${item.id}-${idx}`}
@@ -1073,7 +1073,7 @@ export default function App() {
               </div>
             ) : (
               /* Dedicated Category or Search Responsive Grid */
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-5">
                 {displayedItems.map((item, idx) => (
                   <MediaCard
                     key={`${item.id}-${idx}`}
@@ -1318,12 +1318,12 @@ export default function App() {
             <button
               key={tab.id}
               onClick={() => { setActiveCategory(tab.id); setSearchQuery(''); }}
-              className={`flex flex-col items-center gap-1 transition active:scale-95 ${
+              className={`flex flex-col items-center gap-0.5 sm:gap-1 transition active:scale-95 ${
                 isActive ? 'text-cyan-400 font-bold scale-105' : 'text-cyan-200/50 hover:text-white'
               }`}
             >
-              <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="text-[9px] sm:text-[10px] tracking-tight">{tab.label}</span>
+              <Icon className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+              <span className="text-[8.5px] sm:text-[10px] tracking-tight">{tab.label}</span>
             </button>
           );
         })}
@@ -1331,12 +1331,12 @@ export default function App() {
         {/* Mobile Settings Button - Secret code hidden */}
         <button
           onClick={() => setIsSettingsOpen(true)}
-          className={`flex flex-col items-center gap-1 transition active:scale-95 ${
+          className={`flex flex-col items-center gap-0.5 sm:gap-1 transition active:scale-95 ${
             isMasterMode ? 'text-emerald-400 font-bold' : 'text-cyan-200/50 hover:text-white'
           }`}
         >
-          {isMasterMode ? <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" /> : <Settings className="w-4 h-4 sm:w-5 sm:h-5" />}
-          <span className="text-[9px] sm:text-[10px] tracking-tight">{isMasterMode ? 'VIP' : 'Settings'}</span>
+          {isMasterMode ? <Shield className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-emerald-400" /> : <Settings className="w-3.5 h-3.5 sm:w-5 sm:h-5" />}
+          <span className="text-[8.5px] sm:text-[10px] tracking-tight">{isMasterMode ? 'VIP' : 'Settings'}</span>
         </button>
       </nav>
     </div>

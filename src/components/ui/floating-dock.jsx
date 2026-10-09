@@ -27,29 +27,29 @@ const FloatingDockMobile = ({ items, className = "" }) => {
         {open && (
           <motion.div
             layoutId="nav"
-            className="absolute bottom-full mb-2 inset-x-0 flex flex-col gap-2 p-2 bg-[#040d28]/95 backdrop-blur-xl border border-cyan-400/40 rounded-2xl shadow-[0_0_25px_rgba(0,242,254,0.35)]"
+            className="absolute bottom-full mb-1.5 inset-x-0 flex flex-col gap-1.5 p-1.5 bg-[#040d28]/95 backdrop-blur-xl border border-cyan-400/40 rounded-xl shadow-[0_0_20px_rgba(0,242,254,0.35)]"
           >
             {items.map((item, idx) => (
               <motion.div
                 key={item.title}
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{
                   opacity: 0,
-                  y: 10,
-                  transition: { delay: idx * 0.04 },
+                  y: 8,
+                  transition: { delay: idx * 0.03 },
                 }}
-                transition={{ delay: (items.length - 1 - idx) * 0.04 }}
+                transition={{ delay: (items.length - 1 - idx) * 0.03 }}
               >
                 <button
                   onClick={() => {
                     item.onClick?.();
                     setOpen(false);
                   }}
-                  className="w-10 h-10 rounded-full bg-[#061233] border border-cyan-400/40 flex items-center justify-center text-cyan-300 hover:text-white hover:bg-cyan-500/25 transition cursor-pointer"
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#061233] border border-cyan-400/40 flex items-center justify-center text-cyan-300 hover:text-white hover:bg-cyan-500/25 transition cursor-pointer"
                   title={item.title}
                 >
-                  <div className="w-5 h-5 flex items-center justify-center">
+                  <div className="w-3.5 h-3.5 flex items-center justify-center">
                     {item.icon}
                   </div>
                 </button>
@@ -60,9 +60,9 @@ const FloatingDockMobile = ({ items, className = "" }) => {
       </AnimatePresence>
       <button
         onClick={() => setOpen(!open)}
-        className="w-10 h-10 rounded-full bg-[#061233] border border-cyan-400/50 flex items-center justify-center text-cyan-300 shadow-[0_0_18px_rgba(0,242,254,0.4)] cursor-pointer"
+        className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-[#061233]/90 backdrop-blur-md border border-cyan-400/50 flex items-center justify-center text-cyan-300 shadow-[0_0_14px_rgba(0,242,254,0.4)] active:scale-90 transition-transform cursor-pointer"
       >
-        <span className="text-xs font-black">⚓</span>
+        <span className="text-[10px] font-black">⚓</span>
       </button>
     </div>
   );

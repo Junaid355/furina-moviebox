@@ -256,8 +256,8 @@ export default function SettingsModal({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-2xl p-2 sm:p-4 overflow-y-auto animate-in fade-in duration-200">
-      <div className="relative w-full max-w-4xl bg-[#060c1e]/95 border border-cyan-500/30 rounded-3xl overflow-hidden shadow-[0_0_80px_rgba(6,182,212,0.25)] flex flex-col md:flex-row my-auto max-h-[92vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-2xl p-1.5 sm:p-4 overflow-y-auto animate-in fade-in duration-200">
+      <div className="relative w-full max-w-4xl bg-[#060c1e]/95 border border-cyan-500/30 rounded-2xl sm:rounded-3xl overflow-hidden shadow-[0_0_80px_rgba(6,182,212,0.25)] flex flex-col md:flex-row my-auto max-h-[92vh]">
         
         {/* Toast Notification */}
         {toast && (
@@ -271,24 +271,24 @@ export default function SettingsModal({
         <button 
           onClick={onClose}
           aria-label="Close Settings"
-          className="absolute top-4 right-4 z-40 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 flex items-center justify-center text-cyan-300 hover:text-white transition cursor-pointer"
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 z-40 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 flex items-center justify-center text-cyan-300 hover:text-white transition cursor-pointer"
         >
-          <X className="w-4 h-4" />
+          <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
         </button>
 
         {/* SIDEBAR NAVIGATION */}
-        <div className="w-full md:w-64 bg-[#040815] border-b md:border-b-0 md:border-r border-cyan-500/20 p-3 sm:p-4 flex flex-col shrink-0">
-          <div className="flex items-center gap-2.5 px-2 py-3 mb-2 border-b border-cyan-500/15">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-gray-950 shadow-md">
-              <Settings className="w-4 h-4" />
+        <div className="w-full md:w-64 bg-[#040815] border-b md:border-b-0 md:border-r border-cyan-500/20 p-2 sm:p-4 flex flex-col shrink-0">
+          <div className="flex items-center gap-2 sm:gap-2.5 px-2 py-2 sm:py-3 mb-1 sm:mb-2 border-b border-cyan-500/15">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-gray-950 shadow-md">
+              <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
             <div>
-              <h2 className="font-extrabold text-sm text-white tracking-wide">Settings Hub</h2>
-              <p className="text-[10px] text-cyan-300/60 uppercase tracking-wider font-mono">Streaming Preferences</p>
+              <h2 className="font-extrabold text-xs sm:text-sm text-white tracking-wide">Settings Hub</h2>
+              <p className="text-[9px] sm:text-[10px] text-cyan-300/60 uppercase tracking-wider font-mono">Streaming Preferences</p>
             </div>
           </div>
 
-          <nav className="flex md:flex-col gap-1 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 scrollbar-none">
+          <nav className="flex md:flex-col gap-1 overflow-x-auto md:overflow-x-visible pb-1.5 md:pb-0 scrollbar-none">
             {navSections.map((sec) => {
               const Icon = sec.icon;
               const isActive = activeSection === sec.id;
@@ -297,7 +297,7 @@ export default function SettingsModal({
                 <button
                   key={sec.id}
                   onClick={() => setActiveSection(sec.id)}
-                  className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition shrink-0 cursor-pointer ${
+                  className={`flex items-center justify-between px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl text-[11px] sm:text-xs font-bold transition shrink-0 cursor-pointer ${
                     isActive
                       ? isVault && isMasterMode
                         ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow'
@@ -305,8 +305,8 @@ export default function SettingsModal({
                       : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-sm">{sec.emoji}</span>
+                  <div className="flex items-center gap-2 sm:gap-2.5">
+                    <span className="text-xs sm:text-sm">{sec.emoji}</span>
                     <span>{sec.label}</span>
                   </div>
                   {isVault && isMasterMode && (
@@ -321,7 +321,7 @@ export default function SettingsModal({
         </div>
 
         {/* CONTENT PANEL */}
-        <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-6 text-xs text-slate-200">
+        <div className="flex-1 p-3 sm:p-6 overflow-y-auto space-y-4 sm:space-y-6 text-xs text-slate-200">
 
           {/* 1. PLAYBACK SETTINGS */}
           {activeSection === 'playback' && (

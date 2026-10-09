@@ -88,6 +88,7 @@ const MediaCard = React.memo(function MediaCard({
 
     rafId.current = requestAnimationFrame(() => {
       if (cardRef.current) {
+        cardRef.current.style.transition = 'none';
         cardRef.current.style.transform = `perspective(1000px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) translateY(-8px) scale3d(1.025, 1.025, 1.025)`;
       }
       if (glareRef.current) {
@@ -101,6 +102,7 @@ const MediaCard = React.memo(function MediaCard({
     setIsHovered(false);
     if (rafId.current) cancelAnimationFrame(rafId.current);
     if (cardRef.current) {
+      cardRef.current.style.transition = 'transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1)';
       cardRef.current.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px) scale3d(1, 1, 1)';
     }
     if (glareRef.current) {
@@ -194,32 +196,32 @@ const MediaCard = React.memo(function MediaCard({
 
         {/* Quality & Dub Badges with 3D Depth Layer */}
         <div 
-          className="absolute top-2 left-2 flex flex-col gap-1 z-20 pointer-events-none transition-transform duration-200"
+          className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 flex flex-col gap-0.5 sm:gap-1 z-20 pointer-events-none transition-transform duration-200"
           style={{ transform: 'translateZ(26px)' }}
         >
-          <span className="badge-4k-uhd text-[8.5px] px-1.5 py-0.5 rounded shadow-sm tracking-wider border border-cyan-300/30">
+          <span className="badge-4k-uhd text-[7.5px] sm:text-[8.5px] px-1 sm:px-1.5 py-0.5 rounded shadow-sm tracking-wider border border-cyan-300/30">
             4K UHD
           </span>
           {isHindi && (
-            <span className="badge-hindi-gold text-[8.5px] px-1.5 py-0.5 rounded shadow-sm flex items-center gap-0.5 tracking-wider border border-amber-300/30">
+            <span className="badge-hindi-gold text-[7.5px] sm:text-[8.5px] px-1 sm:px-1.5 py-0.5 rounded shadow-sm flex items-center gap-0.5 tracking-wider border border-amber-300/30">
               <span>🇮🇳</span>
               <span>{isAnime ? 'HINDI' : 'HINDI'}</span>
             </span>
           )}
           {isAnime && (
-            <span className="badge-fhd text-[8.5px] px-1.5 py-0.5 rounded shadow-sm flex items-center gap-0.5 tracking-wider border border-purple-300/30">
+            <span className="badge-fhd text-[7.5px] sm:text-[8.5px] px-1 sm:px-1.5 py-0.5 rounded shadow-sm flex items-center gap-0.5 tracking-wider border border-purple-300/30">
               <span>🇯🇵</span>
               <span>SUB / DUB</span>
             </span>
           )}
           {savedProgress && (
-            <span className="bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 text-[8.5px] font-black tracking-wider px-1.5 py-0.5 rounded shadow-sm flex items-center gap-0.5">
+            <span className="bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 text-[7.5px] sm:text-[8.5px] font-black tracking-wider px-1 sm:px-1.5 py-0.5 rounded shadow-sm flex items-center gap-0.5">
               <span>▶</span>
               <span>RESUME {savedProgress}</span>
             </span>
           )}
           {isSeries ? (
-            <span className="bg-purple-600/90 text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow-sm tracking-wider">
+            <span className="bg-purple-600/90 text-white text-[7px] sm:text-[8px] font-black px-1 sm:px-1.5 py-0.5 rounded shadow-sm tracking-wider">
               SERIES
             </span>
           ) : null}
@@ -227,12 +229,12 @@ const MediaCard = React.memo(function MediaCard({
 
         {/* Top Right Actions: Rating, Watchlist, Details with 3D Depth */}
         <div 
-          className="absolute top-2.5 right-2.5 flex items-center gap-1.5 z-20 transition-transform duration-200"
+          className="absolute top-1.5 right-1.5 sm:top-2.5 sm:right-2.5 flex items-center gap-1 sm:gap-1.5 z-20 transition-transform duration-200"
           style={{ transform: 'translateZ(26px)' }}
         >
-          <div className="bg-black/65 backdrop-blur-md px-2 py-0.5 rounded-md flex items-center gap-1 border border-white/10 shadow">
-            <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
-            <span className="text-[10px] font-bold text-white">{rating}</span>
+          <div className="bg-black/65 backdrop-blur-md px-1.5 sm:px-2 py-0.5 rounded-md flex items-center gap-0.5 sm:gap-1 border border-white/10 shadow">
+            <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-400 fill-amber-400" />
+            <span className="text-[9px] sm:text-[10px] font-bold text-white">{rating}</span>
           </div>
 
           <button
@@ -241,13 +243,13 @@ const MediaCard = React.memo(function MediaCard({
               if (onToggleWatchlist) onToggleWatchlist(item);
             }}
             title={isWatchlisted ? 'Remove from Watchlist' : 'Add to Watchlist'}
-            className={`w-6 h-6 rounded-md flex items-center justify-center backdrop-blur-md transition border cursor-pointer ${
+            className={`w-5 h-5 sm:w-6 sm:h-6 rounded-md flex items-center justify-center backdrop-blur-md transition border cursor-pointer ${
               isWatchlisted
                 ? 'bg-cyan-500 text-gray-950 border-cyan-400 shadow-[0_0_10px_rgba(56,189,248,0.5)]'
                 : 'bg-black/60 text-white/80 border-white/10 hover:text-white hover:bg-black/80 hover:border-cyan-400/50'
             }`}
           >
-            {isWatchlisted ? <Check className="w-3.5 h-3.5" /> : <Bookmark className="w-3.5 h-3.5" />}
+            {isWatchlisted ? <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> : <Bookmark className="w-3 h-3 sm:w-3.5 sm:h-3.5" />}
           </button>
         </div>
 
@@ -277,15 +279,15 @@ const MediaCard = React.memo(function MediaCard({
 
       {/* Card Info Container */}
       <div 
-        className="p-2.5 sm:p-3 bg-[#050b1d] border-t border-white/[0.05] flex flex-col justify-between [transform-style:preserve-3d]"
+        className="p-2 sm:p-3 bg-[#050b1d] border-t border-white/[0.05] flex flex-col justify-between [transform-style:preserve-3d]"
         style={{ transform: 'translateZ(14px)' }}
       >
-        <h3 className="font-bold text-xs sm:text-[13px] text-white line-clamp-1 group-hover:text-cyan-300 transition-colors">
+        <h3 className="font-bold text-[11px] sm:text-[13px] text-white line-clamp-1 group-hover:text-cyan-300 transition-colors">
           {title}
         </h3>
-        <div className="flex items-center justify-between mt-1 text-[10px] text-slate-400">
+        <div className="flex items-center justify-between mt-0.5 sm:mt-1 text-[9px] sm:text-[10px] text-slate-400">
           <span>{year}</span>
-          <span className="text-[9.5px] font-semibold text-cyan-400/80">
+          <span className="text-[8.5px] sm:text-[9.5px] font-semibold text-cyan-400/80">
             {isSeries ? 'Series' : 'Movie'}
           </span>
         </div>

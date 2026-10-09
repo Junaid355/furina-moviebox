@@ -173,7 +173,7 @@ export default function Navbar({
         </div>
 
         {/* Compact Search Bar with 3D Spotlight Overlay Shortcut Trigger */}
-        <div className="w-36 sm:w-48 lg:w-48 xl:w-56 focus-within:w-64 transition-all duration-300 relative shrink-0">
+        <div className="w-28 xs:w-36 sm:w-48 lg:w-48 xl:w-56 focus-within:w-40 sm:focus-within:w-64 transition-all duration-300 relative shrink-0">
           <div className="relative flex items-center">
             <Search className="absolute left-2.5 w-3.5 h-3.5 text-cyan-400/70 pointer-events-none" />
             <input
@@ -201,7 +201,7 @@ export default function Navbar({
               enterKeyHint="search"
               placeholder="Search..."
               style={{ touchAction: 'manipulation' }}
-              className="w-full bg-[#0b1633]/90 border border-cyan-500/25 rounded-full pl-7 pr-7 py-1 text-base sm:text-xs text-white placeholder-cyan-200/40 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 transition shadow-inner"
+              className="w-full bg-[#0b1633]/90 border border-cyan-500/25 rounded-full pl-7 pr-7 py-0.5 sm:py-1 text-base sm:text-xs text-white placeholder-cyan-200/40 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 transition shadow-inner"
             />
             {localSearch && (
               <>
@@ -276,12 +276,12 @@ export default function Navbar({
         </nav>
 
         {/* Action Controls: Movie Studio, Apps, Audio FX, Settings */}
-        <div className="flex items-center gap-1 sm:gap-1.5 shrink-0 ml-auto">
+        <div className="flex items-center gap-0.5 sm:gap-1.5 shrink-0 ml-auto">
           <button
             onClick={onOpenStudio}
             data-testid="studio-btn"
             title="Furina Movie Studio & Content Platform"
-            className="btn-shine px-2.5 py-1 rounded-full border border-cyan-500/40 bg-gradient-to-r from-cyan-500/20 to-blue-600/20 hover:from-cyan-500/35 hover:to-blue-600/35 text-cyan-300 hover:text-white transition-all duration-200 flex items-center gap-1 text-[11px] font-bold cursor-pointer shadow-sm shrink-0 group/studio hover:shadow-[0_0_12px_rgba(6,182,212,0.4)]"
+            className="btn-shine px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full border border-cyan-500/40 bg-gradient-to-r from-cyan-500/20 to-blue-600/20 hover:from-cyan-500/35 hover:to-blue-600/35 text-cyan-300 hover:text-white transition-all duration-200 flex items-center gap-1 text-[10px] sm:text-[11px] font-bold cursor-pointer shadow-sm shrink-0 group/studio hover:shadow-[0_0_12px_rgba(6,182,212,0.4)]"
           >
             <Film className="w-3 h-3 text-cyan-400 group-hover/studio:scale-110 group-hover/studio:rotate-6 transition-transform duration-200" />
             <span>Studio</span>
@@ -290,11 +290,10 @@ export default function Navbar({
           <button
             onClick={onOpenAndroidModal}
             title="Install App on Android (1-Tap Standalone PWA & Native)"
-            className="px-2 py-1 rounded-full border border-emerald-500/40 bg-emerald-500/15 text-emerald-300 hover:text-white hover:bg-emerald-500/25 transition-all duration-200 flex items-center gap-1 text-[11px] font-bold cursor-pointer shrink-0 group/android hover:shadow-[0_0_12px_rgba(16,185,129,0.4)]"
+            className="p-1 sm:px-2 sm:py-1 rounded-full border border-emerald-500/40 bg-emerald-500/15 text-emerald-300 hover:text-white hover:bg-emerald-500/25 transition-all duration-200 flex items-center gap-1 text-[10px] sm:text-[11px] font-bold cursor-pointer shrink-0 group/android hover:shadow-[0_0_12px_rgba(16,185,129,0.4)]"
           >
             <Smartphone className="w-3 h-3 text-emerald-400 group-hover/android:scale-110 transition-transform duration-200" />
             <span className="hidden sm:inline">Android App</span>
-            <span className="sm:hidden">App</span>
           </button>
 
           <button
@@ -313,13 +312,13 @@ export default function Navbar({
             }}
             data-testid="cozy-sound-btn"
             title={isSoundOn ? '3D Sound FX: Active (Click to Mute)' : '3D Sound FX: Muted (Click to Enable)'}
-            className={`p-1.5 rounded-full border transition-all duration-200 flex items-center gap-1 cursor-pointer shrink-0 ${
+            className={`p-1 sm:p-1.5 rounded-full border transition-all duration-200 flex items-center gap-1 cursor-pointer shrink-0 ${
               isSoundOn
                 ? 'bg-amber-500/20 border-amber-400/40 text-amber-300 hover:bg-amber-500/30 shadow-[0_0_10px_rgba(251,146,60,0.35)]'
                 : 'bg-[#0b1633] border-cyan-500/30 text-slate-400 hover:text-white hover:bg-white/10'
             }`}
           >
-            {isSoundOn ? <Volume2 className="w-3.5 h-3.5 text-amber-300 animate-pulse" /> : <VolumeX className="w-3.5 h-3.5 text-slate-400" />}
+            {isSoundOn ? <Volume2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-300 animate-pulse" /> : <VolumeX className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400" />}
             <span className="hidden 2xl:inline text-[11px] font-semibold">
               {isSoundOn ? 'Audio' : 'Muted'}
             </span>
@@ -328,8 +327,9 @@ export default function Navbar({
           <button
             onClick={onOpenSettings}
             data-testid="settings-btn"
+            aria-label="Settings"
             title="Settings & Master Vault"
-            className={`px-2 py-1 rounded-full border transition-all duration-200 flex items-center gap-1 cursor-pointer shrink-0 group/settings ${
+            className={`p-1 sm:px-2 sm:py-1 rounded-full border transition-all duration-200 flex items-center gap-1 cursor-pointer shrink-0 group/settings ${
               isMasterMode
                 ? 'bg-emerald-500/20 border-emerald-400 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.5)]'
                 : 'bg-[#0b1633] border-cyan-500/30 text-cyan-300 hover:text-white hover:bg-white/10 hover:border-cyan-400/50'
@@ -349,19 +349,20 @@ export default function Navbar({
       </div>
 
       {/* Mobile Category Scrollable Bar */}
-      <div className="flex lg:hidden overflow-x-auto gap-1.5 pt-2 pb-0.5 no-scrollbar">
+      <div className="flex lg:hidden overflow-x-auto gap-1 pt-1.5 pb-0.5 no-scrollbar">
         {categories.map((cat) => {
           const Icon = cat.icon;
           const isActive = activeCategory === cat.id && !searchQuery;
           return (
             <button
               key={cat.id}
+              data-category={cat.id}
               onClick={() => { 
                 soundFx.playClick();
                 setActiveCategory(cat.id); 
                 setSearchQuery(''); 
               }}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition border ${
+              className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-medium whitespace-nowrap transition border ${
                 cat.isVault
                   ? isActive
                     ? 'bg-amber-500 text-gray-950 border-amber-400 font-bold shadow'
@@ -371,7 +372,7 @@ export default function Navbar({
                   : 'bg-[#0c1836]/60 border-cyan-500/15 text-cyan-200/60'
               }`}
             >
-              <Icon className="w-3 h-3" />
+              <Icon className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
               <span>{cat.label}</span>
             </button>
           );

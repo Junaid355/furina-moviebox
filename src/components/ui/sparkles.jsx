@@ -49,7 +49,22 @@ export const SparklesCore = ({
 
     window.addEventListener("resize", handleResize);
 
+    let isScrolling = false;
+    let scrollTimeout = null;
+    const handleScroll = () => {
+      isScrolling = true;
+      if (scrollTimeout) clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        isScrolling = false;
+      }, 100);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
     const render = () => {
+      if (typeof document !== 'undefined' && (document.hidden || isScrolling)) {
+        animationFrameId = requestAnimationFrame(render);
+        return;
+      }
       ctx.clearRect(0, 0, width, height);
 
       particles.forEach((p) => {
@@ -78,6 +93,8 @@ export const SparklesCore = ({
 
     return () => {
       window.removeEventListener("resize", handleResize);
+      window.removeEventListener("scroll", handleScroll);
+      if (scrollTimeout) clearTimeout(scrollTimeout);
       cancelAnimationFrame(animationFrameId);
     };
   }, [canvasId, minSize, maxSize, particleDensity, particleColor]);

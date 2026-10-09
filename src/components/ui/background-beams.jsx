@@ -20,8 +20,20 @@ export const BackgroundBeams = ({ className = "" }) => {
     };
     window.addEventListener("resize", handleResize);
 
+    let isScrolling = false;
+    let scrollTimeout = null;
+    const handleScroll = () => {
+      isScrolling = true;
+      if (scrollTimeout) clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        isScrolling = false;
+      }, 100);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
     // Fontaine Hydro Water Bubbles & Twinkling Crystalline Sparkles
-    const bubbleCount = 65;
+    const isMobile = window.innerWidth < 768;
+    const bubbleCount = isMobile ? 26 : 48;
     const bubbles = Array.from({ length: bubbleCount }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
@@ -36,8 +48,8 @@ export const BackgroundBeams = ({ className = "" }) => {
 
     let time = 0;
     const render = () => {
-      if (typeof document !== 'undefined' && (document.hidden || document.body.classList.contains('furina-player-active'))) {
-        // Sleep animation while modal/player is active to keep CPU/GPU at 0% and eliminate lag
+      if (typeof document !== 'undefined' && (document.hidden || document.body.classList.contains('furina-player-active') || isScrolling)) {
+        // Sleep animation while scrolling or modal/player is active to keep 60fps buttery smooth
         animationFrameId = requestAnimationFrame(render);
         return;
       }
@@ -154,6 +166,8 @@ export const BackgroundBeams = ({ className = "" }) => {
 
     return () => {
       window.removeEventListener("resize", handleResize);
+      window.removeEventListener("scroll", handleScroll);
+      if (scrollTimeout) clearTimeout(scrollTimeout);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);

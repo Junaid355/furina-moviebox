@@ -25,8 +25,8 @@ export default function HeroBanner({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const cardRef = useRef(null);
-  const [transformStyle, setTransformStyle] = useState('perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)');
-  const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 });
+  const glareRef = useRef(null);
+  const rafId = useRef(null);
 
   useEffect(() => {
     if (list.length <= 1 || isPaused) return;
@@ -36,9 +36,10 @@ export default function HeroBanner({
     return () => clearInterval(timer);
   }, [list.length, isPaused]);
 
-  // 3D Perspective Tilt on Mouse Movement (Aceternity 3D Hero Stage)
+  // 60-120 FPS Direct RAF DOM transform (Zero React re-renders on mousemove)
   const handleMouseMove = (e) => {
     if (!cardRef.current) return;
+    if (rafId.current) cancelAnimationFrame(rafId.current);
     const rect = cardRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -47,19 +48,31 @@ export default function HeroBanner({
 
     const rotX = ((y - centerY) / centerY) * -6;
     const rotY = ((x - centerX) / centerX) * 6;
+    const gx = Math.round((x / rect.width) * 100);
+    const gy = Math.round((y / rect.height) * 100);
 
-    setTransformStyle(`perspective(1200px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) scale3d(1.008, 1.008, 1.008)`);
-    setGlare({
-      x: Math.round((x / rect.width) * 100),
-      y: Math.round((y / rect.height) * 100),
-      opacity: 0.28
+    rafId.current = requestAnimationFrame(() => {
+      if (cardRef.current) {
+        cardRef.current.style.transition = 'none';
+        cardRef.current.style.transform = `perspective(1200px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) scale3d(1.008, 1.008, 1.008)`;
+      }
+      if (glareRef.current) {
+        glareRef.current.style.opacity = '0.28';
+        glareRef.current.style.background = `radial-gradient(circle at ${gx}% ${gy}%, rgba(255,255,255,0.22) 0%, rgba(0,242,254,0.15) 30%, transparent 65%)`;
+      }
     });
   };
 
   const handleMouseLeave = () => {
     setIsPaused(false);
-    setTransformStyle('perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)');
-    setGlare((prev) => ({ ...prev, opacity: 0 }));
+    if (rafId.current) cancelAnimationFrame(rafId.current);
+    if (cardRef.current) {
+      cardRef.current.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)';
+      cardRef.current.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+    }
+    if (glareRef.current) {
+      glareRef.current.style.opacity = '0';
+    }
   };
 
   if (list.length === 0) return null;
@@ -107,11 +120,9 @@ export default function HeroBanner({
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{
-        transform: transformStyle,
-        transformStyle: 'preserve-3d',
-        transition: 'transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1)'
+        transformStyle: 'preserve-3d'
       }}
-      className="relative w-full h-[54vh] sm:h-[65vh] max-h-[590px] overflow-hidden rounded-3xl mb-8 border-2 border-cyan-400/50 shadow-[0_25px_70px_rgba(0,0,0,0.92),0_0_45px_rgba(0,242,254,0.35),inset_0_0_35px_rgba(0,242,254,0.15)] group [transform-style:preserve-3d]"
+      className="relative w-full h-[40vh] sm:h-[65vh] max-h-[580px] overflow-hidden rounded-2xl sm:rounded-3xl mb-5 sm:mb-8 border-2 border-cyan-400/50 shadow-[0_25px_70px_rgba(0,0,0,0.92),0_0_45px_rgba(0,242,254,0.35),inset_0_0_35px_rgba(0,242,254,0.15)] group [transform-style:preserve-3d]"
     >
       {/* Theatrical Overhead Stage Lamp Fixture with radiant cyan hydro lighting */}
       <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-transparent via-[#00f2fe] to-transparent z-20 shadow-[0_0_35px_#00f2fe,0_0_15px_#38bdf8]" />
@@ -133,11 +144,8 @@ export default function HeroBanner({
 
       {/* 3D Specular Glare Reflection Layer */}
       <div 
-        className="pointer-events-none absolute inset-0 z-20 transition-opacity duration-300 rounded-3xl"
-        style={{
-          opacity: glare.opacity,
-          background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,0.22) 0%, rgba(0,242,254,0.15) 30%, transparent 65%)`
-        }}
+        ref={glareRef}
+        className="pointer-events-none absolute inset-0 z-20 transition-opacity duration-300 rounded-2xl sm:rounded-3xl opacity-0"
       />
 
       {/* Background Poster Image with smooth crossfade */}
@@ -209,60 +217,60 @@ export default function HeroBanner({
 
       {/* Content */}
       <div 
-        className="absolute bottom-0 left-0 right-0 p-6 sm:p-12 max-w-3xl z-10 animate-fade-in [transform-style:preserve-3d]" 
+        className="absolute bottom-0 left-0 right-0 p-3 sm:p-8 md:p-12 max-w-3xl z-10 animate-fade-in [transform-style:preserve-3d]" 
         key={`content-${currentItem?.id}`}
       >
         
         {/* Furina Mascot Top Premiere Tag */}
         <div 
-          className="flex items-center gap-2 mb-3 flex-wrap transition-transform duration-200"
+          className="flex items-center gap-1 sm:gap-2 mb-1.5 sm:mb-3 flex-wrap transition-transform duration-200"
           style={{ transform: 'translateZ(36px)' }}
         >
-          <div className="flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-cyan-950/85 border border-cyan-400/50 shadow-[0_0_12px_rgba(56,189,248,0.4)] backdrop-blur-md">
+          <div className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-0.5 rounded-full bg-cyan-950/85 border border-cyan-400/50 shadow-[0_0_12px_rgba(56,189,248,0.4)] backdrop-blur-md">
             <img 
               src="./furina_chibi.gif" 
               alt="Furina Chibi" 
-              className="w-4 h-4 rounded-full object-cover border border-cyan-300"
+              className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full object-cover border border-cyan-300"
             />
-            <span className="text-[9.5px] font-black uppercase tracking-wider text-cyan-300">Furina Premiere</span>
+            <span className="text-[8px] sm:text-[9.5px] font-black uppercase tracking-wider text-cyan-300">Furina Premiere</span>
           </div>
 
-          <span className="badge-4k-uhd text-[10px] px-3 py-0.5 rounded-full shadow-lg tracking-wider uppercase border border-cyan-300/40">
+          <span className="badge-4k-uhd text-[8px] sm:text-[10px] px-2 sm:px-3 py-0.5 rounded-full shadow-lg tracking-wider uppercase border border-cyan-300/40">
             4K Ultra HD
           </span>
           {isHindi && (
-            <span className="badge-hindi-gold text-[10px] px-2.5 py-0.5 rounded-full shadow flex items-center gap-1 border border-amber-300/40">
+            <span className="badge-hindi-gold text-[8px] sm:text-[10px] px-1.5 sm:px-2.5 py-0.5 rounded-full shadow flex items-center gap-1 border border-amber-300/40">
               <span>🇮🇳</span>
               <span>Hindi Audio</span>
             </span>
           )}
           {isAnime && (
-            <span className="badge-fhd text-[10px] px-2.5 py-0.5 rounded-full shadow flex items-center gap-1 border border-purple-300/40">
+            <span className="badge-fhd text-[8px] sm:text-[10px] px-1.5 sm:px-2.5 py-0.5 rounded-full shadow flex items-center gap-1 border border-purple-300/40">
               <span>🇯🇵</span>
               <span>SUB / 🎙️ DUB</span>
             </span>
           )}
           {isSeries ? (
-            <span className="bg-purple-500/20 text-purple-300 border border-purple-500/40 text-[11px] font-bold px-2.5 py-0.5 rounded-full backdrop-blur-sm">
+            <span className="bg-purple-500/20 text-purple-300 border border-purple-500/40 text-[9px] sm:text-[11px] font-bold px-2 sm:px-2.5 py-0.5 rounded-full backdrop-blur-sm">
               Web Series
             </span>
           ) : (
-            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[11px] font-bold px-2.5 py-0.5 rounded-full backdrop-blur-sm">
+            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[9px] sm:text-[11px] font-bold px-2 sm:px-2.5 py-0.5 rounded-full backdrop-blur-sm">
               Cinema Movie
             </span>
           )}
-          <span className="flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-amber-500/30 text-amber-400 font-extrabold text-xs">
-            <Star className="w-3.5 h-3.5 fill-amber-400" />
+          <span className="flex items-center gap-1 bg-black/60 backdrop-blur-md px-1.5 sm:px-2.5 py-0.5 rounded-full border border-amber-500/30 text-amber-400 font-extrabold text-[10px] sm:text-xs">
+            <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-amber-400" />
             {rating}
           </span>
-          <span className="text-cyan-200/70 text-xs font-semibold px-2 py-0.5 bg-white/5 rounded-full border border-white/5">{year}</span>
+          <span className="text-cyan-200/70 text-[10px] sm:text-xs font-semibold px-1.5 sm:px-2 py-0.5 bg-white/5 rounded-full border border-white/5">{year}</span>
           {runtime && (
-            <span className="text-slate-300 text-xs font-medium px-2 py-0.5 bg-white/5 rounded-full border border-white/5">{runtime}</span>
+            <span className="text-slate-300 text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 bg-white/5 rounded-full border border-white/5 hidden xs:inline">{runtime}</span>
           )}
         </div>
 
         <h1 
-          className="text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-2 leading-tight drop-shadow-[0_4px_18px_rgba(0,242,254,0.45)] transition-transform duration-200"
+          className="text-lg xs:text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-1 sm:mb-2 leading-tight drop-shadow-[0_4px_18px_rgba(0,242,254,0.45)] transition-transform duration-200 line-clamp-1 xs:line-clamp-2"
           style={{ transform: 'translateZ(50px)' }}
         >
           {title}
@@ -270,11 +278,11 @@ export default function HeroBanner({
 
         {genres.length > 0 && (
           <div 
-            className="flex items-center gap-1.5 mb-3 flex-wrap transition-transform duration-200"
+            className="hidden xs:flex items-center gap-1 sm:gap-1.5 mb-1.5 sm:mb-3 flex-wrap transition-transform duration-200"
             style={{ transform: 'translateZ(34px)' }}
           >
-            {genres.slice(0, 4).map((g) => (
-              <span key={g} className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-cyan-950/70 border border-cyan-500/40 text-cyan-300">
+            {genres.slice(0, 3).map((g) => (
+              <span key={g} className="text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-md bg-cyan-950/70 border border-cyan-500/40 text-cyan-300">
                 {g}
               </span>
             ))}
@@ -282,14 +290,14 @@ export default function HeroBanner({
         )}
 
         <p 
-          className="text-xs sm:text-sm text-cyan-100/90 line-clamp-2 sm:line-clamp-3 mb-6 max-w-xl font-medium leading-relaxed drop-shadow transition-transform duration-200"
+          className="text-[11px] sm:text-sm text-cyan-100/90 line-clamp-1 sm:line-clamp-3 mb-2.5 sm:mb-6 max-w-xl font-medium leading-relaxed drop-shadow transition-transform duration-200"
           style={{ transform: 'translateZ(28px)' }}
         >
           {currentItem?.overview}
         </p>
 
         <div 
-          className="flex items-center gap-3.5 flex-wrap transition-transform duration-200"
+          className="flex items-center gap-2 sm:gap-3.5 flex-wrap transition-transform duration-200"
           style={{ transform: 'translateZ(60px)' }}
         >
           <div className="relative group/playbtn">
@@ -299,9 +307,9 @@ export default function HeroBanner({
               shimmerColor="#ffffff"
               shimmerDuration="2.5s"
               background="linear-gradient(135deg, #00f2fe 0%, #0284c7 50%, #2563eb 100%)"
-              className="text-gray-950 font-black text-sm px-8 py-3.5 shadow-[0_0_35px_rgba(0,242,254,0.85)] border-2 border-white/60 hover:scale-105 active:scale-95 transition-all"
+              className="text-gray-950 font-black text-xs sm:text-sm px-4 py-2 sm:px-8 sm:py-3.5 shadow-[0_0_25px_rgba(0,242,254,0.85)] border-2 border-white/60 hover:scale-105 active:scale-95 transition-all"
             >
-              <Play className="w-4 h-4 fill-gray-950 ml-0.5" />
+              <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-gray-950 ml-0.5" />
               <span className="tracking-wide">Watch in 4K</span>
             </ShimmerButton>
           </div>
@@ -312,9 +320,9 @@ export default function HeroBanner({
                 soundFx.playClick();
                 onOpenDetails(currentItem);
               }}
-              className="flex items-center gap-2 px-6 py-3.5 rounded-full text-sm font-bold transition-all border backdrop-blur-xl bg-slate-950/80 border-cyan-400/40 text-cyan-200 hover:text-white hover:bg-cyan-500/20 hover:border-cyan-300 shadow-[0_0_15px_rgba(56,189,248,0.2)] hover:scale-105 active:scale-95 cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-2 sm:px-6 sm:py-3.5 rounded-full text-xs sm:text-sm font-bold transition-all border backdrop-blur-xl bg-slate-950/80 border-cyan-400/40 text-cyan-200 hover:text-white hover:bg-cyan-500/20 hover:border-cyan-300 shadow-[0_0_15px_rgba(56,189,248,0.2)] hover:scale-105 active:scale-95 cursor-pointer"
             >
-              <Info className="w-4 h-4 text-cyan-300 bounce-hover" />
+              <Info className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-300 bounce-hover" />
               <span>Details</span>
             </button>
           )}
@@ -324,13 +332,13 @@ export default function HeroBanner({
               soundFx.playClick();
               onToggleWatchlist(currentItem);
             }}
-            className={`flex items-center gap-2 px-6 py-3.5 rounded-full text-sm font-bold transition-all border backdrop-blur-xl cursor-pointer hover:scale-105 active:scale-95 ${
+            className={`flex items-center gap-1.5 px-3 py-2 sm:px-6 sm:py-3.5 rounded-full text-xs sm:text-sm font-bold transition-all border backdrop-blur-xl cursor-pointer hover:scale-105 active:scale-95 ${
               saved
                 ? 'bg-cyan-500/25 border-cyan-400 text-cyan-200 shadow-[0_0_20px_rgba(56,189,248,0.4)]'
                 : 'bg-slate-950/80 border-cyan-400/30 text-slate-200 hover:text-white hover:bg-cyan-500/20 hover:border-cyan-300'
             }`}
           >
-            {saved ? <Check className="w-4 h-4 text-cyan-400" /> : <Plus className="w-4 h-4 text-cyan-300" />}
+            {saved ? <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400" /> : <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-300" />}
             <span>{saved ? 'Saved' : '+ Watchlist'}</span>
           </button>
         </div>
@@ -338,7 +346,7 @@ export default function HeroBanner({
 
       {/* Carousel Dots & Controls (if more than 1 item) */}
       {list.length > 1 && (
-        <div className="absolute bottom-6 right-6 sm:bottom-10 sm:right-12 z-20 flex items-center gap-2">
+        <div className="hidden xs:flex absolute bottom-3 right-3 sm:bottom-10 sm:right-12 z-20 items-center gap-1.5 sm:gap-2">
           <button
             onClick={() => setCurrentIndex((prev) => (prev - 1 + list.length) % list.length)}
             aria-label="Previous Featured Slide"
