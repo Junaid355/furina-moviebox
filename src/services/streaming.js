@@ -4,35 +4,9 @@
 
 export const SERVERS = [
   {
-    id: 'tgvid',
-    name: '[ 🌸 Server 1 (Ad-Free Cinema) ] TgVid Prime (Ad-Free • Multi-Language / HD)',
-    shortName: '[ 🌸 Server 1 (Ad-Free) ]',
-    badge: 'Ad-Free • Multi-Lang',
-    color: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
-    supportedAudios: ['hindi', 'english', 'sub'],
-    getMovieUrl: (tmdbId, audioMode = 'hindi', isAnime = false) => {
-      const lang = audioMode === 'english' ? 'en' : 'hi';
-      const serverParam = audioMode === 'hindi' ? '&server=hindi' : (audioMode === 'english' ? '&server=english' : '');
-      let url = `https://tgvid.lovable.app/embed/movie/${tmdbId}?color=38bdf8&back=true${serverParam}&lang=${lang}`;
-      if (audioMode === 'sub' || isAnime) {
-        url += '&sub_lang=ja';
-      }
-      return url;
-    },
-    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'hindi', isAnime = false) => {
-      const lang = audioMode === 'english' ? 'en' : 'hi';
-      const serverParam = audioMode === 'hindi' ? '&server=hindi' : (audioMode === 'english' ? '&server=english' : '');
-      let url = `https://tgvid.lovable.app/embed/tv/${tmdbId}/${s}/${e}?color=38bdf8&back=true${serverParam}&lang=${lang}&episodeSelector=false&autoplayNextEp=false`;
-      if (audioMode === 'sub' || isAnime) {
-        url += '&sub_lang=ja';
-      }
-      return url;
-    }
-  },
-  {
     id: 'vidstuck',
-    name: '[ 🇮🇳 Server 2 (Hindi Dub / CC) ] VidStuck Pro (Centaurus • Multi-Dub • 1080p)',
-    shortName: '[ 🇮🇳 Server 2 (Hindi Dub) ]',
+    name: '[ 🇮🇳 Server 1 (High-Speed CDN) ] VidStuck Pro (Centaurus • Multi-Dub • 1080p)',
+    shortName: '[ 🇮🇳 Server 1 (Fast CDN) ]',
     badge: 'Multi-Dub • Centaurus',
     color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
     supportedAudios: ['hindi', 'english', 'sub'],
@@ -46,35 +20,9 @@ export const SERVERS = [
     }
   },
   {
-    id: 'bingr',
-    name: '[ 🌐 Server 3 (Clean Stream) ] Bingr Stream (High Bitrate • Ultra-Light)',
-    shortName: '[ 🌐 Server 3 (Clean Stream) ]',
-    badge: 'High Bitrate • Light',
-    color: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
-    supportedAudios: ['english', 'sub', 'hindi'],
-    getMovieUrl: (tmdbId) => `https://bingr.one/watch/movie/${tmdbId}`,
-    getTvUrl: (tmdbId, s = 1, e = 1) => `https://bingr.one/watch/tv/${tmdbId}/${s}/${e}`
-  },
-  {
-    id: 'zxcstream',
-    name: '[ ⚡ Server 4 (Roxy Stream) ] ZXC Roxy (Fast Streams • Zero Captcha)',
-    shortName: '[ ⚡ Server 4 (Roxy) ]',
-    badge: 'Fast Streams',
-    color: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
-    supportedAudios: ['english', 'sub', 'hindi'],
-    getMovieUrl: (tmdbId, audioMode = 'hindi') => {
-      const lang = audioMode === 'english' ? 'en' : 'hi';
-      return `https://zxcstream.xyz/player/movie/${tmdbId}?dubLang=${lang}&server=0`;
-    },
-    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'hindi') => {
-      const lang = audioMode === 'english' ? 'en' : 'hi';
-      return `https://zxcstream.xyz/player/tv/${tmdbId}/${s}/${e}?dubLang=${lang}&server=0`;
-    }
-  },
-  {
     id: 'vidfast',
-    name: '[ ⚡ Server 5 (4K Ultra Fast) ] VidFast Ultra (Instant AutoPlay • 4K UHD)',
-    shortName: '[ ⚡ Server 5 (4K Ultra) ]',
+    name: '[ ⚡ Server 2 (4K Ultra Fast) ] VidFast Ultra (Instant AutoPlay • 4K UHD)',
+    shortName: '[ ⚡ Server 2 (4K Ultra) ]',
     badge: '4K Ultra Fast',
     color: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
     supportedAudios: ['english', 'sub', 'hindi'],
@@ -83,8 +31,8 @@ export const SERVERS = [
   },
   {
     id: 'nxsha',
-    name: '[ 🎧 Server 6 (Dual Audio) ] NxSha Prime (Clean Ads • Dual Audio / 4K)',
-    shortName: '[ 🎧 Server 6 (Dual Audio) ]',
+    name: '[ 🎧 Server 3 (Dual Audio 4K) ] NxSha Prime (Clean Ads • Dual Audio / 4K)',
+    shortName: '[ 🎧 Server 3 (Dual Audio) ]',
     badge: 'Dual Audio • 4K',
     color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
     supportedAudios: ['hindi', 'english', 'sub'],
@@ -98,9 +46,19 @@ export const SERVERS = [
     }
   },
   {
+    id: 'bingr',
+    name: '[ 🌐 Server 4 (Clean Stream) ] Bingr Stream (High Bitrate • Ultra-Light)',
+    shortName: '[ 🌐 Server 4 (Clean Stream) ]',
+    badge: 'High Bitrate • Light',
+    color: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
+    supportedAudios: ['english', 'sub', 'hindi'],
+    getMovieUrl: (tmdbId) => `https://bingr.one/watch/movie/${tmdbId}`,
+    getTvUrl: (tmdbId, s = 1, e = 1) => `https://bingr.one/watch/tv/${tmdbId}/${s}/${e}`
+  },
+  {
     id: 'twoembed_vip',
-    name: '[ 👑 Server 7 (VIP Stream) ] 2Embed VIP (Direct Playback / High Bitrate)',
-    shortName: '[ 👑 Server 7 (VIP Stream) ]',
+    name: '[ 👑 Server 5 (VIP Stream) ] 2Embed VIP (Direct Playback / High Bitrate)',
+    shortName: '[ 👑 Server 5 (VIP Stream) ]',
     badge: 'VIP Stream',
     color: 'bg-sky-500/20 text-sky-400 border-sky-500/30',
     supportedAudios: ['english', 'sub'],
@@ -108,9 +66,25 @@ export const SERVERS = [
     getTvUrl: (tmdbId, s = 1, e = 1) => `https://www.2embed.cc/embedtv/${tmdbId}&s=${s}&e=${e}`
   },
   {
+    id: 'zxcstream',
+    name: '[ ⚡ Server 6 (Roxy Stream) ] ZXC Roxy (Fast Streams • Zero Captcha)',
+    shortName: '[ ⚡ Server 6 (Roxy) ]',
+    badge: 'Fast Streams',
+    color: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
+    supportedAudios: ['english', 'sub', 'hindi'],
+    getMovieUrl: (tmdbId, audioMode = 'hindi') => {
+      const lang = audioMode === 'english' ? 'en' : 'hi';
+      return `https://zxcstream.xyz/player/movie/${tmdbId}?dubLang=${lang}&server=0`;
+    },
+    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'hindi') => {
+      const lang = audioMode === 'english' ? 'en' : 'hi';
+      return `https://zxcstream.xyz/player/tv/${tmdbId}/${s}/${e}?dubLang=${lang}&server=0`;
+    }
+  },
+  {
     id: 'animeworld_india',
-    name: '[ 🇮🇳 Server 8 (Hindi CDN) ] Cinema Mirror 2 (Verified High-Speed CDN)',
-    shortName: '[ 🇮🇳 Server 8 (Hindi CDN) ]',
+    name: '[ 🇮🇳 Server 7 (Hindi CDN) ] Cinema Mirror 2 (Verified High-Speed CDN)',
+    shortName: '[ 🇮🇳 Server 7 (Hindi CDN) ]',
     badge: 'High-Speed CDN',
     color: 'bg-orange-500/20 text-orange-300 border-orange-500/40',
     supportedAudios: ['hindi', 'english', 'sub'],
@@ -119,8 +93,8 @@ export const SERVERS = [
   },
   {
     id: 'vidlink',
-    name: '[ 🇬🇧 Server 9 (English Dub) ] VidLink Pro (Verified English Dub & Multi-Audio)',
-    shortName: '[ 🇬🇧 Server 9 (English Dub) ]',
+    name: '[ 🇬🇧 Server 8 (English Dub) ] VidLink Pro (Verified English Dub & Multi-Audio)',
+    shortName: '[ 🇬🇧 Server 8 (English Dub) ]',
     badge: 'Multi-Audio / Dub',
     color: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
     supportedAudios: ['english', 'sub'],
@@ -147,8 +121,8 @@ export const SERVERS = [
   },
   {
     id: 'one23embed',
-    name: '[ 🇮🇳 Server 10 (Hindi Dubbed) ] 123Embed (Multi-Audio & Dub Zero-Captcha)',
-    shortName: '[ 🇮🇳 Server 10 (Hindi Dubbed) ]',
+    name: '[ 🇮🇳 Server 9 (Hindi Dubbed) ] 123Embed (Multi-Audio & Dub Zero-Captcha)',
+    shortName: '[ 🇮🇳 Server 9 (Hindi Dubbed) ]',
     badge: 'Multi-Audio 1080p',
     color: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
     supportedAudios: ['hindi', 'english', 'sub'],
@@ -167,8 +141,8 @@ export const SERVERS = [
   },
   {
     id: 'smashy',
-    name: '[ 🎧 Server 11 (Multi-Language) ] SmashyStream (Multi-Language & Hindi Audio)',
-    shortName: '[ 🎧 Server 11 (Multi-Language) ]',
+    name: '[ 🎧 Server 10 (Multi-Language) ] SmashyStream (Multi-Language & Hindi Audio)',
+    shortName: '[ 🎧 Server 10 (Multi-Language) ]',
     badge: 'Multi-Language',
     color: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
     supportedAudios: ['hindi', 'english', 'sub'],
@@ -177,13 +151,39 @@ export const SERVERS = [
   },
   {
     id: 'autoembed',
-    name: '[ 🎬 Server 12 (AutoEmbed) ] AutoEmbed Prime (Instant Play / 1080p HD)',
-    shortName: '[ 🎬 Server 12 (AutoEmbed) ]',
+    name: '[ 🎬 Server 11 (AutoEmbed) ] AutoEmbed Prime (Instant Play / 1080p HD)',
+    shortName: '[ 🎬 Server 11 (AutoEmbed) ]',
     badge: '1080p HD',
     color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
     supportedAudios: ['english', 'sub', 'hindi'],
     getMovieUrl: (tmdbId) => `https://autoembed.co/movie/tmdb/${tmdbId}`,
     getTvUrl: (tmdbId, s = 1, e = 1) => `https://autoembed.co/tv/tmdb/${tmdbId}-${s}-${e}`
+  },
+  {
+    id: 'tgvid',
+    name: '[ 🌸 Server 12 (Backup Mirror) ] TgVid Prime (Ad-Free • Multi-Language)',
+    shortName: '[ 🌸 Server 12 (Backup) ]',
+    badge: 'Backup Mirror',
+    color: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
+    supportedAudios: ['hindi', 'english', 'sub'],
+    getMovieUrl: (tmdbId, audioMode = 'hindi', isAnime = false) => {
+      const lang = audioMode === 'english' ? 'en' : 'hi';
+      const serverParam = audioMode === 'hindi' ? '&server=hindi' : (audioMode === 'english' ? '&server=english' : '');
+      let url = `https://tgvid.lovable.app/embed/movie/${tmdbId}?color=38bdf8&back=true${serverParam}&lang=${lang}`;
+      if (audioMode === 'sub' || isAnime) {
+        url += '&sub_lang=ja';
+      }
+      return url;
+    },
+    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'hindi', isAnime = false) => {
+      const lang = audioMode === 'english' ? 'en' : 'hi';
+      const serverParam = audioMode === 'hindi' ? '&server=hindi' : (audioMode === 'english' ? '&server=english' : '');
+      let url = `https://tgvid.lovable.app/embed/tv/${tmdbId}/${s}/${e}?color=38bdf8&back=true${serverParam}&lang=${lang}&episodeSelector=false&autoplayNextEp=false`;
+      if (audioMode === 'sub' || isAnime) {
+        url += '&sub_lang=ja';
+      }
+      return url;
+    }
   }
 ];
 

@@ -8,17 +8,17 @@
 //  2 = player shell rendered (source picker / loading UI) but slower or ad-heavier
 //  3 = blank frame or embed-side error in testing
 export const SERVER_PROFILES = {
-  tgvid:             { tier: 1, badge: 'Ad-Free • Multi-Lang', adLevel: 'Clean', hindi: true },
-  vidstuck:          { tier: 1, badge: 'Multi-Dub • Centaurus', adLevel: 'Clean', hindi: true },
-  bingr:             { tier: 1, badge: 'High Bitrate • Light', adLevel: 'Clean', hindi: false },
-  zxcstream:         { tier: 1, badge: 'Fast Stream • Roxy', adLevel: 'Clean', hindi: true },
-  vidfast:           { tier: 1, badge: '4K Ultra • AutoPlay', adLevel: 'Clean', hindi: false },
-  nxsha:             { tier: 1, badge: 'Dual Audio • 4K', adLevel: 'Clean', hindi: true },
-  twoembed_vip:      { tier: 2, badge: 'VIP Cinema Stream', adLevel: 'Low', hindi: false },
-  animeworld_india:  { tier: 2, badge: 'High-Speed CDN', adLevel: 'Low', hindi: true },
+  vidstuck:          { tier: 1, badge: 'Multi-Dub • Centaurus (High-Speed)', adLevel: 'Clean', hindi: true },
+  nxsha:             { tier: 1, badge: 'Dual Audio • 4K (Ultra Fast)', adLevel: 'Clean', hindi: true },
+  vidfast:           { tier: 1, badge: '4K Ultra Fast (Instant Play)', adLevel: 'Clean', hindi: false },
+  bingr:             { tier: 1, badge: 'High Bitrate • Clean CDN', adLevel: 'Clean', hindi: false },
+  twoembed_vip:      { tier: 1, badge: 'VIP Cinema Stream (Direct CDN)', adLevel: 'Low', hindi: false },
+  animeworld_india:  { tier: 2, badge: 'High-Speed CDN Mirror', adLevel: 'Low', hindi: true },
   vidlink:           { tier: 2, badge: 'Multi-Audio Pro', adLevel: 'Medium', hindi: false },
+  zxcstream:         { tier: 2, badge: 'Fast Stream • Roxy', adLevel: 'Clean', hindi: true },
   one23embed:        { tier: 2, badge: 'Multi-Source 1080p', adLevel: 'Medium', hindi: true },
   smashy:            { tier: 2, badge: 'Auto Source Hunt', adLevel: 'Medium', hindi: true },
+  tgvid:             { tier: 3, badge: 'Backup Mirror (Slow / Unstable)', adLevel: 'Clean', hindi: true },
   autoembed:         { tier: 3, badge: 'Fallback Mirror', adLevel: 'Medium', hindi: true }
 };
 
@@ -86,17 +86,17 @@ async function probeOne(server, tmdbId) {
   try {
     url = server.getMovieUrl(tmdbId || 299534, 'english', false);
   } catch (e) {
-    return { ok: false, ms: 0 };
+    return { ok: false, ms: 9999 };
   }
   const origin = new URL(url).origin + '/';
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 4000);
+  const timer = setTimeout(() => ctrl.abort(), 2500);
   const start = performance.now();
   try {
     await fetch(origin, { mode: 'no-cors', cache: 'no-store', signal: ctrl.signal, credentials: 'omit' });
     return { ok: true, ms: Math.round(performance.now() - start) };
   } catch (e) {
-    return { ok: false, ms: Math.round(performance.now() - start) };
+    return { ok: false, ms: 9999 };
   } finally {
     clearTimeout(timer);
   }

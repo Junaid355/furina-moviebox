@@ -39,7 +39,8 @@ import {
   CURATED_HOLLYWOOD_BLOCKBUSTERS,
   CURATED_BOLLYWOOD_BLOCKBUSTERS,
   CURATED_HINDI_DUBBED_ANIME,
-  CURATED_HOLLYWOOD_HINDI_DUBS
+  CURATED_HOLLYWOOD_HINDI_DUBS,
+  FALLBACK_MEDIA
 } from './services/tmdb';
 import { SERVERS } from './services/streaming';
 import { 
@@ -73,9 +74,20 @@ export default function App() {
   const [kdramaFilter, setKdramaFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
-  const [items, setItems] = useState([]);
-  const [heroItem, setHeroItem] = useState(null);
-  const [loading, setLoading] = useState(true);
+  
+  // Instant Cache & Hydration: Never show blank/stuck spinner on load
+  const [items, setItems] = useState(() => {
+    try {
+      const cached = localStorage.getItem('furina_cached_trending');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return deduplicateMedia(parsed);
+      }
+    } catch (e) {}
+    return deduplicateMedia([...FALLBACK_MEDIA, ...CURATED_HOLLYWOOD_BLOCKBUSTERS]);
+  });
+  const [heroItem, setHeroItem] = useState(() => FALLBACK_MEDIA[0] || null);
+  const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
@@ -231,11 +243,11 @@ export default function App() {
     try {
       const saved = localStorage.getItem('furina_moviebox_server');
       const validIds = SERVERS.map((s) => s.id);
-      if (saved && validIds.includes(saved) && saved !== 'vidlink_hindi' && saved !== 'smashystream' && saved !== 'autoembed') {
+      if (saved && validIds.includes(saved) && saved !== 'vidlink_hindi' && saved !== 'smashystream' && saved !== 'autoembed' && saved !== 'tgvid') {
         return saved;
       }
     } catch (e) {}
-    return 'tgvid';
+    return 'vidstuck';
   });
 
   useEffect(() => {
@@ -342,11 +354,15 @@ export default function App() {
     return [];
   };
 
-  // Initial load when category or search changes (with stale-request protection)
+  // Initial load when category or search changes (with stale-request protection & SWR)
   useEffect(() => {
     const currentSeq = ++requestSeqRef.current;
     setPage(1);
-    setLoading(true);
+    
+    // Only show full loading shimmer if we have zero items for this view
+    if (activeCategory !== 'trending' || debouncedQuery) {
+      setLoading(true);
+    }
     setError(null);
 
     if (activeCategory === 'watchlist') {
@@ -370,12 +386,17 @@ export default function App() {
         // Discard stale responses from previously triggered fetches
         if (currentSeq !== requestSeqRef.current) return;
         const uniqueResults = deduplicateMedia(results);
-        setItems(uniqueResults);
         if (uniqueResults && uniqueResults.length > 0) {
+          setItems(uniqueResults);
           setHeroItem(uniqueResults[0]);
           setError(null);
+          // Cache top trending titles for instant subsequent loading
+          if (activeCategory === 'trending' && !debouncedQuery) {
+            try {
+              localStorage.setItem('furina_cached_trending', JSON.stringify(uniqueResults.slice(0, 40)));
+            } catch (e) {}
+          }
         } else {
-          setHeroItem(null);
           // If no query and not watchlist/studio and returned empty array, mark error for retry
           if (!debouncedQuery && activeCategory !== 'watchlist' && activeCategory !== 'studio') {
             setError("Couldn't load movies");
@@ -385,7 +406,9 @@ export default function App() {
       })
       .catch(() => {
         if (currentSeq !== requestSeqRef.current) return;
-        setError("Couldn't load movies");
+        if (items.length === 0) {
+          setError("Couldn't load movies");
+        }
         setLoading(false);
       });
   }, [activeCategory, debouncedQuery, animeAudioFilter, movieFilter, kdramaFilter, includeMature, isMasterMode, watchlist.length, studioVersion, retryCount]);
@@ -516,9 +539,9 @@ export default function App() {
 
         {/* Magic UI Infinite Marquee for Trending Quick-Picks */}
         {items && items.length > 0 && (
-          <div className="mb-8 overflow-hidden rounded-2xl bg-[#060e24]/75 border border-cyan-500/25 py-2.5 backdrop-blur-xl shadow-lg">
-            <div className="flex items-center gap-2 px-4 mb-1.5 text-[11px] font-black uppercase tracking-wider text-cyan-300">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-spin" />
+          <div className="mb-4 sm:mb-8 overflow-hidden rounded-xl sm:rounded-2xl bg-[#060e24]/75 border border-cyan-500/25 py-1.5 sm:py-2.5 backdrop-blur-xl shadow-lg">
+            <div className="flex items-center gap-1.5 px-3 sm:px-4 mb-1 text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-cyan-300">
+              <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-cyan-400 animate-spin" />
               <span>Fontaine 4K Live Broadcasts:</span>
             </div>
             <Marquee pauseOnHover className="[--duration:32s]">
@@ -529,11 +552,11 @@ export default function App() {
                     soundFx.playClick();
                     setActiveMedia(m);
                   }}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#081534] border border-cyan-500/30 hover:border-cyan-400 text-xs text-white font-semibold cursor-pointer transition hover:scale-105 mx-1"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#081534] border border-cyan-500/30 hover:border-cyan-400 text-[11px] sm:text-xs text-white font-semibold cursor-pointer transition hover:scale-105 mx-1"
                 >
-                  <span className="text-[10px] text-cyan-400">▶</span>
-                  <span className="truncate max-w-[160px]">{m.title || m.name}</span>
-                  <span className="badge-4k-uhd text-[8px] px-1 py-0.2 rounded font-black">4K</span>
+                  <span className="text-[9px] text-cyan-400">▶</span>
+                  <span className="truncate max-w-[130px] sm:max-w-[160px]">{m.title || m.name}</span>
+                  <span className="badge-4k-uhd text-[7.5px] px-1 py-0.2 rounded font-black">4K</span>
                 </div>
               ))}
             </Marquee>
@@ -542,17 +565,17 @@ export default function App() {
 
         {/* Continue Watching Section */}
         {!searchQuery.trim() && activeCategory === 'trending' && continueWatching && continueWatching.length > 0 && (
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-cyan-400" />
-                <h3 className="text-base sm:text-lg font-black text-white">Continue Watching</h3>
+          <div className="mb-4 sm:mb-8">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400" />
+                <h3 className="text-sm sm:text-lg font-black text-white">Continue Watching</h3>
               </div>
-              <span className="text-[11px] text-cyan-200/60 font-medium">
+              <span className="text-[10px] sm:text-[11px] text-cyan-200/60 font-medium">
                 {continueWatching.length} in progress
               </span>
             </div>
-            <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
+            <div className="flex gap-2.5 sm:gap-3 overflow-x-auto pb-2 no-scrollbar">
               {continueWatching.map((cw) => {
                 const cwTitle = cw.title || cw.name || 'Untitled';
                 const poster = cw.poster_path ? (cw.poster_path.startsWith('http') ? cw.poster_path : `https://image.tmdb.org/t/p/w500${cw.poster_path}`) : './icon-512.png';
@@ -560,7 +583,7 @@ export default function App() {
                   <div
                     key={cw.id}
                     onClick={() => setActiveMedia(cw)}
-                    className="relative flex-shrink-0 w-28 xs:w-36 sm:w-44 bg-[#081534] border border-cyan-500/30 hover:border-cyan-400 rounded-xl overflow-hidden cursor-pointer group transition shadow-md"
+                    className="relative flex-shrink-0 w-24 xs:w-32 sm:w-44 bg-[#081534] border border-cyan-500/30 hover:border-cyan-400 rounded-xl overflow-hidden cursor-pointer group transition shadow-md"
                   >
                     <div className="aspect-[16/10] w-full bg-[#050c20] relative overflow-hidden">
                       <img
@@ -570,22 +593,22 @@ export default function App() {
                         onError={(e) => { e.currentTarget.src = poster; }}
                       />
                       <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition flex items-center justify-center">
-                        <div className="w-8 h-8 rounded-full bg-cyan-400 text-gray-950 flex items-center justify-center shadow-md transform scale-90 group-hover:scale-100 transition">
-                          <Play className="w-4 h-4 fill-gray-950 ml-0.5" />
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-cyan-400 text-gray-950 flex items-center justify-center shadow-md transform scale-90 group-hover:scale-100 transition">
+                          <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-gray-950 ml-0.5" />
                         </div>
                       </div>
                       <button
                         onClick={(e) => removeContinueWatching(cw.id, e)}
                         title="Remove from Continue Watching"
-                        className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-black/70 hover:bg-rose-600 text-white flex items-center justify-center text-xs transition"
+                        className="absolute top-1 right-1 sm:top-1.5 sm:right-1.5 w-4.5 h-4.5 sm:w-5 sm:h-5 rounded-full bg-black/70 hover:bg-rose-600 text-white flex items-center justify-center text-xs transition"
                       >
-                        <X className="w-3 h-3" />
+                        <X className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                       </button>
                     </div>
-                    <div className="p-2">
-                      <h4 className="font-bold text-xs text-white truncate">{cwTitle}</h4>
-                      <div className="flex items-center justify-between text-[10px] text-cyan-300/80 mt-1">
-                        <span className="font-bold bg-cyan-500/20 px-1.5 py-0.5 rounded text-cyan-300">
+                    <div className="p-1.5 sm:p-2">
+                      <h4 className="font-bold text-[11px] sm:text-xs text-white truncate">{cwTitle}</h4>
+                      <div className="flex items-center justify-between text-[9px] sm:text-[10px] text-cyan-300/80 mt-0.5 sm:mt-1">
+                        <span className="font-bold bg-cyan-500/20 px-1 sm:px-1.5 py-0.2 sm:py-0.5 rounded text-cyan-300">
                           S{cw.season || 1}:E{cw.episode || 1}
                         </span>
                         <span className="text-slate-400">Resume ▶</span>
@@ -599,40 +622,41 @@ export default function App() {
         )}
 
         {/* Section Header & Quick Filter Pills */}
-        <div className="mb-6 space-y-3">
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <div className="flex items-center gap-2.5">
-              <span className={`w-3 h-3 rounded-full ${activeCategory === 'mature' ? 'bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.9)]' : 'bg-cyan-400 shadow-[0_0_12px_rgba(56,189,248,0.9)]'}`} />
-              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white capitalize drop-shadow-sm">
-                {searchQuery.trim()
-                  ? `Results for "${searchQuery.trim()}"`
-                  : activeCategory === 'trending'
-                  ? '🔥 Trending Worldwide (Movies & Series)'
-                  : activeCategory === 'new_movies'
-                  ? '✨ New Movie Releases (In Theaters & 4K Streaming)'
-                  : activeCategory === 'hollywood'
-                  ? '🎬 Hollywood Cinema (English)'
-                  : activeCategory === 'hindi'
-                  ? '🇮🇳 Bollywood & Hindi Dubbed Blockbusters'
-                  : activeCategory === 'series'
-                  ? '📺 Top Global Web Series'
-                  : activeCategory === 'kdrama'
-                  ? '🇰🇷 Top Korean Dramas (K-Drama)'
-                  : activeCategory === 'horror'
-                  ? '👻 Horror & Supernatural Thrillers'
-                  : activeCategory === 'anime'
-                  ? '🌸 Anime & Japanese Animations (Sub/Dub)'
-                  : activeCategory === 'ecchi_anime'
-                  ? '🔞 Hanime Vault (Exclusive Uncut Collection)'
-                  : activeCategory === 'mature'
-                  ? '🎬 Master Cinema Vault (Uncut Cinema)'
-                  : '❤️ My Saved Watchlist'}
-              </h1>
+        {(Boolean(searchQuery.trim()) || activeCategory !== 'trending' || globalMediaFilter !== 'all') && (
+          <div className="mb-4 sm:mb-6 space-y-2 sm:space-y-3">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2 sm:gap-2.5">
+                <span className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full ${activeCategory === 'mature' ? 'bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.9)]' : 'bg-cyan-400 shadow-[0_0_12px_rgba(56,189,248,0.9)]'}`} />
+                <h1 className="text-base sm:text-xl font-black tracking-tight text-white capitalize drop-shadow-sm">
+                  {searchQuery.trim()
+                    ? `Results for "${searchQuery.trim()}"`
+                    : activeCategory === 'trending'
+                    ? '🔥 Trending Worldwide (Movies & Series)'
+                    : activeCategory === 'new_movies'
+                    ? '✨ New Movie Releases (In Theaters & 4K Streaming)'
+                    : activeCategory === 'hollywood'
+                    ? '🎬 Hollywood Cinema (English)'
+                    : activeCategory === 'hindi'
+                    ? '🇮🇳 Bollywood & Hindi Dubbed Blockbusters'
+                    : activeCategory === 'series'
+                    ? '📺 Top Global Web Series'
+                    : activeCategory === 'kdrama'
+                    ? '🇰🇷 Top Korean Dramas (K-Drama)'
+                    : activeCategory === 'horror'
+                    ? '👻 Horror & Supernatural Thrillers'
+                    : activeCategory === 'anime'
+                    ? '🌸 Anime & Japanese Animations (Sub/Dub)'
+                    : activeCategory === 'ecchi_anime'
+                    ? '🔞 Hanime Vault (Exclusive Uncut Collection)'
+                    : activeCategory === 'mature'
+                    ? '🎬 Master Cinema Vault (Uncut Cinema)'
+                    : '❤️ My Saved Watchlist'}
+                </h1>
+              </div>
+              <span className="text-[10px] sm:text-xs text-cyan-300/60 font-semibold bg-[#0a132b] px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full border border-cyan-500/15">
+                {items.length} titles loaded (Page {page})
+              </span>
             </div>
-            <span className="text-xs text-cyan-300/60 font-semibold bg-[#0a132b] px-3 py-1 rounded-full border border-cyan-500/15">
-              {items.length} titles loaded (Page {page})
-            </span>
-          </div>
 
           {/* Quick Search & Filter Suggestions Chips */}
           {searchQuery.trim() && (
@@ -859,6 +883,7 @@ export default function App() {
             </div>
           )}
         </div>
+      )}
 
         {/* Universal Multi-Language & Media Filter Bar (Requirement 9) */}
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 text-xs mb-4">
@@ -1318,12 +1343,12 @@ export default function App() {
             <button
               key={tab.id}
               onClick={() => { setActiveCategory(tab.id); setSearchQuery(''); }}
-              className={`flex flex-col items-center gap-0.5 sm:gap-1 transition active:scale-95 ${
+              className={`flex flex-col items-center justify-center min-w-[42px] py-0.5 gap-0.5 transition active:scale-95 touch-manipulation ${
                 isActive ? 'text-cyan-400 font-bold scale-105' : 'text-cyan-200/50 hover:text-white'
               }`}
             >
-              <Icon className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
-              <span className="text-[8.5px] sm:text-[10px] tracking-tight">{tab.label}</span>
+              <Icon className="w-4 h-4 shrink-0" />
+              <span className="text-[9px] font-medium tracking-tight truncate max-w-[48px]">{tab.label}</span>
             </button>
           );
         })}
@@ -1331,12 +1356,12 @@ export default function App() {
         {/* Mobile Settings Button - Secret code hidden */}
         <button
           onClick={() => setIsSettingsOpen(true)}
-          className={`flex flex-col items-center gap-0.5 sm:gap-1 transition active:scale-95 ${
+          className={`flex flex-col items-center justify-center min-w-[42px] py-0.5 gap-0.5 transition active:scale-95 touch-manipulation ${
             isMasterMode ? 'text-emerald-400 font-bold' : 'text-cyan-200/50 hover:text-white'
           }`}
         >
-          {isMasterMode ? <Shield className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-emerald-400" /> : <Settings className="w-3.5 h-3.5 sm:w-5 sm:h-5" />}
-          <span className="text-[8.5px] sm:text-[10px] tracking-tight">{isMasterMode ? 'VIP' : 'Settings'}</span>
+          {isMasterMode ? <Shield className="w-4 h-4 shrink-0 text-emerald-400" /> : <Settings className="w-4 h-4 shrink-0" />}
+          <span className="text-[9px] font-medium tracking-tight">{isMasterMode ? 'VIP' : 'Settings'}</span>
         </button>
       </nav>
     </div>

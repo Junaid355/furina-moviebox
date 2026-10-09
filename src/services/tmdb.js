@@ -62,7 +62,7 @@ export function deduplicateMedia(items) {
 
 // Curated blockbusters (Hindi, English, Web Series) as immediate backup
 
-const FALLBACK_MEDIA = [
+export const FALLBACK_MEDIA = [
 
   {
 

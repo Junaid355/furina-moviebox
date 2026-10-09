@@ -60,11 +60,18 @@ export const SparklesCore = ({
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
 
-    const render = () => {
+    let lastSparkleTime = 0;
+    const FRAME_INTERVAL = 33;
+
+    const render = (timestamp) => {
+      animationFrameId = requestAnimationFrame(render);
       if (typeof document !== 'undefined' && (document.hidden || isScrolling)) {
-        animationFrameId = requestAnimationFrame(render);
         return;
       }
+      if (timestamp - lastSparkleTime < FRAME_INTERVAL) {
+        return;
+      }
+      lastSparkleTime = timestamp;
       ctx.clearRect(0, 0, width, height);
 
       particles.forEach((p) => {
@@ -85,11 +92,9 @@ export const SparklesCore = ({
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fill();
       });
-
-      animationFrameId = requestAnimationFrame(render);
     };
 
-    render();
+    render(performance.now());
 
     return () => {
       window.removeEventListener("resize", handleResize);

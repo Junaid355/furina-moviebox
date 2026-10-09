@@ -361,7 +361,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     setIframeLoading(true);
     const timer = setTimeout(() => {
       setIframeLoading(false);
-    }, 2200);
+    }, 1500);
     return () => clearTimeout(timer);
   }, [selectedServer?.id, season, episode, audioMode, reloadKey]);
 
@@ -391,7 +391,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   // AdBlock / Guide States
   const [showUBlockGuide, setShowUBlockGuide] = useState(false);
   const [aiBoostMode, setAiBoostMode] = useState(() => {
-    return localStorage.getItem('furina_ai_boost') || '4k';
+    return localStorage.getItem('furina_ai_boost') || 'off';
   });
   const [aiBoostToast, setAiBoostToast] = useState(null);
   const [subtitleToast, setSubtitleToast] = useState(null);
@@ -585,15 +585,15 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const AI_BOOST_STYLES = {
     off: {},
     '4k': {
-      filter: 'contrast(1.09) saturate(1.14) brightness(1.02) drop-shadow(0 0 1px rgba(0,0,0,0.5))',
+      filter: 'contrast(1.05) saturate(1.08) brightness(1.01)',
       transition: 'filter 0.3s ease'
     },
     hdr: {
-      filter: 'contrast(1.18) saturate(1.28) brightness(1.04)',
+      filter: 'contrast(1.12) saturate(1.18) brightness(1.02)',
       transition: 'filter 0.3s ease'
     },
     night: {
-      filter: 'brightness(1.12) contrast(1.08) saturate(1.08)',
+      filter: 'brightness(1.10) contrast(1.05) saturate(1.05)',
       transition: 'filter 0.3s ease'
     }
   };
@@ -1568,9 +1568,8 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
           {/* ========================================================================= */}
           <div 
             className={`relative w-full bg-black flex items-center justify-center overflow-hidden ${
-              isFullscreen ? 'w-full h-full flex-1 max-w-full max-h-full' : 'w-full flex-1 min-h-[460px] sm:min-h-[580px] md:min-h-[660px] lg:min-h-[740px]'
+              isFullscreen ? 'w-full h-full flex-1 max-w-full max-h-full' : 'w-full flex-1 aspect-video sm:aspect-auto sm:min-h-[500px] md:min-h-[600px] lg:min-h-[720px]'
             }`}
-            style={AI_BOOST_STYLES[aiBoostMode] || {}}
           >
             {/* CASE 0: Future Unreleased Theatrical Release -> CLEAN THEATRICAL CARD */}
             {isFutureRelease ? (
@@ -1951,19 +1950,20 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   </div>
                 )}
 
-                {/* Floating Quick Mirror Switcher (Top Right of Player Container - works in windowed & fullscreen) */}
-                <div className="absolute top-2.5 right-2.5 z-30 flex items-center gap-1.5 bg-slate-950/80 backdrop-blur-md px-2.5 py-1 rounded-lg border border-cyan-500/30 text-white shadow-xl pointer-events-auto">
-                  <span className="text-[10px] text-cyan-300 font-mono hidden sm:inline">
-                    {currentServer.shortName}
+                {/* Floating Quick Mirror Switcher & Buffering Turbo-Rescue */}
+                <div className="absolute top-2.5 right-2.5 z-30 flex items-center gap-1.5 bg-slate-950/90 backdrop-blur-md px-2.5 py-1 rounded-xl border border-cyan-500/40 text-white shadow-2xl pointer-events-auto">
+                  <span className="text-[10px] text-cyan-300 font-bold hidden sm:flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping inline-block" />
+                    <span>{currentServer.shortName}</span>
                   </span>
                   <button
                     type="button"
                     onClick={handleNotPlaying}
-                    className="px-2 py-0.5 rounded bg-rose-500/25 hover:bg-rose-500/40 text-rose-200 border border-rose-400/50 text-[10px] font-bold flex items-center gap-1 transition cursor-pointer active:scale-95 shadow-sm"
-                    title="If video is stuck or buffering, click to immediately switch to next mirror"
+                    className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-rose-600/90 via-amber-600/90 to-cyan-600/90 hover:from-rose-500 hover:to-cyan-500 text-white border border-cyan-400/50 text-[10px] sm:text-[11px] font-black flex items-center gap-1.5 transition cursor-pointer active:scale-95 shadow-[0_0_15px_rgba(244,63,94,0.4)]"
+                    title="Buffering or slow stream? 1-Tap instant switch to fastest low-latency mirror!"
                   >
-                    <RefreshCw className="w-2.5 h-2.5" />
-                    <span>Next Server</span>
+                    <Zap className="w-3 h-3 text-amber-300 animate-bounce" />
+                    <span>Buffering? Fast Switch ⚡</span>
                   </button>
                 </div>
 
@@ -1987,6 +1987,14 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                     <span className="text-[11px] text-cyan-200/70 font-medium mt-1">
                       Furina is preparing your Fontaine Premiere ✨
                     </span>
+                    <button
+                      type="button"
+                      onClick={handleNotPlaying}
+                      className="mt-3 pointer-events-auto px-3.5 py-1 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-gray-950 font-black text-xs shadow-lg transition transform hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Zap className="w-3.5 h-3.5 text-amber-300" />
+                      <span>Slow CDN? Instant Turbo Switch ⚡</span>
+                    </button>
                   </div>
                 )}
                 <iframe
@@ -2000,6 +2008,9 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                       ? 'w-full h-full aspect-video max-w-[calc(100vh*16/9)] max-h-[calc(100vw*9/16)] shadow-2xl' 
                       : 'w-full h-full'
                   }`}
+                  loading="eager"
+                  importance="high"
+                  referrerPolicy="no-referrer-when-downgrade"
                   sandbox={adShieldActive && shieldMode === 'strict' ? "allow-scripts allow-same-origin allow-forms allow-presentation" : undefined}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
                   allowFullScreen

@@ -47,13 +47,19 @@ export const BackgroundBeams = ({ className = "" }) => {
     }));
 
     let time = 0;
-    const render = () => {
+    let lastRenderTime = 0;
+    const FRAME_INTERVAL = 33; // 30 FPS throttle saves 50% GPU load on PC
+
+    const render = (timestamp) => {
+      animationFrameId = requestAnimationFrame(render);
       if (typeof document !== 'undefined' && (document.hidden || document.body.classList.contains('furina-player-active') || isScrolling)) {
-        // Sleep animation while scrolling or modal/player is active to keep 60fps buttery smooth
-        animationFrameId = requestAnimationFrame(render);
         return;
       }
-      time += 0.012;
+      if (timestamp - lastRenderTime < FRAME_INTERVAL) {
+        return;
+      }
+      lastRenderTime = timestamp;
+      time += 0.024;
       ctx.clearRect(0, 0, width, height);
 
       // 1. Radiant Fontaine Aurora & Theatrical Hydro Light Rays

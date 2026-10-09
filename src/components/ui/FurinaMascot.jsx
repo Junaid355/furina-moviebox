@@ -43,7 +43,7 @@ export const FurinaMascot = ({ onOpenSearch }) => {
           setIsMinimized(false);
           soundFx.playWaterDrop();
         }}
-        className="fixed bottom-4 right-4 z-40 p-2.5 rounded-full bg-[#040d28]/95 border-2 border-cyan-400/60 shadow-[0_0_25px_rgba(0,242,254,0.6)] backdrop-blur-md flex items-center gap-2 text-cyan-300 hover:scale-105 transition cursor-pointer"
+        className="fixed bottom-6 right-6 z-40 hidden md:flex p-2.5 rounded-full bg-[#040d28]/95 border-2 border-cyan-400/60 shadow-[0_0_25px_rgba(0,242,254,0.6)] backdrop-blur-md items-center gap-2 text-cyan-300 hover:scale-105 transition cursor-pointer"
         title="Open Furina Mascot"
       >
         <img
@@ -59,7 +59,7 @@ export const FurinaMascot = ({ onOpenSearch }) => {
   return (
     <aside 
       aria-label="Furina Chibi Mascot Companion"
-      className="fixed bottom-20 right-3 md:bottom-6 md:right-6 z-40 flex flex-col items-end pointer-events-none select-none"
+      className="fixed bottom-6 right-6 z-40 hidden md:flex flex-col items-end pointer-events-none select-none"
     >
       {/* Floating Hearts */}
       {hearts.map((h) => (
