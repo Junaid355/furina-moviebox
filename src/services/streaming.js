@@ -34,13 +34,13 @@ export const SERVERS = [
     supportedAudios: ['hindi', 'english', 'sub'],
     getMovieUrl: (tmdbId) => {
       const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '533535';
-      return `https://player.autoembed.cc/embed/movie/${cleanId}`;
+      return `https://player.autoembed.co/embed/movie/${cleanId}`;
     },
     getTvUrl: (tmdbId, s = 1, e = 1) => {
       const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '66732';
       const seasonNum = Math.max(1, Number(s) || 1);
       const epNum = Math.max(1, Number(e) || 1);
-      return `https://player.autoembed.cc/embed/tv/${cleanId}/${seasonNum}/${epNum}`;
+      return `https://player.autoembed.co/embed/tv/${cleanId}/${seasonNum}/${epNum}`;
     }
   },
   {
@@ -269,6 +269,7 @@ export const SERVERS = [
   },
   {
     id: 'vidsrc_su',
+    aliasIds: ['vidsrc_4k', 'vidsrc'],
     name: '[ ⚡ Server 13 (VidSrc Pro) ] VidSrc Cloud (4K Ultra • Direct Stream)',
     shortName: '[ ⚡ Server 13 (VidSrc Pro) ]',
     badge: 'VidSrc Cloud • 4K',
@@ -330,12 +331,21 @@ export const SERVERS = [
   }
 ];
 
+const KNOWN_TV_SERIES_IDS = new Set([
+  '66732', '63174', '94997', '108978', '119051', '71446', '71912', '76479', 
+  '100088', '106379', '84958', '125988', '70523', '110316', '111110', '82452', 
+  '204343', '81356', '96677', '31910', '46260', '12609', '12971', '95479', 
+  '85937', '127532', '1429', '37854', '30984', '13916', '45952', '31911', 
+  '114410', '65930', '73223', '61374', '45782', '120089', '209867', '65733', 
+  '60572', '80885', '226688', '65739', '42912', '298321'
+]);
+
 export function getStreamUrl(server, tmdbId, type = 'movie', season = 1, episode = 1, audioMode = 'hindi', isAnime = false, subLang = 'off') {
   if (!server) {
     server = SERVERS[0];
   }
   const cleanId = String(tmdbId || '').replace(/[^0-9]/g, '');
-  const isTv = type === 'tv' || type === 'series';
+  const isTv = type === 'tv' || type === 'series' || KNOWN_TV_SERIES_IDS.has(cleanId);
   const s = Math.max(1, Number(season) || 1);
   const e = Math.max(1, Number(episode) || 1);
 

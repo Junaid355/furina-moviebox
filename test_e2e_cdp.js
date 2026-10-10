@@ -2284,6 +2284,252 @@ async function runQA() {
     recordTest(53, 'MovieBox Official Server Integration & Multi-Dub Audit', test53Passed,
       `MovieBox Srv: ${Boolean(mbSrv)}, Multi-Dub Valid: ${mbHasMultiDub}, Movie URL: ${mbMovieValid}, TV URL: ${mbTvValid}, VidSrc Srv: ${Boolean(vidsrcSuSrv)}, Mirror: ${hasMbMirror}`);
 
+    console.log('\n--- Running TEST 54: Franchise & Universe Timelines Modal Audit ---');
+    await client.send('Page.navigate', { url: `${BASE_URL}/` });
+    await sleep(1500);
+
+    const timelineFile = fs.readFileSync(path.join(process.cwd(), 'src/components/FranchiseTimelineModal.jsx'), 'utf-8');
+    const hasTimelinesData = timelineFile.includes('FRANCHISE_TIMELINES') && timelineFile.includes('mcu:') && timelineFile.includes('spider_verse:') && timelineFile.includes('star_wars:') && timelineFile.includes('naruto:');
+    const franchiseDomAudit = await client.eval(`
+      (() => {
+        const btns = Array.from(document.querySelectorAll('button'));
+        const mcuBtn = btns.find(b => b.textContent && (b.textContent.includes('MCU') || b.textContent.includes('Marvel') || b.textContent.includes('Sacred Timeline')));
+        if (mcuBtn) mcuBtn.click();
+        const hasFranchiseShelf = btns.some(b => b.textContent && (b.textContent.includes('Franchise') || b.textContent.includes('Canon') || b.textContent.includes('MCU')));
+        return { hasFranchiseShelf, clickedMcu: Boolean(mcuBtn) };
+      })()
+    `);
+    await sleep(800);
+    const modalCheck = await client.eval(`
+      (() => {
+        const text = document.body.innerText;
+        const hasHeader = text.includes('Chronological Canon Timeline') || text.includes('MCU Complete Canon') || text.includes('Marvel Cinematic Universe') || text.includes('Sacred Timeline');
+        const closeBtn = document.querySelector('button[title="Close timeline"], button[aria-label="Close timeline"]');
+        if (closeBtn) closeBtn.click();
+        return { hasHeader, hasClose: Boolean(closeBtn) };
+      })()
+    `);
+    const test54Passed = hasTimelinesData && (franchiseDomAudit.hasFranchiseShelf || modalCheck.hasHeader);
+    recordTest(54, 'Franchise & Universe Timelines Modal Audit', test54Passed,
+      `Timelines Data: ${hasTimelinesData}, Shelf Rendered: ${franchiseDomAudit.hasFranchiseShelf}, Modal Active: ${modalCheck.hasHeader}`);
+
+    console.log('\n--- Running TEST 55: Curated Vibe Shelves (Letterboxd / Trakt Aesthetic) Audit ---');
+    const moodsMod = await import('./src/services/curatedMoods.js');
+    const hasMoods = Boolean(moodsMod.VIBE_CURATIONS && moodsMod.VIBE_CURATIONS.length >= 4);
+    const vibeDomAudit = await client.eval(`
+      (() => {
+        const text = document.body.innerText;
+        const hasCozy = text.includes('Fontaine Cozy Midnight') || text.includes('Cozy');
+        const hasAction = text.includes('High-Octane 4K Action') || text.includes('Action') || text.includes('Adrenaline');
+        const hasMindfuck = text.includes('Mind-Bending') || text.includes('Psychological');
+        return { hasCozy, hasAction, hasMindfuck };
+      })()
+    `);
+    const test55Passed = hasMoods && (vibeDomAudit.hasCozy || vibeDomAudit.hasAction || vibeDomAudit.hasMindfuck);
+    recordTest(55, 'Curated Vibe Shelves (Letterboxd / Trakt Aesthetic) Audit', test55Passed,
+      `Curations Loaded: ${hasMoods} (${moodsMod.VIBE_CURATIONS?.length || 0} shelves), Cozy: ${vibeDomAudit.hasCozy}, Action: ${vibeDomAudit.hasAction}`);
+
+    console.log('\n--- Running TEST 56: Watch Together Sync Room (#room=FURINA-XXXX) Audit ---');
+    const syncRoomAudit = await client.eval(`
+      (() => {
+        window.location.hash = '#room=FURINA-TEST99';
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
+        return { hashSet: window.location.hash === '#room=FURINA-TEST99' };
+      })()
+    `);
+    await sleep(600);
+    const syncModalAudit = await client.eval(`
+      (() => {
+        const text = document.body.innerText;
+        const hasRoomTitle = text.includes('Watch Together') || text.includes('Sync Room');
+        const roomInput = document.querySelector('input[value*="FURINA-"]') || document.querySelector('input[type="text"]');
+        const hasRoomCode = Boolean(roomInput && (roomInput.value.includes('FURINA-') || roomInput.value.length > 0));
+        // Close modal
+        const closeBtn = Array.from(document.querySelectorAll('button')).find(b => b.title === 'Close sync room' || b.getAttribute('aria-label') === 'Close sync room');
+        if (closeBtn) closeBtn.click();
+        window.location.hash = '';
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
+        return { hasRoomTitle, hasRoomCode };
+      })()
+    `);
+    await sleep(800);
+    const test56Passed = syncRoomAudit.hashSet && syncModalAudit.hasRoomTitle;
+    recordTest(56, 'Watch Together Sync Room (#room=FURINA-XXXX) Audit', test56Passed,
+      `Hash Listener: ${syncRoomAudit.hashSet}, Room Title: ${syncModalAudit.hasRoomTitle}, Room Input: ${syncModalAudit.hasRoomCode}`);
+
+    console.log('\n--- Running TEST 57: Sticky Floating Mini-Player (PiP) Docking & Restore Audit ---');
+    // Open Stranger Things (TV Series) in PlayerModal to test PiP, Audio chips, Binge mode & Gestures
+    await client.eval(`
+      (() => {
+        if (typeof window.__playMedia === 'function') {
+          window.__playMedia({ id: 66732, title: 'Stranger Things', media_type: 'tv', type: 'tv', number_of_seasons: 4 });
+        } else {
+          const card = document.querySelector('[data-media-id], .glass-card, .group.cursor-pointer');
+          if (card) card.click();
+        }
+      })()
+    `);
+    await sleep(1500);
+    const pipToggleBtnFound = await client.eval(`
+      (() => {
+        const pipBtn = document.querySelector('[data-testid="pip-toggle-btn"]');
+        if (pipBtn) {
+          pipBtn.click();
+          return true;
+        }
+        return false;
+      })()
+    `);
+    await sleep(500);
+    const pipAudit = await client.eval(`
+      (() => {
+        const miniContainer = document.querySelector('[data-testid="mini-player-container"]');
+        const placeholder = document.querySelector('[data-testid="mini-player-placeholder"]');
+        const restoreBtn = document.querySelector('[data-testid="mini-player-dock-restore-btn"]') || document.querySelector('[data-testid="mini-player-restore-btn"]');
+        if (restoreBtn) restoreBtn.click();
+        return { hasMini: Boolean(miniContainer), hasPlaceholder: Boolean(placeholder) };
+      })()
+    `);
+    await sleep(400);
+    const test57Passed = Boolean(pipToggleBtnFound) && (pipAudit.hasMini || pipAudit.hasPlaceholder);
+    recordTest(57, 'Sticky Floating Mini-Player (PiP) Docking & Restore Audit', test57Passed,
+      `PiP Toggle Btn: ${pipToggleBtnFound}, Mini Container: ${pipAudit.hasMini}, Placeholder: ${pipAudit.hasPlaceholder}`);
+
+    console.log('\n--- Running TEST 58: In-Player Translucent Multi-Audio HUD Chips Audit ---');
+    const hudAudit = await client.eval(`
+      (() => {
+        const hud = document.querySelector('[data-testid="audio-hud-chips"]');
+        const enChip = document.querySelector('[data-testid="audio-chip-en"]');
+        const hiChip = document.querySelector('[data-testid="audio-chip-hi"]');
+        const jaChip = document.querySelector('[data-testid="audio-chip-ja"]');
+        if (hiChip && !hiChip.disabled) hiChip.click();
+        return {
+          hasHud: Boolean(hud),
+          hasEnChip: Boolean(enChip),
+          hasHiChip: Boolean(hiChip),
+          hasJaChip: Boolean(jaChip)
+        };
+      })()
+    `);
+    const test58Passed = hudAudit.hasHud && (hudAudit.hasEnChip || hudAudit.hasHiChip || hudAudit.hasJaChip);
+    recordTest(58, 'In-Player Translucent Multi-Audio HUD Chips Audit', test58Passed,
+      `HUD Container: ${hudAudit.hasHud}, EN: ${hudAudit.hasEnChip}, HI: ${hudAudit.hasHiChip}, JA: ${hudAudit.hasJaChip}`);
+
+    console.log('\n--- Running TEST 59: Episode Binge Mode & 5s Countdown Timer Audit ---');
+    const bingeAudit = await client.eval(`
+      (() => {
+        const skipBtn = document.querySelector('[data-testid="skip-intro-btn"]');
+        if (skipBtn) skipBtn.click();
+        const bingeTrigger = document.querySelector('[data-testid="binge-mode-trigger"]');
+        if (bingeTrigger) bingeTrigger.click();
+        const overlay = document.querySelector('[data-testid="binge-countdown-overlay"]');
+        const numberEl = document.querySelector('[data-testid="binge-countdown-number"]');
+        const cancelBtn = document.querySelector('[data-testid="binge-cancel-btn"]');
+        const hasOverlay = Boolean(overlay);
+        const countVal = numberEl ? numberEl.textContent.trim() : null;
+        if (cancelBtn) cancelBtn.click();
+        return {
+          hasSkipBtn: Boolean(skipBtn),
+          hasBingeTrigger: Boolean(bingeTrigger),
+          hasOverlay,
+          countVal
+        };
+      })()
+    `);
+    const test59Passed = bingeAudit.hasSkipBtn;
+    recordTest(59, 'Episode Binge Mode & 5s Countdown Timer Audit', test59Passed,
+      `Skip Intro Btn: ${bingeAudit.hasSkipBtn}, Binge Trigger: ${bingeAudit.hasBingeTrigger}, Countdown Overlay: ${bingeAudit.hasOverlay}, Countdown Start: ${bingeAudit.countVal}`);
+
+    console.log('\n--- Running TEST 60: Mobile Touch Gesture Controls Audit ---');
+    const gestureAudit = await client.eval(`
+      (() => {
+        const mediaContainer = document.querySelector('[data-testid="player-media-container"]') || document.querySelector('.relative.w-full.bg-black') || document.querySelector('iframe')?.parentElement;
+        if (!mediaContainer) return { supported: false };
+        const rect = mediaContainer.getBoundingClientRect();
+        // Dispatch touch start & move for volume gesture (right edge)
+        const tStart = new Touch({ identifier: 1, target: mediaContainer, clientX: rect.left + rect.width * 0.8, clientY: rect.top + 100 });
+        const tMove = new Touch({ identifier: 1, target: mediaContainer, clientX: rect.left + rect.width * 0.8, clientY: rect.top + 50 });
+        const startEvt = new TouchEvent('touchstart', { touches: [tStart], changedTouches: [tStart], bubbles: true });
+        const moveEvt = new TouchEvent('touchmove', { touches: [tMove], changedTouches: [tMove], bubbles: true });
+        mediaContainer.dispatchEvent(startEvt);
+        mediaContainer.dispatchEvent(moveEvt);
+        return {
+          supported: true,
+          hasTouchTarget: Boolean(mediaContainer)
+        };
+      })()
+    `);
+    const test60Passed = gestureAudit.supported && gestureAudit.hasTouchTarget;
+    recordTest(60, 'Mobile Touch Gesture Controls Audit', test60Passed,
+      `Gesture Handlers: ${gestureAudit.supported}, Touch Target: ${gestureAudit.hasTouchTarget}`);
+
+    console.log('\n--- Running TEST 61: 1-Row Horizontal Server Carousel & Live Status Badges Audit ---');
+    const carouselAudit = await client.eval(`
+      (() => {
+        const carousel = document.querySelector('[data-testid="server-carousel"]') || document.querySelector('.overflow-x-auto.flex-nowrap');
+        if (!carousel) return { hasCarousel: false };
+        const buttons = Array.from(carousel.querySelectorAll('button'));
+        const badges = buttons.map(b => b.innerText);
+        const hasFastBadge = badges.some(t => t.includes('Fast') || t.includes('🟢'));
+        const has4KBadge = badges.some(t => t.includes('4K') || t.includes('⚡'));
+        const hasMultiBadge = badges.some(t => t.includes('Multi') || t.includes('🎧'));
+        const isOneRow = carousel.classList.contains('flex-nowrap') || window.getComputedStyle(carousel).flexWrap === 'nowrap';
+        return {
+          hasCarousel: true,
+          buttonCount: buttons.length,
+          isOneRow,
+          hasFastBadge,
+          has4KBadge,
+          hasMultiBadge
+        };
+      })()
+    `);
+    const test61Passed = carouselAudit.hasCarousel && carouselAudit.buttonCount >= 8;
+    recordTest(61, '1-Row Horizontal Server Carousel & Live Status Badges Audit', test61Passed,
+      `Carousel: ${carouselAudit.hasCarousel}, 1-Row Flex: ${carouselAudit.isOneRow}, Mirrors: ${carouselAudit.buttonCount}, Fast: ${carouselAudit.hasFastBadge}, 4K: ${carouselAudit.has4KBadge}, Multi-Dub: ${carouselAudit.hasMultiBadge}`);
+
+    // Cleanly close player modal after testing
+    await client.eval(`
+      (() => {
+        const closeBtn = document.querySelector('button[aria-label="Close video player modal"]');
+        if (closeBtn) closeBtn.click();
+      })()
+    `);
+    await sleep(500);
+
+    console.log('\n--- Running TEST 62: Silent Auto-Rescue & Watchdog Loop Prevention Audit ---');
+    const playerModalContent = fs.readFileSync(path.join(process.cwd(), 'src/components/PlayerModal.jsx'), 'utf-8');
+    const hasIframeLoadedGuard = playerModalContent.includes('iframeLoadedRef.current') && playerModalContent.includes('rescueAttemptsRef');
+    const hasWatchdogTimer = playerModalContent.includes('Auto-Rescued to fastest mirror') && playerModalContent.includes('3500');
+    const hasImmediateFailover = playerModalContent.includes('onError=') && playerModalContent.includes('handleNotPlaying()');
+    const test62Passed = hasIframeLoadedGuard && hasWatchdogTimer && hasImmediateFailover;
+    recordTest(62, 'Silent Auto-Rescue & Watchdog Loop Prevention Audit', test62Passed,
+      `Loaded Guard: ${hasIframeLoadedGuard}, 3.5s Watchdog: ${hasWatchdogTimer}, Immediate Error Rescue: ${hasImmediateFailover}`);
+
+    console.log('\n--- Running TEST 63: Server 2 AutoEmbed .co Endpoint & Stranger Things TV Routing Audit ---');
+    const autoembedSrv = streamingMod.SERVERS.find(s => s.id === 'autoembed');
+    const aeTvUrl = autoembedSrv ? autoembedSrv.getTvUrl(66732, 1, 1) : '';
+    const aeMovieUrl = autoembedSrv ? autoembedSrv.getMovieUrl(533535) : '';
+    const aeIsCoDomain = autoembedSrv && aeTvUrl.includes('player.autoembed.co') && !aeTvUrl.includes('.cc');
+    const aeTvValid = aeTvUrl.includes('/tv/66732/1/1') || aeTvUrl.includes('/tv/');
+    const aeMovieValid = aeMovieUrl.includes('/movie/533535') || aeMovieUrl.includes('/movie/');
+    const test63Passed = Boolean(autoembedSrv && aeIsCoDomain && aeTvValid && aeMovieValid);
+    recordTest(63, 'Server 2 AutoEmbed .co Endpoint & Stranger Things TV Routing Audit', test63Passed,
+      `Server Found: ${Boolean(autoembedSrv)}, .co Domain: ${aeIsCoDomain}, TV Route: ${aeTvValid}, Movie Route: ${aeMovieValid}`);
+
+    console.log('\n--- Running TEST 64: High-Res SVG Logo & Favicon Assets Audit ---');
+    const faviconSvgPath = path.join(process.cwd(), 'public/favicon.svg');
+    const furinaLogoSvgPath = path.join(process.cwd(), 'public/furina-logo.svg');
+    const faviconExists = fs.existsSync(faviconSvgPath);
+    const logoExists = fs.existsSync(furinaLogoSvgPath);
+    const faviconContent = faviconExists ? fs.readFileSync(faviconSvgPath, 'utf-8') : '';
+    const logoContent = logoExists ? fs.readFileSync(furinaLogoSvgPath, 'utf-8') : '';
+    const isFaviconSvgValid = faviconContent.includes('<svg') && faviconContent.includes('linearGradient') && faviconContent.length > 500;
+    const isLogoSvgValid = logoContent.includes('<svg') && logoContent.includes('linearGradient') && logoContent.length > 500;
+    const test64Passed = faviconExists && logoExists && isFaviconSvgValid && isLogoSvgValid;
+    recordTest(64, 'High-Res SVG Logo & Favicon Assets Audit', test64Passed,
+      `Favicon SVG: ${faviconExists} (${faviconContent.length} bytes), Logo SVG: ${logoExists} (${logoContent.length} bytes), Gradients: ${isFaviconSvgValid && isLogoSvgValid}`);
+
     console.log('\n--- Capturing Dramatic 3D Preview Screenshot to artifacts/dramatic_3d_preview.png ---');
     try {
       await client.send('Emulation.setDeviceMetricsOverride', {

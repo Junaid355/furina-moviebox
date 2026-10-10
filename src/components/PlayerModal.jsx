@@ -326,28 +326,39 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const [skipIntroToast, setSkipIntroToast] = useState(null);
   const [isWatchTogetherOpen, setIsWatchTogetherOpen] = useState(false);
   const [brightnessLevel, setBrightnessLevel] = useState(1);
+  const [volumeLevel, setVolumeLevel] = useState(1);
   const [gestureToast, setGestureToast] = useState(null);
   const lastTouchTapRef = useRef({ time: 0, x: 0 });
   const touchStartRef = useRef({ x: 0, y: 0, time: 0 });
+  const iframeLoadedRef = useRef(false);
+  const rescueAttemptsRef = useRef(0);
 
   // Silent Auto-Rescue (3.5s Watchdog): Auto-failover to next fastest mirror on timeout or hang
   useEffect(() => {
+    iframeLoadedRef.current = false;
     setIframeLoading(true);
     const timer = setTimeout(() => {
+      // If iframe already loaded successfully, NEVER switch server
+      if (iframeLoadedRef.current) {
+        return;
+      }
       setIframeLoading(false);
       // If still loading on a non-custom stream and not manually pinned, auto-failover silently
       if (playerMode === 'stream' && !isCustomMovie && !manualPickRef.current) {
-        const next = nextBestServer({
-          servers: availableServers,
-          current: selectedServer,
-          audioMode,
-          isAnime,
-          isHanime,
-          tmdbId: resolvedTmdbId
-        });
-        if (next && next.id !== selectedServer?.id) {
-          setSelectedServer(next);
-          showServerToast(next, null, 'Auto-Rescued to fastest mirror ⚡');
+        if (rescueAttemptsRef.current < 3) {
+          rescueAttemptsRef.current += 1;
+          const next = nextBestServer({
+            servers: availableServers,
+            current: selectedServer,
+            audioMode,
+            isAnime,
+            isHanime,
+            tmdbId: resolvedTmdbId
+          });
+          if (next && next.id !== selectedServer?.id) {
+            setSelectedServer(next);
+            showServerToast(next, null, 'Auto-Rescued to fastest mirror ⚡');
+          }
         }
       }
     }, 3500);
@@ -538,6 +549,24 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
         setGestureToast(`☀️ Brightness: ${Math.round(next * 100)}%`);
         return next;
       });
+      touchStartRef.current.y = touch.clientY;
+    }
+    // Vertical drag on right edge: Adjust volume
+    else if (relativeX > rect.width * 0.65 && Math.abs(deltaY) > 20) {
+      const step = deltaY > 0 ? 0.04 : -0.04;
+      if (videoRef.current) {
+        const curVol = typeof videoRef.current.volume === 'number' ? videoRef.current.volume : 1;
+        const nextVol = Math.min(1, Math.max(0, Math.round((curVol + step) * 100) / 100));
+        videoRef.current.volume = nextVol;
+        setVolumeLevel(nextVol);
+        setGestureToast(`🔊 Volume: ${Math.round(nextVol * 100)}%`);
+      } else {
+        setVolumeLevel((prev) => {
+          const next = Math.min(1, Math.max(0, Math.round((prev + step) * 100) / 100));
+          setGestureToast(`🔊 Volume: ${Math.round(next * 100)}%`);
+          return next;
+        });
+      }
       touchStartRef.current.y = touch.clientY;
     }
   };
@@ -1344,6 +1373,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
               <button
                 onClick={handleSafeClose}
+                aria-label="Close video player modal"
                 title="Close Player (Esc)"
                 className="w-10 h-10 rounded-full bg-rose-600 hover:bg-rose-500 text-white border-2 border-rose-400 flex items-center justify-center transition shadow-[0_0_20px_rgba(244,63,94,0.8)] cursor-pointer"
               >
@@ -1527,17 +1557,32 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 <RefreshCw className="w-3.5 h-3.5" />
               </button>
 
+              {/* Mini-Player PiP Toggle Button */}
+              <button
+                type="button"
+                data-testid="pip-toggle-btn"
+                onClick={() => {
+                  soundFx.playClick?.();
+                  setIsMiniPlayer((prev) => !prev);
+                }}
+                title={isMiniPlayer ? "Restore from Mini-Player" : "Floating Mini-Player (PiP)"}
+                className="flex items-center gap-1 p-2 rounded-xl bg-[#0c1836] border border-cyan-500/30 text-cyan-300 hover:text-white hover:bg-white/10 transition cursor-pointer shrink-0"
+              >
+                <PictureInPicture className="w-3.5 h-3.5" />
+              </button>
+
               {/* Watch Together / Sync Room Trigger */}
               <button
+                data-testid="sync-room-trigger-btn"
                 onClick={() => {
                   setIsWatchTogetherOpen(true);
                   soundFx.playClick?.();
                 }}
                 title="Watch Together / Sync Room"
-                className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/40 text-purple-300 hover:text-white text-xs font-bold transition shadow-sm cursor-pointer"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/40 text-purple-300 hover:text-white text-xs font-bold transition shadow-sm cursor-pointer shrink-0"
               >
                 <Users className="w-3.5 h-3.5" />
-                <span>Sync Room</span>
+                <span className="hidden sm:inline">Sync Room</span>
               </button>
 
               {/* Open stream in clean external window */}
@@ -1777,10 +1822,11 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
         >
           {/* Docking placeholder when floating mini-player is active */}
           {isMiniPlayer && !isFullscreen && (
-            <div className="w-full h-44 sm:h-56 bg-slate-950/70 border border-cyan-500/20 rounded-xl flex flex-col items-center justify-center text-xs text-cyan-300/70 gap-2 m-2">
+            <div data-testid="mini-player-placeholder" className="w-full h-44 sm:h-56 bg-slate-950/70 border border-cyan-500/20 rounded-xl flex flex-col items-center justify-center text-xs text-cyan-300/70 gap-2 m-2">
               <span className="font-extrabold text-cyan-200">🎬 Floating Mini-Player Active</span>
               <button
                 type="button"
+                data-testid="mini-player-restore-btn"
                 onClick={() => { setIsMiniPlayer(false); setManualMiniDismiss(true); }}
                 className="px-3 py-1 rounded-lg bg-cyan-500/20 text-cyan-200 border border-cyan-400/30 text-xs font-bold hover:bg-cyan-500/40 cursor-pointer"
               >
@@ -1793,13 +1839,14 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
           {/* 5. VIDEO PLAYER AREA (CUSTOM VIDEO OR STRICT IFRAME STREAM)               */}
           {/* ========================================================================= */}
           <div 
+            data-testid={isMiniPlayer && !isFullscreen ? "mini-player-container" : "player-media-container"}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
             style={{ filter: `brightness(${brightnessLevel})` }}
             className={`relative w-full bg-black flex items-center justify-center overflow-hidden transition-all duration-300 ${
               isMiniPlayer && !isFullscreen
-                ? 'fixed bottom-4 right-4 w-[280px] sm:w-[360px] aspect-video z-[99999] rounded-2xl shadow-[0_0_35px_rgba(6,182,212,0.85)] border-2 border-cyan-400 overflow-hidden bg-black'
+                ? 'fixed bottom-4 right-4 w-44 sm:w-80 md:w-96 aspect-video z-[99999] rounded-xl shadow-[0_0_35px_rgba(6,182,212,0.85)] border-2 border-cyan-400 overflow-hidden bg-black'
                 : isFullscreen 
                   ? 'w-full h-full flex-1 max-w-full max-h-full' 
                   : 'w-full flex-1 h-[52vh] min-h-[280px] max-h-[58vh] sm:h-auto sm:aspect-auto sm:min-h-[500px] md:min-h-[600px] lg:min-h-[720px]'
@@ -1810,6 +1857,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
               <div className="absolute top-2 right-2 z-[60] flex items-center gap-1.5 bg-black/80 backdrop-blur-md p-1 rounded-lg border border-cyan-500/40">
                 <button
                   type="button"
+                  data-testid="mini-player-dock-restore-btn"
                   onClick={() => { setIsMiniPlayer(false); setManualMiniDismiss(true); }}
                   title="Restore to Player Modal"
                   className="p-1 rounded bg-cyan-500/20 hover:bg-cyan-500/40 text-cyan-200 text-xs font-bold cursor-pointer"
@@ -1818,6 +1866,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 </button>
                 <button
                   type="button"
+                  data-testid="mini-player-dock-close-btn"
                   onClick={() => { setIsMiniPlayer(false); setManualMiniDismiss(true); }}
                   title="Close Mini-Player"
                   className="p-1 rounded bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 text-xs font-bold cursor-pointer"
@@ -1835,16 +1884,17 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
             )}
 
             {/* In-Player Translucent HUD Chips (Crunchyroll / Netflix style) */}
-            <div className="absolute top-3 left-3 z-30 flex items-center gap-1 bg-slate-950/85 backdrop-blur-md px-2 py-1 rounded-xl border border-cyan-500/30 shadow-lg pointer-events-auto">
+            <div data-testid="audio-hud-chips" className="absolute top-3 left-3 z-30 flex items-center gap-1 bg-slate-950/85 backdrop-blur-md px-2 py-1 rounded-xl border border-cyan-500/30 shadow-lg pointer-events-auto">
               <span className="text-[9px] font-extrabold text-cyan-300 uppercase tracking-wider hidden xs:inline mr-0.5">Audio:</span>
               <button
                 type="button"
+                data-testid="audio-chip-en"
                 onClick={() => handleAudioChange('english')}
                 disabled={!hasWorkingEnglishSource}
                 title="English Dub"
                 className={`px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-extrabold transition cursor-pointer flex items-center gap-0.5 ${
                   audioMode === 'english'
-                    ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 shadow-md font-black'
+                    ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 shadow-[0_0_12px_rgba(6,182,212,0.8)] font-black border border-cyan-300'
                     : hasWorkingEnglishSource ? 'text-slate-300 hover:text-white bg-white/5' : 'text-slate-600 opacity-40 cursor-not-allowed'
                 }`}
               >
@@ -1852,12 +1902,13 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
               </button>
               <button
                 type="button"
+                data-testid="audio-chip-hi"
                 onClick={() => handleAudioChange('hindi')}
                 disabled={!hasWorkingHindiSource}
                 title="Hindi Audio"
                 className={`px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-extrabold transition cursor-pointer flex items-center gap-0.5 ${
                   audioMode === 'hindi'
-                    ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-gray-950 shadow-md font-black'
+                    ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-gray-950 shadow-[0_0_12px_rgba(245,158,11,0.8)] font-black border border-amber-300'
                     : hasWorkingHindiSource ? 'text-slate-300 hover:text-white bg-white/5' : 'text-slate-600 opacity-40 cursor-not-allowed'
                 }`}
               >
@@ -1865,12 +1916,13 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
               </button>
               <button
                 type="button"
+                data-testid="audio-chip-ja"
                 onClick={() => handleAudioChange('sub')}
                 disabled={!hasWorkingJapaneseSource}
                 title="Japanese Sub"
                 className={`px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-extrabold transition cursor-pointer flex items-center gap-0.5 ${
                   audioMode === 'sub'
-                    ? 'bg-gradient-to-r from-purple-400 to-indigo-500 text-white shadow-md font-black'
+                    ? 'bg-gradient-to-r from-purple-400 to-indigo-500 text-white shadow-[0_0_12px_rgba(168,85,247,0.8)] font-black border border-purple-300'
                     : hasWorkingJapaneseSource ? 'text-slate-300 hover:text-white bg-white/5' : 'text-slate-600 opacity-40 cursor-not-allowed'
                 }`}
               >
@@ -1881,6 +1933,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
             {/* Skip Intro (85s) Button */}
             <button
               type="button"
+              data-testid="skip-intro-btn"
               onClick={() => {
                 soundFx.playClick?.();
                 if (videoRef.current) {
@@ -1896,6 +1949,20 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
               <span>Skip Intro (85s)</span>
             </button>
 
+            {/* 1-Tap Binge Next Mode Trigger for Series */}
+            {isSeries && (
+              <button
+                type="button"
+                data-testid="binge-mode-trigger"
+                onClick={() => setBingeCountdown(5)}
+                className="absolute bottom-12 left-32 z-30 px-2.5 py-1 rounded-xl bg-slate-950/85 hover:bg-black text-emerald-300 hover:text-white border border-emerald-400/50 shadow-lg backdrop-blur-md text-[10.5px] font-black transition flex items-center gap-1.5 cursor-pointer active:scale-95 pointer-events-auto"
+                title="Binge Next Episode (5s countdown)"
+              >
+                <Zap className="w-3 h-3 text-emerald-400" />
+                <span>Binge Next (5s)</span>
+              </button>
+            )}
+
             {/* Skip Intro Toast Notification */}
             {skipIntroToast && (
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 px-4 py-2 rounded-xl bg-black/90 border border-cyan-400 text-cyan-200 text-xs font-black shadow-2xl backdrop-blur-md pointer-events-none animate-in fade-in duration-150">
@@ -1905,8 +1972,8 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
             {/* Binge Countdown Overlay (Auto-Next Episode in 5s) */}
             {bingeCountdown !== null && (
-              <div className="absolute inset-0 z-50 bg-black/85 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-200 pointer-events-auto">
-                <div className="w-16 h-16 rounded-full bg-cyan-500/20 border-2 border-cyan-400 flex items-center justify-center text-2xl font-black text-cyan-300 mb-3 shadow-[0_0_25px_rgba(6,182,212,0.6)]">
+              <div data-testid="binge-countdown-overlay" className="absolute inset-0 z-50 bg-black/85 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-200 pointer-events-auto">
+                <div data-testid="binge-countdown-number" className="w-16 h-16 rounded-full bg-cyan-500/20 border-2 border-cyan-400 flex items-center justify-center text-2xl font-black text-cyan-300 mb-3 shadow-[0_0_25px_rgba(6,182,212,0.6)]">
                   {bingeCountdown}
                 </div>
                 <h4 className="text-base font-black text-white mb-1">Up Next: Episode {episode + 1}</h4>
@@ -1914,6 +1981,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
+                    data-testid="binge-play-now-btn"
                     onClick={() => {
                       setBingeCountdown(null);
                       handleNextEpisode();
@@ -1924,6 +1992,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   </button>
                   <button
                     type="button"
+                    data-testid="binge-cancel-btn"
                     onClick={() => setBingeCountdown(null)}
                     className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 font-bold text-xs transition cursor-pointer"
                   >
@@ -2190,7 +2259,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                           };
                         }
                         if (isSeries && appSettings?.autoNextEpisode !== false) {
-                          handleNextEpisode();
+                          setBingeCountdown(5);
                         }
                       }}
                       onTimeUpdate={() => {
@@ -2359,10 +2428,21 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   </div>
                 )}
                 <iframe
+                  data-testid="player-iframe"
                   key={`${currentServer.id}-${season}-${episode}-${audioMode}-${reloadKey}-${adShieldActive ? 'shield' : 'standard'}-${shieldMode}`}
                   src={streamUrl}
                   title={title}
-                  onLoad={() => setIframeLoading(false)}
+                  onLoad={() => {
+                    iframeLoadedRef.current = true;
+                    rescueAttemptsRef.current = 0;
+                    setIframeLoading(false);
+                  }}
+                  onError={() => {
+                    if (playerMode === 'stream' && !isCustomMovie && rescueAttemptsRef.current < 3) {
+                      rescueAttemptsRef.current += 1;
+                      handleNotPlaying();
+                    }
+                  }}
                   style={AI_BOOST_STYLES[aiBoostMode] || {}}
                   className={`border-0 bg-black ${
                     isFullscreen 
@@ -2461,12 +2541,13 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                     <span>Not playing? Next server</span>
                   </button>
 
-                  <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth snap-x py-1.5 flex-nowrap w-full">
+                  <div data-testid="server-carousel" className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth snap-x py-1.5 flex-nowrap w-full">
                     {availableServers.map((srv) => {
                       const isSelected = currentServer.id === srv.id;
                       return (
                         <button
                           key={srv.id}
+                          data-testid={`server-btn-${srv.id}`}
                           onClick={() => {
                             manualPickRef.current = true;
                             setSelectedServer(srv);
@@ -2489,7 +2570,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                         >
                           <span>{srv.shortName}</span>
                           <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono ${isSelected ? 'bg-black/30 text-white' : 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/20'}`}>
-                            {srv.badge || '🟢 Fast'}
+                            {srv.statusBadge || srv.badge || '🟢 Fast'}
                           </span>
                         </button>
                       );

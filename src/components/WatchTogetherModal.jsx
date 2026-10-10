@@ -102,6 +102,8 @@ export default function WatchTogetherModal({ isOpen, onClose, activeMedia, curre
           </div>
           <button
             onClick={onClose}
+            aria-label="Close sync room"
+            title="Close sync room"
             className="w-8 h-8 rounded-full bg-white/10 hover:bg-rose-600 text-white flex items-center justify-center transition border border-white/20 cursor-pointer"
           >
             <X className="w-4 h-4" />

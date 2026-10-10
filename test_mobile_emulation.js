@@ -237,7 +237,15 @@ async function runMobileTests() {
     await client.setDeviceMetrics(390, 844, 3, true);
 
     await client.send('Page.navigate', { url: `${BASE_URL}/` });
-    await sleep(3500);
+    await sleep(2500);
+
+    // Wait for React to mount the search input
+    for (let waitIdx = 0; waitIdx < 20; waitIdx++) {
+      const hasInput = await client.eval(`Boolean(document.querySelector('input[type="text"]'))`);
+      if (hasInput) break;
+      await sleep(300);
+    }
+
     await client.setDeviceMetrics(390, 844, 3, true);
     await sleep(500);
 
@@ -273,9 +281,16 @@ async function runMobileTests() {
     await client.eval(`
       (() => {
         const input = document.querySelector('input[type="text"]');
-        input.focus();
-        input.value = 'Spider';
-        input.dispatchEvent(new Event('input', { bubbles: true }));
+        if (input) {
+          input.focus();
+          const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+          if (setter) {
+            setter.call(input, 'Spider');
+          } else {
+            input.value = 'Spider';
+          }
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        }
       })()
     `);
     await sleep(1000);
@@ -291,8 +306,15 @@ async function runMobileTests() {
     await client.eval(`
       (() => {
         const input = document.querySelector('input[type="text"]');
-        input.value = '';
-        input.dispatchEvent(new Event('input', { bubbles: true }));
+        if (input) {
+          const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+          if (setter) {
+            setter.call(input, '');
+          } else {
+            input.value = '';
+          }
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        }
       })()
     `);
     await sleep(1500);
