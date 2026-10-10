@@ -1,0 +1,57 @@
+
+=== SNIPPET 0 ===
+>!oe.includes(+s.resolutions)),n=[...l,...o];return n&&n.length==1&&n[0].format=="HLS"&&(n[0].resolutions="Auto"),n},W=()=>{const e=Lt("webQuality"),a=(e==null?void 0:e.quality)||"";return String(a).toLowerCase()==="auto"?"":a},G=e=>Array.isArray(e)?re.value?e:e.filter(a=>!ue(a)):[],He=()=>({mse:!1,dashH264:!1,dashH265:!1,dashAV1:!1,dashAudio:!1,h264:{typeSupported:!1,decodable:null,smooth:null,powerEfficient:null,contentType:null},h265:{typeSupported:!1,decodable:null,smooth:null,powerEfficient:null,contentType:null},av1:{typeSupported:!1,decodable:null,smooth:null,powerEfficient:null,contentType
+
+=== SNIPPET 1 ===
+:null},audio:{typeSupported:!1,decodable:null,smooth:null,powerEfficient:null,contentType:null}}),pe=(e=[])=>!e||e.length<=1?!1:e.some(a=>{var l;return((l=a.playbackType)==null?void 0:l.startsWith("dash"))||a.playbackType==="hls"}),$e=()=>/(localhost|10\.|h5-test)/i.test(location.origin)?"https://h5-api-test.aoneroom.com":"https://h5-api.aoneroom.com",Qe=()=>{const e=Date.now(),a=typeof globalThis<"u"?globalThis.crypto:null;return a!=null&&a.randomUUID?`${e}_${a.randomUUID()}`:`${e}_${Math.random().toString(36).slice(2,10)
+
+=== SNIPPET 2 ===
+}`},Y=(e,a=t.value.playSessionId)=>{const l=ct(e);return(!a||a===t.value.playSessionId)&&(t.value.dashRuntimeSupport=e,t.value.dashRuntimeTrackPayload=l),l},fe=()=>{var e;return{video_dash_h265:((e=t.value.dashRuntimeTrackPayload)==null?void 0:e.video_dash_h265)??null}},Be=e=>{if(!(e!=null&&e.length))return[];const a=W();if(!a)return e;const l=String(a),o=parseInt(l);let n=e.findIndex(s=>s.html===l);if(n<0&&!Number.isNaN(o)){n=0;for(let s=1;s<e.length&&!(Math.abs(Number(e[s].resolution)-o)>Math.abs(Number(e[s-1].resolution)-o));s++)n=s}return e.map((
+
+=== SNIPPET 3 ===
+s,i)=>({...s,default:i===n||!!s.default&&n<0}))},ve=(e,a,l)=>{const o=Y(e,a),n=typeof window<"u"&&typeof window.ath_send=="function"?window.ath_send:null;if(!n)return;const s={step:"dash_capability",play_session_id:a,subject_id:d.query.id||t.value.subjectId,subjectType:t.value.subjectType,se:t.value.curSe,ep:t.value.curEp,dash_player_switch_on:l,...o,event_ts:Date.now()};R("[埋点] h5_video_startup dash_capability",s),n("h5_video_startup",s,"beacon")},me=(e,a=t.value.playSessionId,l=t
+
+=== SNIPPET 4 ===
+.value.dashPlayerSwitchOn)=>{if(e){ve(e,a,l);return}Y(ye(),a),ke().then(o=>ve(o,a,l)).catch(()=>{})},X=(e,a={})=>({html:e.resolutions+"P",url:e.url,resolution:e.resolutions,size:e.size,format:e.format,id:e.id,vipLocked:e.vipLocked,...a}),x=e=>{var _,w,m,N,h,b,I,q,we,Se;const a=A.value||{},l=(e==null?void 0:e.p
+
+=== SNIPPET 5 ===
+laybackType)||t.value.playbackType,o=$e(),n=new URL(location.href).pathname.split("/").filter(Boolean).pop(),s=r.value.subject.subjectId;let i="",c=[],p=e==null?void 0:e.resolutions;T.value=[],y.value=[],l!=null&&l.startsWith("dash")?(i=o+`/wefeed-h5api-bff/subject/caption?format=DASH&id=${(e==null?void 0:e.id)||((w=(_=a.dash)==null?void 0:_[0])==null?void 0:w.id)}&subjectId=${s}&detailPath=${n}`,c=(a.dash||[]).filter(u=>u.resolutions!="0").flatMap(u=>String(u.resolutions||"").split(",").map(f=>f.trim()).filter(Boolean).map(f=>X({...u,resolutions:f},{codecName:u.code
+
+=== SNIPPET 6 ===
+cName,playbackType:l})))):l==="hls"&&((m=a.hls)==null?void 0:m.length)>0?(i=o+`/wefeed-h5api-bff/subject/caption?format=HLS&id=${(e==null?void 0:e.id)||((N=a.hls[0])==null?void 0:N.id)}&subjectId=${s}&detailPath=${n}`,c=a.hls.length>1?(a.hls||[]).filter(u=>u.resolutions!="0").map(u=>X(u)):[]):(i=o+`/wefeed-h5api-bff/subject/caption?format=MP4&id=${(e==null?void 0:e.id)||((b=(h=a.streams)==null?void 0:h[0])==null?void 0:b.id)}&subjectId=${s}&detailPath=${n}`,c=(a.streams||[]).filter(u=>u.resolutions!="0").map(u=>X(u))),p||(p=(q=C(l==="h
+
+=== SNIPPET 7 ===
+ls"&&((I=a.hls)==null?void 0:I.length)>0?a.hls:a.streams||[])[0])==null?void 0:q.resolutions);const v=c.findIndex(u=>{const f=(e==null?void 0:e.url)&&u.url===e.url,at=(e==null?void 0:e.id)&&String(u.id)===String(e.id)&&+u.resolution==+p,lt=!(e!=null&&e.id)&&+u.resolution==+p;return f||at||lt});if(v>-1&&(c[v].default=!0),l!=null&&l.startsWith("dash")||l==
+
+=== SNIPPET 8 ===
+="hls"){const u={};(a.streams||[]).forEach(f=>{f.resolutions&&(u[String(f.resolutions)]=f.vipLocked??f.vip_locked??!1)}),c=c.map(f=>({...f,vipLocked:u[String(f.resolution)]??f.vipLocked??!1,vip_locked:u[String(f.resolution)]??f.vip_locked??!1}))}y.value=Be(c),Ge(i),t.value.getSubUrl=(e==null?void 0:e.id)||((Se=(we=a.streams)==n
+
+=== SNIPPET 9 ===
+ex:t.value.fallbackIndex,source_id:t.value.sourceId,fallback_queue:(a||[]).map(o=>o.playbackType)})},he=(e,a)=>{const l=Number(e);!Number.isFinite(l)||l<=0||(t.value.playbackResumeTime=l,t.value.playbackResumeReason=a,t.value.playbackResumeSe=t.value.curSe,t.value.playbackResumeEp=t.value.curEp,R("[dash] set playback resume time",{reason:a,resume_time:l,se:t.value.curSe,ep:t.value.curEp}))},M=e=>{const a=typeof window<"u"&&typeof window.ath_send=="function"?window.ath_send:null;if(!a)return;const l=t.value.playbackSourceMode==="fallback",o={playback_source_mode:t.value.playbackSourceMode,play_sess
+
+=== SNIPPET 10 ===
+=null?void 0:e.currentTime)??t.value.playbackCurrentTime,"manual_switch_source"),D(o,a,l),x(o))};function Ge(e){const a=++P;t.value.subtitle="1",fetch(e,{headers:{Accept:"application/json","X-Client-Info":JSON.stringify({timezone:Pe()})}}).then(l=>l.json()).then(l=>{if(!g||a!==P)return;let o=l.data.captions;if(!o||o.length==0){t.value.subtitle="",t.value.name="",K();return}const n=Ce(o);let s=[{default:n.lan===Re,en:"Off",html:"Off",lan:Re,subtitle:"Off",url:"",lanName:"Off"}];for(let i of o)s.push({default:i.lan==n.lan,en:i.lanName,html:i.lanName,subtitle:i.lanName,...i});T.value=s,K(),t.value.subti
+
+=== SNIPPET 11 ===
+r.mediaDetectResult2(JSON.stringify(l),"giveVideoUrlCallback",222)),k(r.value.subject.subjectId,e,a)}function k(e,a,l,o){const n=++j;A.value=null,P++,o||(t.value.url="",t.value.progress=0,t.value.showPlayerErrCard=!1),Ht(e,a,l,o,ae).then(async s=>{var m,N;if(!g||n!==j)return;const i=s.data||{};if(i.dash=i.dash||[],i.hls=ce(i.hls||[]),i.streams=ce(i.streams||[]),s.data=i,A.value=s.data||{},t.value.limited=s.data.limited,t.value.limitedCode=s.data.limitedCode,t.value.limitedNum=s.data.limitedNum||4,t.value.freeNum=s.data.freeNum,t.value.dash=s.data.dash||[],t.value.hls=s.data.hls||[],t.value.showPla
+
+=== SNIPPET 12 ===
+yerErrCard=!0,t.value.dashPlayerSwitchOn=ut(),t.value.playSessionId=Qe(),t.value.dashRuntimeSupport=null,t.value.dashRuntimeTrackPayload={},Y(ye()),t.value.playbackType="",t.value.playbackSourceMode="",t.value.currentSource=null,t.value.fallbackQueue=[],t.value.fallbackIndex=0,t.value.videoCodec="",t.value.sourceId="",t.value.finalFailReported=!1,t.value.isSourceSwitching=!1,t.value.playbackCurrentTime=0,t.value.p
+
+=== SNIPPET 13 ===
+laybackResumeTime=0,t.value.playbackResumeReason="",t.value.playbackResumeSe=0,t.value.playbackResumeEp=0,t.value.pageStageTimingConsumed=!1,(N=(m=s.data)==null?void 0:m.dash)!=null&&N.length&&(t.value.cookieUrl=s.data.dash[0].prePlayApi),t.value.hasResource=s.data.hasResource,s.data.limited)return;t.value.dashPlayerSwitchOn||me(),localStorage.removeItem("webLimitedCount");const c=G(s.data.dash),p=C(G(s.data.hls)),v=C(G(s.data.streams)),_=s.data.dash.length||C(s.data.hls).length||C(s.data.streams).length,w=[...s.data.
+
+=== SNIPPET 14 ===
+dash,...s.data.hls,...s.data.streams].some(ue);if(!c.length&&!p.length&&!v.length){t.value.url="",t.value.showPlayerErrCard=!0,_&&w&&Nt()&&!re.value&&De();return}if(t.value.url="",t.value.dashPlayerSwitchOn){const h=await ke();if(!g||n!==j)return;me(h);const b=Ie({dash:c,hls:p,streams:v,runtimeSupport:h,preferredQuality:W(),skipHlsFallbackAfterDash:!0}),I=pe(b.fallbackQueue);t.value.playbackSourceMode=I?"fallback":"direct",D(b.currentSource,b.fallbackQueue,0),I&&M({step:"fallback_chain_select",select_reason:b.selectReason,playback_source_mode:t.value.playbackSourceMode,fallback_
+
+=== SNIPPET 15 ===
+queue:b.fallbackQueue.map(q=>q.playbackType).join(",")}),b.currentSource&&x(b.currentSource)}else{const h=Ie({dash:[],hls:p,streams:v,runtimeSupport:He(),preferredQuality:W()}),b=pe(h.fallbackQueue);t.value.playbackSourceMode=b?"fallback":"direct",D(h.currentSource,h.fallbackQueue,0),b&&M({step:"fallback_chain_select",select_reason:h.selectReason,playback_source_mode:t.value.playbackSourceMode,fallback_queue:h.fallbackQueue.map
+
+=== SNIPPET 16 ===
+subjectId,0,0,1);de()}const Ke=async()=>{const e=++E;Z.open(),await Pt();let a="https://h5-api.aoneroom.com";if(!a||!location)return;/(localhost|10\.|h5-test)/i.test(location.origin)&&(a="https://h5-api-test.aoneroom.com");let l=new URL(location.href).pathname.split("/").filter(Boolean).pop(),o=a+`/wefeed-h5api-bff/detail?detailPath=${l}`;fetch(o,{...Ot(),headers:{Accept:"application/json","X-Client-Info":JSON.stringify({timezone:Pe()}),"X-Vip-Restrict":ae,...Ut(),...qt()}}).then(n=>n.json()).then(n=>{var s,i;if(!(!g||e!==E)){if(n.code==404){Et("/404",{replace:!0});return}n.code==400?J.value=!0:J.value=!1,t.v
+
+=== SNIPPET 17 ===
+e(),Ve()}}).catch(n=>{!g||e!==E||(Z.close(),J.value=!0)}).finally(()=>{g&&e===E&&Z.close()})},F=e=>String(e??"").trim().replace(/p$/i,""),K=(e="")=>{var o,n,s,i,c,p,v,_;const a=(o=window.hola_navigator)==null?void 0:o.mediaDetectResult3;let l=A.value;if(!(typeof a!="function"||!((n=l==null?void 0:l.dash)!=null&&n.length)&&!((s=l==null?void 0:l.hls)!=null&&s.length)&&!((i=l==null?void 0:l.streams)!=null&&i.length))){At&&xt()&&(l=Dt(l));try{const w={subject:(c=r.value)==null?void 0:c.subject,resource:(p=r.value)==null?void 0:p.resource,playInfo:{currentInfo:{se:t.value.curSe,ep:t.value.curEp,resolut
+
+=== SNIPPET 18 ===
+ion:F(e)||((v=y.value.find(m=>m.default))==null?void 0:v.resolution)||((_=y.value[0])==null?void 0:_.resolution)||""},videoInfo:l},captions:T.value,originalUrl:location.href};console.log("sendDataToApp info---",JSON.stringify(w)),a.call(window.hola_navigator,JSON.stringify(w),"giveVideoUrlCallback",333)}catch(w){console.error("sendDataToApp error---",w)}}},Ze=e=>{console.log("changeResolution resolution---",e),K(e)},et=e=>{if(e!=null&

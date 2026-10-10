@@ -104,7 +104,11 @@ export const FALLBACK_MEDIA = [
 
     release_date: '2024-08-15',
 
-    category: 'hindi'
+    category: 'hindi',
+
+    original_language: 'hi',
+
+    origin_country: ['IN']
 
   },
 

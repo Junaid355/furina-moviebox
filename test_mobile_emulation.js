@@ -6,7 +6,7 @@ import { spawn } from 'child_process';
 const EDGE_PATH = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
 const PORT = 9889;
 const USER_DATA_DIR = path.join(process.cwd(), 'edge-mobile-profile');
-const BASE_URL = 'http://127.0.0.1:4174';
+let BASE_URL = 'http://127.0.0.1:4174';
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -158,8 +158,26 @@ async function runMobileTests() {
     }
   });
 
-  await new Promise((resolve) => previewServer.listen(4174, '127.0.0.1', resolve));
-  console.log('✓ Mobile test static server listening on http://127.0.0.1:4174\n');
+  let actualPort = 4174;
+  await new Promise((resolve, reject) => {
+    function tryPort(p) {
+      previewServer.once('error', (err) => {
+        if (err.code === 'EADDRINUSE') {
+          console.log(`Port ${p} in use, trying ${p + 1}...`);
+          tryPort(p + 1);
+        } else {
+          reject(err);
+        }
+      });
+      previewServer.listen(p, '127.0.0.1', () => {
+        actualPort = p;
+        resolve();
+      });
+    }
+    tryPort(4174);
+  });
+  BASE_URL = `http://127.0.0.1:${actualPort}`;
+  console.log(`✓ Mobile test static server listening on ${BASE_URL}\n`);
 
   if (!fs.existsSync(USER_DATA_DIR)) {
     fs.mkdirSync(USER_DATA_DIR, { recursive: true });
@@ -220,6 +238,8 @@ async function runMobileTests() {
 
     await client.send('Page.navigate', { url: `${BASE_URL}/` });
     await sleep(3500);
+    await client.setDeviceMetrics(390, 844, 3, true);
+    await sleep(500);
 
     // M1: Viewport and horizontal scroll check
     const m1Overflow = await client.eval(`

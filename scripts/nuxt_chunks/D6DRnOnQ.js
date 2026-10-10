@@ -1,0 +1,1 @@
+import{u as s}from"./CrZrqgDu.js";const S=()=>{const t=s();return{seoTdkMeta:t,getSeoTdkMeta:()=>t.value||{},setSeoTdkMeta:e=>{t.value={...t.value,...e}},replacePlaceholder:(e,u,a)=>e&&e.replace(/\{([^}]+)\}/g,(o,r)=>(a==null?void 0:a(o,r))||u[r]||o)}};export{S as u};

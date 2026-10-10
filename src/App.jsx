@@ -43,6 +43,7 @@ import {
   FALLBACK_MEDIA
 } from './services/tmdb';
 import { SERVERS } from './services/streaming';
+import { CURATED_MOVIEBOX_TITLES, fetchMovieBoxTrending } from './services/movieboxService';
 import { 
   Flame, Film, Tv, Sparkles, Heart, RefreshCw, Shield, Settings, 
   ChevronDown, Clock, Play, X, Star, Volume2, VolumeX, Search 
@@ -99,6 +100,7 @@ export default function App() {
 
   // Curated instant-cache & background live-refresh shelves for Homepage
   const [shelvesData, setShelvesData] = useState({
+    moviebox: CURATED_MOVIEBOX_TITLES,
     popularMovies: CURATED_HOLLYWOOD_BLOCKBUSTERS.slice(0, 16),
     popularAnime: [...CURATED_HINDI_DUBBED_ANIME.slice(0, 10), ...CURATED_HINDI_DUBBED_ANIME.slice(10, 16)],
     hindiDubbed: [...CURATED_BOLLYWOOD_BLOCKBUSTERS.slice(0, 10), ...CURATED_HOLLYWOOD_HINDI_DUBS.slice(0, 10)],
@@ -113,7 +115,7 @@ export default function App() {
     let cancelled = false;
     const loadShelves = async () => {
       try {
-        const [popMovies, popAnime, hindi, multi, series, latest, top, action] = await Promise.allSettled([
+        const [popMovies, popAnime, hindi, multi, series, latest, top, action, moviebox] = await Promise.allSettled([
           fetchPopularMovies(1),
           fetchPopularAnime(1),
           fetchHindiMovies(1),
@@ -121,11 +123,13 @@ export default function App() {
           fetchTrendingSeries(1),
           fetchLatestMovies(1),
           fetchTopRated(1),
-          fetchGenreMovies(28, 1)
+          fetchGenreMovies(28, 1),
+          fetchMovieBoxTrending()
         ]);
 
         if (cancelled) return;
         setShelvesData({
+          moviebox: moviebox.status === 'fulfilled' && moviebox.value?.length > 0 ? moviebox.value : CURATED_MOVIEBOX_TITLES,
           popularMovies: popMovies.status === 'fulfilled' && popMovies.value?.length > 0 ? popMovies.value : CURATED_HOLLYWOOD_BLOCKBUSTERS,
           popularAnime: popAnime.status === 'fulfilled' && popAnime.value?.length > 0 ? popAnime.value : CURATED_HINDI_DUBBED_ANIME,
           hindiDubbed: hindi.status === 'fulfilled' && hindi.value?.length > 0 ? hindi.value : CURATED_BOLLYWOOD_BLOCKBUSTERS,
@@ -204,6 +208,13 @@ export default function App() {
 
   useEffect(() => {
     setContinueWatching(getContinueWatchingList());
+    const handleProgressChange = () => setContinueWatching(getContinueWatchingList());
+    window.addEventListener('storage', handleProgressChange);
+    window.addEventListener('furina:progress-updated', handleProgressChange);
+    return () => {
+      window.removeEventListener('storage', handleProgressChange);
+      window.removeEventListener('furina:progress-updated', handleProgressChange);
+    };
   }, [activeMedia, activeCategory]);
 
   // Apply theme, accent, and appearance settings on mount & react to updates (Requirement 11)
@@ -261,6 +272,22 @@ export default function App() {
       localStorage.setItem('furina_master_mode', isMasterMode ? 'true' : 'false');
     } catch {}
   }, [isMasterMode]);
+
+  useEffect(() => {
+    window.__openStudio = () => setIsStudioOpen(true);
+    window.__closeStudio = () => setIsStudioOpen(false);
+    window.__playMedia = (media) => {
+      setIsStudioOpen(false);
+      setActiveMedia(media);
+    };
+    window.__getStudioSample = () => getStoredStudioMovies()[0];
+    return () => {
+      delete window.__openStudio;
+      delete window.__closeStudio;
+      delete window.__playMedia;
+      delete window.__getStudioSample;
+    };
+  }, []);
 
   useEffect(() => {
     const syncMasterMode = () => {
@@ -334,6 +361,7 @@ export default function App() {
     }
     if (cat === 'trending') return await fetchTrendingAll(pageNum);
     if (cat === 'new_movies') return await fetchLatestMovies(pageNum);
+    if (cat === 'moviebox') return await fetchMovieBoxTrending();
     if (cat === 'hollywood') {
       if (movieFilter === 'hindi') return await fetchHindiDubbedHollywood(pageNum);
       if (movieFilter === 'popular') return await fetchTrendingAll(pageNum);
@@ -432,6 +460,7 @@ export default function App() {
 
   const displayedItems = useMemo(() => {
     if (globalMediaFilter === 'all') return items;
+    if (globalMediaFilter === 'moviebox') return items.filter((item) => String(item.id).startsWith('mb_') || item.corner?.includes('MovieBox') || isHindiAvailable(item));
     if (globalMediaFilter === 'hindi') return items.filter((item) => isHindiAvailable(item));
     if (globalMediaFilter === 'english') return items.filter((item) => item.original_language !== 'hi' || item.languages?.en);
     if (globalMediaFilter === 'japanese') return items.filter((item) => item.original_language === 'ja' || item.category === 'anime' || item.languages?.ja);
@@ -634,6 +663,8 @@ export default function App() {
                     ? '🔥 Trending Worldwide (Movies & Series)'
                     : activeCategory === 'new_movies'
                     ? '✨ New Movie Releases (In Theaters & 4K Streaming)'
+                    : activeCategory === 'moviebox'
+                    ? '📦 MovieBox 2026 Picks & Multi-Dub'
                     : activeCategory === 'hollywood'
                     ? '🎬 Hollywood Cinema (English)'
                     : activeCategory === 'hindi'
@@ -889,6 +920,7 @@ export default function App() {
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 text-xs mb-4">
           {[
             { id: 'all', label: 'All' },
+            { id: 'moviebox', label: '📦 MovieBox 2026', highlight: 'cyan' },
             { id: 'hindi', label: '🇮🇳 Hindi Dubbed', highlight: 'amber' },
             { id: 'english', label: '🇺🇸 English' },
             { id: 'japanese', label: '🇯🇵 Japanese' },
@@ -976,6 +1008,21 @@ export default function App() {
             {/* If on Homepage without search or language filter, display Netflix-style streaming shelves */}
             {!searchQuery.trim() && activeCategory === 'trending' && globalMediaFilter === 'all' ? (
               <div className="space-y-6 sm:space-y-8">
+                {/* Shelf: MovieBox 2026 Picks & Multi-Dub */}
+                {shelvesData.moviebox?.length > 0 && (
+                  <MediaShelf
+                    title="MovieBox 2026 Picks & Multi-Dub"
+                    icon={Film}
+                    badge="MOVIEBOX"
+                    items={shelvesData.moviebox}
+                    onPlay={setActiveMedia}
+                    onOpenDetails={setDetailsItem}
+                    isWatchlisted={isWatchlisted}
+                    onToggleWatchlist={toggleWatchlist}
+                    onViewAll={() => setActiveCategory('moviebox')}
+                  />
+                )}
+
                 {/* Shelf 1: Trending Worldwide */}
                 <MediaShelf
                   title="Trending Worldwide"
@@ -1153,6 +1200,7 @@ export default function App() {
       {activeMedia && (
         <ErrorBoundary inline>
           <PlayerModal
+            key={activeMedia.id}
             item={activeMedia}
             preferredServerId={preferredServer}
             isHindiPreferred={

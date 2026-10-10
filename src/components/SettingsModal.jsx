@@ -271,6 +271,8 @@ export default function SettingsModal({
         <button 
           onClick={onClose}
           aria-label="Close Settings"
+          title="Close Settings (Esc)"
+          data-testid="close-settings-btn"
           className="absolute top-3 right-3 sm:top-4 sm:right-4 z-40 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 flex items-center justify-center text-cyan-300 hover:text-white transition cursor-pointer"
         >
           <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />

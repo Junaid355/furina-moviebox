@@ -44,6 +44,7 @@ export default function Navbar({
   const baseCategories = [
     { id: 'trending', label: 'Trending', icon: Flame },
     { id: 'new_movies', label: 'New Movies', icon: Sparkles },
+    { id: 'moviebox', label: 'MovieBox', icon: Film },
     { id: 'hollywood', label: 'Hollywood', icon: Film },
     { id: 'hindi', label: 'Hindi', icon: Sparkles },
     { id: 'kdrama', label: 'K-Drama', icon: Tv },

@@ -128,6 +128,13 @@ export default function MovieStudioModal({ isOpen, onClose, onPlayMovie, onMovie
   const [activeTab, setActiveTab] = useState('list'); // 'list' | 'editor'
   const [editingId, setEditingId] = useState(null);
 
+  useEffect(() => {
+    if (isOpen) {
+      setMovies(getStoredStudioMovies());
+      setActiveTab('list');
+    }
+  }, [isOpen]);
+
   // Form State
   const [formData, setFormData] = useState({
     title: '',
