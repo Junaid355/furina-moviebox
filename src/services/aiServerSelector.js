@@ -13,18 +13,18 @@ export const SERVER_PROFILES = {
   vidfast:           { tier: 1, badge: '4K Ultra Fast (Instant Play)', adLevel: 'Clean', hindi: false },
   bingr:             { tier: 1, badge: 'High Bitrate • Clean CDN', adLevel: 'Clean', hindi: false },
   vidsrc_pm:         { tier: 1, badge: 'Zero Ads • 4K Direct', adLevel: 'Clean', hindi: false },
-  moviebox:          { tier: 1, badge: 'MovieBox Official • Multi-Dub', adLevel: 'Clean', hindi: true },
-  moviebox_cloud:    { tier: 1, badge: 'MovieBox Official • Multi-Dub', adLevel: 'Clean', hindi: true },
+  moviebox:          { tier: 1, badge: 'MovieBox Stream • Multi-Dub', adLevel: 'Clean', hindi: true },
+  moviebox_cloud:    { tier: 1, badge: 'MovieBox Ultra • Multi-Dub', adLevel: 'Clean', hindi: true },
   twoembed_vip:      { tier: 1, badge: 'VIP Cinema Stream (Direct CDN)', adLevel: 'Low', hindi: false },
   vidsrc_su:         { tier: 1, badge: 'VidSrc Cloud • 4K UHD Direct', adLevel: 'Clean', hindi: false },
+  autoembed:         { tier: 1, badge: 'Instant 1080p • Zero Lag', adLevel: 'Clean', hindi: true },
   multiembed:        { tier: 2, badge: 'MultiEmbed VIP • Global Dubs', adLevel: 'Clean', hindi: true },
   animeworld_india:  { tier: 2, badge: 'High-Speed CDN Mirror', adLevel: 'Low', hindi: true },
   vidlink:           { tier: 2, badge: 'Multi-Audio Pro', adLevel: 'Medium', hindi: false },
   zxcstream:         { tier: 2, badge: 'Fast Stream • Roxy Prime', adLevel: 'Clean', hindi: true },
   one23embed:        { tier: 2, badge: 'Multi-Source 1080p', adLevel: 'Medium', hindi: true },
   smashy:            { tier: 2, badge: 'AnyEmbed Direct Stream', adLevel: 'Clean', hindi: true },
-  tgvid:             { tier: 3, badge: 'Backup Mirror (Slow / Unstable)', adLevel: 'Clean', hindi: true },
-  autoembed:         { tier: 3, badge: 'Fallback Mirror', adLevel: 'Medium', hindi: true }
+  tgvid:             { tier: 3, badge: 'Backup Mirror (Slow / Unstable)', adLevel: 'Clean', hindi: true }
 };
 
 const DEFAULT_PROFILE = { tier: 2, badge: 'HD Mirror', adLevel: 'Unknown', hindi: false };

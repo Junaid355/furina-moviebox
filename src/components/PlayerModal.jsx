@@ -1281,10 +1281,10 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
               <button
                 onClick={toggleFullscreen}
                 title="Cinema Fullscreen (F)"
-                className="flex items-center gap-1.5 p-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-gray-950 text-xs font-extrabold transition shadow-[0_0_15px_rgba(56,189,248,0.45)] transform hover:scale-105 active:scale-95 cursor-pointer shrink-0"
+                className="hidden sm:flex items-center gap-1.5 p-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-gray-950 text-xs font-extrabold transition shadow-[0_0_15px_rgba(56,189,248,0.45)] transform hover:scale-105 active:scale-95 cursor-pointer shrink-0"
               >
                 <Maximize2 className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Cinema Mode</span>
+                <span>Cinema Mode</span>
               </button>
 
               {/* Progress-Aware Download Manager */}
@@ -1292,7 +1292,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 onClick={handleDownload}
                 disabled={downloadState.status === 'downloading' || downloadState.status === 'preparing'}
                 title="Download movie or episode in HD / 4K"
-                className={`flex items-center gap-1.5 p-1.5 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold transition shadow-sm cursor-pointer shrink-0 ${
+                className={`hidden sm:flex items-center gap-1.5 p-1.5 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold transition shadow-sm cursor-pointer shrink-0 ${
                   downloadState.status === 'completed'
                     ? 'bg-emerald-500 text-gray-950 border border-emerald-400 font-extrabold shadow-[0_0_12px_rgba(16,185,129,0.5)]'
                     : downloadState.status === 'downloading' || downloadState.status === 'preparing'
@@ -1305,7 +1305,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 {downloadState.status === 'completed' && <CheckCircle2 className="w-3.5 h-3.5 text-gray-950" />}
                 {downloadState.status === 'idle' && <Download className="w-3.5 h-3.5" />}
 
-                <span className="hidden sm:inline">
+                <span>
                   {downloadState.status === 'preparing' && `Preparing ${downloadState.progress}%`}
                   {downloadState.status === 'downloading' && `Downloading ${downloadState.progress}%`}
                   {downloadState.status === 'completed' && 'Downloaded ✓'}
@@ -1321,17 +1321,17 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   soundFx.playClick?.();
                 }}
                 title={`🛡️ Furina Ad-Shield (${shieldMode === 'smart' ? 'Smart Shield' : 'Strict Sandbox'} - ${adShieldActive ? 'ON' : 'OFF'}, ${blockedAdsCount} blocked). Click to open uBlock HUD.`}
-                className={`flex items-center gap-1.5 p-1.5 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold transition shadow-sm cursor-pointer shrink-0 border ${
+                className={`flex items-center gap-1 p-1 sm:px-3 sm:py-1.5 rounded-xl text-[10px] sm:text-xs font-bold transition shadow-sm cursor-pointer shrink-0 border ${
                   adShieldActive
                     ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/50 shadow-[0_0_12px_rgba(16,185,129,0.4)]'
                     : 'bg-rose-500/20 text-rose-300 border-rose-500/40'
                 }`}
               >
-                <ShieldCheck className={`w-3.5 h-3.5 ${adShieldActive ? 'text-emerald-400 animate-pulse' : 'text-rose-400'}`} />
+                <ShieldCheck className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${adShieldActive ? 'text-emerald-400 animate-pulse' : 'text-rose-400'}`} />
                 <span className="hidden sm:inline">Ad-Shield:</span>
-                <span className="font-black">{adShieldActive ? 'ON' : 'OFF'}</span>
+                <span className="font-black text-[9.5px] sm:text-xs">{adShieldActive ? 'ON' : 'OFF'}</span>
                 {blockedAdsCount > 0 && (
-                  <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-emerald-950/80 text-emerald-300 font-mono border border-emerald-500/30">
+                  <span className="text-[8.5px] sm:text-[9px] px-1 py-0.2 rounded-full bg-emerald-950/80 text-emerald-300 font-mono border border-emerald-500/30">
                     {blockedAdsCount}
                   </span>
                 )}
@@ -1524,7 +1524,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
               </div>
 
               {/* Integrated AI Boost Filter Switcher */}
-              <div className="flex items-center gap-1 bg-black/50 p-0.5 rounded-full border border-cyan-500/30">
+              <div className="hidden sm:flex items-center gap-1 bg-black/50 p-0.5 rounded-full border border-cyan-500/30">
                 <span className="flex items-center gap-1 px-2 py-0.5 text-cyan-300 font-extrabold text-[10px]">
                   <Sparkles className="w-3 h-3 text-cyan-400 animate-pulse" />
                   <span>AI Boost:</span>
@@ -1553,7 +1553,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
               {/* Quick Cinema Fullscreen Button */}
               <button
                 onClick={toggleFullscreen}
-                className="text-[11px] text-cyan-300 hover:text-white font-bold flex items-center gap-1 bg-cyan-500/15 border border-cyan-500/30 px-2.5 py-1 rounded-lg transition cursor-pointer ml-auto"
+                className="hidden sm:flex text-[11px] text-cyan-300 hover:text-white font-bold items-center gap-1 bg-cyan-500/15 border border-cyan-500/30 px-2.5 py-1 rounded-lg transition cursor-pointer ml-auto"
                 title="Cinema Fullscreen (F)"
               >
                 <Maximize2 className="w-3 h-3" />
@@ -1562,7 +1562,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
             </div>
 
             {/* Audio Mode Active Guidance Badge & Hardware Track Detection */}
-            <div className="flex items-center gap-2 flex-wrap text-[11px] text-cyan-200/70">
+            <div className="hidden sm:flex items-center gap-2 flex-wrap text-[11px] text-cyan-200/70">
               {audioMode === 'english' && hasWorkingEnglishSource && (
                 <span className="text-cyan-300 font-medium">
                   ✓ <strong>English Audio Active</strong> ({isCustom ? 'Studio Master Track' : isAnime ? 'VidLink Pro verified English stream' : 'Original Theatrical Master Audio'})
@@ -1603,7 +1603,9 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
           {/* ========================================================================= */}
           <div 
             className={`relative w-full bg-black flex items-center justify-center overflow-hidden ${
-              isFullscreen ? 'w-full h-full flex-1 max-w-full max-h-full' : 'w-full flex-1 aspect-video sm:aspect-auto sm:min-h-[500px] md:min-h-[600px] lg:min-h-[720px]'
+              isFullscreen 
+                ? 'w-full h-full flex-1 max-w-full max-h-full' 
+                : 'w-full flex-1 h-[52vh] min-h-[280px] max-h-[58vh] sm:h-auto sm:aspect-auto sm:min-h-[500px] md:min-h-[600px] lg:min-h-[720px]'
             }`}
           >
             {/* CASE 0: Future Unreleased Theatrical Release -> CLEAN THEATRICAL CARD */}
@@ -2135,7 +2137,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                     <span>Not playing? Next server</span>
                   </button>
 
-                  <div className="flex items-center gap-1.5 flex-wrap">
+                  <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 flex-nowrap sm:flex-wrap w-full">
                     {availableServers.map((srv) => {
                       const isSelected = currentServer.id === srv.id;
                       return (
@@ -2155,7 +2157,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                               // Official MovieBox & MultiEmbed high-speed multi-dub routing
                             }
                           }}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer border ${
+                          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer border shrink-0 sm:shrink ${
                             isSelected && playerMode === 'stream'
                               ? 'bg-cyan-500 text-gray-950 border-cyan-400 shadow-[0_0_10px_rgba(56,189,248,0.5)]'
                               : 'bg-[#060c20] text-cyan-200/70 border-cyan-500/25 hover:bg-white/5 hover:text-white'
@@ -2168,7 +2170,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 text-[11px] text-cyan-200/80 flex-wrap">
+                <div className="hidden sm:flex items-center gap-2 text-[11px] text-cyan-200/80 flex-wrap">
                   <span className="flex items-center gap-1 bg-cyan-950/60 border border-cyan-500/30 px-2 py-0.5 rounded-md text-[10px] font-bold text-cyan-300">
                     <Subtitles className="w-3 h-3 text-cyan-400" />
                     <span>Subtitles (CC): Toggle English/Hindi subtitles inside player</span>
@@ -2186,7 +2188,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
               {/* In-Player / Below Player Audio Guidance Tip */}
               <div 
                 data-testid="audio-guidance-bar"
-                className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg bg-cyan-950/40 border border-cyan-500/30 text-cyan-200 text-[11px]"
+                className="hidden sm:flex w-full items-center gap-2 px-3 py-1.5 rounded-lg bg-cyan-950/40 border border-cyan-500/30 text-cyan-200 text-[11px]"
               >
                 <span className="font-semibold">🎙️ Multi-Audio: Click the Gear (⚙️) or Audio icon inside the player to select Hindi / English, or switch to the Hindi Dubbed server mirror below.</span>
               </div>

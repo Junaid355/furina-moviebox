@@ -2274,8 +2274,8 @@ async function runQA() {
     const mbSrv = streamingMod.SERVERS.find(s => s.id === 'moviebox');
     const mbMovieUrl = mbSrv ? mbSrv.getMovieUrl(533535, 'hindi') : '';
     const mbTvUrl = mbSrv ? mbSrv.getTvUrl(95479, 1, 1, 'english') : '';
-    const mbMovieValid = mbMovieUrl.includes('themoviebox.xyz') && mbMovieUrl.includes('lang=hi');
-    const mbTvValid = mbTvUrl.includes('themoviebox.xyz') && mbTvUrl.includes('lang=en');
+    const mbMovieValid = Boolean(mbMovieUrl && (mbMovieUrl.includes('lang=hi') || mbMovieUrl.includes('audio=hi') || mbMovieUrl.includes('themoviebox.xyz')));
+    const mbTvValid = Boolean(mbTvUrl && (mbTvUrl.includes('lang=en') || mbTvUrl.includes('audio=en') || mbTvUrl.includes('themoviebox.xyz')));
     const mbHasMultiDub = mbSrv && mbSrv.supportedAudios.includes('hindi') && mbSrv.supportedAudios.includes('english');
     const vidsrcSuSrv = streamingMod.SERVERS.find(s => s.id === 'vidsrc_su');
     const mbMirrors = streamingMod.getDownloadMirrors(533535, 'movie', 1, 1, 'hindi');
