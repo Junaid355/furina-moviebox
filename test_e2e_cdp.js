@@ -1066,7 +1066,7 @@ async function runQA() {
       (() => {
         const iframe = document.querySelector('iframe');
         const hasSandbox = iframe ? iframe.hasAttribute('sandbox') : false;
-        const aiBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('AI Auto-Select'));
+        const aiBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('AI Boost') || b.innerText.includes('AI Auto-Select') || b.getAttribute('data-testid') === 'ai-boost-server-btn');
         const adShieldBtn = Array.from(document.querySelectorAll('button')).find(b => b.title?.includes('Furina Ad-Shield') || b.innerText.includes('Ad-Shield'));
         return {
           hasSandbox,
@@ -1076,10 +1076,10 @@ async function runQA() {
       })()
     `);
 
-    // Click AI Auto-Select Server
+    // Click AI Auto-Select / Boost Server
     await client.eval(`
       (() => {
-        const aiBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('AI Auto-Select'));
+        const aiBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('AI Boost') || b.innerText.includes('AI Auto-Select') || b.getAttribute('data-testid') === 'ai-boost-server-btn');
         if (aiBtn) aiBtn.click();
       })()
     `);

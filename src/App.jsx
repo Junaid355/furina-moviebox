@@ -108,7 +108,32 @@ export default function App() {
     const handleHash = () => {
       try {
         if (typeof window !== 'undefined' && window.location.hash.startsWith('#room=')) {
-          setIsWatchTogetherOpen(true);
+          const rawHash = window.location.hash.slice(1);
+          const params = new URLSearchParams(rawHash.replace(/^room=([^&]+)/, 'roomCode=$1'));
+          const mId = params.get('id');
+          const mTitle = params.get('title');
+          const mType = params.get('type') || 'movie';
+          const s = Number(params.get('s')) || 1;
+          const e = Number(params.get('e')) || 1;
+          const srv = params.get('srv') || 'autoembed';
+          const poster = params.get('poster') || '';
+
+          if (mId && mTitle) {
+            const syncItem = {
+              id: isNaN(Number(mId)) ? mId : Number(mId),
+              title: decodeURIComponent(mTitle),
+              name: decodeURIComponent(mTitle),
+              media_type: mType,
+              type: mType,
+              poster_path: poster ? decodeURIComponent(poster) : '',
+              season: s,
+              episode: e,
+              preferredServerId: srv
+            };
+            setActiveMedia(syncItem);
+          } else {
+            setIsWatchTogetherOpen(true);
+          }
         }
       } catch (e) {}
     };

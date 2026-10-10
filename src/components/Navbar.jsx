@@ -144,9 +144,9 @@ export default function Navbar({
               <Film className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400" />
             </div>
           ) : (
-            <div className="relative w-7 h-7 sm:w-9 sm:h-9 rounded-full overflow-hidden border-2 border-cyan-400 shadow-[0_0_12px_rgba(56,189,248,0.7)] group-hover:scale-110 group-active:scale-95 transition-all duration-300 bg-[#060d24] shrink-0">
+            <div className="relative w-7 h-7 sm:w-9 sm:h-9 rounded-full overflow-hidden border-2 border-cyan-400 shadow-[0_0_15px_rgba(56,189,248,0.75)] group-hover:scale-110 group-active:scale-95 transition-all duration-300 bg-[#060d24] shrink-0">
               <img 
-                src="./furina_chibi.gif" 
+                src="./furina-avatar.jpg" 
                 alt="Furina MovieBox" 
                 className="w-full h-full object-cover" 
                 onError={(e) => { e.currentTarget.src = './favicon.png'; }}

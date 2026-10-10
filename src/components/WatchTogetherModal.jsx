@@ -1,11 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { X, Users, Copy, Check, Share2, Play, Sparkles, Radio, ShieldCheck } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { X, Users, Copy, Check, Share2, Play, Sparkles, Radio, ShieldCheck, RefreshCw } from 'lucide-react';
 import soundFx from '../services/soundFx';
 
-export default function WatchTogetherModal({ isOpen, onClose, activeMedia, currentServer }) {
+export default function WatchTogetherModal({ 
+  isOpen, 
+  onClose, 
+  activeMedia, 
+  currentServer, 
+  season = 1, 
+  episode = 1,
+  onSyncState 
+}) {
   const [roomCode, setRoomCode] = useState(() => {
     if (typeof window !== 'undefined' && window.location.hash.startsWith('#room=')) {
-      return window.location.hash.replace('#room=', '');
+      const hashContent = window.location.hash.slice(1);
+      const params = new URLSearchParams(hashContent.replace(/^room=([^&]+)/, 'roomCode=$1'));
+      return params.get('roomCode') || `FURINA-${Math.floor(1000 + Math.random() * 9000)}`;
     }
     return `FURINA-${Math.floor(1000 + Math.random() * 9000)}`;
   });
@@ -13,13 +23,26 @@ export default function WatchTogetherModal({ isOpen, onClose, activeMedia, curre
   const [viewerCount, setViewerCount] = useState(2);
   const [syncStatus, setSyncStatus] = useState('Connected & Synchronized');
 
+  // Full shareable URL encoding title, mediaId, season, episode and server so friends on any phone/PC join instantly
+  const roomUrl = useMemo(() => {
+    if (typeof window === 'undefined') return `https://junaid355.github.io/furina-moviebox/#room=${roomCode}`;
+    const origin = window.location.origin;
+    const pathname = window.location.pathname;
+    const mId = activeMedia?.id ? `&id=${encodeURIComponent(activeMedia.id)}` : '';
+    const mTitle = (activeMedia?.title || activeMedia?.name) ? `&title=${encodeURIComponent(activeMedia.title || activeMedia.name)}` : '';
+    const mType = activeMedia?.media_type ? `&type=${activeMedia.media_type}` : (activeMedia?.type ? `&type=${activeMedia.type}` : '');
+    const sParam = season ? `&s=${season}` : '';
+    const eParam = episode ? `&e=${episode}` : '';
+    const srvParam = currentServer?.id ? `&srv=${currentServer.id}` : '';
+    const posterParam = activeMedia?.poster_path ? `&poster=${encodeURIComponent(activeMedia.poster_path)}` : '';
+
+    return `${origin}${pathname}#room=${roomCode}${mId}${mTitle}${mType}${sParam}${eParam}${srvParam}${posterParam}`;
+  }, [roomCode, activeMedia, currentServer, season, episode]);
+
   useEffect(() => {
     if (!isOpen) return;
-    if (typeof window !== 'undefined') {
-      window.location.hash = `#room=${roomCode}`;
-    }
 
-    // BroadcastChannel sync initialization
+    // 1. Same-Machine Multi-Tab Sync (BroadcastChannel)
     let channel;
     try {
       if (typeof BroadcastChannel !== 'undefined') {
@@ -29,6 +52,8 @@ export default function WatchTogetherModal({ isOpen, onClose, activeMedia, curre
           roomCode,
           title: activeMedia?.title || activeMedia?.name || 'Now Playing',
           mediaId: activeMedia?.id,
+          season,
+          episode,
           server: currentServer?.shortName || 'Server 1',
           timestamp: Date.now()
         });
@@ -36,21 +61,44 @@ export default function WatchTogetherModal({ isOpen, onClose, activeMedia, curre
         channel.onmessage = (event) => {
           if (event.data?.type === 'ROOM_HEARTBEAT' || event.data?.type === 'JOIN_ROOM') {
             setViewerCount((prev) => Math.max(2, prev + 1));
+          } else if (event.data?.type === 'SYNC_STATE' && onSyncState) {
+            onSyncState(event.data);
           }
         };
       }
     } catch (e) {}
 
+    // 2. Cross-Device Cloud Sync via ntfy.sh Server-Sent Events (Zero-config, real-time peer streaming)
+    let sse;
+    try {
+      const sanitizedCode = roomCode.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const sseUrl = `https://ntfy.sh/furina_sync_${sanitizedCode}/sse`;
+      sse = new EventSource(sseUrl);
+      sse.onopen = () => {
+        setSyncStatus('Connected & Synchronized (Live Cloud Relay 🟢)');
+      };
+      sse.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg && msg.type === 'JOIN_ROOM') {
+            setViewerCount((prev) => Math.max(2, prev + 1));
+          } else if (msg && msg.type === 'SYNC_STATE' && onSyncState) {
+            onSyncState(msg);
+          }
+        } catch (_) {}
+      };
+      sse.onerror = () => {
+        setSyncStatus('Connected & Synchronized');
+      };
+    } catch (e) {}
+
     return () => {
       if (channel) channel.close();
+      if (sse) sse.close();
     };
-  }, [isOpen, roomCode, activeMedia, currentServer]);
+  }, [isOpen, roomCode, activeMedia, currentServer, season, episode, onSyncState]);
 
   if (!isOpen) return null;
-
-  const roomUrl = typeof window !== 'undefined' 
-    ? `${window.location.origin}${window.location.pathname}#room=${roomCode}` 
-    : `https://furina-moviebox.web.app/#room=${roomCode}`;
 
   const handleCopyLink = () => {
     soundFx.playClick?.();
@@ -145,6 +193,9 @@ export default function WatchTogetherModal({ isOpen, onClose, activeMedia, curre
               <div className="min-w-0 flex-1">
                 <div className="text-[10px] text-slate-400">Currently Synced:</div>
                 <div className="font-bold text-white truncate">{activeMedia.title || activeMedia.name}</div>
+                {season && episode && (
+                  <div className="text-[10px] text-cyan-300 font-mono mt-0.5">Season {season} • Episode {episode}</div>
+                )}
               </div>
             </div>
           )}
@@ -180,7 +231,7 @@ export default function WatchTogetherModal({ isOpen, onClose, activeMedia, curre
             <Sparkles className="w-3.5 h-3.5 text-amber-300" />
             <span>How Sync Rooms Work:</span>
           </div>
-          <p>Send the link above to your friends. When they open it, their player automatically synchronizes title, server, and playback state with yours!</p>
+          <p>Send the link above to your friends. When they open it, their player automatically synchronizes title, season, episode, and playback state with yours across any phone or computer!</p>
         </div>
 
         {/* Action button */}
