@@ -3,10 +3,14 @@ import {
   X, Server, Film, Tv, RefreshCw, ExternalLink, Info, Zap, Play, Pause,
   Sparkles, ShieldCheck, Download, Maximize2, Minimize2, Volume2, VolumeX,
   CheckCircle2, AlertTriangle, ArrowRight, Loader2, ChevronLeft, ChevronRight,
-  PictureInPicture, Keyboard, HelpCircle, Subtitles
+  PictureInPicture, Keyboard, HelpCircle, Subtitles, Users, Sun, FastForward
 } from 'lucide-react';
 import { SERVERS, getStreamUrl, getDownloadUrl } from '../services/streaming';
-import { fetchSeasonEpisodes, fetchTvDetails, isHindiAvailable, isHindiDubbedAnime, getGenreNames, BACKDROP_BASE, IMG_BASE, POSTER_THUMB_BASE } from '../services/tmdb';
+import { 
+  fetchSeasonEpisodes, fetchTvDetails, isHindiAvailable, isHindiDubbedAnime, 
+  getGenreNames, BACKDROP_BASE, IMG_BASE, POSTER_THUMB_BASE,
+  VERIFIED_HINDI_GLOBAL_SERIES_IDS 
+} from '../services/tmdb';
 import { 
   permitPopupOnce, getBlockedCount, isAdBlockEnabled, 
   setShieldEnabled, getShieldMode, setShieldMode, setPlayerActive 
@@ -15,6 +19,7 @@ import { evaluateServers, isAutoAiServerEnabled, probeServers, nextBestServer } 
 import soundFx from '../services/soundFx';
 import DownloadModal from './DownloadModal';
 import UBlockShieldModal from './UBlockShieldModal';
+import WatchTogetherModal from './WatchTogetherModal';
 import hindiProviderManager, { 
   selectPhysicalAudioTrack, 
   getPrioritizedAudioSources 
@@ -32,13 +37,6 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     return {};
   }, []);
 
-  // Safe classification and robust fallbacks
-  const isSeries = Boolean(
-    item?.media_type === 'tv' || 
-    (item?.media_type !== 'movie' && Boolean(item?.first_air_date)) || 
-    item?.category === 'series' || 
-    item?.category === 'kdrama'
-  );
   const title = item?.title || item?.name || 'Now Playing';
 
   // Accurate Anime, Hanime & Hindi classification
@@ -67,6 +65,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       return null;
     }
     const titleLower = (item?.title || item?.name || '').toLowerCase();
+    if (titleLower.includes('stranger things')) return 66732;
     if (titleLower.includes('house of the dragon')) return 94997;
     if (titleLower.includes('deadpool')) return 533535;
     if (titleLower.includes('endgame')) return 299534;
@@ -81,12 +80,41 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     if (titleLower.includes('reacher')) return 108978;
     if (titleLower.includes('avatar')) return 19995;
     if (titleLower.includes('carrie')) return 440;
+    if (titleLower.includes('wednesday')) return 119051;
+    if (titleLower.includes('the boys')) return 76479;
+    if (titleLower.includes('money heist')) return 71446;
+    if (titleLower.includes('the witcher') || titleLower.includes('witcher')) return 71912;
+    if (titleLower.includes('loki')) return 84958;
+    if (titleLower.includes('fallout')) return 106379;
+    if (titleLower.includes('the last of us') || titleLower.includes('last of us')) return 100088;
+    if (titleLower.includes('silo')) return 125988;
+    if (titleLower.includes('squid game')) return 204343;
+    if (titleLower.includes('dark')) return 70523;
+    if (titleLower.includes('alice in borderland')) return 110316;
     if (typeof item?.id === 'number' && item.id < 20000000) return item.id;
     if (item?.tmdb_id && Number(item.tmdb_id) < 20000000) return Number(item.tmdb_id);
     if (item?.tmdbId && Number(item.tmdbId) < 20000000) return Number(item.tmdbId);
     if (item?.id && !isNaN(Number(item.id)) && Number(item.id) < 20000000) return Number(item.id);
     return null;
   }, [item]);
+
+  // Safe classification and robust fallbacks for TV Series vs Movies
+  const isSeries = Boolean(
+    item?.media_type === 'tv' || 
+    item?.type === 'tv' ||
+    item?.category === 'series' || 
+    item?.category === 'kdrama' ||
+    Boolean(item?.seasons) ||
+    Boolean(item?.number_of_seasons) ||
+    Boolean(item?.episodes) ||
+    (item?.media_type !== 'movie' && Boolean(item?.first_air_date)) ||
+    (resolvedTmdbId && (
+      VERIFIED_HINDI_GLOBAL_SERIES_IDS.has(Number(resolvedTmdbId)) ||
+      VERIFIED_HINDI_GLOBAL_SERIES_IDS.has(Number(item?.id)) ||
+      [66732, 63174, 94997, 108978, 119051, 71446, 71912, 76479, 100088, 106379, 84958, 125988, 70523, 110316, 111110, 82452, 204343, 81356, 96677].includes(Number(resolvedTmdbId || item?.id))
+    )) ||
+    (title && /stranger things|wednesday|lucifer|reacher|house of the dragon|the boys|money heist|loki|witcher|fallout|last of us|silo|dark|squid game/i.test(title))
+  );
 
   // Studio playback mode is strictly reserved for custom videos explicitly created in the Movie Studio creator tool or the default demo sample
   const isCustomMovie = Boolean(
@@ -156,9 +184,9 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     return null;
   })();
 
-  // Initial Audio Mode: respects saved choice per title, then user preference, with honest availability fallback
+  // Initial Audio Mode: respects saved choice per title, then smart category memory, then user preference
   const getInitialAudioMode = () => {
-    // 1. Check title-specific persisted choice (Section 5 & 7)
+    // 1. Check title-specific persisted choice
     if (appSettings.rememberAudioPerTitle !== false && item?.id) {
       try {
         const savedChoice = localStorage.getItem(`furina_audio_${item.id}`);
@@ -170,7 +198,29 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       } catch (e) {}
     }
 
-    // 2. Global user preference
+    // 2. Smart Language Memory by Category:
+    // Anime: Automatically play in Japanese with subtitles
+    if (isAnime && hasWorkingJapaneseSource) {
+      return 'sub';
+    }
+
+    // Bollywood: Automatically play in Hindi
+    if (isBollywoodHindi && hasWorkingHindiSource) {
+      return 'hindi';
+    }
+
+    // Category-specific saved preference
+    try {
+      const catKey = isAnime ? 'furina_anime_audio_pref' : isBollywoodHindi ? 'furina_bollywood_audio_pref' : 'furina_hollywood_audio_pref';
+      const catSaved = localStorage.getItem(catKey);
+      if (catSaved) {
+        if (catSaved === 'hindi' && hasWorkingHindiSource) return 'hindi';
+        if (catSaved === 'sub' && hasWorkingJapaneseSource) return 'sub';
+        if (catSaved === 'english' && hasWorkingEnglishSource) return 'english';
+      }
+    } catch (e) {}
+
+    // Hollywood blockbusters: in user's chosen default (Hindi Dub or English)
     if (userPreferredAudio === 'hindi') {
       if (hasWorkingHindiSource) return 'hindi';
       return hasWorkingEnglishSource ? 'english' : (hasWorkingJapaneseSource ? 'sub' : 'english');
@@ -190,8 +240,6 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       if (customSources.ja) return 'sub';
       return 'english';
     }
-    if (isBollywoodHindi && hasWorkingHindiSource) return 'hindi';
-    if (isAnime) return 'sub';
     if (hasWorkingHindiSource) {
       return 'hindi';
     }
@@ -207,6 +255,31 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const savedPlaybackTimeRef = useRef(0);
   const savedVolumeRef = useRef(1);
   const savedMutedRef = useRef(false);
+
+  // Episodes & Season State with Watch Progress Persistence
+  const getSavedProgress = () => {
+    try {
+      if (item?.id) {
+        const saved = localStorage.getItem(`furina_progress_${item.id}`);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && typeof parsed.season === 'number' && typeof parsed.episode === 'number') {
+            return { season: parsed.season, episode: parsed.episode };
+          }
+        }
+      }
+    } catch (e) {}
+    return { season: 1, episode: 1 };
+  };
+
+  const initialProgress = getSavedProgress();
+  const [season, setSeason] = useState(initialProgress.season);
+  const [episode, setEpisode] = useState(initialProgress.episode);
+  const [totalSeasons, setTotalSeasons] = useState(1);
+  const [episodesList, setEpisodesList] = useState([]);
+  const [isLoadingEpisodes, setIsLoadingEpisodes] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
+  const handleReload = () => setReloadKey((k) => k + 1);
 
   // Filter servers: Hanime/mature content is strictly NOT hosted on VidLink (causes Next.js 500)
   // and AutoEmbed returns 404 Content Not Found on mature/vault titles (e.g. TMDB 1033051)
@@ -238,14 +311,48 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const [selectedServer, setSelectedServer] = useState(getInitialServer);
   const [iframeLoading, setIframeLoading] = useState(true);
 
-  // Watchdog: prevent iframe loading spinner from staying indefinitely on slow networks or blocked events
+  // Fullscreen & Core Player Refs
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showControls, setShowControls] = useState(true);
+  const playerWrapperRef = useRef(null);
+  const videoRef = useRef(null);
+  const controlsTimeoutRef = useRef(null);
+
+  // Mobile Gestures, Binge Mode, Sticky Mini-Player & Watch Together states
+  const scrollContainerRef = useRef(null);
+  const [isMiniPlayer, setIsMiniPlayer] = useState(false);
+  const [manualMiniDismiss, setManualMiniDismiss] = useState(false);
+  const [bingeCountdown, setBingeCountdown] = useState(null);
+  const [skipIntroToast, setSkipIntroToast] = useState(null);
+  const [isWatchTogetherOpen, setIsWatchTogetherOpen] = useState(false);
+  const [brightnessLevel, setBrightnessLevel] = useState(1);
+  const [gestureToast, setGestureToast] = useState(null);
+  const lastTouchTapRef = useRef({ time: 0, x: 0 });
+  const touchStartRef = useRef({ x: 0, y: 0, time: 0 });
+
+  // Silent Auto-Rescue (3.5s Watchdog): Auto-failover to next fastest mirror on timeout or hang
   useEffect(() => {
     setIframeLoading(true);
     const timer = setTimeout(() => {
       setIframeLoading(false);
-    }, 7000);
+      // If still loading on a non-custom stream and not manually pinned, auto-failover silently
+      if (playerMode === 'stream' && !isCustomMovie && !manualPickRef.current) {
+        const next = nextBestServer({
+          servers: availableServers,
+          current: selectedServer,
+          audioMode,
+          isAnime,
+          isHanime,
+          tmdbId: resolvedTmdbId
+        });
+        if (next && next.id !== selectedServer?.id) {
+          setSelectedServer(next);
+          showServerToast(next, null, 'Auto-Rescued to fastest mirror ⚡');
+        }
+      }
+    }, 3500);
     return () => clearTimeout(timer);
-  }, [selectedServer.id, audioMode]);
+  }, [selectedServer?.id, season, episode, audioMode, playerMode, isCustomMovie, availableServers, isAnime, isHanime, resolvedTmdbId]);
 
   // Furina uBlock Ad-Shield Pro & AI Server Selection
   const [adShieldActive, setAdShieldActive] = useState(() => isAdBlockEnabled());
@@ -353,31 +460,6 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     return () => { cancelled = true; };
   }, [availableServers, hasOnlineStream, resolvedTmdbId]);
 
-  // Episodes & Season State with Watch Progress Persistence
-  const getSavedProgress = () => {
-    try {
-      if (item?.id) {
-        const saved = localStorage.getItem(`furina_progress_${item.id}`);
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (parsed && typeof parsed.season === 'number' && typeof parsed.episode === 'number') {
-            return { season: parsed.season, episode: parsed.episode };
-          }
-        }
-      }
-    } catch (e) {}
-    return { season: 1, episode: 1 };
-  };
-
-  const initialProgress = getSavedProgress();
-  const [season, setSeason] = useState(initialProgress.season);
-  const [episode, setEpisode] = useState(initialProgress.episode);
-  const [totalSeasons, setTotalSeasons] = useState(1);
-  const [episodesList, setEpisodesList] = useState([]);
-  const [isLoadingEpisodes, setIsLoadingEpisodes] = useState(false);
-  const [reloadKey, setReloadKey] = useState(0);
-  const handleReload = () => setReloadKey((k) => k + 1);
-
   // Auto-clear loading spinner quickly so video controls and stream are interactive
   useEffect(() => {
     setIframeLoading(true);
@@ -394,6 +476,89 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const handleNextEpisode = () => {
     setEpisode((prev) => prev + 1);
   };
+
+  // Handle container scroll for Sticky Floating Mini-Player (PiP)
+  const handleContainerScroll = useCallback((e) => {
+    const top = e.currentTarget.scrollTop;
+    if (top > 260 && !manualMiniDismiss && !isFullscreen) {
+      if (!isMiniPlayer) setIsMiniPlayer(true);
+    } else if (top <= 200) {
+      if (isMiniPlayer) setIsMiniPlayer(false);
+      if (manualMiniDismiss) setManualMiniDismiss(false);
+    }
+  }, [isMiniPlayer, manualMiniDismiss, isFullscreen]);
+
+  // Touch Gesture controls on mobile (Double-tap skip 10s, Vertical drag for brightness)
+  const handleTouchStart = (e) => {
+    if (!e.touches || e.touches.length === 0) return;
+    const touch = e.touches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY, time: Date.now() };
+
+    const now = Date.now();
+    const lastTap = lastTouchTapRef.current;
+    if (now - lastTap.time < 320 && Math.abs(touch.clientX - lastTap.x) < 55) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const relativeX = touch.clientX - rect.left;
+      const isLeft = relativeX < rect.width * 0.45;
+      const isRight = relativeX > rect.width * 0.55;
+
+      if (isLeft) {
+        soundFx.playClick?.();
+        if (videoRef.current) {
+          videoRef.current.currentTime = Math.max(0, (videoRef.current.currentTime || 0) - 10);
+        }
+        setGestureToast('⏪ -10s');
+        setTimeout(() => setGestureToast(null), 1200);
+      } else if (isRight) {
+        soundFx.playClick?.();
+        if (videoRef.current) {
+          videoRef.current.currentTime = Math.min(videoRef.current.duration || 9999, (videoRef.current.currentTime || 0) + 10);
+        }
+        setGestureToast('⏩ +10s');
+        setTimeout(() => setGestureToast(null), 1200);
+      }
+      lastTouchTapRef.current = { time: 0, x: 0 };
+    } else {
+      lastTouchTapRef.current = { time: now, x: touch.clientX };
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (!e.touches || e.touches.length === 0) return;
+    const touch = e.touches[0];
+    const deltaY = touchStartRef.current.y - touch.clientY;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const relativeX = touchStartRef.current.x - rect.left;
+
+    // Vertical drag on left edge: Adjust brightness overlay
+    if (relativeX < rect.width * 0.35 && Math.abs(deltaY) > 20) {
+      const step = deltaY > 0 ? 0.02 : -0.02;
+      setBrightnessLevel((prev) => {
+        const next = Math.min(1.5, Math.max(0.4, Math.round((prev + step) * 100) / 100));
+        setGestureToast(`☀️ Brightness: ${Math.round(next * 100)}%`);
+        return next;
+      });
+      touchStartRef.current.y = touch.clientY;
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setTimeout(() => setGestureToast(null), 1200);
+  };
+
+  // Episode Binge Countdown Handler
+  useEffect(() => {
+    if (bingeCountdown === null) return;
+    if (bingeCountdown <= 0) {
+      setBingeCountdown(null);
+      handleNextEpisode();
+      return;
+    }
+    const timer = setTimeout(() => {
+      setBingeCountdown((c) => (c !== null ? c - 1 : null));
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [bingeCountdown]);
 
   // Persist Watch Progress on Mount and Season / Episode Change
   useEffect(() => {
@@ -444,12 +609,15 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     setAudioMode(newMode);
     setUnavailableNotice({ show: false, message: '' });
 
-    // Persist audio preference per title (Requirement 5 & 7)
+    // Persist audio preference per title and smart category memory
     try {
       const s = JSON.parse(localStorage.getItem('furina_settings') || '{}');
       if (s.rememberAudioPerTitle !== false && item?.id) {
         localStorage.setItem(`furina_audio_${item.id}`, newMode);
       }
+      const catKey = isAnime ? 'furina_anime_audio_pref' : isBollywoodHindi ? 'furina_bollywood_audio_pref' : 'furina_hollywood_audio_pref';
+      localStorage.setItem(catKey, newMode);
+      localStorage.setItem('furina_smart_lang_pref', newMode);
     } catch (e) {}
 
     // HTML5 Physical Audio Track switching (where supported)
@@ -598,13 +766,6 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       '--sub-color': colorMap[appSettings?.subtitleStyle] || '#ffffff'
     };
   }, [appSettings?.subtitleSize, appSettings?.subtitleOpacity, appSettings?.subtitleBackground, appSettings?.subtitleStyle]);
-
-  // Fullscreen Mode States
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showControls, setShowControls] = useState(true);
-  const playerWrapperRef = useRef(null);
-  const videoRef = useRef(null);
-  const controlsTimeoutRef = useRef(null);
 
   // Download Manager State (0% -> 100% progress)
   const [downloadState, setDownloadState] = useState({
@@ -1366,6 +1527,19 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 <RefreshCw className="w-3.5 h-3.5" />
               </button>
 
+              {/* Watch Together / Sync Room Trigger */}
+              <button
+                onClick={() => {
+                  setIsWatchTogetherOpen(true);
+                  soundFx.playClick?.();
+                }}
+                title="Watch Together / Sync Room"
+                className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/40 text-purple-300 hover:text-white text-xs font-bold transition shadow-sm cursor-pointer"
+              >
+                <Users className="w-3.5 h-3.5" />
+                <span>Sync Room</span>
+              </button>
+
               {/* Open stream in clean external window */}
               <button
                 onClick={openInNewWindow}
@@ -1426,7 +1600,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                       }`}
                     >
                       <span>{audioMode === 'english' ? '✓' : '○'}</span>
-                      <span>🎙️ English Dub</span>
+                      <span>🇬🇧 English Dub</span>
                     </button>
                   ) : (
                     <div
@@ -1596,18 +1770,168 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
         {/* ========================================================================= */}
         {/* 4. SCROLLABLE INNER BODY - Video, Rescue Bar, Audio Info & Episodes        */}
         {/* ========================================================================= */}
-        <div className={`flex-1 flex flex-col ${isFullscreen ? 'w-full h-full items-center justify-center bg-black overflow-hidden p-0 m-0' : 'overflow-y-auto overscroll-contain'}`}>
+        <div 
+          ref={scrollContainerRef}
+          onScroll={handleContainerScroll}
+          className={`flex-1 flex flex-col ${isFullscreen ? 'w-full h-full items-center justify-center bg-black overflow-hidden p-0 m-0' : 'overflow-y-auto overscroll-contain'}`}
+        >
+          {/* Docking placeholder when floating mini-player is active */}
+          {isMiniPlayer && !isFullscreen && (
+            <div className="w-full h-44 sm:h-56 bg-slate-950/70 border border-cyan-500/20 rounded-xl flex flex-col items-center justify-center text-xs text-cyan-300/70 gap-2 m-2">
+              <span className="font-extrabold text-cyan-200">🎬 Floating Mini-Player Active</span>
+              <button
+                type="button"
+                onClick={() => { setIsMiniPlayer(false); setManualMiniDismiss(true); }}
+                className="px-3 py-1 rounded-lg bg-cyan-500/20 text-cyan-200 border border-cyan-400/30 text-xs font-bold hover:bg-cyan-500/40 cursor-pointer"
+              >
+                Restore to Full View ↖
+              </button>
+            </div>
+          )}
 
           {/* ========================================================================= */}
           {/* 5. VIDEO PLAYER AREA (CUSTOM VIDEO OR STRICT IFRAME STREAM)               */}
           {/* ========================================================================= */}
           <div 
-            className={`relative w-full bg-black flex items-center justify-center overflow-hidden ${
-              isFullscreen 
-                ? 'w-full h-full flex-1 max-w-full max-h-full' 
-                : 'w-full flex-1 h-[52vh] min-h-[280px] max-h-[58vh] sm:h-auto sm:aspect-auto sm:min-h-[500px] md:min-h-[600px] lg:min-h-[720px]'
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            style={{ filter: `brightness(${brightnessLevel})` }}
+            className={`relative w-full bg-black flex items-center justify-center overflow-hidden transition-all duration-300 ${
+              isMiniPlayer && !isFullscreen
+                ? 'fixed bottom-4 right-4 w-[280px] sm:w-[360px] aspect-video z-[99999] rounded-2xl shadow-[0_0_35px_rgba(6,182,212,0.85)] border-2 border-cyan-400 overflow-hidden bg-black'
+                : isFullscreen 
+                  ? 'w-full h-full flex-1 max-w-full max-h-full' 
+                  : 'w-full flex-1 h-[52vh] min-h-[280px] max-h-[58vh] sm:h-auto sm:aspect-auto sm:min-h-[500px] md:min-h-[600px] lg:min-h-[720px]'
             }`}
           >
+            {/* Mini Player Control Bar (when docked) */}
+            {isMiniPlayer && !isFullscreen && (
+              <div className="absolute top-2 right-2 z-[60] flex items-center gap-1.5 bg-black/80 backdrop-blur-md p-1 rounded-lg border border-cyan-500/40">
+                <button
+                  type="button"
+                  onClick={() => { setIsMiniPlayer(false); setManualMiniDismiss(true); }}
+                  title="Restore to Player Modal"
+                  className="p-1 rounded bg-cyan-500/20 hover:bg-cyan-500/40 text-cyan-200 text-xs font-bold cursor-pointer"
+                >
+                  ↖
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setIsMiniPlayer(false); setManualMiniDismiss(true); }}
+                  title="Close Mini-Player"
+                  className="p-1 rounded bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 text-xs font-bold cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
+            {/* Gesture Toast (Double Tap 10s Skip & Brightness Indicator) */}
+            {gestureToast && (
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 px-4 py-2 rounded-2xl bg-black/90 border border-cyan-400 text-cyan-200 text-sm font-black shadow-2xl backdrop-blur-md pointer-events-none animate-in fade-in zoom-in duration-100">
+                {gestureToast}
+              </div>
+            )}
+
+            {/* In-Player Translucent HUD Chips (Crunchyroll / Netflix style) */}
+            <div className="absolute top-3 left-3 z-30 flex items-center gap-1 bg-slate-950/85 backdrop-blur-md px-2 py-1 rounded-xl border border-cyan-500/30 shadow-lg pointer-events-auto">
+              <span className="text-[9px] font-extrabold text-cyan-300 uppercase tracking-wider hidden xs:inline mr-0.5">Audio:</span>
+              <button
+                type="button"
+                onClick={() => handleAudioChange('english')}
+                disabled={!hasWorkingEnglishSource}
+                title="English Dub"
+                className={`px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-extrabold transition cursor-pointer flex items-center gap-0.5 ${
+                  audioMode === 'english'
+                    ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 shadow-md font-black'
+                    : hasWorkingEnglishSource ? 'text-slate-300 hover:text-white bg-white/5' : 'text-slate-600 opacity-40 cursor-not-allowed'
+                }`}
+              >
+                <span>🎙️ EN</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAudioChange('hindi')}
+                disabled={!hasWorkingHindiSource}
+                title="Hindi Audio"
+                className={`px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-extrabold transition cursor-pointer flex items-center gap-0.5 ${
+                  audioMode === 'hindi'
+                    ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-gray-950 shadow-md font-black'
+                    : hasWorkingHindiSource ? 'text-slate-300 hover:text-white bg-white/5' : 'text-slate-600 opacity-40 cursor-not-allowed'
+                }`}
+              >
+                <span>🇮🇳 HI</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAudioChange('sub')}
+                disabled={!hasWorkingJapaneseSource}
+                title="Japanese Sub"
+                className={`px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-extrabold transition cursor-pointer flex items-center gap-0.5 ${
+                  audioMode === 'sub'
+                    ? 'bg-gradient-to-r from-purple-400 to-indigo-500 text-white shadow-md font-black'
+                    : hasWorkingJapaneseSource ? 'text-slate-300 hover:text-white bg-white/5' : 'text-slate-600 opacity-40 cursor-not-allowed'
+                }`}
+              >
+                <span>🇯🇵 JA</span>
+              </button>
+            </div>
+
+            {/* Skip Intro (85s) Button */}
+            <button
+              type="button"
+              onClick={() => {
+                soundFx.playClick?.();
+                if (videoRef.current) {
+                  videoRef.current.currentTime = (videoRef.current.currentTime || 0) + 85;
+                }
+                setSkipIntroToast('⏭️ Intro Skipped (+85s)');
+                setTimeout(() => setSkipIntroToast(null), 2500);
+              }}
+              className="absolute bottom-12 left-3 z-30 px-2.5 py-1 rounded-xl bg-slate-950/85 hover:bg-black text-cyan-300 hover:text-white border border-cyan-400/50 shadow-lg backdrop-blur-md text-[10.5px] font-black transition flex items-center gap-1.5 cursor-pointer active:scale-95 pointer-events-auto"
+              title="Skip Intro sequence (85 seconds)"
+            >
+              <FastForward className="w-3 h-3 text-cyan-400" />
+              <span>Skip Intro (85s)</span>
+            </button>
+
+            {/* Skip Intro Toast Notification */}
+            {skipIntroToast && (
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 px-4 py-2 rounded-xl bg-black/90 border border-cyan-400 text-cyan-200 text-xs font-black shadow-2xl backdrop-blur-md pointer-events-none animate-in fade-in duration-150">
+                {skipIntroToast}
+              </div>
+            )}
+
+            {/* Binge Countdown Overlay (Auto-Next Episode in 5s) */}
+            {bingeCountdown !== null && (
+              <div className="absolute inset-0 z-50 bg-black/85 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-200 pointer-events-auto">
+                <div className="w-16 h-16 rounded-full bg-cyan-500/20 border-2 border-cyan-400 flex items-center justify-center text-2xl font-black text-cyan-300 mb-3 shadow-[0_0_25px_rgba(6,182,212,0.6)]">
+                  {bingeCountdown}
+                </div>
+                <h4 className="text-base font-black text-white mb-1">Up Next: Episode {episode + 1}</h4>
+                <p className="text-xs text-slate-300 mb-4">Playing next episode in {bingeCountdown} seconds...</p>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBingeCountdown(null);
+                      handleNextEpisode();
+                    }}
+                    className="px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 font-black text-xs shadow-lg hover:scale-105 active:scale-95 transition cursor-pointer"
+                  >
+                    Play Now ▶
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBingeCountdown(null)}
+                    className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 font-bold text-xs transition cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
             {/* CASE 0: Future Unreleased Theatrical Release -> CLEAN THEATRICAL CARD */}
             {isFutureRelease ? (
               <div className="w-full h-full min-h-[340px] bg-gradient-to-b from-[#070e24] via-[#050b1d] to-[#040817] flex flex-col items-center justify-center p-6 text-center border-y border-cyan-500/20">
@@ -2137,7 +2461,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                     <span>Not playing? Next server</span>
                   </button>
 
-                  <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 flex-nowrap sm:flex-wrap w-full">
+                  <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth snap-x py-1.5 flex-nowrap w-full">
                     {availableServers.map((srv) => {
                       const isSelected = currentServer.id === srv.id;
                       return (
@@ -2157,13 +2481,16 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                               // Official MovieBox & MultiEmbed high-speed multi-dub routing
                             }
                           }}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer border shrink-0 sm:shrink ${
+                          className={`snap-start px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border shrink-0 ${
                             isSelected && playerMode === 'stream'
-                              ? 'bg-cyan-500 text-gray-950 border-cyan-400 shadow-[0_0_10px_rgba(56,189,248,0.5)]'
-                              : 'bg-[#060c20] text-cyan-200/70 border-cyan-500/25 hover:bg-white/5 hover:text-white'
+                              ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-gray-950 font-black border-cyan-300 shadow-[0_0_15px_rgba(56,189,248,0.6)] scale-[1.02]'
+                              : 'bg-[#060c20] text-cyan-200/80 border-cyan-500/25 hover:bg-white/5 hover:text-white'
                           }`}
                         >
                           <span>{srv.shortName}</span>
+                          <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono ${isSelected ? 'bg-black/30 text-white' : 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/20'}`}>
+                            {srv.badge || '🟢 Fast'}
+                          </span>
                         </button>
                       );
                     })}
@@ -2391,6 +2718,14 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
         isOpen={isUBlockModalOpen}
         onClose={() => setIsUBlockModalOpen(false)}
         onRunAiServerBenchmark={() => handleAiAutoSelectServer(true)}
+        currentServer={currentServer}
+      />
+
+      {/* Watch Together & Sync Room Modal */}
+      <WatchTogetherModal
+        isOpen={isWatchTogetherOpen}
+        onClose={() => setIsWatchTogetherOpen(false)}
+        activeMedia={item}
         currentServer={currentServer}
       />
     </div>

@@ -8,120 +8,87 @@ export const SERVERS = [
     name: '[ 🇮🇳 Server 1 (High-Speed CDN) ] VidStuck Pro (Centaurus • Multi-Dub • 1080p)',
     shortName: '[ 🇮🇳 Server 1 (Fast CDN) ]',
     badge: 'Multi-Dub • Centaurus',
+    statusBadge: '🟢 Fast',
     color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
     supportedAudios: ['hindi', 'english', 'sub'],
     getMovieUrl: (tmdbId, audioMode = 'hindi') => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '533535';
       const dub = audioMode === 'english' ? 'en' : 'hi';
-      return `https://vidstuck.xyz/embed/movie/${tmdbId}?dubLang=${dub}`;
+      return `https://vidstuck.xyz/embed/movie/${cleanId}?dubLang=${dub}`;
     },
     getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'hindi') => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '66732';
       const dub = audioMode === 'english' ? 'en' : 'hi';
-      return `https://vidstuck.xyz/embed/tv/${tmdbId}/${s}/${e}?dubLang=${dub}`;
+      const seasonNum = Math.max(1, Number(s) || 1);
+      const epNum = Math.max(1, Number(e) || 1);
+      return `https://vidstuck.xyz/embed/tv/${cleanId}/${seasonNum}/${epNum}?dubLang=${dub}`;
+    }
+  },
+  {
+    id: 'autoembed',
+    name: '[ 🎬 Server 2 (AutoEmbed CDN) ] AutoEmbed Prime (Instant Play / 1080p HD)',
+    shortName: '[ 🎬 Server 2 (AutoEmbed) ]',
+    badge: 'Instant Play • Multi-Audio',
+    statusBadge: '🟢 Fast',
+    color: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
+    supportedAudios: ['hindi', 'english', 'sub'],
+    getMovieUrl: (tmdbId) => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '533535';
+      return `https://player.autoembed.cc/embed/movie/${cleanId}`;
+    },
+    getTvUrl: (tmdbId, s = 1, e = 1) => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '66732';
+      const seasonNum = Math.max(1, Number(s) || 1);
+      const epNum = Math.max(1, Number(e) || 1);
+      return `https://player.autoembed.cc/embed/tv/${cleanId}/${seasonNum}/${epNum}`;
     }
   },
   {
     id: 'vidfast',
-    name: '[ ⚡ Server 2 (4K Ultra Fast) ] VidFast Ultra (Instant AutoPlay • 4K UHD)',
-    shortName: '[ ⚡ Server 2 (4K Ultra) ]',
+    name: '[ ⚡ Server 3 (4K Ultra Fast) ] VidFast Ultra (Instant AutoPlay • 4K UHD)',
+    shortName: '[ ⚡ Server 3 (4K Ultra) ]',
     badge: '4K Ultra Fast',
+    statusBadge: '⚡ 4K',
     color: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
     supportedAudios: ['english', 'sub', 'hindi'],
-    getMovieUrl: (tmdbId) => `https://autoembed.co/movie/tmdb/${tmdbId}`,
-    getTvUrl: (tmdbId, s = 1, e = 1) => `https://autoembed.co/tv/tmdb/${tmdbId}-${s}-${e}`
+    getMovieUrl: (tmdbId) => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '533535';
+      return `https://vidfast.vc/movie/${cleanId}?autoPlay=true`;
+    },
+    getTvUrl: (tmdbId, s = 1, e = 1) => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '66732';
+      const seasonNum = Math.max(1, Number(s) || 1);
+      const epNum = Math.max(1, Number(e) || 1);
+      return `https://vidfast.vc/tv/${cleanId}/${seasonNum}/${epNum}?autoPlay=true`;
+    }
   },
   {
     id: 'nxsha',
-    name: '[ 🎧 Server 3 (Multi-Audio 4K) ] NxSha Prime (Clean Ads • Multi-Audio / 4K)',
-    shortName: '[ 🎧 Server 3 (Multi-Audio) ]',
+    name: '[ 🎧 Server 4 (Multi-Audio 4K) ] NxSha Prime (Clean Ads • Multi-Audio / 4K)',
+    shortName: '[ 🎧 Server 4 (Multi-Audio) ]',
     badge: 'Dual Audio • 4K',
-    color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+    statusBadge: '🎧 Multi-Dub',
+    color: 'bg-teal-500/20 text-teal-300 border-teal-500/30',
     supportedAudios: ['hindi', 'english', 'sub'],
     getMovieUrl: (tmdbId, audioMode = 'hindi') => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '533535';
       const lang = audioMode === 'english' ? 'en' : audioMode === 'sub' ? 'ja' : 'hi';
-      return `https://nxsha.space/embed/movie/${tmdbId}?lang=${lang}&disable_app_ad=true`;
+      return `https://nxsha.space/embed/movie/${cleanId}?lang=${lang}&disable_app_ad=true`;
     },
     getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'hindi') => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '66732';
       const lang = audioMode === 'english' ? 'en' : audioMode === 'sub' ? 'ja' : 'hi';
-      return `https://nxsha.space/embed/tv/${tmdbId}/${s}/${e}?lang=${lang}&disable_app_ad=true`;
+      const seasonNum = Math.max(1, Number(s) || 1);
+      const epNum = Math.max(1, Number(e) || 1);
+      return `https://nxsha.space/embed/tv/${cleanId}/${seasonNum}/${epNum}?lang=${lang}&disable_app_ad=true`;
     }
-  },
-  {
-    id: 'bingr',
-    name: '[ 🌐 Server 4 (Clean Stream) ] Bingr Stream (High Bitrate • Ultra-Light)',
-    shortName: '[ 🌐 Server 4 (Clean Stream) ]',
-    badge: 'High Bitrate • Light',
-    color: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
-    supportedAudios: ['english', 'sub', 'hindi'],
-    getMovieUrl: (tmdbId) => `https://bingr.one/watch/movie/${tmdbId}`,
-    getTvUrl: (tmdbId, s = 1, e = 1) => `https://bingr.one/watch/tv/${tmdbId}/${s}/${e}`
-  },
-  {
-    id: 'vidsrc_pm',
-    name: '[ 👑 Server 5 (VidSrc PM Pro) ] VidSrc PM Direct (Zero Ads • Instant Play • 4K)',
-    shortName: '[ 👑 Server 5 (VidSrc PM) ]',
-    badge: 'Zero Ads • 4K',
-    color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-    supportedAudios: ['english', 'sub', 'hindi'],
-    getMovieUrl: (tmdbId) => `https://vidsrc.pm/embed/movie/${tmdbId}`,
-    getTvUrl: (tmdbId, s = 1, e = 1) => `https://vidsrc.pm/embed/tv/${tmdbId}/${s}/${e}`
-  },
-  {
-    id: 'moviebox_cloud',
-    name: '[ 📦 Server 6 (MovieBox Cloud) ] MovieBox Official CDN (Multi-Dub • Fast Stream • 1080p)',
-    shortName: '[ 📦 Server 6 (MovieBox) ]',
-    badge: 'MovieBox Official • Multi-Dub',
-    color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40',
-    supportedAudios: ['hindi', 'english', 'sub'],
-    getMovieUrl: (tmdbId, audioMode = 'hindi') => {
-      const lang = audioMode === 'english' ? 'en' : (audioMode === 'sub' ? 'ja' : 'hi');
-      return `https://nxsha.space/embed/movie/${tmdbId}?lang=${lang}&disable_app_ad=true`;
-    },
-    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'hindi') => {
-      const lang = audioMode === 'english' ? 'en' : (audioMode === 'sub' ? 'ja' : 'hi');
-      return `https://nxsha.space/embed/tv/${tmdbId}/${s}/${e}?lang=${lang}&disable_app_ad=true`;
-    }
-  },
-  {
-    id: 'twoembed_vip',
-    name: '[ 👑 Server 7 (VIP Stream) ] 2Embed VIP (Direct Playback / High Bitrate)',
-    shortName: '[ 👑 Server 7 (VIP Stream) ]',
-    badge: 'VIP Stream',
-    color: 'bg-sky-500/20 text-sky-400 border-sky-500/30',
-    supportedAudios: ['english', 'sub'],
-    getMovieUrl: (tmdbId) => `https://www.2embed.cc/embed/${tmdbId}`,
-    getTvUrl: (tmdbId, s = 1, e = 1) => `https://www.2embed.cc/embedtv/${tmdbId}&s=${s}&e=${e}`
-  },
-  {
-    id: 'zxcstream',
-    name: '[ ⚡ Server 8 (Roxy Prime) ] ZXC Roxy (Fast Streams • Zero Captcha)',
-    shortName: '[ ⚡ Server 8 (Roxy) ]',
-    badge: 'Fast Streams',
-    color: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
-    supportedAudios: ['english', 'sub', 'hindi'],
-    getMovieUrl: (tmdbId, audioMode = 'hindi') => {
-      const lang = audioMode === 'english' ? 'en' : 'hi';
-      return `https://player.zxcprime.xyz/player/movie/${tmdbId}?dubLang=${lang}&server=0`;
-    },
-    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'hindi') => {
-      const lang = audioMode === 'english' ? 'en' : 'hi';
-      return `https://player.zxcprime.xyz/player/tv/${tmdbId}/${s}/${e}?dubLang=${lang}&server=0`;
-    }
-  },
-  {
-    id: 'animeworld_india',
-    name: '[ 🇮🇳 Server 7 (Hindi CDN) ] Cinema Mirror 2 (Verified High-Speed CDN)',
-    shortName: '[ 🇮🇳 Server 7 (Hindi CDN) ]',
-    badge: 'High-Speed CDN',
-    color: 'bg-orange-500/20 text-orange-300 border-orange-500/40',
-    supportedAudios: ['hindi', 'english', 'sub'],
-    getMovieUrl: (tmdbId) => `https://www.2embed.skin/embed/${tmdbId}`,
-    getTvUrl: (tmdbId, s = 1, e = 1) => `https://www.2embed.skin/embedtv/${tmdbId}&s=${s}&e=${e}`
   },
   {
     id: 'vidlink',
-    name: '[ 🇬🇧 Server 8 (English Dub) ] VidLink Pro (Verified English Dub & Multi-Audio)',
-    shortName: '[ 🇬🇧 Server 8 (English Dub) ]',
+    name: '[ 🇬🇧 Server 5 (English Dub) ] VidLink Pro (Verified English Dub & Multi-Audio)',
+    shortName: '[ 🇬🇧 Server 5 (VidLink Pro) ]',
     badge: 'Multi-Audio / Dub',
+    statusBadge: '⚡ 4K',
     color: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
     supportedAudios: ['english', 'sub'],
     getMovieUrl: (tmdbId, audioMode = 'english') => {
@@ -135,8 +102,10 @@ export const SERVERS = [
       return url;
     },
     getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'english') => {
-      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '95479';
-      let url = `https://vidlink.pro/tv/${cleanId}/${s}/${e}?primaryColor=06b6d4`;
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '66732';
+      const seasonNum = Math.max(1, Number(s) || 1);
+      const epNum = Math.max(1, Number(e) || 1);
+      let url = `https://vidlink.pro/tv/${cleanId}/${seasonNum}/${epNum}?primaryColor=06b6d4`;
       if (audioMode === 'sub') {
         url += '&sub_dub=sub';
       } else {
@@ -147,64 +116,130 @@ export const SERVERS = [
   },
   {
     id: 'one23embed',
-    name: '[ 🇮🇳 Server 9 (Hindi Dubbed) ] 123Embed (Multi-Audio & Dub Zero-Captcha)',
-    shortName: '[ 🇮🇳 Server 9 (Hindi Dubbed) ]',
+    name: '[ 🇮🇳 Server 6 (Hindi Dubbed) ] 123Embed (Multi-Audio & Dub Zero-Captcha)',
+    shortName: '[ 🇮🇳 Server 6 (123Embed) ]',
     badge: 'Multi-Audio 1080p',
+    statusBadge: '🎧 Multi-Dub',
     color: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
     supportedAudios: ['hindi', 'english', 'sub'],
     getMovieUrl: (tmdbId, audioMode = 'english') => {
-      const cleanId = String(tmdbId).replace(/[^0-9]/g, '');
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '533535';
       let url = `https://play2.123embed.net/movie/${cleanId}`;
       if (audioMode === 'hindi') url += '?audio=hi';
       return url;
     },
     getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'english') => {
-      const cleanId = String(tmdbId).replace(/[^0-9]/g, '');
-      let url = `https://play2.123embed.net/tv/${cleanId}/${s}/${e}`;
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '66732';
+      const seasonNum = Math.max(1, Number(s) || 1);
+      const epNum = Math.max(1, Number(e) || 1);
+      let url = `https://play2.123embed.net/tv/${cleanId}/${seasonNum}/${epNum}`;
       if (audioMode === 'hindi') url += '?audio=hi';
       return url;
     }
   },
   {
-    id: 'smashy',
-    name: '[ 🎧 Server 12 (AnyEmbed Direct) ] AnyEmbed Pro (Multi-Language & Hindi Audio)',
-    shortName: '[ 🎧 Server 12 (AnyEmbed) ]',
-    badge: 'Multi-Language',
-    color: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
-    supportedAudios: ['hindi', 'english', 'sub'],
-    getMovieUrl: (tmdbId) => `https://anyembed.xyz/embed/tmdb-movie-${tmdbId}`,
-    getTvUrl: (tmdbId, s = 1, e = 1) => `https://anyembed.xyz/embed/tmdb-tv-${tmdbId}/${s}/${e}`
+    id: 'bingr',
+    name: '[ 🌐 Server 7 (Clean Stream) ] Bingr Stream (High Bitrate • Ultra-Light)',
+    shortName: '[ 🌐 Server 7 (Clean Stream) ]',
+    badge: 'High Bitrate • Light',
+    statusBadge: '🛡️ Ad-Free',
+    color: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
+    supportedAudios: ['english', 'sub', 'hindi'],
+    getMovieUrl: (tmdbId) => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '533535';
+      return `https://bingr.one/watch/movie/${cleanId}`;
+    },
+    getTvUrl: (tmdbId, s = 1, e = 1) => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '66732';
+      const seasonNum = Math.max(1, Number(s) || 1);
+      const epNum = Math.max(1, Number(e) || 1);
+      return `https://bingr.one/watch/tv/${cleanId}/${seasonNum}/${epNum}`;
+    }
   },
   {
-    id: 'autoembed',
-    name: '[ 🎬 Server 11 (AutoEmbed) ] AutoEmbed Prime (Instant Play / 1080p HD)',
-    shortName: '[ 🎬 Server 11 (AutoEmbed) ]',
-    badge: '1080p HD',
-    color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+    id: 'vidsrc_pm',
+    name: '[ 👑 Server 8 (VidSrc PM Pro) ] VidSrc PM Direct (Zero Ads • Instant Play • 4K)',
+    shortName: '[ 👑 Server 8 (VidSrc PM) ]',
+    badge: 'Zero Ads • 4K',
+    statusBadge: '⚡ 4K',
+    color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
     supportedAudios: ['english', 'sub', 'hindi'],
-    getMovieUrl: (tmdbId) => `https://autoembed.co/movie/tmdb/${tmdbId}`,
-    getTvUrl: (tmdbId, s = 1, e = 1) => `https://autoembed.co/tv/tmdb/${tmdbId}-${s}-${e}`
+    getMovieUrl: (tmdbId) => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '533535';
+      return `https://vidsrc.pm/embed/movie/${cleanId}`;
+    },
+    getTvUrl: (tmdbId, s = 1, e = 1) => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '66732';
+      const seasonNum = Math.max(1, Number(s) || 1);
+      const epNum = Math.max(1, Number(e) || 1);
+      return `https://vidsrc.pm/embed/tv/${cleanId}/${seasonNum}/${epNum}`;
+    }
+  },
+  {
+    id: 'moviebox_cloud',
+    name: '[ 📦 Server 9 (MovieBox Cloud) ] MovieBox Official CDN (Multi-Dub • Fast Stream • 1080p)',
+    shortName: '[ 📦 Server 9 (MovieBox) ]',
+    badge: 'MovieBox Official • Multi-Dub',
+    statusBadge: '🎧 Multi-Dub',
+    color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40',
+    supportedAudios: ['hindi', 'english', 'sub'],
+    getMovieUrl: (tmdbId, audioMode = 'hindi') => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '533535';
+      const lang = audioMode === 'english' ? 'en' : (audioMode === 'sub' ? 'ja' : 'hi');
+      return `https://nxsha.space/embed/movie/${cleanId}?lang=${lang}&disable_app_ad=true`;
+    },
+    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'hindi') => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '66732';
+      const lang = audioMode === 'english' ? 'en' : (audioMode === 'sub' ? 'ja' : 'hi');
+      const seasonNum = Math.max(1, Number(s) || 1);
+      const epNum = Math.max(1, Number(e) || 1);
+      return `https://nxsha.space/embed/tv/${cleanId}/${seasonNum}/${epNum}?lang=${lang}&disable_app_ad=true`;
+    }
+  },
+  {
+    id: 'twoembed_vip',
+    name: '[ 👑 Server 10 (VIP Stream) ] 2Embed VIP (Direct Playback / High Bitrate)',
+    shortName: '[ 👑 Server 10 (VIP Stream) ]',
+    badge: 'VIP Stream',
+    statusBadge: '🟢 Fast',
+    color: 'bg-sky-500/20 text-sky-400 border-sky-500/30',
+    supportedAudios: ['english', 'sub'],
+    getMovieUrl: (tmdbId) => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '533535';
+      return `https://www.2embed.cc/embed/${cleanId}`;
+    },
+    getTvUrl: (tmdbId, s = 1, e = 1) => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '66732';
+      const seasonNum = Math.max(1, Number(s) || 1);
+      const epNum = Math.max(1, Number(e) || 1);
+      return `https://www.2embed.cc/embedtv/${cleanId}&s=${seasonNum}&e=${epNum}`;
+    }
   },
   {
     id: 'tgvid',
-    name: '[ 🌸 Server 12 (Backup Mirror) ] TgVid Prime (Ad-Free • Multi-Language)',
-    shortName: '[ 🌸 Server 12 (Backup) ]',
-    badge: 'Backup Mirror',
+    name: '[ 🌸 Server 11 (Ad-Free Backup) ] TgVid Prime (Ad-Free • Multi-Language)',
+    shortName: '[ 🌸 Server 11 (Ad-Free) ]',
+    badge: 'Ad-Free Mirror',
+    statusBadge: '🛡️ Ad-Free',
     color: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
     supportedAudios: ['hindi', 'english', 'sub'],
     getMovieUrl: (tmdbId, audioMode = 'hindi', isAnime = false) => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '533535';
       const lang = audioMode === 'english' ? 'en' : 'hi';
       const serverParam = audioMode === 'hindi' ? '&server=hindi' : (audioMode === 'english' ? '&server=english' : '');
-      let url = `https://tgvid.lovable.app/embed/movie/${tmdbId}?color=38bdf8&back=true${serverParam}&lang=${lang}`;
+      let url = `https://tgvid.lovable.app/embed/movie/${cleanId}?color=38bdf8&back=true${serverParam}&lang=${lang}`;
       if (audioMode === 'sub' || isAnime) {
         url += '&sub_lang=ja';
       }
       return url;
     },
     getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'hindi', isAnime = false) => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '66732';
       const lang = audioMode === 'english' ? 'en' : 'hi';
       const serverParam = audioMode === 'hindi' ? '&server=hindi' : (audioMode === 'english' ? '&server=english' : '');
-      let url = `https://tgvid.lovable.app/embed/tv/${tmdbId}/${s}/${e}?color=38bdf8&back=true${serverParam}&lang=${lang}&episodeSelector=false&autoplayNextEp=false`;
+      const seasonNum = Math.max(1, Number(s) || 1);
+      const epNum = Math.max(1, Number(e) || 1);
+      let url = `https://tgvid.lovable.app/embed/tv/${cleanId}/${seasonNum}/${epNum}?color=38bdf8&back=true${serverParam}&lang=${lang}&episodeSelector=false&autoplayNextEp=false`;
       if (audioMode === 'sub' || isAnime) {
         url += '&sub_lang=ja';
       }
@@ -212,10 +247,51 @@ export const SERVERS = [
     }
   },
   {
+    id: 'zxcstream',
+    name: '[ ⚡ Server 12 (Roxy Prime) ] ZXC Roxy (Fast Streams • Zero Captcha)',
+    shortName: '[ ⚡ Server 12 (Roxy) ]',
+    badge: 'Fast Streams',
+    statusBadge: '🟢 Fast',
+    color: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
+    supportedAudios: ['english', 'sub', 'hindi'],
+    getMovieUrl: (tmdbId, audioMode = 'hindi') => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '533535';
+      const lang = audioMode === 'english' ? 'en' : 'hi';
+      return `https://player.zxcprime.xyz/player/movie/${cleanId}?dubLang=${lang}&server=0`;
+    },
+    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'hindi') => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '66732';
+      const lang = audioMode === 'english' ? 'en' : 'hi';
+      const seasonNum = Math.max(1, Number(s) || 1);
+      const epNum = Math.max(1, Number(e) || 1);
+      return `https://player.zxcprime.xyz/player/tv/${cleanId}/${seasonNum}/${epNum}?dubLang=${lang}&server=0`;
+    }
+  },
+  {
+    id: 'vidsrc_su',
+    name: '[ ⚡ Server 13 (VidSrc Pro) ] VidSrc Cloud (4K Ultra • Direct Stream)',
+    shortName: '[ ⚡ Server 13 (VidSrc Pro) ]',
+    badge: 'VidSrc Cloud • 4K',
+    statusBadge: '⚡ 4K',
+    color: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
+    supportedAudios: ['english', 'sub', 'hindi'],
+    getMovieUrl: (tmdbId) => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '533535';
+      return `https://vidsrc.su/embed/movie/${cleanId}`;
+    },
+    getTvUrl: (tmdbId, s = 1, e = 1) => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '66732';
+      const seasonNum = Math.max(1, Number(s) || 1);
+      const epNum = Math.max(1, Number(e) || 1);
+      return `https://vidsrc.su/embed/tv/${cleanId}/${seasonNum}/${epNum}`;
+    }
+  },
+  {
     id: 'moviebox',
-    name: '[ 📦 Server 13 (MovieBox Direct) ] MovieBox CDN (Multi-Dub Stream • 4K UHD)',
-    shortName: '[ 📦 Server 13 (MovieBox) ]',
+    name: '[ 📦 Server 14 (MovieBox Direct) ] MovieBox CDN (Multi-Dub Stream • 4K UHD)',
+    shortName: '[ 📦 Server 14 (MovieBox) ]',
     badge: 'MovieBox 4K • Multi-Dub',
+    statusBadge: '🎧 Multi-Dub',
     color: 'bg-teal-500/20 text-teal-300 border-teal-500/40',
     supportedAudios: ['hindi', 'english', 'sub', 'french', 'spanish'],
     getMovieUrl: (tmdbId, audioMode = 'hindi') => {
@@ -224,26 +300,19 @@ export const SERVERS = [
       return `https://nxsha.space/embed/movie/${cleanId}?lang=${lang}&disable_app_ad=true`;
     },
     getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'hindi') => {
-      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '95479';
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '66732';
       const lang = audioMode === 'english' ? 'en' : (audioMode === 'sub' ? 'ja' : (audioMode === 'french' ? 'fr' : (audioMode === 'spanish' ? 'es' : 'hi')));
-      return `https://nxsha.space/embed/tv/${cleanId}/${s}/${e}?lang=${lang}&disable_app_ad=true`;
+      const seasonNum = Math.max(1, Number(s) || 1);
+      const epNum = Math.max(1, Number(e) || 1);
+      return `https://nxsha.space/embed/tv/${cleanId}/${seasonNum}/${epNum}?lang=${lang}&disable_app_ad=true`;
     }
-  },
-  {
-    id: 'vidsrc_su',
-    name: '[ ⚡ Server 14 (VidSrc Pro) ] VidSrc Cloud (4K Ultra • Direct Stream)',
-    shortName: '[ ⚡ Server 14 (VidSrc Pro) ]',
-    badge: 'VidSrc Cloud • 4K',
-    color: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
-    supportedAudios: ['english', 'sub', 'hindi'],
-    getMovieUrl: (tmdbId) => `https://autoembed.co/movie/tmdb/${String(tmdbId).replace(/[^0-9]/g, '') || '533535'}`,
-    getTvUrl: (tmdbId, s = 1, e = 1) => `https://autoembed.co/tv/tmdb/${String(tmdbId).replace(/[^0-9]/g, '') || '95479'}-${s}-${e}`
   },
   {
     id: 'multiembed',
     name: '[ 🌐 Server 15 (123Embed Global) ] 123Embed VIP (Multi-Language • Zero Buffering)',
     shortName: '[ 🌐 Server 15 (123Embed) ]',
     badge: 'Global Dubs • VIP',
+    statusBadge: '🎧 Multi-Dub',
     color: 'bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/40',
     supportedAudios: ['hindi', 'english', 'sub', 'french', 'spanish'],
     getMovieUrl: (tmdbId, audioMode = 'hindi') => {
@@ -252,9 +321,11 @@ export const SERVERS = [
       return `https://play2.123embed.net/movie/${cleanId}?audio=${lang}`;
     },
     getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'hindi') => {
-      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '95479';
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '66732';
       const lang = audioMode === 'english' ? 'en' : 'hi';
-      return `https://play2.123embed.net/tv/${cleanId}/${s}/${e}?audio=${lang}`;
+      const seasonNum = Math.max(1, Number(s) || 1);
+      const epNum = Math.max(1, Number(e) || 1);
+      return `https://play2.123embed.net/tv/${cleanId}/${seasonNum}/${epNum}?audio=${lang}`;
     }
   }
 ];
@@ -263,12 +334,22 @@ export function getStreamUrl(server, tmdbId, type = 'movie', season = 1, episode
   if (!server) {
     server = SERVERS[0];
   }
+  const cleanId = String(tmdbId || '').replace(/[^0-9]/g, '');
+  const isTv = type === 'tv' || type === 'series';
+  const s = Math.max(1, Number(season) || 1);
+  const e = Math.max(1, Number(episode) || 1);
+
   let url = '';
-  if (type === 'tv') {
-    url = server.getTvUrl(tmdbId, season, episode, audioMode, isAnime);
+  if (isTv) {
+    url = (typeof server.getTvUrl === 'function') 
+      ? server.getTvUrl(cleanId, s, e, audioMode, isAnime) 
+      : server.getMovieUrl(cleanId, audioMode, isAnime);
   } else {
-    url = server.getMovieUrl(tmdbId, audioMode, isAnime);
+    url = (typeof server.getMovieUrl === 'function')
+      ? server.getMovieUrl(cleanId, audioMode, isAnime)
+      : '';
   }
+
   if (subLang && subLang !== 'off') {
     const sep = url.includes('?') ? '&' : '?';
     if (!url.includes('sub_lang=') && !url.includes('sub=')) {

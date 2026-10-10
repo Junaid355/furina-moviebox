@@ -44,9 +44,12 @@ import {
 } from './services/tmdb';
 import { SERVERS } from './services/streaming';
 import { CURATED_MOVIEBOX_TITLES, fetchMovieBoxTrending } from './services/movieboxService';
+import FranchiseTimelineModal, { FRANCHISE_TIMELINES } from './components/FranchiseTimelineModal';
+import WatchTogetherModal from './components/WatchTogetherModal';
+import { VIBE_CURATIONS } from './services/curatedMoods';
 import { 
   Flame, Film, Tv, Sparkles, Heart, RefreshCw, Shield, Settings, 
-  ChevronDown, Clock, Play, X, Star, Volume2, VolumeX, Search 
+  ChevronDown, Clock, Play, X, Star, Volume2, VolumeX, Search, Milestone, Users, Moon, Compass
 } from 'lucide-react';
 
 function getContinueWatchingList() {
@@ -97,6 +100,22 @@ export default function App() {
   const [detailsItem, setDetailsItem] = useState(null);
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
   const [isMuted, setIsMuted] = useState(() => soundFx.isMuted());
+  const [isTimelineOpen, setIsTimelineOpen] = useState(false);
+  const [isWatchTogetherOpen, setIsWatchTogetherOpen] = useState(false);
+
+  // Listen for #room= hash on mount & hashchange to auto-open synchronized stream
+  useEffect(() => {
+    const handleHash = () => {
+      try {
+        if (typeof window !== 'undefined' && window.location.hash.startsWith('#room=')) {
+          setIsWatchTogetherOpen(true);
+        }
+      } catch (e) {}
+    };
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
 
   // Curated instant-cache & background live-refresh shelves for Homepage
   const [shelvesData, setShelvesData] = useState({
@@ -975,7 +994,7 @@ export default function App() {
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-5">
               {[...Array(10)].map((_, i) => (
-                <div key={i} className="rounded-2xl overflow-hidden glass-card flex flex-col animate-pulse">
+                <div key={i} className="rounded-2xl overflow-hidden skeleton-card bg-[#050b1d]/80 border border-white/5 flex flex-col animate-pulse">
                   <div className="aspect-[2/3] w-full skeleton-shimmer" />
                   <div className="p-3 bg-[#050b1d] border-t border-white/[0.04] space-y-2">
                     <div className="h-3.5 bg-white/10 rounded-md skeleton-shimmer w-3/4" />
@@ -1122,6 +1141,70 @@ export default function App() {
                     onToggleWatchlist={toggleWatchlist}
                   />
                 )}
+
+                {/* Franchise Chronological Timelines Banner Shelf */}
+                <div className="my-8 p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-purple-950/60 via-indigo-950/70 to-[#070e24] border border-purple-500/30 shadow-[0_0_30px_rgba(168,85,247,0.2)]">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-purple-500/20 border border-purple-400/40 flex items-center justify-center text-purple-300 shadow-sm">
+                        <Milestone className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h2 className="text-base sm:text-lg font-black text-white">Franchise Chronological Timelines</h2>
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 font-bold">CANON ORDER</span>
+                        </div>
+                        <p className="text-xs text-purple-200/60">Letterboxd & Trakt verified chronological watch orders without filler</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        soundFx.playClick();
+                        setIsTimelineOpen(true);
+                      }}
+                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-400 hover:to-indigo-500 text-white font-extrabold text-xs shadow-lg transition transform hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-1.5"
+                    >
+                      <span>Explore All Sagas</span>
+                      <span>➔</span>
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {[
+                      { key: 'mcu', title: 'Marvel MCU', badge: 'Sacred Timeline', color: 'border-red-500/40 bg-red-950/20 text-red-200' },
+                      { key: 'spider_verse', title: 'Spider-Verse', badge: 'Multiverse Order', color: 'border-blue-500/40 bg-blue-950/20 text-blue-200' },
+                      { key: 'star_wars', title: 'Star Wars', badge: 'The Force Saga', color: 'border-amber-500/40 bg-amber-950/20 text-amber-200' },
+                      { key: 'naruto', title: 'Naruto Canon', badge: 'No-Filler Watch Order', color: 'border-orange-500/40 bg-orange-950/20 text-orange-200' }
+                    ].map((saga) => (
+                      <button
+                        key={saga.key}
+                        onClick={() => {
+                          soundFx.playClick();
+                          setIsTimelineOpen(true);
+                        }}
+                        className={`p-3 rounded-xl border ${saga.color} hover:border-cyan-400 hover:scale-[1.03] transition text-left cursor-pointer group`}
+                      >
+                        <div className="text-[10px] font-mono font-bold text-cyan-300 mb-1">{saga.badge}</div>
+                        <div className="text-xs sm:text-sm font-black text-white group-hover:text-cyan-200">{saga.title}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Vibe & Mood Curations (Letterboxd & Trakt Style) */}
+                {VIBE_CURATIONS.map((vibe) => (
+                  <MediaShelf
+                    key={vibe.id}
+                    title={vibe.title}
+                    subtitle={vibe.subtitle}
+                    icon={vibe.id.includes('cozy') ? Moon : vibe.id.includes('ghibli') ? Sparkles : vibe.id.includes('action') ? Flame : Volume2}
+                    badge={vibe.badge}
+                    items={vibe.items}
+                    onPlay={setActiveMedia}
+                    onOpenDetails={setDetailsItem}
+                    isWatchlisted={isWatchlisted}
+                    onToggleWatchlist={toggleWatchlist}
+                  />
+                ))}
 
                 {/* Additional Explore Grid */}
                 <div className="pt-4 border-t border-cyan-500/10">
@@ -1288,6 +1371,24 @@ export default function App() {
         includeMature={includeMature}
       />
 
+      {/* Franchise Chronological Timelines Modal (MCU, Spider-Verse, Star Wars, Naruto) */}
+      <FranchiseTimelineModal
+        isOpen={isTimelineOpen}
+        onClose={() => setIsTimelineOpen(false)}
+        onSelectMedia={(itemToPlay) => {
+          setIsTimelineOpen(false);
+          setActiveMedia(itemToPlay);
+        }}
+      />
+
+      {/* Watch Together & Sync Room Modal */}
+      <WatchTogetherModal
+        isOpen={isWatchTogetherOpen}
+        onClose={() => setIsWatchTogetherOpen(false)}
+        activeMedia={activeMedia || heroItem}
+        currentServer={SERVERS[0]}
+      />
+
       {/* Aceternity UI 3D Floating Dock (Desktop & Large Screens) */}
       <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 hidden md:block pointer-events-auto">
         <FloatingDock
@@ -1331,6 +1432,22 @@ export default function App() {
                 setSearchQuery('');
               },
               active: activeCategory === 'anime'
+            },
+            {
+              title: "Franchises",
+              icon: <Milestone className="w-5 h-5 text-amber-300" />,
+              onClick: () => {
+                soundFx.playClick();
+                setIsTimelineOpen(true);
+              }
+            },
+            {
+              title: "Sync Room",
+              icon: <Users className="w-5 h-5 text-purple-300" />,
+              onClick: () => {
+                soundFx.playClick();
+                setIsWatchTogetherOpen(true);
+              }
             },
             {
               title: "3D Spotlight (Ctrl+K)",
