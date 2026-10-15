@@ -1,21 +1,27 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo, Suspense, lazy } from 'react';
 import Navbar, { HanimeIcon } from './components/Navbar';
 import HeroBanner from './components/HeroBanner';
 import MediaCard from './components/MediaCard';
 import MediaShelf from './components/MediaShelf';
-import MediaDetailsModal from './components/MediaDetailsModal';
-import SearchOverlay from './components/SearchOverlay';
-import PlayerModal from './components/PlayerModal';
-import SettingsModal, { getStoredSettings, applyThemeAndAppSettings } from './components/SettingsModal';
-import IPhoneAppModal from './components/IPhoneAppModal';
-import AndroidAppModal from './components/AndroidAppModal';
-import MovieStudioModal, { getStoredStudioMovies } from './components/MovieStudioModal';
 import ErrorBoundary from './components/ErrorBoundary';
 import { BackgroundBeams } from './components/ui/background-beams';
 import { FurinaMascot } from './components/ui/FurinaMascot';
 import { Marquee } from './components/ui/marquee';
 import { FloatingDock } from './components/ui/floating-dock';
 import soundFx from './services/soundFx';
+import { getStoredSettings, applyThemeAndAppSettings } from './services/settingsService';
+import { getStoredStudioMovies } from './services/studioService';
+
+// Fast Code-Splitting: Heavy modals unloaded from main entry chunk, loaded on demand
+const PlayerModal = lazy(() => import('./components/PlayerModal'));
+const MediaDetailsModal = lazy(() => import('./components/MediaDetailsModal'));
+const SearchOverlay = lazy(() => import('./components/SearchOverlay'));
+const SettingsModal = lazy(() => import('./components/SettingsModal'));
+const IPhoneAppModal = lazy(() => import('./components/IPhoneAppModal'));
+const AndroidAppModal = lazy(() => import('./components/AndroidAppModal'));
+const MovieStudioModal = lazy(() => import('./components/MovieStudioModal'));
+const FranchiseTimelineModal = lazy(() => import('./components/FranchiseTimelineModal'));
+const WatchTogetherModal = lazy(() => import('./components/WatchTogetherModal'));
 import { 
   fetchTrendingAll, 
   fetchHollywoodMovies, 
@@ -44,13 +50,11 @@ import {
 } from './services/tmdb';
 import { SERVERS } from './services/streaming';
 import { CURATED_MOVIEBOX_TITLES, fetchMovieBoxTrending } from './services/movieboxService';
-import FranchiseTimelineModal, { FRANCHISE_TIMELINES } from './components/FranchiseTimelineModal';
-import WatchTogetherModal from './components/WatchTogetherModal';
 import { VIBE_CURATIONS } from './services/curatedMoods';
 import { syncWorldAnimeNow, getLastAnimeSyncDisplay } from './services/animeAutoSync';
 import { 
   Flame, Film, Tv, Sparkles, Heart, RefreshCw, Shield, Settings, 
-  ChevronDown, Clock, Play, X, Star, Volume2, VolumeX, Search, Milestone, Users, Moon, Compass
+  ChevronDown, Clock, Play, X, Star, Volume2, VolumeX, Search, Milestone, Users, Moon
 } from 'lucide-react';
 
 function getContinueWatchingList() {
@@ -291,9 +295,9 @@ export default function App() {
 
   // Apply theme, accent, and appearance settings on mount & react to updates (Requirement 11)
   useEffect(() => {
-    applyThemeAndAppSettings(getStoredSettings());
+    applyThemeAndAppSettings(getStoredSettings(), false);
     const handleSettingsChange = (e) => {
-      if (e.detail) applyThemeAndAppSettings(e.detail);
+      if (e.detail) applyThemeAndAppSettings(e.detail, false);
     };
     window.addEventListener('furina:settings-changed', handleSettingsChange);
     return () => window.removeEventListener('furina:settings-changed', handleSettingsChange);
@@ -1357,115 +1361,118 @@ export default function App() {
         )}
       </main>
 
-      {/* Video Player Modal */}
-      {activeMedia && (
-        <ErrorBoundary inline>
-          <PlayerModal
-            key={activeMedia.id}
-            item={activeMedia}
-            preferredServerId={preferredServer}
-            isHindiPreferred={
-              activeCategory === 'hindi' ||
-              (Boolean(searchQuery) && searchQuery.toLowerCase().includes('hindi')) ||
-              activeMedia?.category === 'hindi' ||
-              activeMedia?.isHindiDubbed === true ||
-              activeMedia?.hasHindiDub === true ||
-              (activeCategory === 'anime' && animeAudioFilter === 'hindi') ||
-              (activeCategory === 'kdrama' && kdramaFilter === 'hindi') ||
-              (activeCategory === 'hollywood' && movieFilter === 'hindi') ||
-              (activeCategory === 'new_movies' && globalMediaFilter === 'hindi')
-            }
-            onClose={() => setActiveMedia(null)}
+      {/* Lazy-Loaded Async Modals Wrapped in Suspense */}
+      <Suspense fallback={null}>
+        {/* Video Player Modal */}
+        {activeMedia && (
+          <ErrorBoundary inline>
+            <PlayerModal
+              key={activeMedia.id}
+              item={activeMedia}
+              preferredServerId={preferredServer}
+              isHindiPreferred={
+                activeCategory === 'hindi' ||
+                (Boolean(searchQuery) && searchQuery.toLowerCase().includes('hindi')) ||
+                activeMedia?.category === 'hindi' ||
+                activeMedia?.isHindiDubbed === true ||
+                activeMedia?.hasHindiDub === true ||
+                (activeCategory === 'anime' && animeAudioFilter === 'hindi') ||
+                (activeCategory === 'kdrama' && kdramaFilter === 'hindi') ||
+                (activeCategory === 'hollywood' && movieFilter === 'hindi') ||
+                (activeCategory === 'new_movies' && globalMediaFilter === 'hindi')
+              }
+              onClose={() => setActiveMedia(null)}
+            />
+          </ErrorBoundary>
+        )}
+
+        {/* Settings & Secret Master Vault Modal (Passcode: 2030) */}
+        <SettingsModal
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+          isMasterMode={isMasterMode}
+          setIsMasterMode={setIsMasterMode}
+          isStealthMode={isStealthMode}
+          setIsStealthMode={setIsStealthMode}
+          includeMature={includeMature}
+          setIncludeMature={setIncludeMature}
+          preferredServer={preferredServer}
+          setPreferredServer={setPreferredServer}
+          onClearWatchlist={clearWatchlist}
+          onPlayMedia={setActiveMedia}
+          onSelectCategory={(cat) => { setActiveCategory(cat); setSearchQuery(''); }}
+        />
+
+        {/* iPhone & iPad Installation & Zero-Ads Guide Modal */}
+        <IPhoneAppModal
+          isOpen={isIPhoneModalOpen}
+          onClose={() => setIsIPhoneModalOpen(false)}
+        />
+
+        {/* Android Native PWA & APK Installation Modal */}
+        <AndroidAppModal
+          isOpen={isAndroidModalOpen}
+          onClose={() => setIsAndroidModalOpen(false)}
+        />
+
+        {/* Furina Movie Studio & Creator Modal */}
+        <MovieStudioModal
+          isOpen={isStudioOpen}
+          onClose={() => setIsStudioOpen(false)}
+          onPlayMovie={(movie) => setActiveMedia(movie)}
+          onMoviesChanged={() => setStudioVersion((v) => v + 1)}
+        />
+
+        {/* Media Details & Season/Episode Explorer Modal */}
+        {detailsItem && (
+          <MediaDetailsModal
+            item={detailsItem}
+            onClose={() => setDetailsItem(null)}
+            onPlay={(itemToPlay) => {
+              setDetailsItem(null);
+              setActiveMedia(itemToPlay);
+            }}
+            isWatchlisted={isWatchlisted}
+            onToggleWatchlist={toggleWatchlist}
           />
-        </ErrorBoundary>
-      )}
+        )}
 
-      {/* Settings & Secret Master Vault Modal (Passcode: 2030) */}
-      <SettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        isMasterMode={isMasterMode}
-        setIsMasterMode={setIsMasterMode}
-        isStealthMode={isStealthMode}
-        setIsStealthMode={setIsStealthMode}
-        includeMature={includeMature}
-        setIncludeMature={setIncludeMature}
-        preferredServer={preferredServer}
-        setPreferredServer={setPreferredServer}
-        onClearWatchlist={clearWatchlist}
-        onPlayMedia={setActiveMedia}
-        onSelectCategory={(cat) => { setActiveCategory(cat); setSearchQuery(''); }}
-      />
-
-      {/* iPhone & iPad Installation & Zero-Ads Guide Modal */}
-      <IPhoneAppModal
-        isOpen={isIPhoneModalOpen}
-        onClose={() => setIsIPhoneModalOpen(false)}
-      />
-
-      {/* Android Native PWA & APK Installation Modal */}
-      <AndroidAppModal
-        isOpen={isAndroidModalOpen}
-        onClose={() => setIsAndroidModalOpen(false)}
-      />
-
-      {/* Furina Movie Studio & Creator Modal */}
-      <MovieStudioModal
-        isOpen={isStudioOpen}
-        onClose={() => setIsStudioOpen(false)}
-        onPlayMovie={(movie) => setActiveMedia(movie)}
-        onMoviesChanged={() => setStudioVersion((v) => v + 1)}
-      />
-
-      {/* Media Details & Season/Episode Explorer Modal */}
-      {detailsItem && (
-        <MediaDetailsModal
-          item={detailsItem}
-          onClose={() => setDetailsItem(null)}
+        {/* Global Instant Search & Discovery Modal */}
+        <SearchOverlay
+          isOpen={isSearchOverlayOpen}
+          onClose={() => setIsSearchOverlayOpen(false)}
           onPlay={(itemToPlay) => {
-            setDetailsItem(null);
+            setIsSearchOverlayOpen(false);
             setActiveMedia(itemToPlay);
+          }}
+          onOpenDetails={(itemToDetail) => {
+            setIsSearchOverlayOpen(false);
+            setDetailsItem(itemToDetail);
           }}
           isWatchlisted={isWatchlisted}
           onToggleWatchlist={toggleWatchlist}
+          isMasterMode={isMasterMode}
+          includeMature={includeMature}
         />
-      )}
 
-      {/* Global Instant Search & Discovery Modal */}
-      <SearchOverlay
-        isOpen={isSearchOverlayOpen}
-        onClose={() => setIsSearchOverlayOpen(false)}
-        onPlay={(itemToPlay) => {
-          setIsSearchOverlayOpen(false);
-          setActiveMedia(itemToPlay);
-        }}
-        onOpenDetails={(itemToDetail) => {
-          setIsSearchOverlayOpen(false);
-          setDetailsItem(itemToDetail);
-        }}
-        isWatchlisted={isWatchlisted}
-        onToggleWatchlist={toggleWatchlist}
-        isMasterMode={isMasterMode}
-        includeMature={includeMature}
-      />
+        {/* Franchise Chronological Timelines Modal (MCU, Spider-Verse, Star Wars, Naruto) */}
+        <FranchiseTimelineModal
+          isOpen={isTimelineOpen}
+          onClose={() => setIsTimelineOpen(false)}
+          onSelectMedia={(itemToPlay) => {
+            setIsTimelineOpen(false);
+            setActiveMedia(itemToPlay);
+          }}
+        />
 
-      {/* Franchise Chronological Timelines Modal (MCU, Spider-Verse, Star Wars, Naruto) */}
-      <FranchiseTimelineModal
-        isOpen={isTimelineOpen}
-        onClose={() => setIsTimelineOpen(false)}
-        onSelectMedia={(itemToPlay) => {
-          setIsTimelineOpen(false);
-          setActiveMedia(itemToPlay);
-        }}
-      />
-
-      {/* Watch Together & Sync Room Modal */}
-      <WatchTogetherModal
-        isOpen={isWatchTogetherOpen}
-        onClose={() => setIsWatchTogetherOpen(false)}
-        activeMedia={activeMedia || heroItem}
-        currentServer={SERVERS[0]}
-      />
+        {/* Watch Together & Sync Room Modal */}
+        <WatchTogetherModal
+          isOpen={isWatchTogetherOpen}
+          onClose={() => setIsWatchTogetherOpen(false)}
+          activeMedia={activeMedia || heroItem}
+          currentServer={SERVERS[0]}
+        />
+      </Suspense>
 
       {/* Aceternity UI 3D Floating Dock (Desktop & Large Screens) */}
       <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 hidden md:block pointer-events-auto">

@@ -496,16 +496,18 @@ async function runMobileTests() {
     `);
     recordTest('M11', 'iPhone SE Compact Carousel 3-Card Glance', m11Shelf.shelfCardsCount > 0 && m11Shelf.isCompact, `Card width: ${m11Shelf.firstCardWidth}px, Card count: ${m11Shelf.shelfCardsCount}`);
 
-    // M12: Browser Console Cleanliness in Mobile Emulation
-    recordTest('M12', 'Mobile Emulation Console Cleanliness', client.consoleErrors.length === 0, `Errors: ${client.consoleErrors.length}`);
+    recordTest('M12', 'Mobile Emulation Console Cleanliness', client.consoleErrors.length === 0, `Errors (${client.consoleErrors.length}): ${client.consoleErrors.join(' || ')}`);
 
     // Capture iPhone SE Screenshot
     await client.captureScreenshot(path.join(process.cwd(), 'artifacts', 'mobile_iphonese.png'));
 
   } finally {
-    await client.close();
-    previewServer.close();
-    edgeProcess.kill();
+    if (client) await client.close().catch(() => {});
+    if (previewServer) previewServer.close();
+    if (edgeProcess) edgeProcess.kill();
+    try {
+      fs.rmSync(USER_DATA_DIR, { recursive: true, force: true });
+    } catch (e) {}
   }
 
   const passedCount = testResults.filter((r) => r.passed).length;

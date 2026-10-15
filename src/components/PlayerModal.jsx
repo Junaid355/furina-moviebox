@@ -1,21 +1,21 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { 
   X, Server, Film, Tv, RefreshCw, ExternalLink, Info, Zap, Play, Pause,
-  Sparkles, ShieldCheck, Download, Maximize2, Minimize2, Volume2, VolumeX,
+  Sparkles, ShieldCheck, Download, Maximize2, Minimize2, Volume2,
   CheckCircle2, AlertTriangle, ArrowRight, Loader2, ChevronLeft, ChevronRight,
-  PictureInPicture, Keyboard, HelpCircle, Subtitles, Users, Sun, FastForward
+  PictureInPicture, Keyboard, Subtitles, Users, FastForward
 } from 'lucide-react';
 import { SERVERS, getStreamUrl, getDownloadUrl } from '../services/streaming';
 import { 
-  fetchSeasonEpisodes, fetchTvDetails, isHindiAvailable, isHindiDubbedAnime, 
-  getGenreNames, BACKDROP_BASE, IMG_BASE, POSTER_THUMB_BASE,
+  fetchSeasonEpisodes, fetchTvDetails, isHindiAvailable, 
+  getGenreNames, BACKDROP_BASE, POSTER_THUMB_BASE,
   VERIFIED_HINDI_GLOBAL_SERIES_IDS 
 } from '../services/tmdb';
 import { 
   permitPopupOnce, getBlockedCount, isAdBlockEnabled, 
   setShieldEnabled, getShieldMode, setShieldMode, setPlayerActive 
 } from '../services/adblocker';
-import { evaluateServers, isAutoAiServerEnabled, probeServers, nextBestServer } from '../services/aiServerSelector';
+import { evaluateServers, probeServers, nextBestServer } from '../services/aiServerSelector';
 import soundFx from '../services/soundFx';
 import DownloadModal from './DownloadModal';
 import UBlockShieldModal from './UBlockShieldModal';

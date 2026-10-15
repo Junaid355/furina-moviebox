@@ -24,6 +24,15 @@ const USER_DATA_DIR = path.join(process.cwd(), 'edge-qa-profile-' + process.pid)
 const PORT = 9888 + (process.pid % 50);
 let BASE_URL = 'http://127.0.0.1:4173';
 
+// Clean up any stale edge profile directories from prior aborted runs
+try {
+  fs.readdirSync(process.cwd()).forEach((file) => {
+    if (file.startsWith('edge-qa-profile') || file.startsWith('edge-temp-profile')) {
+      try { fs.rmSync(path.join(process.cwd(), file), { recursive: true, force: true }); } catch (e) {}
+    }
+  });
+} catch (e) {}
+
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
