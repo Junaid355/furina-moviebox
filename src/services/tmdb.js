@@ -1,5 +1,8 @@
 // TMDB Service with live auto-updating & offline curated blockbusters
 import apiManager from './apiManager.js';
+import { getAllWorldAnime, syncWorldAnimeNow, getLastAnimeSyncDisplay, isAnimeHindiDub } from './animeAutoSync.js';
+
+export { getAllWorldAnime, syncWorldAnimeNow, getLastAnimeSyncDisplay, isAnimeHindiDub };
 
 const API_KEY = '4e44d9029b1270a757cddc766a1bcb63';
 
@@ -2380,14 +2383,10 @@ export async function fetchAnime(page = 1, audioFilter = 'all') {
       sortParam = 'vote_count.desc';
     }
 
-    const allCurated = [
-      ...CURATED_HINDI_DUBBED_ANIME,
-      ...CURATED_ENGLISH_DUBBED_ANIME,
-      ...CURATED_SUBBED_ANIME
-    ];
-    const allCuratedIds = new Set(allCurated.map((a) => Number(a.id)));
+    const worldCatalog = getAllWorldAnime();
+    const allCuratedIds = new Set(worldCatalog.map((a) => Number(a.id)));
 
-    // Fetch both TV anime series AND anime cinema movies with cache
+    // Fetch live TV anime series AND anime cinema movies with cache
     const tvPromise = cachedFetchJson(`${BASE_URL}/discover/tv?api_key=${API_KEY}&with_genres=16&with_original_language=ja&first_air_date.lte=${today}&vote_count.gte=8&sort_by=${sortParam}&page=${page}`)
       .catch(() => ({ results: [] }));
     const moviePromise = cachedFetchJson(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=16&with_original_language=ja&primary_release_date.lte=${today}&vote_count.gte=10&sort_by=${sortParam}&page=${page}`)
@@ -2409,7 +2408,7 @@ export async function fetchAnime(page = 1, audioFilter = 'all') {
     const cleanDiscovered = interleaved
       .filter((item) => item && item.id && !isHanimeContent(item) && !allCuratedIds.has(Number(item.id)))
       .map((m) => {
-        const isHindi = isHindiDubbedAnime(m) || VERIFIED_HINDI_ANIME_IDS.has(Number(m.id));
+        const isHindi = isHindiDubbedAnime(m) || isAnimeHindiDub(m) || VERIFIED_HINDI_ANIME_IDS.has(Number(m.id));
         return { 
           ...m, 
           media_type: m.media_type || (m.first_air_date ? 'tv' : 'movie'), 
@@ -2423,6 +2422,9 @@ export async function fetchAnime(page = 1, audioFilter = 'all') {
       .filter((item) => {
         if (audioFilter === 'hindi') {
           return item.hasHindiDub;
+        }
+        if (audioFilter === 'airing') {
+          return Boolean(item.isAiringWeekly || (item.first_air_date && item.first_air_date >= '2024-01-01'));
         }
         return true;
       });
@@ -2441,44 +2443,29 @@ export async function fetchAnime(page = 1, audioFilter = 'all') {
 
       let curatedBase = [];
       if (audioFilter === 'hindi') {
-        curatedBase = [...studioAnime, ...CURATED_HINDI_DUBBED_ANIME.map((a) => ({ ...a, hasHindiDub: true, isHindiDubbed: true, dub_type: 'hindi' }))];
+        const hindiWorld = worldCatalog.filter(a => a.hasHindiDub || isAnimeHindiDub(a));
+        curatedBase = [...studioAnime, ...hindiWorld.map(a => ({ ...a, hasHindiDub: true, isHindiDubbed: true, dub_type: 'hindi' }))];
       } else if (audioFilter === 'english') {
-        curatedBase = [...studioAnime, ...CURATED_ENGLISH_DUBBED_ANIME];
+        curatedBase = [...studioAnime, ...worldCatalog.filter(a => a.hasEnglishDub).map(a => ({ ...a, dub_type: 'english' }))];
       } else if (audioFilter === 'sub') {
-        curatedBase = [...studioAnime, ...CURATED_SUBBED_ANIME];
+        curatedBase = [...studioAnime, ...worldCatalog.map(a => ({ ...a, dub_type: 'sub' }))];
+      } else if (audioFilter === 'airing') {
+        curatedBase = [...worldCatalog.filter(a => a.isAiringWeekly)];
       } else {
-        const seenIds = new Set();
-        curatedBase = [
-          ...studioAnime,
-          ...CURATED_HINDI_DUBBED_ANIME.slice(0, 15),
-          ...CURATED_ENGLISH_DUBBED_ANIME.slice(0, 15),
-          ...CURATED_SUBBED_ANIME.slice(0, 10)
-        ].map((a) => {
-          const isHindi = isHindiDubbedAnime(a) || VERIFIED_HINDI_ANIME_IDS.has(Number(a.id));
-          return { ...a, hasHindiDub: isHindi, isHindiDubbed: isHindi };
-        })
-        .filter((item) => {
-          if (!item || seenIds.has(Number(item.id))) return false;
-          seenIds.add(Number(item.id));
-          return true;
-        });
+        curatedBase = [...studioAnime, ...worldCatalog];
       }
 
-      return [...curatedBase, ...cleanDiscovered];
+      return deduplicateMedia([...curatedBase, ...cleanDiscovered]);
     }
 
     return cleanDiscovered;
-
   } catch (err) {
-
-    if (audioFilter === 'hindi') return page === 1 ? CURATED_HINDI_DUBBED_ANIME : [];
-
-    if (audioFilter === 'sub') return page === 1 ? CURATED_SUBBED_ANIME : [];
-
-    return page === 1 ? CURATED_ENGLISH_DUBBED_ANIME : [];
-
+    const worldCatalog = getAllWorldAnime();
+    if (audioFilter === 'hindi') return page === 1 ? worldCatalog.filter(a => a.hasHindiDub || isAnimeHindiDub(a)) : [];
+    if (audioFilter === 'airing') return page === 1 ? worldCatalog.filter(a => a.isAiringWeekly) : [];
+    if (audioFilter === 'sub') return page === 1 ? worldCatalog : [];
+    return page === 1 ? worldCatalog : [];
   }
-
 }
 
 

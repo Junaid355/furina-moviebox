@@ -22,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Testing & temporary profiles
+edge-*
+edge-qa-profile*
+edge-temp-profile*
+*.tmp
+artifacts/*.png
+artifacts/*.jpg
+artifacts/*.webp

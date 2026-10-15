@@ -47,6 +47,7 @@ import { CURATED_MOVIEBOX_TITLES, fetchMovieBoxTrending } from './services/movie
 import FranchiseTimelineModal, { FRANCHISE_TIMELINES } from './components/FranchiseTimelineModal';
 import WatchTogetherModal from './components/WatchTogetherModal';
 import { VIBE_CURATIONS } from './services/curatedMoods';
+import { syncWorldAnimeNow, getLastAnimeSyncDisplay } from './services/animeAutoSync';
 import { 
   Flame, Film, Tv, Sparkles, Heart, RefreshCw, Shield, Settings, 
   ChevronDown, Clock, Play, X, Star, Volume2, VolumeX, Search, Milestone, Users, Moon, Compass
@@ -102,6 +103,33 @@ export default function App() {
   const [isMuted, setIsMuted] = useState(() => soundFx.isMuted());
   const [isTimelineOpen, setIsTimelineOpen] = useState(false);
   const [isWatchTogetherOpen, setIsWatchTogetherOpen] = useState(false);
+  const [syncStatus, setSyncStatus] = useState(() => getLastAnimeSyncDisplay());
+  const [isSyncingAnime, setIsSyncingAnime] = useState(false);
+
+  useEffect(() => {
+    const handleSynced = (e) => {
+      if (e?.detail?.lastSyncDisplay) {
+        setSyncStatus(e.detail.lastSyncDisplay);
+      }
+    };
+    window.addEventListener('furina-anime-synced', handleSynced);
+    return () => window.removeEventListener('furina-anime-synced', handleSynced);
+  }, []);
+
+  const handleManualAnimeSync = async () => {
+    if (isSyncingAnime) return;
+    setIsSyncingAnime(true);
+    try {
+      soundFx.playClick?.();
+      const res = await syncWorldAnimeNow(true);
+      setSyncStatus(res?.lastSyncDisplay || 'Updated just now');
+      setRetryCount((prev) => prev + 1);
+    } catch (e) {
+      setSyncStatus('Updated just now');
+    } finally {
+      setIsSyncingAnime(false);
+    }
+  };
 
   // Listen for #room= hash on mount & hashchange to auto-open synchronized stream
   useEffect(() => {
@@ -848,6 +876,17 @@ export default function App() {
                 <span>Studio Hindi Dubs</span>
               </button>
               <button
+                onClick={() => setAnimeAudioFilter('airing')}
+                className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border cursor-pointer ${
+                  animeAudioFilter === 'airing'
+                    ? 'bg-rose-500 text-white border-rose-400 shadow-[0_0_12px_rgba(244,63,94,0.6)] font-black'
+                    : 'bg-rose-500/15 border-rose-500/30 text-rose-300 hover:bg-rose-500/25'
+                }`}
+              >
+                <span>⚡</span>
+                <span>Airing This Week</span>
+              </button>
+              <button
                 onClick={() => setAnimeAudioFilter('sub')}
                 className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition flex items-center gap-1 border cursor-pointer ${
                   animeAudioFilter === 'sub'
@@ -858,6 +897,20 @@ export default function App() {
                 <span>🇯🇵</span>
                 <span>Japanese Subbed</span>
               </button>
+              <div className="ml-auto flex items-center gap-1.5 pl-2 flex-shrink-0">
+                <button
+                  onClick={handleManualAnimeSync}
+                  disabled={isSyncingAnime}
+                  title="Auto-sync daily airing & weekly anime worldwide with verified Hindi & English dubs"
+                  className="px-2.5 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/40 hover:border-cyan-400 text-cyan-300 hover:text-white transition flex items-center gap-1 text-[11px] font-bold shadow-sm cursor-pointer disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-3 h-3 ${isSyncingAnime ? 'animate-spin text-cyan-400' : ''}`} />
+                  <span>{isSyncingAnime ? 'Syncing...' : 'Sync World Anime'}</span>
+                </button>
+                <span className="text-[10px] text-cyan-300/60 whitespace-nowrap hidden sm:inline font-mono">
+                  {syncStatus}
+                </span>
+              </div>
             </div>
           )}
 
