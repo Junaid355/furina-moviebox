@@ -368,13 +368,7 @@ async function runQA() {
       (() => {
         const input = document.querySelector('input[type="text"]');
         if (!input) return;
-        input.value = '';
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-        const word = 'naruto';
-        for (let i = 0; i < word.length; i++) {
-          input.value += word[i];
-          input.dispatchEvent(new Event('input', { bubbles: true }));
-        }
+        window.__setReactInput('input[type="text"]', 'naruto');
       })();
     `);
     await sleep(1000);
@@ -860,9 +854,9 @@ async function runQA() {
 
     await client.eval(`window.__setReactInput('input[type="text"]', 'Furina E2E');`);
     let foundCreatedInSearch = false;
-    for (let w = 0; w < 15; w++) {
+    for (let w = 0; w < 20; w++) {
       await sleep(500);
-      foundCreatedInSearch = await client.eval('document.body.innerText.includes("Furina E2E Blockbuster")');
+      foundCreatedInSearch = await client.eval('(document.body?.innerText || "").includes("Furina E2E Blockbuster")');
       if (foundCreatedInSearch) break;
     }
     recordTest(20, 'Page Reload Persistence', foundCreatedInSearch, 'Created movie persisted across reload and surfaced in search');

@@ -1440,8 +1440,8 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
         {!isFullscreen && (
           <div className="flex items-center justify-between p-2 sm:p-4 border-b border-cyan-500/30 bg-[#050b1d] shrink-0 z-30 shadow-md">
             <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 flex-1 pr-1.5 sm:pr-2">
-              <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full overflow-hidden border-2 border-cyan-400 shadow-[0_0_15px_rgba(56,189,248,0.7)] shrink-0">
-                <img src="./furina-avatar.jpg" alt="Furina" onError={(e) => { e.currentTarget.src = './favicon.png'; }} className="w-full h-full object-cover" />
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden border-2 border-cyan-400 shadow-[0_0_15px_rgba(56,189,248,0.7)] ring-1 ring-cyan-200/50 bg-[#060d24] shrink-0">
+                <img src="./furina-avatar.png" alt="Furina" onError={(e) => { e.currentTarget.src = './favicon.png'; }} className="w-full h-full object-cover object-center" />
               </div>
               <div className="min-w-0 flex-1">
                 <h2 className="font-extrabold text-xs sm:text-base text-white flex items-center gap-1.5 min-w-0" title={title}>

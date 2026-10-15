@@ -75,8 +75,8 @@ export default class ErrorBoundary extends React.Component {
       return (
         <div className="min-h-screen bg-[#030712] text-white flex flex-col items-center justify-center p-4 sm:p-6 text-center select-none">
           {/* Glowing Avatar */}
-          <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-cyan-400/60 shadow-[0_0_25px_rgba(56,189,248,0.5)] mb-4 animate-pulse">
-            <img src="./favicon.png" alt="Furina" className="w-full h-full object-cover" />
+          <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-cyan-400/60 shadow-[0_0_25px_rgba(56,189,248,0.5)] mb-4 animate-pulse bg-[#060d24]">
+            <img src="./furina-avatar.png" alt="Furina" className="w-full h-full object-cover object-center" />
           </div>
 
           <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight mb-2">

@@ -140,35 +140,41 @@ export default function Navbar({
           className="flex items-center gap-1 sm:gap-2.5 cursor-pointer group shrink-0"
         >
           {isStealthMode ? (
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-slate-700 to-slate-900 border border-slate-600/50 flex items-center justify-center text-cyan-400 font-black text-xs shadow">
-              <Film className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400" />
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gradient-to-br from-slate-700 to-slate-900 border border-slate-600/50 flex items-center justify-center text-cyan-400 font-black text-xs shadow">
+              <Film className="w-4 h-4 text-cyan-400" />
             </div>
           ) : (
-            <div className="relative w-7 h-7 sm:w-9 sm:h-9 rounded-full overflow-hidden border-2 border-cyan-400 shadow-[0_0_15px_rgba(56,189,248,0.75)] group-hover:scale-110 group-active:scale-95 transition-all duration-300 bg-[#060d24] shrink-0">
+            <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden border-2 border-cyan-400/90 shadow-[0_0_16px_rgba(56,189,248,0.7)] ring-1 ring-cyan-200/50 group-hover:scale-105 group-hover:shadow-[0_0_24px_rgba(56,189,248,0.9)] group-active:scale-95 transition-all duration-300 bg-[#060d24] shrink-0">
               <img 
-                src="./furina-avatar.jpg" 
+                src="./furina-avatar.png" 
                 alt="Furina MovieBox" 
-                className="w-full h-full object-cover" 
+                className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-300" 
                 onError={(e) => { e.currentTarget.src = './favicon.png'; }}
               />
             </div>
           )}
           
-          <div className="shrink-0">
-            <div className="flex items-center gap-1">
-              <span className={`font-extrabold text-sm sm:text-base tracking-tight ${
+          <div className="shrink-0 flex flex-col justify-center">
+            <div className="flex items-center gap-1 sm:gap-1.5">
+              <span className={`font-black text-sm sm:text-base tracking-tight ${
                 isStealthMode
                   ? 'text-white'
-                  : 'bg-gradient-to-r from-cyan-300 via-sky-400 to-blue-500 bg-clip-text text-transparent'
+                  : 'bg-gradient-to-r from-cyan-200 via-sky-300 to-blue-400 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(56,189,248,0.5)]'
               }`}>
                 {isStealthMode ? 'Stream' : 'Furina'}
               </span>
-              <span className="font-bold text-sm sm:text-base text-white hidden xs:inline">
-                {isStealthMode ? 'Cinema' : 'MovieBox'}
+              <span className="font-extrabold text-sm sm:text-base text-white tracking-tight flex items-center gap-1">
+                <span>{isStealthMode ? 'Cinema' : 'MovieBox'}</span>
+                {!isStealthMode && (
+                  <span className="text-[8.5px] font-black uppercase px-1 py-0.5 rounded bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 font-mono shadow-[0_0_8px_rgba(56,189,248,0.6)] leading-none hidden xs:inline-block">
+                    4K
+                  </span>
+                )}
               </span>
             </div>
-            <div className="text-[8.5px] text-cyan-300/80 font-medium tracking-wider uppercase hidden 2xl:block">
-              {isStealthMode ? 'HD Stream Player' : '4K Movies & Web Series'}
+            <div className="text-[8px] sm:text-[8.5px] text-cyan-300/80 font-semibold tracking-wider uppercase hidden 2xl:flex items-center gap-1">
+              <span>{isStealthMode ? 'HD Stream Player' : '4K Cinema & Multi-Dub'}</span>
+              <span className="text-cyan-400">✦</span>
             </div>
           </div>
         </div>
