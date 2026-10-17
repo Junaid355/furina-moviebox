@@ -1,392 +1,326 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Plus, Check, Star, Info, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { Play, Plus, Check, Star, Info, ChevronLeft, ChevronRight, Sparkles, Volume2, Users } from 'lucide-react';
 import { isHindiAvailable } from '../services/tmdb';
-import { resolveBackdropUrl, extractGenres } from '../services/contentModel';
+import { resolveBackdropUrl, resolvePosterUrl, extractGenres, getGenreBadgeStyle } from '../services/contentModel';
 import soundFx from '../services/soundFx';
-import { BorderBeam } from './ui/border-beam';
-import { Spotlight } from './ui/spotlight';
-import { SparklesCore } from './ui/sparkles';
-import { Ripple } from './ui/ripple';
-import { ShimmerButton } from './ui/shimmer-button';
-import { GlowEffect } from './ui/glow-effect';
 
-export default function HeroBanner({ 
-  items, 
-  item, 
-  onPlay, 
-  isWatchlisted, 
+export default function HeroBanner({
+  items = [],
+  item: propItem,
+  onPlay,
+  isWatchlisted,
   onToggleWatchlist,
-  onOpenDetails 
+  onOpenDetails,
+  onWatchTogether
 }) {
-  const list = (Array.isArray(items) && items.length > 0)
-    ? items.filter(Boolean).slice(0, 8)
-    : (item ? [item] : []);
+  const slides = Array.isArray(items) && items.length > 0
+    ? items.slice(0, 8)
+    : propItem
+    ? [propItem]
+    : [];
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const cardRef = useRef(null);
-  const glareRef = useRef(null);
-  const rafId = useRef(null);
+  const touchStartXRef = useRef(null);
 
   useEffect(() => {
-    if (list.length <= 1 || isPaused) return;
+    setCurrentIndex(0);
+  }, [items]);
+
+  useEffect(() => {
+    if (slides.length <= 1 || isPaused) return;
     const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % list.length);
-    }, 7000);
+      setCurrentIndex((prev) => (prev + 1) % slides.length);
+    }, 6500);
     return () => clearInterval(timer);
-  }, [list.length, isPaused]);
+  }, [slides.length, isPaused]);
 
-  const cardRectRef = useRef(null);
+  if (slides.length === 0) return null;
 
-  const handleMouseEnter = () => {
-    setIsPaused(true);
-    if (cardRef.current) {
-      cardRectRef.current = cardRef.current.getBoundingClientRect();
-    }
-  };
+  const item = slides[currentIndex] || slides[0];
+  if (!item) return null;
 
-  // 60-120 FPS Direct RAF DOM transform (Zero React re-renders on mousemove)
-  const handleMouseMove = (e) => {
-    if (!cardRef.current) return;
-    if (rafId.current) cancelAnimationFrame(rafId.current);
-    const rect = cardRectRef.current || cardRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-
-    const rotX = ((y - centerY) / centerY) * -6;
-    const rotY = ((x - centerX) / centerX) * 6;
-    const gx = Math.round((x / rect.width) * 100);
-    const gy = Math.round((y / rect.height) * 100);
-
-    rafId.current = requestAnimationFrame(() => {
-      if (cardRef.current) {
-        cardRef.current.style.transition = 'none';
-        cardRef.current.style.transform = `perspective(1200px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) scale3d(1.008, 1.008, 1.008)`;
-      }
-      if (glareRef.current) {
-        glareRef.current.style.opacity = '0.28';
-        glareRef.current.style.background = `radial-gradient(circle at ${gx}% ${gy}%, rgba(255,255,255,0.22) 0%, rgba(0,242,254,0.15) 30%, transparent 65%)`;
-      }
-    });
-  };
-
-  const handleMouseLeave = () => {
-    setIsPaused(false);
-    cardRectRef.current = null;
-    if (rafId.current) cancelAnimationFrame(rafId.current);
-    if (cardRef.current) {
-      cardRef.current.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)';
-      cardRef.current.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
-    }
-    if (glareRef.current) {
-      glareRef.current.style.opacity = '0';
-    }
-  };
-
-  if (list.length === 0) return null;
-  const currentItem = list[currentIndex] || list[0] || {};
-
-  const title = currentItem?.title || currentItem?.name || 'Featured Blockbuster';
-  const year = String(currentItem?.release_date || currentItem?.first_air_date || '').substring(0, 4) || '2024';
-  const rating = typeof currentItem?.vote_average === 'number'
-    ? currentItem.vote_average.toFixed(1)
-    : (currentItem?.vote_average || '8.2');
-
-  const isSeries = Boolean(
-    currentItem?.media_type === 'tv' || 
-    Boolean(currentItem?.first_air_date) || 
-    currentItem?.category === 'series' || 
-    currentItem?.category === 'kdrama'
-  );
+  const backdropUrl = resolveBackdropUrl(item.backdrop_path || item.poster_path);
+  const title = item.title || item.name || 'Featured Premiere';
+  const year = item.year || String(item.release_date || item.first_air_date || '').substring(0, 4) || '2025';
+  const rating = typeof item.vote_average === 'number'
+    ? item.vote_average.toFixed(1)
+    : item.rating || '8.5';
 
   const isAnime = Boolean(
-    currentItem?.category === 'anime' ||
-    currentItem?.category === 'ecchi_anime' ||
-    currentItem?.isAnime === true ||
-    currentItem?.original_language === 'ja'
+    item.category === 'anime' ||
+    item.category === 'ecchi_anime' ||
+    item.isAnime === true ||
+    item.original_language === 'ja'
   );
 
   const isHindi = Boolean(
-    currentItem?.languages?.hi?.url ||
-    currentItem?.isHindiDubbed ||
-    isHindiAvailable(currentItem)
+    item.isHindiDubbed ||
+    item.hasHindiDub ||
+    item.languages?.hi ||
+    isHindiAvailable(item)
   );
 
-  const genres = extractGenres(currentItem);
-  const runtime = currentItem?.runtime || (isSeries ? '45m / ep' : '2h 10m');
-  const saved = (isWatchlisted && currentItem?.id) ? isWatchlisted(currentItem.id) : false;
+  const genres = extractGenres(item).slice(0, 3);
+  const saved = isWatchlisted ? isWatchlisted(item.id) : false;
 
-  const handlePlayClick = () => {
-    soundFx.playStartChime();
-    onPlay(currentItem);
+  const prevSlide = (e) => {
+    e?.stopPropagation();
+    setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
+  const nextSlide = (e) => {
+    e?.stopPropagation();
+    setCurrentIndex((prev) => (prev + 1) % slides.length);
+  };
+
+  const handleTouchStart = (e) => {
+    if (e.touches && e.touches.length > 0) {
+      touchStartXRef.current = e.touches[0].clientX;
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStartXRef.current === null || !e.changedTouches || e.changedTouches.length === 0) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartXRef.current;
+    if (Math.abs(deltaX) > 45) {
+      if (deltaX > 0) prevSlide();
+      else nextSlide();
+    }
+    touchStartXRef.current = null;
   };
 
   return (
-    <div 
-      ref={cardRef}
-      onMouseEnter={handleMouseEnter}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      style={{
-        transformStyle: 'preserve-3d'
-      }}
-      className="relative w-full h-[240px] xs:h-[270px] sm:h-[65vh] max-h-[580px] min-h-[220px] sm:min-h-[300px] overflow-hidden rounded-2xl sm:rounded-3xl mb-3 sm:mb-8 border-2 border-cyan-400/50 shadow-[0_20px_50px_rgba(0,0,0,0.92),0_0_35px_rgba(0,242,254,0.3)] group [transform-style:preserve-3d]"
+    <div
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      className="relative w-full min-h-[340px] sm:min-h-[450px] md:min-h-[520px] rounded-2xl sm:rounded-3xl overflow-hidden mb-6 sm:mb-9 border border-cyan-500/35 shadow-[0_25px_70px_rgba(0,0,0,0.9),0_0_45px_rgba(6,182,212,0.18)] group select-none bg-[#040814]"
     >
-      {/* Theatrical Overhead Stage Lamp Fixture with radiant cyan hydro lighting */}
-      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-transparent via-[#00f2fe] to-transparent z-20 shadow-[0_0_35px_#00f2fe,0_0_15px_#38bdf8]" />
-      <div className="absolute -top-1 left-1/4 -translate-x-1/2 w-48 sm:w-80 h-3 bg-cyan-400/50 rounded-full blur-md z-20 pointer-events-none" />
-      <div className="absolute -top-16 left-8 md:left-32 w-80 h-80 bg-[#00f2fe]/25 rounded-full blur-3xl pointer-events-none z-10" />
+      {/* Top Neon Laser Highlight */}
+      <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-80 z-20" />
 
-      {/* Dual Animated Moving Border Beams tracing the perimeter */}
-      <BorderBeam size={340} duration={8} colorFrom="#00f2fe" colorTo="#38bdf8" borderWidth={2.5} />
-      <BorderBeam size={240} duration={12} delay={4} colorFrom="#38bdf8" colorTo="#2563eb" borderWidth={2} />
-
-      {/* Aceternity Overhead Glowing Lamp / Spotlight Cone illuminating Title */}
-      <div 
-        className="absolute -top-10 left-0 sm:left-12 w-full max-w-2xl h-[420px] pointer-events-none z-10 opacity-80 mix-blend-screen"
-        style={{
-          background: 'radial-gradient(ellipse 60% 70% at 30% 0%, rgba(0, 242, 254, 0.45) 0%, rgba(56, 189, 248, 0.22) 40%, rgba(37, 99, 235, 0.08) 65%, transparent 85%)'
+      {/* Backdrop Image with Smooth Cinematic Scale */}
+      <img
+        key={`${item.id}-${currentIndex}`}
+        src={backdropUrl}
+        alt={title}
+        referrerPolicy="no-referrer"
+        onError={(e) => {
+          e.currentTarget.onerror = null;
+          e.currentTarget.src = './icon-512.png';
         }}
-      />
-      <Spotlight className="-top-28 left-2 md:left-20 md:-top-16" fill="rgba(0, 242, 254, 0.6)" />
-
-      {/* 3D Specular Glare Reflection Layer */}
-      <div 
-        ref={glareRef}
-        className="pointer-events-none absolute inset-0 z-20 transition-opacity duration-300 rounded-2xl sm:rounded-3xl opacity-0"
+        className="absolute inset-0 w-full h-full object-cover object-center transition-all duration-1000 scale-105 group-hover:scale-100 opacity-85"
       />
 
-      {/* Background Poster Image with smooth crossfade */}
-      <div className="absolute inset-0 bg-[#030712]">
-        <img
-          key={currentItem?.id}
-          src={resolveBackdropUrl(currentItem?.backdrop_path || currentItem?.poster_path)}
-          alt={title}
-          onError={(e) => {
-            e.currentTarget.onerror = null;
-            e.currentTarget.src = './icon-512.png';
-          }}
-          className="w-full h-full object-cover object-center scale-105 transition-all duration-1000 group-hover:scale-100 filter brightness-95 animate-fade-in"
-        />
-      </div>
+      {/* Rich Multi-Layer Fontaine Hydro Cinema Vignette */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#030712] via-[#030712]/65 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#030712] via-[#030712]/80 to-transparent sm:w-4/5" />
+      <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-cyan-500/15 rounded-full blur-[110px] pointer-events-none" />
 
-      {/* Cinematic Vignette Gradients */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-[#020617]/65 to-transparent pointer-events-none" />
-      <div className="absolute inset-0 bg-gradient-to-r from-[#020617] via-[#020617]/85 to-transparent max-w-4xl pointer-events-none" />
-
-      {/* Ambient hydro lighting and sparkles */}
-      <div className="absolute top-1/4 left-10 w-96 h-96 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
-      <SparklesCore
-        id="hero-sparkles"
-        particleDensity={28}
-        particleColor="#38bdf8"
-        minSize={0.6}
-        maxSize={2.2}
-        className="opacity-75 z-10"
-      />
-
-      {/* Theatrical Fontaine Opera Stage: Lady Furina Performing Prominently */}
-      <div 
-        className="hidden md:flex absolute top-7 right-8 z-30 flex-col items-center p-3.5 rounded-2xl bg-gradient-to-b from-[#091a42]/90 via-[#050f29]/95 to-[#03081a]/95 border-2 border-cyan-400/50 shadow-[0_12px_35px_rgba(0,0,0,0.85),0_0_25px_rgba(0,242,254,0.4)] backdrop-blur-xl group/stage hover:scale-105 transition-all duration-300 pointer-events-auto cursor-pointer"
-        style={{ transform: 'translateZ(55px)' }}
-        onClick={() => soundFx.playWaterDrop()}
-        title="Lady Furina's Fontaine Theatrical Stage"
-      >
-        {/* Stage Spotlight Glow */}
-        <div className="absolute -top-3 w-20 h-20 bg-cyan-400/30 rounded-full blur-xl pointer-events-none" />
-        
-        {/* Top Stage Header with Gold Trim */}
-        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/25 via-cyan-500/20 to-blue-500/25 border border-amber-300/40 text-amber-300 text-[10px] font-black tracking-wider uppercase mb-2 shadow">
-          <span>👑</span>
-          <span>Fontaine Opera Stage</span>
-        </div>
-
-        {/* Animated Furina Mascot Dancing on Platform */}
-        <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-cyan-300 shadow-[0_0_22px_rgba(0,242,254,0.75)] bg-[#040a1c] mb-2">
-          <img
-            src="./furina_chibi.gif"
-            alt="Furina Chibi Mascot Stage Performance"
-            className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-200"
-          />
-          <div className="absolute bottom-0 inset-x-0 h-4 bg-gradient-to-t from-cyan-400/50 to-transparent pointer-events-none" />
-        </div>
-
-        {/* Stage Dialogue Pill */}
-        <div className="px-2.5 py-1 rounded-xl bg-cyan-950/85 border border-cyan-400/40 text-center max-w-[155px]">
-          <span className="text-[10px] font-extrabold text-cyan-200 flex items-center justify-center gap-1">
-            <span className="animate-spin text-xs">✨</span>
-            <span>Furina Premiere</span>
-          </span>
-          <p className="text-[8.5px] text-cyan-300/90 mt-0.5 font-medium leading-tight">
-            "Behold, Fontaine's finest 4K cinema!"
-          </p>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div 
-        className="absolute bottom-0 left-0 right-0 p-3 sm:p-8 md:p-12 max-w-3xl z-10 animate-fade-in [transform-style:preserve-3d]" 
-        key={`content-${currentItem?.id}`}
-      >
-        
-        {/* Furina Mascot Top Premiere Tag */}
-        <div 
-          className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-3 flex-wrap transition-transform duration-200"
-          style={{ transform: 'translateZ(36px)' }}
-        >
-          <div className="hidden sm:flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-0.5 rounded-full bg-cyan-950/85 border border-cyan-400/50 shadow-[0_0_12px_rgba(56,189,248,0.4)] backdrop-blur-md">
-            <img 
-              src="./furina_chibi.gif" 
-              alt="Furina Chibi" 
-              className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full object-cover border border-cyan-300"
-            />
-            <span className="text-[8px] sm:text-[9.5px] font-black uppercase tracking-wider text-cyan-300">Furina Premiere</span>
-          </div>
-
-          <span className="badge-4k-uhd text-[7.5px] sm:text-[10px] px-1.5 sm:px-3 py-0.5 rounded-full shadow-lg tracking-wider uppercase border border-cyan-300/40">
-            4K Ultra HD
-          </span>
-          {isHindi && (
-            <span className="badge-hindi-gold text-[7.5px] sm:text-[10px] px-1.5 sm:px-2.5 py-0.5 rounded-full shadow flex items-center gap-1 border border-amber-300/40">
-              <span>🇮🇳</span>
-              <span>Hindi Audio</span>
-            </span>
-          )}
-          {isAnime && (
-            <span className="badge-fhd text-[7.5px] sm:text-[10px] px-1.5 sm:px-2.5 py-0.5 rounded-full shadow flex items-center gap-1 border border-purple-300/40">
-              <span>🇯🇵</span>
-              <span>SUB / DUB</span>
-            </span>
-          )}
-          {isSeries ? (
-            <span className="hidden sm:inline-block bg-purple-500/20 text-purple-300 border border-purple-500/40 text-[9px] sm:text-[11px] font-bold px-2 sm:px-2.5 py-0.5 rounded-full backdrop-blur-sm">
-              Web Series
-            </span>
-          ) : (
-            <span className="hidden sm:inline-block bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[9px] sm:text-[11px] font-bold px-2 sm:px-2.5 py-0.5 rounded-full backdrop-blur-sm">
-              Cinema Movie
-            </span>
-          )}
-          <span className="flex items-center gap-1 bg-black/60 backdrop-blur-md px-1.5 sm:px-2.5 py-0.5 rounded-full border border-amber-500/30 text-amber-400 font-extrabold text-[9px] sm:text-xs">
-            <Star className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 fill-amber-400" />
-            {rating}
-          </span>
-          <span className="text-cyan-200/70 text-[9px] sm:text-xs font-semibold px-1.5 sm:px-2 py-0.5 bg-white/5 rounded-full border border-white/5">{year}</span>
-          {runtime && (
-            <span className="text-slate-300 text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 bg-white/5 rounded-full border border-white/5 hidden xs:inline">{runtime}</span>
-          )}
-        </div>
-
-        <h1 
-          className="text-base xs:text-xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-1 sm:mb-2 leading-tight drop-shadow-[0_4px_18px_rgba(0,242,254,0.45)] transition-transform duration-200 line-clamp-1 xs:line-clamp-2"
-          style={{ transform: 'translateZ(50px)' }}
-        >
-          {title}
-        </h1>
-
-        {genres.length > 0 && (
-          <div 
-            className="hidden sm:flex items-center gap-1 sm:gap-1.5 mb-1.5 sm:mb-3 flex-wrap transition-transform duration-200"
-            style={{ transform: 'translateZ(34px)' }}
+      {/* Prev / Next Glass Arrows on Desktop */}
+      {slides.length > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={prevSlide}
+            aria-label="Previous slide"
+            className="hidden sm:flex absolute left-3.5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-slate-950/70 hover:bg-cyan-500 hover:text-slate-950 text-white border border-cyan-500/35 items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer shadow-lg"
           >
-            {genres.slice(0, 3).map((g) => (
-              <span key={g} className="text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-md bg-cyan-950/70 border border-cyan-500/40 text-cyan-300">
-                {g}
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            type="button"
+            onClick={nextSlide}
+            aria-label="Next slide"
+            className="hidden sm:flex absolute right-3.5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-slate-950/70 hover:bg-cyan-500 hover:text-slate-950 text-white border border-cyan-500/35 items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer shadow-lg"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </>
+      )}
+
+      {/* Foreground Content */}
+      <div className="relative z-10 h-full min-h-[340px] sm:min-h-[450px] md:min-h-[520px] flex flex-col justify-end p-5 sm:p-9 md:p-12">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 w-full">
+          
+          {/* Left Hero Details */}
+          <div className="max-w-2xl space-y-3 sm:space-y-4">
+            {/* Glowing Cinema Badges Row */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 font-black text-[10px] sm:text-[11px] uppercase tracking-wider shadow-[0_0_15px_rgba(34,211,238,0.6)] flex items-center gap-1">
+                <Sparkles className="w-3 h-3 fill-slate-950" />
+                <span>4K DOLBY VISION</span>
               </span>
-            ))}
+
+              <span className="px-2.5 py-1 rounded-lg bg-slate-950/80 backdrop-blur-md border border-amber-500/40 text-amber-400 font-black text-[11px] flex items-center gap-1">
+                <Star className="w-3.5 h-3.5 fill-amber-400" />
+                <span>{rating}</span>
+              </span>
+
+              <span className="px-2.5 py-1 rounded-lg bg-slate-950/80 backdrop-blur-md border border-cyan-500/30 text-cyan-200 font-mono font-bold text-[11px]">
+                {year}
+              </span>
+
+              {isHindi && (
+                <span className="px-2.5 py-1 rounded-lg bg-amber-500/20 backdrop-blur-md border border-amber-400/50 text-amber-300 font-extrabold text-[11px] flex items-center gap-1">
+                  <Volume2 className="w-3 h-3 text-amber-400" />
+                  <span>🇮🇳 Hindi Dub + Multi-Audio</span>
+                </span>
+              )}
+
+              {isAnime && (
+                <span className="px-2.5 py-1 rounded-lg bg-purple-500/20 backdrop-blur-md border border-purple-400/50 text-purple-200 font-extrabold text-[11px]">
+                  🇯🇵 Anime Sub/Dub
+                </span>
+              )}
+            </div>
+
+            {/* Hero Display Title */}
+            <h1 className="text-2xl sm:text-4xl md:text-5xl font-black tracking-tight text-white leading-[1.08] drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] [text-wrap:balance]">
+              {title}
+            </h1>
+
+            {/* Color-Coded Genre Tags */}
+            {genres.length > 0 && (
+              <div className="flex items-center gap-2 flex-wrap">
+                {genres.map((genre) => {
+                  const style = getGenreBadgeStyle(genre);
+                  return (
+                    <span
+                      key={genre}
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-extrabold tracking-wide border backdrop-blur-md ${style.badgeClass}`}
+                    >
+                      <span className={`w-1.5 h-1.5 rounded-full ${style.dotClass}`} />
+                      <span>{style.label}</span>
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Concise Synopsis */}
+            <p className="text-xs sm:text-sm md:text-base text-slate-200/90 line-clamp-2 sm:line-clamp-3 max-w-xl leading-relaxed font-normal">
+              {item.overview || 'Stream instantly in 4K Ultra HD with verified multi-audio dubs and zero buffering.'}
+            </p>
+
+            {/* Primary & Secondary Action Buttons */}
+            <div className="flex items-center gap-2.5 sm:gap-3 pt-1 flex-wrap">
+              <button
+                type="button"
+                onClick={() => {
+                  soundFx.playStartChime?.();
+                  onPlay(item);
+                }}
+                className="min-h-[46px] px-6 sm:px-8 py-3 rounded-xl bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-black text-xs sm:text-sm flex items-center gap-2 shadow-[0_0_30px_rgba(34,211,238,0.6)] transition transform hover:scale-[1.03] active:scale-95 cursor-pointer whitespace-nowrap"
+              >
+                <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-slate-950" />
+                <span>Watch 4K Stream</span>
+              </button>
+
+              {onWatchTogether && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundFx.playClick?.();
+                    onWatchTogether(item);
+                  }}
+                  className="min-h-[46px] px-4 sm:px-5 py-3 rounded-xl bg-purple-500/20 hover:bg-purple-500/35 backdrop-blur-md border border-purple-400/50 text-purple-200 hover:text-white font-bold text-xs sm:text-sm flex items-center gap-2 transition active:scale-95 cursor-pointer whitespace-nowrap shadow-[0_0_18px_rgba(168,85,247,0.3)]"
+                >
+                  <Users className="w-4 h-4 text-purple-300" />
+                  <span>Watch Together</span>
+                </button>
+              )}
+
+              {onOpenDetails && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundFx.playClick?.();
+                    onOpenDetails(item);
+                  }}
+                  className="min-h-[46px] px-4 sm:px-5 py-3 rounded-xl bg-slate-900/85 hover:bg-slate-800 backdrop-blur-md border border-cyan-500/35 hover:border-cyan-400 text-white font-bold text-xs sm:text-sm flex items-center gap-2 transition active:scale-95 cursor-pointer whitespace-nowrap"
+                >
+                  <Info className="w-4 h-4 text-cyan-400" />
+                  <span>Details</span>
+                </button>
+              )}
+
+              {onToggleWatchlist && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundFx.playClick?.();
+                    onToggleWatchlist(item);
+                  }}
+                  aria-label={saved ? 'Remove from Watchlist' : 'Add to Watchlist'}
+                  className={`min-h-[46px] px-4 py-3 rounded-xl backdrop-blur-md border font-bold text-xs sm:text-sm flex items-center gap-1.5 transition active:scale-95 cursor-pointer whitespace-nowrap ${
+                    saved
+                      ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_15px_rgba(34,211,238,0.3)]'
+                      : 'bg-slate-900/80 border-white/15 text-slate-200 hover:text-white hover:border-cyan-500/40'
+                  }`}
+                >
+                  {saved ? <Check className="w-4 h-4 text-cyan-400" /> : <Plus className="w-4 h-4" />}
+                  <span className="hidden xs:inline">{saved ? 'Saved' : 'Watchlist'}</span>
+                </button>
+              )}
+            </div>
           </div>
-        )}
 
-        <p 
-          className="text-[11px] sm:text-sm text-cyan-100/90 hidden sm:line-clamp-2 md:line-clamp-3 mb-2.5 sm:mb-6 max-w-xl font-medium leading-relaxed drop-shadow transition-transform duration-200"
-          style={{ transform: 'translateZ(28px)' }}
-        >
-          {currentItem?.overview}
-        </p>
-
-        <div 
-          className="flex items-center gap-1.5 sm:gap-3.5 flex-wrap transition-transform duration-200 mt-1 sm:mt-0"
-          style={{ transform: 'translateZ(60px)' }}
-        >
-          <div className="relative group/playbtn">
-            <GlowEffect mode="rotate" blur="medium" scale={1.05} duration={3} colors={['#00f2fe', '#38bdf8', '#2563eb', '#7c3aed']} />
-            <ShimmerButton
-              onClick={handlePlayClick}
-              shimmerColor="#ffffff"
-              shimmerDuration="2.5s"
-              background="linear-gradient(135deg, #00f2fe 0%, #0284c7 50%, #2563eb 100%)"
-              className="text-gray-950 font-black text-xs sm:text-sm px-3.5 py-1.5 sm:px-8 sm:py-3.5 shadow-[0_0_20px_rgba(0,242,254,0.85)] border-2 border-white/60 hover:scale-105 active:scale-95 transition-all"
-            >
-              <Play className="w-3 h-3 sm:w-4 sm:h-4 fill-gray-950 ml-0.5" />
-              <span className="tracking-wide">Watch in 4K</span>
-            </ShimmerButton>
-          </div>
-
-          {onOpenDetails && (
-            <button
-              onClick={() => {
-                soundFx.playClick();
-                onOpenDetails(currentItem);
-              }}
-              className="flex items-center gap-1 px-2.5 py-1.5 sm:px-6 sm:py-3.5 rounded-full text-xs sm:text-sm font-bold transition-all border backdrop-blur-xl bg-slate-950/80 border-cyan-400/40 text-cyan-200 hover:text-white hover:bg-cyan-500/20 hover:border-cyan-300 shadow-[0_0_15px_rgba(56,189,248,0.2)] hover:scale-105 active:scale-95 cursor-pointer"
-            >
-              <Info className="w-3 h-3 sm:w-4 sm:h-4 text-cyan-300 bounce-hover" />
-              <span>Details</span>
-            </button>
+          {/* Right Interactive Poster Thumbnail Strip (Desktop & Tablet) */}
+          {slides.length > 1 && (
+            <div className="hidden md:flex items-center gap-2 bg-[#040a1c]/85 backdrop-blur-xl p-2 rounded-2xl border border-cyan-500/30 shadow-2xl shrink-0">
+              {slides.slice(0, 6).map((s, idx) => {
+                const isSelected = idx === currentIndex;
+                return (
+                  <button
+                    key={`thumb-${s.id}-${idx}`}
+                    type="button"
+                    onClick={() => {
+                      soundFx.playClick?.();
+                      setCurrentIndex(idx);
+                    }}
+                    className={`relative w-12 h-16 lg:w-14 lg:h-20 rounded-xl overflow-hidden transition-all duration-300 cursor-pointer shrink-0 ${
+                      isSelected
+                        ? 'ring-2 ring-cyan-400 scale-110 shadow-[0_0_20px_rgba(34,211,238,0.75)] z-10'
+                        : 'opacity-55 hover:opacity-95 hover:scale-105'
+                    }`}
+                    title={s.title || s.name}
+                  >
+                    <img
+                      src={resolvePosterUrl(s.poster_path, 'w342')}
+                      alt={s.title || s.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => { e.currentTarget.src = './icon-512.png'; }}
+                    />
+                  </button>
+                );
+              })}
+            </div>
           )}
 
-          <button
-            onClick={() => {
-              soundFx.playClick();
-              onToggleWatchlist(currentItem);
-            }}
-            className={`flex items-center gap-1 px-2.5 py-1.5 sm:px-6 sm:py-3.5 rounded-full text-xs sm:text-sm font-bold transition-all border backdrop-blur-xl cursor-pointer hover:scale-105 active:scale-95 ${
-              saved
-                ? 'bg-cyan-500/25 border-cyan-400 text-cyan-200 shadow-[0_0_20px_rgba(56,189,248,0.4)]'
-                : 'bg-slate-950/80 border-cyan-400/30 text-slate-200 hover:text-white hover:bg-cyan-500/20 hover:border-cyan-300'
-            }`}
-          >
-            {saved ? <Check className="w-3 h-3 sm:w-4 sm:h-4 text-cyan-400" /> : <Plus className="w-3 h-3 sm:w-4 sm:h-4 text-cyan-300" />}
-            <span>{saved ? 'Saved' : '+ Watchlist'}</span>
-          </button>
         </div>
-      </div>
 
-      {/* Carousel Dots & Controls (if more than 1 item) */}
-      {list.length > 1 && (
-        <div className="flex absolute top-3 right-3 sm:top-auto sm:bottom-10 sm:right-12 z-20 items-center gap-1.5 sm:gap-2">
-          <button
-            onClick={() => setCurrentIndex((prev) => (prev - 1 + list.length) % list.length)}
-            aria-label="Previous Featured Slide"
-            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/60 hover:bg-black/80 border border-white/15 text-white flex items-center justify-center backdrop-blur-md transition hover:scale-110 active:scale-95 cursor-pointer shadow-md"
-          >
-            <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          </button>
-
-          <div className="flex items-center gap-1 sm:gap-1.5 px-1 sm:px-2">
-            {list.map((_, idx) => (
+        {/* Mobile Slide Indicator Dots */}
+        {slides.length > 1 && (
+          <div className="flex md:hidden items-center gap-1.5 mt-4">
+            {slides.map((s, idx) => (
               <button
-                key={idx}
+                key={s.id || idx}
+                type="button"
+                aria-label={`Slide ${idx + 1}`}
                 onClick={() => setCurrentIndex(idx)}
-                aria-label={`Go to slide ${idx + 1}`}
-                className={`h-1.5 sm:h-2 rounded-full transition-all duration-300 cursor-pointer ${
-                  currentIndex === idx ? 'w-5 sm:w-6 bg-cyan-400 shadow-[0_0_8px_rgba(56,189,248,0.8)]' : 'w-1.5 sm:w-2 bg-white/30 hover:bg-white/60'
+                className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                  idx === currentIndex
+                    ? 'w-7 bg-cyan-400 shadow-[0_0_10px_#22d3ee]'
+                    : 'w-2 bg-white/30 hover:bg-white/60'
                 }`}
               />
             ))}
           </div>
-
-          <button
-            onClick={() => setCurrentIndex((prev) => (prev + 1) % list.length)}
-            aria-label="Next Featured Slide"
-            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/60 hover:bg-black/80 border border-white/15 text-white flex items-center justify-center backdrop-blur-md transition hover:scale-110 active:scale-95 cursor-pointer shadow-md"
-          >
-            <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          </button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

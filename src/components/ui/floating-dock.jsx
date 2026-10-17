@@ -9,13 +9,9 @@ import soundFx from "../../services/soundFx";
 export const FloatingDock = ({
   items,
   desktopClassName = "",
-  mobileClassName = "",
 }) => {
   return (
-    <>
-      <FloatingDockDesktop items={items} className={desktopClassName} />
-      <FloatingDockMobile items={items} className={mobileClassName} />
-    </>
+    <FloatingDockDesktop items={items} className={desktopClassName} />
   );
 };
 

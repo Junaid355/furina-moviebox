@@ -66,218 +66,119 @@ export function deduplicateMedia(items) {
 // Curated blockbusters (Hindi, English, Web Series) as immediate backup
 
 export const FALLBACK_MEDIA = [
-
   {
-
     id: 533535,
-
     title: 'Deadpool & Wolverine',
-
     overview: 'A listless Wade Wilson toils away in civilian life with his days as the morally flexible mercenary, Deadpool, behind him. But when his homeworld faces an existential threat, Wade must reluctantly suit-up again with an even more reluctant Wolverine.',
-
     poster_path: '/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg',
-
-    backdrop_path: '/yDHYTjA3R0neXjgu144Y1fX3AcA.jpg',
-
+    backdrop_path: '/9l1eZiJHmhr5jIlthMdJN5WYoff.jpg',
     media_type: 'movie',
-
     vote_average: 7.7,
-
     release_date: '2024-07-24',
-
-    category: 'hollywood'
-
+    category: 'hollywood',
+    isHindiDubbed: true
   },
-
   {
-
     id: 1114513,
-
     title: 'Stree 2: Sarkate Ka Aatank',
-
     overview: 'After the events of Stree, the town of Chanderi is being haunted again. This time by a headless monster who is abducting women.',
-
     poster_path: '/dA4N6uWOnEMgbxXwFX7qX7adzs8.jpg',
-
-    backdrop_path: '/aKa9xKzK1d5I7t8tL6c8yJ4kK.jpg',
-
+    backdrop_path: '/9l1eZiJHmhr5jIlthMdJN5WYoff.jpg',
     media_type: 'movie',
-
     vote_average: 7.5,
-
     release_date: '2024-08-15',
-
     category: 'hindi',
-
     original_language: 'hi',
-
-    origin_country: ['IN']
-
+    origin_country: ['IN'],
+    isHindiDubbed: true
   },
-
   {
-
     id: 1160018,
-
     title: 'Kill',
-
     overview: 'When a pair of commando friends face an army of invading bandits on a passenger train bound for New Delhi, what should have been a peaceful ride turns into a bloody fight for survival.',
-
     poster_path: '/m2zXTuNPkywdYLyWlVyJZW2QOJH.jpg',
-
-    backdrop_path: '/yDHYTjA3R0neXjgu144Y1fX3AcA.jpg',
-
+    backdrop_path: '/9l1eZiJHmhr5jIlthMdJN5WYoff.jpg',
     media_type: 'movie',
-
     vote_average: 7.4,
-
     release_date: '2024-07-03',
-
-    category: 'hindi'
-
+    category: 'hindi',
+    isHindiDubbed: true
   },
-
   {
-
     id: 125988,
-
     name: 'Silo',
-
     title: 'Silo',
-
     overview: 'In a ruined and toxic future, thousands live in a giant silo deep underground. After its sheriff breaks a cardinal rule and residents die mysteriously, engineer Juliette starts to uncover shocking secrets and the truth about the silo.',
-
     poster_path: '/gMYZZvnkVNTqSVnVCphWbPXwWwb.jpg',
-
-    backdrop_path: '/etj5CuMuamjhG2ZwKoBGwd7IP8.jpg',
-
+    backdrop_path: '/zZqpAXxVSBtxV9qPBcscfXBcL2w.jpg',
     media_type: 'tv',
-
     vote_average: 8.2,
-
     first_air_date: '2023-05-04',
-
     category: 'series'
-
   },
-
   {
-
     id: 94997,
-
     name: 'House of the Dragon',
-
     title: 'House of the Dragon',
-
     overview: 'The Targaryen dynasty is at the absolute apex of its power, with more than 15 dragons under their yoke. Most empires crumble from such heights.',
-
     poster_path: '/7QMsOTMUswlwxJP0rTTZfmz2tX2.jpg',
-
-    backdrop_path: '/etj5CuMuamjhG2ZwKoBGwd7IP8.jpg',
-
+    backdrop_path: '/zZqpAXxVSBtxV9qPBcscfXBcL2w.jpg',
     media_type: 'tv',
-
     vote_average: 8.4,
-
     first_air_date: '2022-08-21',
-
     category: 'series',
     isHindiDubbed: true
-
   },
-
   {
-
     id: 84773,
-
     name: 'Mirzapur',
-
     title: 'Mirzapur',
-
     overview: 'The iron-fisted Akhandanand Tripathi is a millionaire carpet exporter and the mafia don of Mirzapur.',
-
     poster_path: '/mQmsmWOSIe5J5iwEQr7EQmiba3X.jpg',
-
-    backdrop_path: '/x4NlXl8Z0oW9nFm9rQ2yT6kK.jpg',
-
+    backdrop_path: '/uDgy6hyPd82kOHh6I95FLtLnj6p.jpg',
     media_type: 'tv',
-
     vote_average: 8.2,
-
     first_air_date: '2018-11-16',
-
-    category: 'hindi'
-
+    category: 'hindi',
+    isHindiDubbed: true
   },
-
   {
-
     id: 66732,
-
     name: 'Stranger Things',
-
     title: 'Stranger Things',
-
     overview: 'When a young boy vanishes, a small town uncovers a mystery involving secret experiments, terrifying supernatural forces and one strange little girl.',
-
     poster_path: '/49WJfeN0moxb9IPfGn8AIqMGskD.jpg',
-
-    backdrop_path: '/56v2KjBlU4XaOv9rVYEQypROD7P.jpg',
-
+    backdrop_path: '/uDgy6hyPd82kOHh6I95FLtLnj6p.jpg',
     media_type: 'tv',
-
     vote_average: 8.6,
-
     first_air_date: '2016-07-15',
-
-    category: 'series'
-
+    category: 'series',
+    isHindiDubbed: true
   },
-
   {
-
     id: 1022789,
-
     title: 'Inside Out 2',
-
     overview: 'Teenager Riley\'s mind headquarters is undergoing a sudden demolition to make room for something entirely unexpected: new Emotions!',
-
     poster_path: '/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg',
-
     backdrop_path: '/stKGOm8zToLQI0ALFL6LDJuTYk5.jpg',
-
     media_type: 'movie',
-
     vote_average: 7.6,
-
     release_date: '2024-06-11',
-
-    category: 'hollywood'
-
+    category: 'hollywood',
+    isHindiDubbed: true
   },
-
   {
-
     id: 974262,
-
     title: 'Kalki 2898 AD',
-
     overview: 'A modern avatar of the Hindu god Vishnu, who is believed to have descended to the earth to protect the world from evil forces.',
-
     poster_path: '/8fYluTtB3b3HKO7KQa5tzrvGaps.jpg',
-
-    backdrop_path: '/u9xW1x9L8K2mN1b3v6pL8kQJ.jpg',
-
+    backdrop_path: '/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg',
     media_type: 'movie',
-
     vote_average: 7.3,
-
     release_date: '2024-06-27',
-
-    category: 'hindi'
-
+    category: 'hindi',
+    isHindiDubbed: true
   }
-
 ];
 
 
@@ -336,7 +237,7 @@ export const CURATED_HOLLYWOOD_BLOCKBUSTERS = [
 
     poster_path: '/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg',
 
-    backdrop_path: '/yDHYTjA3R0neXjgu144Y1fX3AcA.jpg',
+    backdrop_path: '/9l1eZiJHmhr5jIlthMdJN5WYoff.jpg',
 
     media_type: 'movie',
 
@@ -466,7 +367,7 @@ export const CURATED_HOLLYWOOD_BLOCKBUSTERS = [
 
     poster_path: '/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg',
 
-    backdrop_path: '/xOMo8BRK7PfcJv9JCnx7s520Wio.jpg',
+    backdrop_path: '/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg',
 
     media_type: 'movie',
 
@@ -3087,7 +2988,7 @@ export const CURATED_HOLLYWOOD_HINDI_DUBS = [
 
     poster_path: "/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg",
 
-    backdrop_path: "/yDHYTjA3R0neXjgu144Y1fX3AcA.jpg",
+    backdrop_path: "/9l1eZiJHmhr5jIlthMdJN5WYoff.jpg",
 
     media_type: "movie",
 

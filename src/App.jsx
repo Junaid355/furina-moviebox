@@ -11,6 +11,7 @@ import { FloatingDock } from './components/ui/floating-dock';
 import soundFx from './services/soundFx';
 import { getStoredSettings, applyThemeAndAppSettings } from './services/settingsService';
 import { getStoredStudioMovies } from './services/studioService';
+import watchPartyService from './services/watchPartyService';
 
 // Fast Code-Splitting: Heavy modals unloaded from main entry chunk, loaded on demand
 const PlayerModal = lazy(() => import('./components/PlayerModal'));
@@ -22,6 +23,10 @@ const AndroidAppModal = lazy(() => import('./components/AndroidAppModal'));
 const MovieStudioModal = lazy(() => import('./components/MovieStudioModal'));
 const FranchiseTimelineModal = lazy(() => import('./components/FranchiseTimelineModal'));
 const WatchTogetherModal = lazy(() => import('./components/WatchTogetherModal'));
+const MovieBoxHub = lazy(() => import('./components/MovieBoxHub'));
+const LiveTvHub = lazy(() => import('./components/LiveTvHub'));
+const LibraryHub = lazy(() => import('./components/LibraryHub'));
+import MobileExploreSheet from './components/MobileExploreSheet';
 import { 
   fetchTrendingAll, 
   fetchHollywoodMovies, 
@@ -54,7 +59,8 @@ import { VIBE_CURATIONS } from './services/curatedMoods';
 import { syncWorldAnimeNow, getLastAnimeSyncDisplay } from './services/animeAutoSync';
 import { 
   Flame, Film, Tv, Sparkles, Heart, RefreshCw, Shield, Settings, 
-  ChevronDown, Clock, Play, X, Star, Volume2, VolumeX, Search, Milestone, Users, Moon
+  ChevronDown, Clock, Play, X, Star, Volume2, VolumeX, Search, Milestone, Users, Moon,
+  Radio, Compass, FolderHeart
 } from 'lucide-react';
 
 function getContinueWatchingList() {
@@ -107,6 +113,8 @@ export default function App() {
   const [isMuted, setIsMuted] = useState(() => soundFx.isMuted());
   const [isTimelineOpen, setIsTimelineOpen] = useState(false);
   const [isWatchTogetherOpen, setIsWatchTogetherOpen] = useState(false);
+  const [watchPartyTarget, setWatchPartyTarget] = useState(null);
+  const [isMobileExploreOpen, setIsMobileExploreOpen] = useState(false);
   const [syncStatus, setSyncStatus] = useState(() => getLastAnimeSyncDisplay());
   const [isSyncingAnime, setIsSyncingAnime] = useState(false);
 
@@ -142,13 +150,15 @@ export default function App() {
         if (typeof window !== 'undefined' && window.location.hash.startsWith('#room=')) {
           const rawHash = window.location.hash.slice(1);
           const params = new URLSearchParams(rawHash.replace(/^room=([^&]+)/, 'roomCode=$1'));
+          const roomCode = params.get('roomCode');
           const mId = params.get('id');
           const mTitle = params.get('title');
           const mType = params.get('type') || 'movie';
           const s = Number(params.get('s')) || 1;
           const e = Number(params.get('e')) || 1;
-          const srv = params.get('srv') || 'autoembed';
+          const srv = params.get('srv') || 'vidstuck';
           const poster = params.get('poster') || '';
+          const tSec = Number(params.get('t')) || 0;
 
           if (mId && mTitle) {
             const syncItem = {
@@ -162,8 +172,17 @@ export default function App() {
               episode: e,
               preferredServerId: srv
             };
+            watchPartyService.joinRoom(roomCode, syncItem, false);
+            if (tSec > 0) {
+              watchPartyService.playbackState.currentTime = tSec;
+              watchPartyService.playbackState.lastUpdatedAt = Date.now();
+            }
+            setWatchPartyTarget(syncItem);
             setActiveMedia(syncItem);
           } else {
+            if (roomCode) {
+              watchPartyService.joinRoom(roomCode, null, false);
+            }
             setIsWatchTogetherOpen(true);
           }
         }
@@ -398,6 +417,20 @@ export default function App() {
     } catch (e) {}
   }, [watchlist]);
 
+  useEffect(() => {
+    const handleRestored = () => {
+      try {
+        const saved = localStorage.getItem('furina_moviebox_watchlist');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) setWatchlist(parsed.filter(Boolean));
+        }
+      } catch (e) {}
+    };
+    window.addEventListener('furina:watchlist-restored', handleRestored);
+    return () => window.removeEventListener('furina:watchlist-restored', handleRestored);
+  }, []);
+
   const toggleWatchlist = useCallback((item) => {
     if (!item || !item.id) return;
     setWatchlist((prev) => {
@@ -469,10 +502,10 @@ export default function App() {
     }
     setError(null);
 
-    if (activeCategory === 'watchlist') {
-      const cleanWatchlist = deduplicateMedia(watchlist);
-      setItems(cleanWatchlist);
-      setHeroItem(cleanWatchlist[0] || null);
+    if (activeCategory === 'watchlist' || activeCategory === 'livetv' || (activeCategory === 'moviebox' && !debouncedQuery)) {
+      const cleanList = activeCategory === 'watchlist' ? deduplicateMedia(watchlist) : CURATED_MOVIEBOX_TITLES;
+      setItems(cleanList);
+      setHeroItem(cleanList[0] || null);
       setLoading(false);
       return;
     }
@@ -610,6 +643,7 @@ export default function App() {
         onOpenAndroidModal={() => setIsAndroidModalOpen(true)}
         onOpenStudio={() => setIsStudioOpen(true)}
         onOpenSearchOverlay={() => setIsSearchOverlayOpen(true)}
+        onOpenWatchTogether={() => setIsWatchTogetherOpen(true)}
       />
 
       {/* Main Container */}
@@ -628,45 +662,85 @@ export default function App() {
           </div>
         )}
 
-        {/* Featured Hero Carousel Banner */}
-        {!searchQuery.trim() && activeCategory !== 'watchlist' && items && items.length > 0 && (
-          <ErrorBoundary inline>
-            <HeroBanner
-              items={items}
-              item={heroItem}
+        {/* Dedicated Hubs when activeCategory is moviebox, livetv, or watchlist (without search query) */}
+        {!searchQuery.trim() && activeCategory === 'moviebox' ? (
+          <Suspense fallback={<div className="py-16 text-center text-cyan-300 text-sm font-bold animate-pulse">Loading Unified MovieBox Hub...</div>}>
+            <MovieBoxHub
               onPlay={setActiveMedia}
+              onOpenDetails={setDetailsItem}
               isWatchlisted={isWatchlisted}
               onToggleWatchlist={toggleWatchlist}
+              preferredServer={preferredServer}
+              setPreferredServer={setPreferredServer}
+            />
+          </Suspense>
+        ) : !searchQuery.trim() && activeCategory === 'livetv' ? (
+          <Suspense fallback={<div className="py-16 text-center text-cyan-300 text-sm font-bold animate-pulse">Tuning 24/7 Fontaine Live TV Channels...</div>}>
+            <LiveTvHub
+              onPlay={setActiveMedia}
+              onOpenDetails={setDetailsItem}
+              customMoviePool={items}
+              onWatchTogether={(m) => {
+                setWatchPartyTarget(m);
+                setIsWatchTogetherOpen(true);
+              }}
+            />
+          </Suspense>
+        ) : !searchQuery.trim() && activeCategory === 'watchlist' ? (
+          <Suspense fallback={<div className="py-16 text-center text-cyan-300 text-sm font-bold animate-pulse">Loading Collections & Library...</div>}>
+            <LibraryHub
+              watchlist={watchlist}
+              onToggleWatchlist={toggleWatchlist}
+              onClearWatchlist={clearWatchlist}
+              onPlay={setActiveMedia}
               onOpenDetails={setDetailsItem}
             />
-          </ErrorBoundary>
-        )}
-
-        {/* Magic UI Infinite Marquee for Trending Quick-Picks */}
-        {items && items.length > 0 && (
-          <div className="mb-4 sm:mb-8 overflow-hidden rounded-xl sm:rounded-2xl bg-[#060e24]/75 border border-cyan-500/25 py-1.5 sm:py-2.5 backdrop-blur-xl shadow-lg">
-            <div className="flex items-center gap-1.5 px-3 sm:px-4 mb-1 text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-cyan-300">
-              <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-cyan-400 animate-spin" />
-              <span>Fontaine 4K Live Broadcasts:</span>
-            </div>
-            <Marquee pauseOnHover className="[--duration:32s]">
-              {items.slice(0, 10).map((m) => (
-                <div
-                  key={`marquee-${m.id}`}
-                  onClick={() => {
-                    soundFx.playClick();
-                    setActiveMedia(m);
+          </Suspense>
+        ) : (
+          <>
+            {/* Featured Hero Carousel Banner */}
+            {!searchQuery.trim() && items && items.length > 0 && (
+              <ErrorBoundary inline>
+                <HeroBanner
+                  items={items}
+                  item={heroItem}
+                  onPlay={setActiveMedia}
+                  isWatchlisted={isWatchlisted}
+                  onToggleWatchlist={toggleWatchlist}
+                  onOpenDetails={setDetailsItem}
+                  onWatchTogether={(m) => {
+                    setWatchPartyTarget(m);
+                    setIsWatchTogetherOpen(true);
                   }}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#081534] border border-cyan-500/30 hover:border-cyan-400 text-[11px] sm:text-xs text-white font-semibold cursor-pointer transition hover:scale-105 mx-1"
-                >
-                  <span className="text-[9px] text-cyan-400">▶</span>
-                  <span className="truncate max-w-[130px] sm:max-w-[160px]">{m.title || m.name}</span>
-                  <span className="badge-4k-uhd text-[7.5px] px-1 py-0.2 rounded font-black">4K</span>
+                />
+              </ErrorBoundary>
+            )}
+
+            {/* Magic UI Infinite Marquee for Trending Quick-Picks */}
+            {items && items.length > 0 && (
+              <div className="mb-4 sm:mb-8 overflow-hidden rounded-xl sm:rounded-2xl bg-[#060e24]/75 border border-cyan-500/20 py-1.5 sm:py-2.5 backdrop-blur-xl shadow-lg">
+                <div className="flex items-center gap-1.5 px-3 sm:px-4 mb-1 text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-cyan-300">
+                  <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-cyan-400" />
+                  <span>Fontaine 4K Live Broadcasts:</span>
                 </div>
-              ))}
-            </Marquee>
-          </div>
-        )}
+                <Marquee pauseOnHover className="[--duration:32s]">
+                  {items.slice(0, 10).map((m) => (
+                    <div
+                      key={`marquee-${m.id}`}
+                      onClick={() => {
+                        soundFx.playClick();
+                        setActiveMedia(m);
+                      }}
+                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#081534] border border-cyan-500/25 hover:border-cyan-400 text-[11px] sm:text-xs text-white font-semibold cursor-pointer transition hover:scale-105 mx-1"
+                    >
+                      <span className="text-[9px] text-cyan-400">▶</span>
+                      <span className="truncate max-w-[130px] sm:max-w-[160px]">{m.title || m.name}</span>
+                      <span className="text-[9px] text-cyan-300 font-bold">4K</span>
+                    </div>
+                  ))}
+                </Marquee>
+              </div>
+            )}
 
         {/* Continue Watching Section */}
         {!searchQuery.trim() && activeCategory === 'trending' && continueWatching && continueWatching.length > 0 && (
@@ -1359,6 +1433,8 @@ export default function App() {
             </p>
           </div>
         )}
+          </>
+        )}
       </main>
 
       {/* Lazy-Loaded Async Modals Wrapped in Suspense */}
@@ -1469,8 +1545,19 @@ export default function App() {
         <WatchTogetherModal
           isOpen={isWatchTogetherOpen}
           onClose={() => setIsWatchTogetherOpen(false)}
-          activeMedia={activeMedia || heroItem}
+          activeMedia={watchPartyTarget || activeMedia || heroItem}
           currentServer={SERVERS[0]}
+          customMoviePool={items}
+          onPlaySyncedMedia={(m) => {
+            setWatchPartyTarget(m);
+            setActiveMedia(m);
+          }}
+          onSyncState={(m) => {
+            setWatchPartyTarget(m);
+            if (activeMedia) {
+              setActiveMedia(m);
+            }
+          }}
         />
       </Suspense>
 
@@ -1489,14 +1576,24 @@ export default function App() {
               active: activeCategory === 'trending' && !searchQuery
             },
             {
-              title: "Hollywood Movies",
-              icon: <Film className="w-5 h-5" />,
+              title: "MovieBox 4K Hub",
+              icon: <Film className="w-5 h-5 text-cyan-300" />,
               onClick: () => {
                 soundFx.playClick();
-                setActiveCategory('hollywood');
+                setActiveCategory('moviebox');
                 setSearchQuery('');
               },
-              active: activeCategory === 'hollywood'
+              active: activeCategory === 'moviebox'
+            },
+            {
+              title: "Live TV (24/7 EPG)",
+              icon: <Radio className="w-5 h-5 text-rose-400" />,
+              onClick: () => {
+                soundFx.playClick();
+                setActiveCategory('livetv');
+                setSearchQuery('');
+              },
+              active: activeCategory === 'livetv'
             },
             {
               title: "Hindi Hub",
@@ -1517,6 +1614,16 @@ export default function App() {
                 setSearchQuery('');
               },
               active: activeCategory === 'anime'
+            },
+            {
+              title: "Collections & Saved",
+              icon: <FolderHeart className="w-5 h-5 text-pink-300" />,
+              onClick: () => {
+                soundFx.playClick();
+                setActiveCategory('watchlist');
+                setSearchQuery('');
+              },
+              active: activeCategory === 'watchlist'
             },
             {
               title: "Franchises",
@@ -1543,22 +1650,6 @@ export default function App() {
               }
             },
             {
-              title: "Movie Studio",
-              icon: <Film className="w-5 h-5 text-emerald-300" />,
-              onClick: () => {
-                soundFx.playClick();
-                setIsStudioOpen(true);
-              }
-            },
-            {
-              title: isMuted ? "Audio Muted" : "Hydro Sound FX Active",
-              icon: isMuted ? <VolumeX className="w-5 h-5 text-rose-400" /> : <Volume2 className="w-5 h-5 text-cyan-300" />,
-              onClick: () => {
-                soundFx.toggleMute();
-                setIsMuted(soundFx.isMuted());
-              }
-            },
-            {
               title: "Settings",
               icon: <Settings className="w-5 h-5" />,
               onClick: () => {
@@ -1573,45 +1664,69 @@ export default function App() {
       {/* Interactive Cute Furina Chibi Mascot Companion */}
       <FurinaMascot onOpenSearch={() => setIsSearchOverlayOpen(true)} />
 
-      {/* Mobile iOS Style Bottom Navigation Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-[#070d1e]/95 backdrop-blur-2xl border-t border-cyan-500/20 px-1 py-2 safe-bottom flex items-center justify-around shadow-[0_-5px_25px_rgba(0,0,0,0.7)]">
+      {/* Mobile Explore Bottom Sheet */}
+      <MobileExploreSheet
+        isOpen={isMobileExploreOpen}
+        onClose={() => setIsMobileExploreOpen(false)}
+        activeCategory={activeCategory}
+        onSelectCategory={(cat) => {
+          setActiveCategory(cat);
+          setSearchQuery('');
+        }}
+        isMasterMode={isMasterMode}
+        onOpenTimeline={() => setIsTimelineOpen(true)}
+        onOpenSyncRoom={() => setIsWatchTogetherOpen(true)}
+        onOpenStudio={() => setIsStudioOpen(true)}
+        onOpenSettings={() => setIsSettingsOpen(true)}
+        onOpenAndroidModal={() => setIsAndroidModalOpen(true)}
+        onOpenIPhoneModal={() => setIsIPhoneModalOpen(true)}
+      />
+
+      {/* Ergonomic 5-Item Mobile Bottom Navigation Bar (48px+ Touch Targets) */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-[#050b18]/95 backdrop-blur-2xl border-t border-cyan-500/20 px-2 py-1.5 safe-bottom grid grid-cols-5 items-center shadow-[0_-8px_30px_rgba(0,0,0,0.85)]">
         {[
-          { id: 'trending', label: 'Trending', icon: Flame },
-          { id: 'hollywood', label: 'Movies', icon: Film },
-          { id: 'hindi', label: 'Hindi', icon: Sparkles },
-          { id: 'anime', label: 'Anime', icon: Sparkles },
-          { id: 'studio', label: 'Studio', icon: Film },
-          ...(isMasterMode ? [
-            { id: 'mature', label: 'Uncut', icon: Flame },
-            { id: 'ecchi_anime', label: 'Hanime', icon: HanimeIcon }
-          ] : []),
-          { id: 'watchlist', label: 'Saved', icon: Heart },
+          { id: 'trending', label: 'Home', icon: Flame },
+          { id: 'moviebox', label: 'MovieBox', icon: Film },
+          { id: 'livetv', label: 'Live TV', icon: Radio },
+          { id: 'watchlist', label: 'Saved', icon: FolderHeart },
         ].map((tab) => {
           const Icon = tab.icon;
-          const isActive = activeCategory === tab.id && !searchQuery.trim();
+          const isActive = activeCategory === tab.id && !searchQuery.trim() && !isMobileExploreOpen;
           return (
             <button
               key={tab.id}
-              onClick={() => { setActiveCategory(tab.id); setSearchQuery(''); }}
-              className={`flex flex-col items-center justify-center min-w-[42px] py-0.5 gap-0.5 transition active:scale-95 touch-manipulation ${
-                isActive ? 'text-cyan-400 font-bold scale-105' : 'text-cyan-200/50 hover:text-white'
+              onClick={() => {
+                soundFx.playClick?.();
+                setIsMobileExploreOpen(false);
+                setActiveCategory(tab.id);
+                setSearchQuery('');
+              }}
+              className={`flex flex-col items-center justify-center min-h-[48px] rounded-xl gap-1 transition active:scale-95 touch-manipulation cursor-pointer ${
+                isActive
+                  ? 'text-cyan-400 font-extrabold bg-cyan-500/10'
+                  : 'text-slate-400 hover:text-white'
               }`}
             >
-              <Icon className="w-4 h-4 shrink-0" />
-              <span className="text-[9px] font-medium tracking-tight truncate max-w-[48px]">{tab.label}</span>
+              <Icon className={`w-5 h-5 shrink-0 ${tab.id === 'livetv' && isActive ? 'text-rose-400' : ''}`} />
+              <span className="text-[10px] tracking-tight truncate">{tab.label}</span>
             </button>
           );
         })}
-        
-        {/* Mobile Settings Button - Secret code hidden */}
+
+        {/* 5th Item: Explore / More Drawer Trigger */}
         <button
-          onClick={() => setIsSettingsOpen(true)}
-          className={`flex flex-col items-center justify-center min-w-[42px] py-0.5 gap-0.5 transition active:scale-95 touch-manipulation ${
-            isMasterMode ? 'text-emerald-400 font-bold' : 'text-cyan-200/50 hover:text-white'
+          onClick={() => {
+            soundFx.playClick?.();
+            setIsMobileExploreOpen((prev) => !prev);
+          }}
+          className={`flex flex-col items-center justify-center min-h-[48px] rounded-xl gap-1 transition active:scale-95 touch-manipulation cursor-pointer ${
+            isMobileExploreOpen
+              ? 'text-cyan-400 font-extrabold bg-cyan-500/10'
+              : 'text-slate-400 hover:text-white'
           }`}
         >
-          {isMasterMode ? <Shield className="w-4 h-4 shrink-0 text-emerald-400" /> : <Settings className="w-4 h-4 shrink-0" />}
-          <span className="text-[9px] font-medium tracking-tight">{isMasterMode ? 'VIP' : 'Settings'}</span>
+          <Compass className="w-5 h-5 shrink-0" />
+          <span className="text-[10px] tracking-tight">Explore</span>
         </button>
       </nav>
     </div>

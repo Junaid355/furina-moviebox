@@ -1,7 +1,7 @@
 // ============================================================================
-// Furina MovieBox — Normalized Content Model
+// Furina MovieBox — Normalized Content Model & Color-Coded Genre Engine
 // Provides standard normalized structure across TMDB, Curated, and Studio data
-// with robust image fallbacks preventing 404 broken image assets.
+// with robust image fallbacks and automatic color-coded genre badges.
 // ============================================================================
 
 export const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
@@ -32,15 +32,101 @@ export const TMDB_GENRE_MAP = {
   53: 'Thriller',
   10752: 'War',
   37: 'Western',
-  10759: 'Action & Adventure',
+  10759: 'Action',
   10762: 'Kids',
   10763: 'News',
   10764: 'Reality',
-  10765: 'Sci-Fi & Fantasy',
-  10766: 'Soap',
+  10765: 'Sci-Fi',
+  10766: 'Drama',
   10767: 'Talk',
-  10768: 'War & Politics'
+  10768: 'War'
 };
+
+/**
+ * Returns automatic color-coded badge classes for any genre:
+ * - Action / War: Red / Rose
+ * - Comedy / Family: Gold / Amber
+ * - Sci-Fi / Cyberpunk: Cyan
+ * - Fantasy / Magic: Purple
+ * - Horror: Deep Crimson
+ * - Thriller / Crime / Mystery: Indigo / Electric Blue
+ * - Adventure: Emerald
+ * - Romance / Drama: Pink / Rose-Gold
+ * - Animation / Anime: Fuchsia
+ */
+export function getGenreBadgeStyle(genreName = '') {
+  const g = String(genreName || '').trim().toLowerCase();
+
+  if (g.includes('action') || g.includes('war') || g.includes('martial')) {
+    return {
+      label: genreName,
+      badgeClass: 'bg-rose-500/20 text-rose-300 border-rose-500/45 shadow-[0_0_8px_rgba(244,63,94,0.2)]',
+      dotClass: 'bg-rose-400'
+    };
+  }
+  if (g.includes('comedy') || g.includes('family') || g.includes('kids') || g.includes('sitcom')) {
+    return {
+      label: genreName,
+      badgeClass: 'bg-amber-500/20 text-amber-300 border-amber-500/45 shadow-[0_0_8px_rgba(245,158,11,0.22)]',
+      dotClass: 'bg-amber-400'
+    };
+  }
+  if (g.includes('sci-fi') || g.includes('science') || g.includes('cyber') || g.includes('space')) {
+    return {
+      label: genreName === 'Science Fiction' ? 'Sci-Fi' : genreName,
+      badgeClass: 'bg-cyan-500/20 text-cyan-300 border-cyan-400/50 shadow-[0_0_8px_rgba(34,211,238,0.25)]',
+      dotClass: 'bg-cyan-400'
+    };
+  }
+  if (g.includes('horror') || g.includes('slasher') || g.includes('zombie')) {
+    return {
+      label: genreName,
+      badgeClass: 'bg-red-600/25 text-red-300 border-red-500/50 shadow-[0_0_8px_rgba(239,68,68,0.25)]',
+      dotClass: 'bg-red-500'
+    };
+  }
+  if (g.includes('fantasy') || g.includes('magic') || g.includes('supernatural') || g.includes('isekai')) {
+    return {
+      label: genreName,
+      badgeClass: 'bg-purple-500/20 text-purple-300 border-purple-500/45 shadow-[0_0_8px_rgba(168,85,247,0.22)]',
+      dotClass: 'bg-purple-400'
+    };
+  }
+  if (g.includes('adventure')) {
+    return {
+      label: genreName,
+      badgeClass: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/45 shadow-[0_0_8px_rgba(16,185,129,0.2)]',
+      dotClass: 'bg-emerald-400'
+    };
+  }
+  if (g.includes('thriller') || g.includes('crime') || g.includes('mystery')) {
+    return {
+      label: genreName,
+      badgeClass: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/45 shadow-[0_0_8px_rgba(99,102,241,0.22)]',
+      dotClass: 'bg-indigo-400'
+    };
+  }
+  if (g.includes('romance') || g.includes('drama')) {
+    return {
+      label: genreName,
+      badgeClass: 'bg-pink-500/20 text-pink-300 border-pink-500/45 shadow-[0_0_8px_rgba(236,72,153,0.2)]',
+      dotClass: 'bg-pink-400'
+    };
+  }
+  if (g.includes('anime') || g.includes('animation')) {
+    return {
+      label: genreName,
+      badgeClass: 'bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/45 shadow-[0_0_8px_rgba(217,70,239,0.2)]',
+      dotClass: 'bg-fuchsia-400'
+    };
+  }
+
+  return {
+    label: genreName || 'Cinema',
+    badgeClass: 'bg-sky-500/20 text-sky-300 border-sky-500/40',
+    dotClass: 'bg-sky-400'
+  };
+}
 
 export function resolvePosterUrl(path, size = 'w500') {
   if (!path || typeof path !== 'string' || !path.trim()) {
@@ -86,25 +172,116 @@ export function resolveBackdropUrl(path, size = 'original') {
 
 export function extractGenres(item) {
   if (!item) return [];
+
   if (Array.isArray(item.genres) && item.genres.length > 0) {
-    return item.genres.map((g) => (typeof g === 'string' ? g : g?.name)).filter(Boolean);
+    const mapped = item.genres
+      .map((g) => (typeof g === 'string' ? g : g?.name))
+      .filter(Boolean)
+      .map((name) => (name === 'Science Fiction' ? 'Sci-Fi' : name === 'Action & Adventure' ? 'Action' : name === 'Sci-Fi & Fantasy' ? 'Sci-Fi' : name));
+    if (mapped.length > 0) return [...new Set(mapped)];
   }
+
   if (Array.isArray(item.genre_ids) && item.genre_ids.length > 0) {
-    return item.genre_ids.map((id) => TMDB_GENRE_MAP[id]).filter(Boolean);
+    const mapped = item.genre_ids.map((id) => TMDB_GENRE_MAP[id]).filter(Boolean);
+    if (mapped.length > 0) return [...new Set(mapped)];
   }
-  if (item.category) {
-    const catLabels = {
-      anime: 'Anime',
-      hollywood: 'Hollywood',
-      hindi: 'Bollywood',
-      series: 'Series',
-      kdrama: 'K-Drama',
-      horror: 'Horror',
-      studio: 'Studio Master'
-    };
-    return [catLabels[item.category] || item.category];
+
+  // Intelligent keyword inference for curated/fallback items without explicit genre arrays
+  const text = `${item.title || item.name || ''} ${item.overview || ''}`.toLowerCase();
+  const inferred = [];
+
+  if (
+    text.includes('deadpool') ||
+    text.includes('idiots') ||
+    text.includes('stree') ||
+    text.includes('funny') ||
+    text.includes('comedy') ||
+    text.includes('inside out') ||
+    text.includes('hilarious') ||
+    text.includes('bad boys')
+  ) {
+    inferred.push('Comedy');
   }
-  return [];
+  if (
+    text.includes('dune') ||
+    text.includes('interstellar') ||
+    text.includes('sci-fi') ||
+    text.includes('wormhole') ||
+    text.includes('future') ||
+    text.includes('silo') ||
+    text.includes('kalki') ||
+    text.includes('avatar') ||
+    text.includes('multiverse') ||
+    text.includes('alien') ||
+    text.includes('stranger things') ||
+    text.includes('inception')
+  ) {
+    inferred.push('Sci-Fi');
+  }
+  if (
+    text.includes('wolverine') ||
+    text.includes('avengers') ||
+    text.includes('spider-man') ||
+    text.includes('john wick') ||
+    text.includes('commando') ||
+    text.includes('batman') ||
+    text.includes('top gun') ||
+    text.includes('battle') ||
+    text.includes('fight') ||
+    text.includes('assassin') ||
+    text.includes('mafia') ||
+    text.includes('warrior') ||
+    text.includes('hunter')
+  ) {
+    inferred.push('Action');
+  }
+  if (
+    text.includes('ghost') ||
+    text.includes('haunted') ||
+    text.includes('horror') ||
+    text.includes('demon') ||
+    text.includes('curse') ||
+    text.includes('terrifying') ||
+    item.category === 'horror'
+  ) {
+    inferred.push('Horror');
+  }
+  if (
+    text.includes('dragon') ||
+    text.includes('magic') ||
+    text.includes('fantasy') ||
+    text.includes('god') ||
+    text.includes('wizard')
+  ) {
+    inferred.push('Fantasy');
+  }
+  if (
+    text.includes('crime') ||
+    text.includes('detective') ||
+    text.includes('murder') ||
+    text.includes('killer') ||
+    text.includes('cartel') ||
+    text.includes('mirzapur')
+  ) {
+    inferred.push('Crime');
+  }
+  if (
+    text.includes('love') ||
+    text.includes('romance') ||
+    text.includes('marriage') ||
+    item.category === 'kdrama'
+  ) {
+    inferred.push('Romance');
+  }
+
+  if (inferred.length > 0) {
+    return [...new Set(inferred)].slice(0, 3);
+  }
+
+  if (item.category === 'anime' || item.isAnime) return ['Anime', 'Action'];
+  if (item.category === 'series' || item.media_type === 'tv') return ['Drama', 'Thriller'];
+  if (item.category === 'hindi') return ['Action', 'Drama'];
+  return ['Action', 'Sci-Fi'];
 }
 
 /**

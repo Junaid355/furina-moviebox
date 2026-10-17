@@ -3,7 +3,7 @@ import {
   X, Server, Film, Tv, RefreshCw, ExternalLink, Info, Zap, Play, Pause,
   Sparkles, ShieldCheck, Download, Maximize2, Minimize2, Volume2,
   CheckCircle2, AlertTriangle, ArrowRight, Loader2, ChevronLeft, ChevronRight,
-  PictureInPicture, Keyboard, Subtitles, Users, FastForward
+  PictureInPicture, Keyboard, Subtitles, Users, FastForward, Search, Monitor
 } from 'lucide-react';
 import { SERVERS, getStreamUrl, getDownloadUrl } from '../services/streaming';
 import { 
@@ -16,10 +16,14 @@ import {
   setShieldEnabled, getShieldMode, setShieldMode, setPlayerActive 
 } from '../services/adblocker';
 import { evaluateServers, probeServers, nextBestServer } from '../services/aiServerSelector';
+import { resolveMovieBoxToTmdb } from '../services/movieboxService';
+import { recordWatchHistory } from '../services/playlistService';
 import soundFx from '../services/soundFx';
 import DownloadModal from './DownloadModal';
 import UBlockShieldModal from './UBlockShieldModal';
 import WatchTogetherModal from './WatchTogetherModal';
+import WatchPartyPlayerBar from './WatchPartyPlayerBar';
+import { getGenreBadgeStyle } from '../services/contentModel';
 import hindiProviderManager, { 
   selectPhysicalAudioTrack, 
   getPrioritizedAudioSources 
@@ -60,7 +64,9 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     ((item?.genre_ids?.includes(16) || item?.genres?.some((g) => g.id === 16 || g.name === 'Animation')) && item?.original_language === 'ja')
   );
 
-  const resolvedTmdbId = useMemo(() => {
+  const [asyncTmdbId, setAsyncTmdbId] = useState(null);
+
+  const staticTmdbId = useMemo(() => {
     if (item?.isCustom || item?.isCustomMovie || item?.id === 'studio_sample_1' || String(item?.id).startsWith('studio_')) {
       return null;
     }
@@ -97,6 +103,22 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     if (item?.id && !isNaN(Number(item.id)) && Number(item.id) < 20000000) return Number(item.id);
     return null;
   }, [item]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setAsyncTmdbId(null);
+    if (!staticTmdbId && item && !item.isCustom && !item.isCustomMovie && !String(item.id).startsWith('studio_')) {
+      resolveMovieBoxToTmdb(item).then((resolved) => {
+        if (!cancelled && resolved) {
+          const foundId = resolved.tmdb_id || (typeof resolved.id === 'number' ? resolved.id : null);
+          if (foundId) setAsyncTmdbId(foundId);
+        }
+      }).catch(() => {});
+    }
+    return () => { cancelled = true; };
+  }, [item, staticTmdbId]);
+
+  const resolvedTmdbId = staticTmdbId || asyncTmdbId;
 
   // Safe classification and robust fallbacks for TV Series vs Movies
   const isSeries = Boolean(
@@ -312,8 +334,10 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const [selectedServer, setSelectedServer] = useState(getInitialServer);
   const [iframeLoading, setIframeLoading] = useState(true);
 
-  // Fullscreen & Core Player Refs
+  // Fullscreen, Theater Mode & Core Player Refs
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isTheaterMode, setIsTheaterMode] = useState(false);
+  const [episodeSearchQuery, setEpisodeSearchQuery] = useState('');
   const [showControls, setShowControls] = useState(true);
   const playerWrapperRef = useRef(null);
   const videoRef = useRef(null);
@@ -648,7 +672,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     return () => clearTimeout(timer);
   }, [bingeCountdown]);
 
-  // Persist Watch Progress on Mount and Season / Episode Change
+  // Persist Watch Progress & Watch History on Mount and Season / Episode Change
   useEffect(() => {
     if (item?.id) {
       try {
@@ -660,9 +684,10 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
           updatedAt: Date.now()
         }));
         window.dispatchEvent(new CustomEvent('furina:progress-updated'));
+        recordWatchHistory(item, isSeries ? season : 1, isSeries ? episode : 1, selectedServer?.id || 'vidstuck');
       } catch (e) {}
     }
-  }, [item?.id, season, episode, isSeries, title]);
+  }, [item?.id, season, episode, isSeries, title, selectedServer?.id]);
 
   // AdBlock / Guide States
   const [showUBlockGuide, setShowUBlockGuide] = useState(false);
@@ -993,6 +1018,9 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       } else if (e.key === 'f' || e.key === 'F') {
         e.preventDefault();
         toggleFullscreen();
+      } else if (e.key === 't' || e.key === 'T') {
+        e.preventDefault();
+        setIsTheaterMode((prev) => !prev);
       } else if (e.key === 'b' || e.key === 'B') {
         e.preventDefault();
         const modes = ['off', '4k', 'hdr', 'night'];
@@ -1252,6 +1280,8 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
         className={`relative flex flex-col bg-[#050b1d] border-0 sm:border sm:border-cyan-500/35 overflow-hidden transition-all duration-300 ${
           isFullscreen
             ? 'fixed inset-0 z-[999999] w-screen h-screen rounded-none max-w-none max-h-none p-0 bg-black overflow-hidden select-none'
+            : isTheaterMode
+            ? 'w-full max-w-[100vw] h-[100dvh] max-h-[100dvh] rounded-none shadow-[0_0_90px_rgba(0,0,0,0.95)] bg-black'
             : 'w-full max-w-[97vw] xl:max-w-7xl 2xl:max-w-[1600px] h-[100dvh] sm:h-[95vh] max-h-[100dvh] sm:max-h-[96vh] rounded-none sm:rounded-2xl shadow-[0_0_80px_rgba(56,189,248,0.35)] animate-fade-in'
         }`}
         onClick={(e) => e.stopPropagation()}
@@ -1531,6 +1561,25 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   )}
                 </button>
               )}
+
+              {/* Theater Mode Toggle Button */}
+              <button
+                type="button"
+                data-testid="theater-mode-btn"
+                onClick={() => {
+                  soundFx.playClick?.();
+                  setIsTheaterMode((prev) => !prev);
+                }}
+                title="Theater Mode (T) - Expand Video & Dim Surrounding UI"
+                className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold transition cursor-pointer shrink-0 border ${
+                  isTheaterMode
+                    ? 'bg-cyan-500/25 border-cyan-400 text-cyan-200 shadow-[0_0_12px_rgba(56,189,248,0.4)]'
+                    : 'bg-[#0c1836] border-cyan-500/30 text-cyan-300 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                <Monitor className="w-3.5 h-3.5" />
+                <span>{isTheaterMode ? 'Standard View' : 'Theater'}</span>
+              </button>
 
               {/* Fullscreen Mode Button */}
               <button
@@ -2548,6 +2597,28 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
           </div>
 
           {/* ========================================================================= */}
+          {/* 5B. WATCH TOGETHER SHARED PLAYBACK CONTROLS BAR (Play, Pause, Seek, Room) */}
+          {/* ========================================================================= */}
+          {!isFullscreen && (
+            <WatchPartyPlayerBar
+              item={item}
+              season={season}
+              episode={episode}
+              currentServer={selectedServer}
+              videoRef={videoRef}
+              onOpenWatchTogetherModal={() => setIsWatchTogetherOpen(true)}
+              onRemoteSyncMedia={(synced) => {
+                if (synced?.season && synced.season !== season) setSeason(Number(synced.season));
+                if (synced?.episode && synced.episode !== episode) setEpisode(Number(synced.episode));
+                if (synced?.serverId) {
+                  const matched = availableServers.find((s) => s.id === synced.serverId);
+                  if (matched) setSelectedServer(matched);
+                }
+              }}
+            />
+          )}
+
+          {/* ========================================================================= */}
           {/* 6. STREAM RESCUE BAR                                                      */}
           {/* ========================================================================= */}
           {!isFullscreen && (hasOnlineStream || !isCustom) && (
@@ -2686,32 +2757,89 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
           )}
 
           {/* ========================================================================= */}
-          {/* 7. TV SEASONS & EPISODES SELECTOR (IF SERIES)                             */}
+          {/* 7. TV SEASONS & EPISODES SELECTOR (IF SERIES) WITH SEARCH & NEXT PREVIEW  */}
           {/* ========================================================================= */}
           {!isFullscreen && isSeries && (
-            <div className="p-4 border-b border-cyan-500/20 bg-[#060e24]">
-              <div className="flex items-center justify-between mb-3">
+            <div className="p-4 border-b border-cyan-500/20 bg-[#060e24] space-y-3">
+              {/* Next Episode Preview Card */}
+              {(() => {
+                const nextEpObj = episodesList?.find((e) => e.episode_number === episode + 1);
+                return (
+                  <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-[#091432] border border-cyan-500/25">
+                    <div className="flex items-center gap-3 min-w-0">
+                      {nextEpObj?.still_path ? (
+                        <img
+                          src={`https://image.tmdb.org/t/p/w300${nextEpObj.still_path}`}
+                          alt={nextEpObj.name || `Episode ${episode + 1}`}
+                          className="w-20 h-12 object-cover rounded-lg border border-cyan-500/30 shrink-0"
+                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-lg bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-300 font-black text-xs shrink-0">
+                          E{episode + 1}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <div className="text-[10px] font-black uppercase tracking-wider text-cyan-400">
+                          Up Next • Season {season} Episode {episode + 1}
+                        </div>
+                        <div className="text-xs sm:text-sm font-bold text-white truncate">
+                          {nextEpObj?.name || `Episode ${episode + 1}`}
+                        </div>
+                        {nextEpObj?.overview && (
+                          <p className="text-[11px] text-slate-400 truncate max-w-md hidden sm:block">
+                            {nextEpObj.overview}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleNextEpisode}
+                      className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-gray-950 font-black text-xs flex items-center gap-1.5 shrink-0 shadow-md cursor-pointer"
+                    >
+                      <Play className="w-3.5 h-3.5 fill-gray-950" />
+                      <span>Play Ep {episode + 1}</span>
+                    </button>
+                  </div>
+                );
+              })()}
+
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <h3 className="text-xs sm:text-sm font-extrabold text-white flex items-center gap-2">
                   <Tv className="w-4 h-4 text-cyan-400" />
                   <span>Episodes & Seasons</span>
                 </h3>
-                {totalSeasons > 1 && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-cyan-200/70">Season:</span>
-                    <select
-                      value={season}
-                      onChange={(e) => {
-                        setSeason(Number(e.target.value));
-                        setEpisode(1);
-                      }}
-                      className="bg-[#0b1633] border border-cyan-500/30 text-cyan-200 text-xs font-bold rounded-lg px-2.5 py-1 focus:outline-none focus:border-cyan-400"
-                    >
-                      {Array.from({ length: totalSeasons }, (_, i) => i + 1).map((sNum) => (
-                        <option key={sNum} value={sNum}>Season {sNum}</option>
-                      ))}
-                    </select>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {/* Instant Episode Search & Jump */}
+                  <div className="relative">
+                    <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={episodeSearchQuery}
+                      onChange={(e) => setEpisodeSearchQuery(e.target.value)}
+                      placeholder="Jump to Ep # or title..."
+                      className="w-40 sm:w-48 pl-8 pr-2.5 py-1 rounded-lg bg-[#0b1633] border border-cyan-500/30 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400"
+                    />
                   </div>
-                )}
+                  {totalSeasons > 1 && (
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs text-cyan-200/70">Season:</span>
+                      <select
+                        value={season}
+                        onChange={(e) => {
+                          setSeason(Number(e.target.value));
+                          setEpisode(1);
+                        }}
+                        className="bg-[#0b1633] border border-cyan-500/30 text-cyan-200 text-xs font-bold rounded-lg px-2.5 py-1 focus:outline-none focus:border-cyan-400 cursor-pointer"
+                      >
+                        {Array.from({ length: totalSeasons }, (_, i) => i + 1).map((sNum) => (
+                          <option key={sNum} value={sNum}>Season {sNum}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {isLoadingEpisodes ? (
@@ -2721,40 +2849,51 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 </div>
               ) : episodesList && episodesList.length > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 max-h-56 overflow-y-auto pr-1">
-                  {episodesList.map((ep) => {
-                    const isCurrentEp = episode === ep.episode_number;
-                    return (
-                      <button
-                        key={ep.id || ep.episode_number}
-                        onClick={() => setEpisode(ep.episode_number)}
-                        className={`p-2 rounded-xl text-left transition border cursor-pointer ${
-                          isCurrentEp
-                            ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-gray-950 border-cyan-300 shadow-[0_0_12px_rgba(56,189,248,0.5)] font-black'
-                            : 'bg-[#08122c] border-cyan-500/20 text-slate-300 hover:bg-white/5 hover:text-white'
-                        }`}
-                      >
-                        <div className="text-[11px] font-bold truncate">
-                          Ep {ep.episode_number}: {ep.name || `Episode ${ep.episode_number}`}
-                        </div>
-                      </button>
-                    );
-                  })}
+                  {episodesList
+                    .filter((ep) => {
+                      if (!episodeSearchQuery.trim()) return true;
+                      const q = episodeSearchQuery.trim().toLowerCase();
+                      return (
+                        String(ep.episode_number).includes(q) ||
+                        (ep.name || '').toLowerCase().includes(q)
+                      );
+                    })
+                    .map((ep) => {
+                      const isCurrentEp = episode === ep.episode_number;
+                      return (
+                        <button
+                          key={ep.id || ep.episode_number}
+                          onClick={() => setEpisode(ep.episode_number)}
+                          className={`p-2 rounded-xl text-left transition border cursor-pointer ${
+                            isCurrentEp
+                              ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-gray-950 border-cyan-300 shadow-[0_0_12px_rgba(56,189,248,0.5)] font-black'
+                              : 'bg-[#08122c] border-cyan-500/20 text-slate-300 hover:bg-white/5 hover:text-white'
+                          }`}
+                        >
+                          <div className="text-[11px] font-bold truncate">
+                            Ep {ep.episode_number}: {ep.name || `Episode ${ep.episode_number}`}
+                          </div>
+                        </button>
+                      );
+                    })}
                 </div>
               ) : (
                 <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                  {Array.from({ length: 24 }, (_, i) => i + 1).map((epNum) => (
-                    <button
-                      key={epNum}
-                      onClick={() => setEpisode(epNum)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition border cursor-pointer ${
-                        episode === epNum
-                          ? 'bg-cyan-500 text-gray-950 border-cyan-400 font-black shadow'
-                          : 'bg-[#08122c] border-cyan-500/20 text-slate-300 hover:bg-white/5'
-                      }`}
-                    >
-                      Ep {epNum}
-                    </button>
-                  ))}
+                  {Array.from({ length: 24 }, (_, i) => i + 1)
+                    .filter((epNum) => !episodeSearchQuery.trim() || String(epNum).includes(episodeSearchQuery.trim()))
+                    .map((epNum) => (
+                      <button
+                        key={epNum}
+                        onClick={() => setEpisode(epNum)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition border cursor-pointer ${
+                          episode === epNum
+                            ? 'bg-cyan-500 text-gray-950 border-cyan-400 font-black shadow'
+                            : 'bg-[#08122c] border-cyan-500/20 text-slate-300 hover:bg-white/5'
+                        }`}
+                      >
+                        Ep {epNum}
+                      </button>
+                    ))}
                 </div>
               )}
             </div>
@@ -2788,14 +2927,18 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                     return (
                       <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                         <span className="text-[11px] text-cyan-200/60 font-semibold">Genres:</span>
-                        {genres.map((g, idx) => (
-                          <span 
-                            key={idx}
-                            className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/25 text-cyan-300 text-[10px] font-bold"
-                          >
-                            {g}
-                          </span>
-                        ))}
+                        {genres.map((g, idx) => {
+                          const style = getGenreBadgeStyle(g);
+                          return (
+                            <span 
+                              key={idx}
+                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold border ${style.badgeClass}`}
+                            >
+                              <span className={`w-1.5 h-1.5 rounded-full ${style.dotClass}`} />
+                              <span>{style.label}</span>
+                            </span>
+                          );
+                        })}
                       </div>
                     );
                   })()}
