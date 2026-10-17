@@ -1,4 +1,4 @@
-import{r as wa,a as S}from"./vendor-icons-CO56Nbi4.js";var rn={exports:{}},qt={},_i;function Sa(){if(_i)return qt;_i=1;/**
+import{r as wa,a as S}from"./vendor-icons-C0qWqFrL.js";var rn={exports:{}},qt={},_i;function Sa(){if(_i)return qt;_i=1;/**
  * @license React
  * react-jsx-runtime.development.js
  *
