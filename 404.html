@@ -1,28 +1,126 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
   <head>
-    <meta charset="utf-8">
-    <title>Furina MovieBox</title>
-    <script type="text/javascript">
-      // GitHub Pages SPA redirect
-      // Single Page Apps for GitHub Pages
-      // MIT License
-      // https://github.com/rafgraph/spa-github-pages
-      var pathSegmentsToKeep = 1;
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="alternate icon" type="image/png" href="./favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
+    <meta name="theme-color" content="#050811" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Furina MovieBox" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <link rel="manifest" href="./manifest.json" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <!-- High-Speed CDN & Streaming Embed Preconnects to eliminate initial buffering -->
+    <link rel="preconnect" href="https://themoviebox.xyz" crossorigin />
+    <link rel="preconnect" href="https://pacdn.aoneroom.com" crossorigin />
+    <link rel="preconnect" href="https://pbcdnw.aoneroom.com" crossorigin />
+    <link rel="preconnect" href="https://macdn.aoneroom.com" crossorigin />
+    <link rel="preconnect" href="https://mzfi.me" crossorigin />
+    <link rel="preconnect" href="https://vidstuck.xyz" crossorigin />
+    <link rel="preconnect" href="https://vidfast.vc" crossorigin />
+    <link rel="preconnect" href="https://nxsha.space" crossorigin />
+    <link rel="preconnect" href="https://vidsrc.su" crossorigin />
+    <link rel="dns-prefetch" href="https://player.autoembed.co" />
+    <link rel="dns-prefetch" href="https://www.2embed.cc" />
+    <link rel="dns-prefetch" href="https://bingr.one" />
+    <style>
+      /* Prevent iOS Safari viewport jump and auto-zoom when typing on iPhone */
+      @supports (-webkit-touch-callout: none) {
+        input, select, textarea {
+          font-size: 16px !important;
+        }
+      }
+      @media screen and (max-width: 768px) {
+        input, select, textarea {
+          font-size: 16px !important;
+          -webkit-text-size-adjust: 100%;
+        }
+      }
+      html, body {
+        overscroll-behavior-y: none;
+        -webkit-overflow-scrolling: touch;
+      }
+    </style>
+    <title>Furina MovieBox — 4K Free Movies & Web Series</title>
+    <script>
+      // Register modern Service Worker for PWA standalone installation on Android & Desktop
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
+            .then(function(reg) {
+              reg.update();
+            })
+            .catch(function() {});
+        });
+      }
+      // Capture PWA install prompt event for 1-tap in-app installation button
+      window.addEventListener('beforeinstallprompt', function(e) {
+        e.preventDefault();
+        window.deferredInstallPrompt = e;
+        window.dispatchEvent(new CustomEvent('furina:can-install'));
+      });
 
-      var l = window.location;
-      var repoPrefix = l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/');
-      var query = l.search ? l.search : '';
-      var hash = l.hash || '';
-
-      // Redirect directly to base index with preserved query parameters
-      window.location.replace(
-        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-        repoPrefix + '/' + query + hash
-      );
+      async function hardRecover() {
+        try {
+          if ('serviceWorker' in navigator) {
+            const regs = await navigator.serviceWorker.getRegistrations();
+            for (const r of regs) await r.unregister();
+          }
+          if ('caches' in window) {
+            const keys = await caches.keys();
+            for (const k of keys) await caches.delete(k);
+          }
+          sessionStorage.clear();
+        } catch (e) {}
+        window.location.href = window.location.pathname + '?t=' + Date.now();
+      }
     </script>
+    <script type="module" crossorigin src="./assets/index-9lh3XsRk.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/vendor-icons-CO56Nbi4.js">
+    <link rel="modulepreload" crossorigin href="./assets/vendor-react-F2Ox9Mhk.js">
+    <link rel="modulepreload" crossorigin href="./assets/vendor-motion-CChqnOjs.js">
+    <link rel="stylesheet" crossorigin href="./assets/index-CyFQbO0v.css">
   </head>
-  <body>
-    <p>Redirecting to Furina MovieBox...</p>
+  <body class="bg-[#030712] text-white select-none overflow-x-hidden antialiased">
+    <div id="root">
+      <div id="initial-loader" style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #030712; color: #38bdf8; font-family: system-ui, -apple-system, sans-serif; text-align: center; padding: 20px;">
+        <div style="width: 76px; height: 76px; border-radius: 50%; overflow: hidden; border: 2.5px solid #38bdf8; box-shadow: 0 0 30px rgba(56,189,248,0.5); margin-bottom: 18px; animation: pulse 2s infinite ease-in-out; background: #060d24;">
+          <img src="./furina-avatar.png" alt="Furina" style="width: 100%; height: 100%; object-fit: cover; object-position: center;" />
+        </div>
+        <h1 style="font-size: 22px; font-weight: 900; color: #fff; margin: 0 0 6px 0; letter-spacing: -0.5px;">Furina MovieBox</h1>
+        <p style="font-size: 13px; color: #94a3b8; margin: 0 0 24px 0;">Loading 4K Cinema & Hindi Dubs...</p>
+        <div style="width: 32px; height: 32px; border: 3px solid rgba(56,189,248,0.2); border-top-color: #38bdf8; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+        <div id="slow-network-fallback" style="display: none; margin-top: 24px;">
+          <p style="font-size: 11px; color: #cbd5e1; margin-bottom: 10px;">Taking longer than usual?</p>
+          <button onclick="hardRecover()" style="padding: 8px 18px; border-radius: 9999px; background: #0284c7; color: #fff; border: 0; font-size: 12px; font-weight: 700; cursor: pointer;">🔄 Refresh Page</button>
+        </div>
+      </div>
+      <style>
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+      </style>
+    </div>
+    <script>
+      setTimeout(function() {
+        var fallback = document.getElementById('slow-network-fallback');
+        if (fallback) fallback.style.display = 'block';
+      }, 3500);
+
+      window.addEventListener('error', async function(e) {
+        if (e.target && (e.target.tagName === 'SCRIPT' || e.target.tagName === 'LINK')) {
+          console.warn('Asset chunk failed, purging caches and recovering...', e.target.src || e.target.href);
+          if (!sessionStorage.getItem('furina_chunk_recovered')) {
+            sessionStorage.setItem('furina_chunk_recovered', '1');
+            await hardRecover();
+          }
+        }
+      }, true);
+    </script>
   </body>
 </html>
