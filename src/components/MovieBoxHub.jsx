@@ -77,13 +77,13 @@ export default function MovieBoxHub({
         id: resolvedTmdb || item.tmdbId || item.id,
         tmdbId: resolvedTmdb || item.tmdbId,
         tmdb_id: resolvedTmdb || item.tmdbId,
-        preferredServerId: serverOverrideId || preferredServer || 'moviebox'
+        preferredServerId: serverOverrideId || preferredServer || 'vidstuck'
       };
       onPlay(enriched);
     } catch {
       onPlay({
         ...item,
-        preferredServerId: serverOverrideId || preferredServer || 'moviebox'
+        preferredServerId: serverOverrideId || preferredServer || 'vidstuck'
       });
     } finally {
       setResolvingId(null);
@@ -92,7 +92,7 @@ export default function MovieBoxHub({
 
   const featuredServers = useMemo(() => {
     return SERVERS.filter((s) =>
-      ['moviebox', 'vidstuck', 'vidfast', 'nxsha', 'vidsrc_pm', 'vidlink'].includes(s.id)
+      ['moviebox_cloud', 'vidstuck', 'vidfast', 'nxsha', 'vidsrc_pm', 'vidlink'].includes(s.id)
     );
   }, []);
 
@@ -101,7 +101,7 @@ export default function MovieBoxHub({
       {/* Unified MovieBox Spotlight Banner with Trailer Preview & Direct Server Launch */}
       {spotlightItem && (
         <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-cyan-500/30 bg-[#040a1c] shadow-[0_20px_50px_rgba(0,0,0,0.85)]">
-          <div className="relative min-h-[290px] sm:min-h-[420px] flex flex-col justify-end p-4 sm:p-8 md:p-10">
+          <div className="relative min-h-[210px] sm:min-h-[260px] flex flex-col justify-end p-4 sm:p-6">
             {/* Background Backdrop or Video Trailer */}
             <div className="absolute inset-0 bg-[#030712]">
               {showTrailer && spotlightItem.trailerUrl ? (
@@ -204,7 +204,7 @@ export default function MovieBoxHub({
                 )}
               </div>
 
-              <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight [text-wrap:balance]">
+              <h1 className="text-lg sm:text-2xl md:text-3xl font-black text-white tracking-tight leading-tight">
                 {spotlightItem.title}
               </h1>
 
@@ -338,8 +338,8 @@ export default function MovieBoxHub({
         </div>
       </div>
 
-      {/* MovieBox Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-5">
+      {/* Compact 6-7 Column MovieBox Grid */}
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-2.5 sm:gap-3.5">
         {filteredCatalog.map((item) => (
           <MediaCard
             key={`mb-card-${item.id}`}

@@ -1,14 +1,14 @@
 // ============================================================================
 // Furina MovieBox — Normalized Content Model & Color-Coded Genre Engine
 // Provides standard normalized structure across TMDB, Curated, and Studio data
-// with robust image fallbacks and automatic color-coded genre badges.
+// with robust image resolution (accepting both item objects and path strings)
+// and automatic color-coded genre badges.
 // ============================================================================
 
 export const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
 export const TMDB_THUMB_BASE = 'https://image.tmdb.org/t/p/w342';
 export const TMDB_BACKDROP_BASE = 'https://image.tmdb.org/t/p/original';
 
-// Fallback high-resolution thematic poster when remote poster is missing or 404
 export const DEFAULT_POSTER_FALLBACK = './icon-512.png';
 export const DEFAULT_BACKDROP_FALLBACK = './icon-512.png';
 
@@ -44,6 +44,7 @@ export const TMDB_GENRE_MAP = {
 
 /**
  * Returns automatic color-coded badge classes for any genre:
+ * Provides both { badgeClass, dotClass } and { classes, dot } for universal compatibility.
  * - Action / War: Red / Rose
  * - Comedy / Family: Gold / Amber
  * - Sci-Fi / Cyberpunk: Cyan
@@ -57,82 +58,74 @@ export const TMDB_GENRE_MAP = {
 export function getGenreBadgeStyle(genreName = '') {
   const g = String(genreName || '').trim().toLowerCase();
 
+  let badgeClass = 'bg-sky-500/20 text-sky-300 border border-sky-500/40 shadow-[0_0_8px_rgba(14,165,233,0.2)]';
+  let dotClass = 'bg-sky-400';
+  let label = genreName || 'Cinema';
+
   if (g.includes('action') || g.includes('war') || g.includes('martial')) {
-    return {
-      label: genreName,
-      badgeClass: 'bg-rose-500/20 text-rose-300 border-rose-500/45 shadow-[0_0_8px_rgba(244,63,94,0.2)]',
-      dotClass: 'bg-rose-400'
-    };
-  }
-  if (g.includes('comedy') || g.includes('family') || g.includes('kids') || g.includes('sitcom')) {
-    return {
-      label: genreName,
-      badgeClass: 'bg-amber-500/20 text-amber-300 border-amber-500/45 shadow-[0_0_8px_rgba(245,158,11,0.22)]',
-      dotClass: 'bg-amber-400'
-    };
-  }
-  if (g.includes('sci-fi') || g.includes('science') || g.includes('cyber') || g.includes('space')) {
-    return {
-      label: genreName === 'Science Fiction' ? 'Sci-Fi' : genreName,
-      badgeClass: 'bg-cyan-500/20 text-cyan-300 border-cyan-400/50 shadow-[0_0_8px_rgba(34,211,238,0.25)]',
-      dotClass: 'bg-cyan-400'
-    };
-  }
-  if (g.includes('horror') || g.includes('slasher') || g.includes('zombie')) {
-    return {
-      label: genreName,
-      badgeClass: 'bg-red-600/25 text-red-300 border-red-500/50 shadow-[0_0_8px_rgba(239,68,68,0.25)]',
-      dotClass: 'bg-red-500'
-    };
-  }
-  if (g.includes('fantasy') || g.includes('magic') || g.includes('supernatural') || g.includes('isekai')) {
-    return {
-      label: genreName,
-      badgeClass: 'bg-purple-500/20 text-purple-300 border-purple-500/45 shadow-[0_0_8px_rgba(168,85,247,0.22)]',
-      dotClass: 'bg-purple-400'
-    };
-  }
-  if (g.includes('adventure')) {
-    return {
-      label: genreName,
-      badgeClass: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/45 shadow-[0_0_8px_rgba(16,185,129,0.2)]',
-      dotClass: 'bg-emerald-400'
-    };
-  }
-  if (g.includes('thriller') || g.includes('crime') || g.includes('mystery')) {
-    return {
-      label: genreName,
-      badgeClass: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/45 shadow-[0_0_8px_rgba(99,102,241,0.22)]',
-      dotClass: 'bg-indigo-400'
-    };
-  }
-  if (g.includes('romance') || g.includes('drama')) {
-    return {
-      label: genreName,
-      badgeClass: 'bg-pink-500/20 text-pink-300 border-pink-500/45 shadow-[0_0_8px_rgba(236,72,153,0.2)]',
-      dotClass: 'bg-pink-400'
-    };
-  }
-  if (g.includes('anime') || g.includes('animation')) {
-    return {
-      label: genreName,
-      badgeClass: 'bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/45 shadow-[0_0_8px_rgba(217,70,239,0.2)]',
-      dotClass: 'bg-fuchsia-400'
-    };
+    badgeClass = 'bg-rose-500/20 text-rose-300 border border-rose-500/45 shadow-[0_0_10px_rgba(244,63,94,0.28)]';
+    dotClass = 'bg-rose-400';
+  } else if (g.includes('comedy') || g.includes('family') || g.includes('kids') || g.includes('sitcom')) {
+    badgeClass = 'bg-amber-500/20 text-amber-300 border border-amber-500/45 shadow-[0_0_10px_rgba(245,158,11,0.28)]';
+    dotClass = 'bg-amber-400';
+  } else if (g.includes('sci-fi') || g.includes('science') || g.includes('cyber') || g.includes('space')) {
+    label = genreName === 'Science Fiction' ? 'Sci-Fi' : genreName;
+    badgeClass = 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/50 shadow-[0_0_10px_rgba(34,211,238,0.28)]';
+    dotClass = 'bg-cyan-400';
+  } else if (g.includes('horror') || g.includes('slasher') || g.includes('zombie')) {
+    badgeClass = 'bg-red-600/25 text-red-300 border border-red-500/50 shadow-[0_0_10px_rgba(239,68,68,0.28)]';
+    dotClass = 'bg-red-500';
+  } else if (g.includes('fantasy') || g.includes('magic') || g.includes('supernatural') || g.includes('isekai')) {
+    badgeClass = 'bg-purple-500/20 text-purple-300 border border-purple-500/45 shadow-[0_0_10px_rgba(168,85,247,0.25)]';
+    dotClass = 'bg-purple-400';
+  } else if (g.includes('adventure')) {
+    badgeClass = 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/45 shadow-[0_0_10px_rgba(16,185,129,0.25)]';
+    dotClass = 'bg-emerald-400';
+  } else if (g.includes('thriller') || g.includes('crime') || g.includes('mystery')) {
+    badgeClass = 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/45 shadow-[0_0_10px_rgba(99,102,241,0.25)]';
+    dotClass = 'bg-indigo-400';
+  } else if (g.includes('romance') || g.includes('drama')) {
+    badgeClass = 'bg-pink-500/20 text-pink-300 border border-pink-500/45 shadow-[0_0_10px_rgba(236,72,153,0.25)]';
+    dotClass = 'bg-pink-400';
+  } else if (g.includes('anime') || g.includes('animation')) {
+    badgeClass = 'bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/45 shadow-[0_0_10px_rgba(217,70,239,0.25)]';
+    dotClass = 'bg-fuchsia-400';
   }
 
   return {
-    label: genreName || 'Cinema',
-    badgeClass: 'bg-sky-500/20 text-sky-300 border-sky-500/40',
-    dotClass: 'bg-sky-400'
+    label,
+    badgeClass,
+    dotClass,
+    classes: badgeClass,
+    dot: dotClass
   };
 }
 
-export function resolvePosterUrl(path, size = 'w500') {
-  if (!path || typeof path !== 'string' || !path.trim()) {
+/**
+ * Resolves a movie poster URL whether passed an `item` object or a raw `path` string.
+ */
+export function resolvePosterUrl(input, size = 'w500') {
+  let rawPath = '';
+  if (typeof input === 'string') {
+    rawPath = input;
+  } else if (input && typeof input === 'object') {
+    rawPath =
+      input.poster_path ||
+      input.poster ||
+      input.posterUrl ||
+      input.cover?.url ||
+      input.cover ||
+      input.image ||
+      input.backdrop_path ||
+      input.backdrop ||
+      '';
+  }
+
+  if (!rawPath || typeof rawPath !== 'string' || !rawPath.trim()) {
     return DEFAULT_POSTER_FALLBACK;
   }
-  const clean = path.trim();
+
+  const clean = rawPath.trim();
   if (clean.startsWith('http://') || clean.startsWith('https://') || clean.startsWith('data:')) {
     return clean;
   }
@@ -149,11 +142,30 @@ export function resolvePosterUrl(path, size = 'w500') {
   return `https://image.tmdb.org/t/p/${size}${cleanPath}`;
 }
 
-export function resolveBackdropUrl(path, size = 'original') {
-  if (!path || typeof path !== 'string' || !path.trim()) {
+/**
+ * Resolves a movie backdrop URL whether passed an `item` object or a raw `path` string.
+ */
+export function resolveBackdropUrl(input, size = 'original') {
+  let rawPath = '';
+  if (typeof input === 'string') {
+    rawPath = input;
+  } else if (input && typeof input === 'object') {
+    rawPath =
+      input.backdrop_path ||
+      input.backdrop ||
+      input.backdropUrl ||
+      input.poster_path ||
+      input.poster ||
+      input.cover?.url ||
+      input.cover ||
+      '';
+  }
+
+  if (!rawPath || typeof rawPath !== 'string' || !rawPath.trim()) {
     return DEFAULT_BACKDROP_FALLBACK;
   }
-  const clean = path.trim();
+
+  const clean = rawPath.trim();
   if (clean.startsWith('http://') || clean.startsWith('https://') || clean.startsWith('data:')) {
     return clean;
   }
@@ -177,7 +189,15 @@ export function extractGenres(item) {
     const mapped = item.genres
       .map((g) => (typeof g === 'string' ? g : g?.name))
       .filter(Boolean)
-      .map((name) => (name === 'Science Fiction' ? 'Sci-Fi' : name === 'Action & Adventure' ? 'Action' : name === 'Sci-Fi & Fantasy' ? 'Sci-Fi' : name));
+      .map((name) =>
+        name === 'Science Fiction'
+          ? 'Sci-Fi'
+          : name === 'Action & Adventure'
+          ? 'Action'
+          : name === 'Sci-Fi & Fantasy'
+          ? 'Sci-Fi'
+          : name
+      );
     if (mapped.length > 0) return [...new Set(mapped)];
   }
 
@@ -186,7 +206,6 @@ export function extractGenres(item) {
     if (mapped.length > 0) return [...new Set(mapped)];
   }
 
-  // Intelligent keyword inference for curated/fallback items without explicit genre arrays
   const text = `${item.title || item.name || ''} ${item.overview || ''}`.toLowerCase();
   const inferred = [];
 
@@ -284,9 +303,6 @@ export function extractGenres(item) {
   return ['Action', 'Sci-Fi'];
 }
 
-/**
- * Normalizes any movie or series item into the standard Furina MovieBox Content Model
- */
 export function normalizeMediaItem(raw = {}, defaultType = null) {
   if (!raw || typeof raw !== 'object') return null;
 
@@ -311,9 +327,10 @@ export function normalizeMediaItem(raw = {}, defaultType = null) {
   const posterPath = raw.poster_path || raw.poster || '';
   const backdropPath = raw.backdrop_path || raw.backdrop || '';
 
-  const voteAverage = typeof raw.vote_average === 'number'
-    ? raw.vote_average
-    : (parseFloat(raw.vote_average) || 7.8);
+  const voteAverage =
+    typeof raw.vote_average === 'number'
+      ? raw.vote_average
+      : parseFloat(raw.vote_average) || 7.8;
 
   const genres = extractGenres(raw);
 
@@ -327,10 +344,11 @@ export function normalizeMediaItem(raw = {}, defaultType = null) {
   );
 
   const isBollywood = Boolean(
-    !isAnime && (
-      raw.original_language === 'hi' ||
-      (Array.isArray(raw.origin_country) && raw.origin_country.includes('IN') && raw.original_language !== 'en')
-    )
+    !isAnime &&
+      (raw.original_language === 'hi' ||
+        (Array.isArray(raw.origin_country) &&
+          raw.origin_country.includes('IN') &&
+          raw.original_language !== 'en'))
   );
 
   return {
@@ -341,16 +359,16 @@ export function normalizeMediaItem(raw = {}, defaultType = null) {
     overview: raw.overview || raw.description || 'Streaming available in 4K Ultra HD.',
     poster_path: posterPath,
     backdrop_path: backdropPath,
-    poster: resolvePosterUrl(posterPath),
-    posterThumb: resolvePosterUrl(posterPath, 'w342'),
-    backdrop: resolveBackdropUrl(backdropPath),
+    poster: resolvePosterUrl(raw),
+    posterThumb: resolvePosterUrl(raw, 'w342'),
+    backdrop: resolveBackdropUrl(raw),
     year,
     release_date: releaseDate,
     rating: voteAverage.toFixed(1),
     vote_average: voteAverage,
     type,
     media_type: type,
-    category: raw.category || (isAnime ? 'anime' : (isSeries ? 'series' : 'movie')),
+    category: raw.category || (isAnime ? 'anime' : isSeries ? 'series' : 'movie'),
     isAnime,
     isBollywood,
     isCustom: Boolean(raw.isCustom || raw.isCustomMovie),

@@ -218,7 +218,7 @@ export default function LibraryHub({
                   </button>
                 )}
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-5">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-2.5 sm:gap-3.5">
                 {watchlist.map((item) => (
                   <MediaCard
                     key={`wl-${item.id}`}
@@ -363,7 +363,7 @@ export default function LibraryHub({
                 )}
 
                 {activePlaylist.items?.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2.5 sm:gap-3">
                     {activePlaylist.items.map((item) => (
                       <MediaCard
                         key={`pl-item-${item.id}`}
@@ -407,7 +407,7 @@ export default function LibraryHub({
                   <span>Clear History</span>
                 </button>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-5">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-2.5 sm:gap-3.5">
                 {watchHistory.map((item, idx) => (
                   <MediaCard
                     key={`hist-${item.id}-${idx}`}

@@ -1,248 +1,198 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Play, Plus, Check, Star, Info, ChevronLeft, ChevronRight, Sparkles, Volume2, Users } from 'lucide-react';
+import React, { useState, useEffect, useRef, memo } from 'react';
+import { Play, Plus, Check, Star, Info, ChevronLeft, ChevronRight, Volume2, Users, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { isHindiAvailable } from '../services/tmdb';
 import { resolveBackdropUrl, resolvePosterUrl, extractGenres, getGenreBadgeStyle } from '../services/contentModel';
 import soundFx from '../services/soundFx';
 
-export default function HeroBanner({
+const HeroBanner = memo(function HeroBanner({
   items = [],
-  item: propItem,
+  item,
   onPlay,
-  isWatchlisted,
-  onToggleWatchlist,
   onOpenDetails,
-  onWatchTogether
+  onSelectInfo,
+  onWatchTogether,
+  onOpenWatchTogether,
+  isWatchlisted,
+  watchlist = [],
+  onToggleWatchlist,
+  isPaused = false
 }) {
-  const slides = Array.isArray(items) && items.length > 0
-    ? items.slice(0, 8)
-    : propItem
-    ? [propItem]
-    : [];
-
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const touchStartXRef = useRef(null);
+  const [isHovered, setIsHovered] = useState(false);
+  const timerRef = useRef(null);
+
+  const slides = Array.isArray(items) && items.length > 0 ? items.slice(0, 6) : item ? [item] : [];
 
   useEffect(() => {
-    setCurrentIndex(0);
-  }, [items]);
-
-  useEffect(() => {
-    if (slides.length <= 1 || isPaused) return;
-    const timer = setInterval(() => {
+    if (slides.length <= 1 || isHovered || isPaused) return;
+    timerRef.current = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % slides.length);
     }, 6500);
-    return () => clearInterval(timer);
-  }, [slides.length, isPaused]);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [slides.length, isHovered, isPaused]);
 
-  if (slides.length === 0) return null;
+  if (!slides.length) return null;
 
-  const item = slides[currentIndex] || slides[0];
-  if (!item) return null;
-
-  const backdropUrl = resolveBackdropUrl(item.backdrop_path || item.poster_path);
-  const title = item.title || item.name || 'Featured Premiere';
-  const year = item.year || String(item.release_date || item.first_air_date || '').substring(0, 4) || '2025';
-  const rating = typeof item.vote_average === 'number'
-    ? item.vote_average.toFixed(1)
-    : item.rating || '8.5';
-
-  const isAnime = Boolean(
-    item.category === 'anime' ||
-    item.category === 'ecchi_anime' ||
-    item.isAnime === true ||
-    item.original_language === 'ja'
+  const current = slides[currentIndex] || slides[0];
+  const title = current.title || current.name || 'Featured Premiere';
+  const overview = current.overview || 'Stream in 4K Ultra HD with synchronized Multi-Dub audio (Hindi, English & Japanese) and Watch Together rooms.';
+  const year = (current.release_date || current.first_air_date || current.year || '2025').toString().slice(0, 4);
+  const rating = current.vote_average ? Number(current.vote_average).toFixed(1) : '8.7';
+  const isSeries = current.media_type === 'tv' || current.type === 'tv' || Boolean(current.first_air_date);
+  const hasHindi = Boolean(
+    current.hasHindiDub ||
+    current.isHindiDubbed ||
+    current.category === 'hindi' ||
+    current.original_language === 'hi' ||
+    isHindiAvailable(current)
   );
+  const genres = extractGenres(current).slice(0, 3);
+  const backdropUrl = resolveBackdropUrl(current);
+  const posterUrl = resolvePosterUrl(current, 'w500');
 
-  const isHindi = Boolean(
-    item.isHindiDubbed ||
-    item.hasHindiDub ||
-    item.languages?.hi ||
-    isHindiAvailable(item)
-  );
+  const detailsHandler = onOpenDetails || onSelectInfo;
+  const watchTogetherHandler = onWatchTogether || onOpenWatchTogether;
+  const inWatchlist = typeof isWatchlisted === 'function'
+    ? isWatchlisted(current.id)
+    : Array.isArray(watchlist) && watchlist.some((w) => String(w.id) === String(current.id));
 
-  const genres = extractGenres(item).slice(0, 3);
-  const saved = isWatchlisted ? isWatchlisted(item.id) : false;
-
-  const prevSlide = (e) => {
-    e?.stopPropagation();
+  const goPrev = () => {
+    soundFx.playClick?.();
     setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
-  const nextSlide = (e) => {
-    e?.stopPropagation();
+  const goNext = () => {
+    soundFx.playClick?.();
     setCurrentIndex((prev) => (prev + 1) % slides.length);
-  };
-
-  const handleTouchStart = (e) => {
-    if (e.touches && e.touches.length > 0) {
-      touchStartXRef.current = e.touches[0].clientX;
-    }
-  };
-
-  const handleTouchEnd = (e) => {
-    if (touchStartXRef.current === null || !e.changedTouches || e.changedTouches.length === 0) return;
-    const deltaX = e.changedTouches[0].clientX - touchStartXRef.current;
-    if (Math.abs(deltaX) > 45) {
-      if (deltaX > 0) prevSlide();
-      else nextSlide();
-    }
-    touchStartXRef.current = null;
   };
 
   return (
     <div
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      className="relative w-full min-h-[340px] sm:min-h-[450px] md:min-h-[520px] rounded-2xl sm:rounded-3xl overflow-hidden mb-6 sm:mb-9 border border-cyan-500/35 shadow-[0_25px_70px_rgba(0,0,0,0.9),0_0_45px_rgba(6,182,212,0.18)] group select-none bg-[#040814]"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="relative w-full pt-2 pb-3 select-none perspective-1000"
     >
-      {/* Top Neon Laser Highlight */}
-      <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-80 z-20" />
+      <div className="relative w-full min-h-[270px] sm:min-h-[340px] md:min-h-[390px] rounded-3xl overflow-hidden border border-cyan-400/35 bg-[#040a1a] shadow-[0_24px_60px_rgba(0,0,0,0.85),0_0_35px_rgba(6,182,212,0.2)] flex items-end">
+        {/* Top 3D Specular Highlight */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-cyan-300/90 to-transparent z-20" />
 
-      {/* Backdrop Image with Smooth Cinematic Scale */}
-      <img
-        key={`${item.id}-${currentIndex}`}
-        src={backdropUrl}
-        alt={title}
-        referrerPolicy="no-referrer"
-        onError={(e) => {
-          e.currentTarget.onerror = null;
-          e.currentTarget.src = './icon-512.png';
-        }}
-        className="absolute inset-0 w-full h-full object-cover object-center transition-all duration-1000 scale-105 group-hover:scale-100 opacity-85"
-      />
+        {/* Animated Backdrop Image */}
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={`backdrop-${current.id}`}
+            src={backdropUrl}
+            alt={title}
+            initial={{ opacity: 0, scale: 1.06 }}
+            animate={{ opacity: 0.72, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.55, ease: 'easeOut' }}
+            onError={(e) => {
+              e.currentTarget.src = posterUrl || './icon-512.png';
+            }}
+            className="absolute inset-0 w-full h-full object-cover object-center"
+          />
+        </AnimatePresence>
 
-      {/* Rich Multi-Layer Fontaine Hydro Cinema Vignette */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#030712] via-[#030712]/65 to-transparent" />
-      <div className="absolute inset-0 bg-gradient-to-r from-[#030712] via-[#030712]/80 to-transparent sm:w-4/5" />
-      <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-cyan-500/15 rounded-full blur-[110px] pointer-events-none" />
+        {/* Multi-Stop Cinema Vignettes */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#030712] via-[#030712]/65 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#030712] via-[#030712]/80 to-transparent sm:w-4/5" />
 
-      {/* Prev / Next Glass Arrows on Desktop */}
-      {slides.length > 1 && (
-        <>
-          <button
-            type="button"
-            onClick={prevSlide}
-            aria-label="Previous slide"
-            className="hidden sm:flex absolute left-3.5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-slate-950/70 hover:bg-cyan-500 hover:text-slate-950 text-white border border-cyan-500/35 items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer shadow-lg"
+        {/* Content & 3D Floating Poster Card */}
+        <div className="relative z-10 w-full p-4 sm:p-7 md:p-9 flex items-end justify-between gap-6">
+          <motion.div
+            key={`info-${current.id}`}
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35 }}
+            className="max-w-2xl space-y-2.5 sm:space-y-3.5"
           >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <button
-            type="button"
-            onClick={nextSlide}
-            aria-label="Next slide"
-            className="hidden sm:flex absolute right-3.5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-slate-950/70 hover:bg-cyan-500 hover:text-slate-950 text-white border border-cyan-500/35 items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer shadow-lg"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </>
-      )}
-
-      {/* Foreground Content */}
-      <div className="relative z-10 h-full min-h-[340px] sm:min-h-[450px] md:min-h-[520px] flex flex-col justify-end p-5 sm:p-9 md:p-12">
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 w-full">
-          
-          {/* Left Hero Details */}
-          <div className="max-w-2xl space-y-3 sm:space-y-4">
-            {/* Glowing Cinema Badges Row */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 font-black text-[10px] sm:text-[11px] uppercase tracking-wider shadow-[0_0_15px_rgba(34,211,238,0.6)] flex items-center gap-1">
-                <Sparkles className="w-3 h-3 fill-slate-950" />
-                <span>4K DOLBY VISION</span>
+            {/* Official Cinema Brand Logo Badge + Multi-Dub Pill */}
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 shadow-[0_0_16px_rgba(56,189,248,0.65)]">
+                <Sparkles className="w-3 h-3 fill-gray-950" />
+                FURINA 4K PREMIERE
               </span>
 
-              <span className="px-2.5 py-1 rounded-lg bg-slate-950/80 backdrop-blur-md border border-amber-500/40 text-amber-400 font-black text-[11px] flex items-center gap-1">
-                <Star className="w-3.5 h-3.5 fill-amber-400" />
-                <span>{rating}</span>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-slate-950/90 text-amber-300 border border-amber-400/45 shadow-[0_0_10px_rgba(245,158,11,0.25)]">
+                <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                {rating}
               </span>
 
-              <span className="px-2.5 py-1 rounded-lg bg-slate-950/80 backdrop-blur-md border border-cyan-500/30 text-cyan-200 font-mono font-bold text-[11px]">
-                {year}
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/10 text-slate-200 border border-white/15">
+                {year} • {isSeries ? 'TV SERIES' : '4K MOVIE'}
               </span>
 
-              {isHindi && (
-                <span className="px-2.5 py-1 rounded-lg bg-amber-500/20 backdrop-blur-md border border-amber-400/50 text-amber-300 font-extrabold text-[11px] flex items-center gap-1">
-                  <Volume2 className="w-3 h-3 text-amber-400" />
-                  <span>🇮🇳 Hindi Dub + Multi-Audio</span>
-                </span>
-              )}
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-400/45 shadow-[0_0_12px_rgba(245,158,11,0.3)]">
+                <Volume2 className="w-3 h-3 text-amber-400" />
+                {hasHindi ? '🇮🇳 Hindi • 🇬🇧 EN • 🇯🇵 JA' : '🎧 Multi-Dub (HI / EN / JA)'}
+              </span>
 
-              {isAnime && (
-                <span className="px-2.5 py-1 rounded-lg bg-purple-500/20 backdrop-blur-md border border-purple-400/50 text-purple-200 font-extrabold text-[11px]">
-                  🇯🇵 Anime Sub/Dub
-                </span>
-              )}
+              {/* Color-Coded Genre Tags */}
+              {genres.map((genre) => {
+                const style = getGenreBadgeStyle(genre);
+                return (
+                  <span
+                    key={genre}
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold ${style.badgeClass}`}
+                  >
+                    <span className={`w-1.5 h-1.5 rounded-full ${style.dotClass}`} />
+                    {style.label}
+                  </span>
+                );
+              })}
             </div>
 
-            {/* Hero Display Title */}
-            <h1 className="text-2xl sm:text-4xl md:text-5xl font-black tracking-tight text-white leading-[1.08] drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] [text-wrap:balance]">
+            {/* Movie Title Emblem */}
+            <h1 className="text-xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-tight drop-shadow-[0_4px_20px_rgba(0,0,0,0.95)] neon-text line-clamp-2">
               {title}
             </h1>
 
-            {/* Color-Coded Genre Tags */}
-            {genres.length > 0 && (
-              <div className="flex items-center gap-2 flex-wrap">
-                {genres.map((genre) => {
-                  const style = getGenreBadgeStyle(genre);
-                  return (
-                    <span
-                      key={genre}
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-extrabold tracking-wide border backdrop-blur-md ${style.badgeClass}`}
-                    >
-                      <span className={`w-1.5 h-1.5 rounded-full ${style.dotClass}`} />
-                      <span>{style.label}</span>
-                    </span>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Concise Synopsis */}
-            <p className="text-xs sm:text-sm md:text-base text-slate-200/90 line-clamp-2 sm:line-clamp-3 max-w-xl leading-relaxed font-normal">
-              {item.overview || 'Stream instantly in 4K Ultra HD with verified multi-audio dubs and zero buffering.'}
+            {/* Overview */}
+            <p className="text-xs sm:text-sm text-slate-300/95 line-clamp-2 max-w-xl leading-relaxed">
+              {overview}
             </p>
 
-            {/* Primary & Secondary Action Buttons */}
-            <div className="flex items-center gap-2.5 sm:gap-3 pt-1 flex-wrap">
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 pt-1">
               <button
                 type="button"
                 onClick={() => {
-                  soundFx.playStartChime?.();
-                  onPlay(item);
+                  soundFx.playClick?.();
+                  onPlay?.(current);
                 }}
-                className="min-h-[46px] px-6 sm:px-8 py-3 rounded-xl bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-black text-xs sm:text-sm flex items-center gap-2 shadow-[0_0_30px_rgba(34,211,238,0.6)] transition transform hover:scale-[1.03] active:scale-95 cursor-pointer whitespace-nowrap"
+                className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-gray-950 font-black text-xs sm:text-sm flex items-center gap-2 shadow-[0_0_25px_rgba(56,189,248,0.65)] hover:scale-105 active:scale-95 transition cursor-pointer"
               >
-                <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-slate-950" />
-                <span>Watch 4K Stream</span>
+                <Play className="w-4 h-4 fill-gray-950 text-gray-950" />
+                <span>Watch Now (Multi-Dub 4K)</span>
               </button>
 
-              {onWatchTogether && (
+              {watchTogetherHandler && (
                 <button
                   type="button"
                   onClick={() => {
                     soundFx.playClick?.();
-                    onWatchTogether(item);
+                    watchTogetherHandler(current);
                   }}
-                  className="min-h-[46px] px-4 sm:px-5 py-3 rounded-xl bg-purple-500/20 hover:bg-purple-500/35 backdrop-blur-md border border-purple-400/50 text-purple-200 hover:text-white font-bold text-xs sm:text-sm flex items-center gap-2 transition active:scale-95 cursor-pointer whitespace-nowrap shadow-[0_0_18px_rgba(168,85,247,0.3)]"
+                  className="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-purple-500/25 hover:bg-purple-500/35 text-purple-200 border border-purple-400/50 font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-[0_0_18px_rgba(168,85,247,0.3)] transition cursor-pointer"
                 >
-                  <Users className="w-4 h-4 text-purple-300" />
+                  <Users className="w-3.5 h-3.5 text-purple-300" />
                   <span>Watch Together</span>
                 </button>
               )}
 
-              {onOpenDetails && (
+              {detailsHandler && (
                 <button
                   type="button"
                   onClick={() => {
                     soundFx.playClick?.();
-                    onOpenDetails(item);
+                    detailsHandler(current);
                   }}
-                  className="min-h-[46px] px-4 sm:px-5 py-3 rounded-xl bg-slate-900/85 hover:bg-slate-800 backdrop-blur-md border border-cyan-500/35 hover:border-cyan-400 text-white font-bold text-xs sm:text-sm flex items-center gap-2 transition active:scale-95 cursor-pointer whitespace-nowrap"
+                  className="px-3.5 py-2 sm:py-2.5 rounded-xl bg-slate-900/85 hover:bg-slate-800 text-slate-200 border border-cyan-500/30 font-bold text-xs sm:text-sm flex items-center gap-1.5 transition cursor-pointer"
                 >
-                  <Info className="w-4 h-4 text-cyan-400" />
+                  <Info className="w-3.5 h-3.5 text-cyan-400" />
                   <span>Details</span>
                 </button>
               )}
@@ -252,75 +202,85 @@ export default function HeroBanner({
                   type="button"
                   onClick={() => {
                     soundFx.playClick?.();
-                    onToggleWatchlist(item);
+                    onToggleWatchlist(current);
                   }}
-                  aria-label={saved ? 'Remove from Watchlist' : 'Add to Watchlist'}
-                  className={`min-h-[46px] px-4 py-3 rounded-xl backdrop-blur-md border font-bold text-xs sm:text-sm flex items-center gap-1.5 transition active:scale-95 cursor-pointer whitespace-nowrap ${
-                    saved
-                      ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_15px_rgba(34,211,238,0.3)]'
-                      : 'bg-slate-900/80 border-white/15 text-slate-200 hover:text-white hover:border-cyan-500/40'
+                  className={`p-2 sm:p-2.5 rounded-xl border transition cursor-pointer ${
+                    inWatchlist
+                      ? 'bg-cyan-500/25 border-cyan-400 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.4)]'
+                      : 'bg-slate-900/80 border-white/15 text-slate-300 hover:text-white hover:border-cyan-400/40'
                   }`}
+                  title={inWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
                 >
-                  {saved ? <Check className="w-4 h-4 text-cyan-400" /> : <Plus className="w-4 h-4" />}
-                  <span className="hidden xs:inline">{saved ? 'Saved' : 'Watchlist'}</span>
+                  {inWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                 </button>
               )}
             </div>
-          </div>
+          </motion.div>
 
-          {/* Right Interactive Poster Thumbnail Strip (Desktop & Tablet) */}
-          {slides.length > 1 && (
-            <div className="hidden md:flex items-center gap-2 bg-[#040a1c]/85 backdrop-blur-xl p-2 rounded-2xl border border-cyan-500/30 shadow-2xl shrink-0">
-              {slides.slice(0, 6).map((s, idx) => {
-                const isSelected = idx === currentIndex;
-                return (
-                  <button
-                    key={`thumb-${s.id}-${idx}`}
-                    type="button"
-                    onClick={() => {
-                      soundFx.playClick?.();
-                      setCurrentIndex(idx);
-                    }}
-                    className={`relative w-12 h-16 lg:w-14 lg:h-20 rounded-xl overflow-hidden transition-all duration-300 cursor-pointer shrink-0 ${
-                      isSelected
-                        ? 'ring-2 ring-cyan-400 scale-110 shadow-[0_0_20px_rgba(34,211,238,0.75)] z-10'
-                        : 'opacity-55 hover:opacity-95 hover:scale-105'
-                    }`}
-                    title={s.title || s.name}
-                  >
-                    <img
-                      src={resolvePosterUrl(s.poster_path, 'w342')}
-                      alt={s.title || s.name}
-                      className="w-full h-full object-cover"
-                      onError={(e) => { e.currentTarget.src = './icon-512.png'; }}
-                    />
-                  </button>
-                );
-              })}
+          {/* Right Side: 3D Floating Movie Poster & Official Emblem Card */}
+          <motion.div
+            key={`poster-${current.id}`}
+            initial={{ opacity: 0, rotateY: -16, scale: 0.92 }}
+            animate={{ opacity: 1, rotateY: -8, scale: 1 }}
+            transition={{ duration: 0.45 }}
+            onClick={() => onPlay?.(current)}
+            className="hidden md:flex flex-col items-center shrink-0 mr-10 cursor-pointer group/heroposter"
+          >
+            <div className="relative w-32 lg:w-36 aspect-[2/3] rounded-2xl overflow-hidden border-2 border-cyan-400/60 shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_30px_rgba(56,189,248,0.45)] group-hover/heroposter:scale-105 transition-transform duration-300">
+              <img
+                src={posterUrl}
+                alt={title}
+                onError={(e) => {
+                  e.currentTarget.src = './icon-512.png';
+                }}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end justify-center p-2">
+                <span className="px-2 py-0.5 rounded-md bg-cyan-500/90 text-gray-950 text-[9px] font-black uppercase tracking-wider shadow">
+                  ▶ PLAY 4K
+                </span>
+              </div>
             </div>
-          )}
-
+          </motion.div>
         </div>
 
-        {/* Mobile Slide Indicator Dots */}
+        {/* Slide Navigation & Dots */}
         {slides.length > 1 && (
-          <div className="flex md:hidden items-center gap-1.5 mt-4">
-            {slides.map((s, idx) => (
-              <button
-                key={s.id || idx}
-                type="button"
-                aria-label={`Slide ${idx + 1}`}
-                onClick={() => setCurrentIndex(idx)}
-                className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                  idx === currentIndex
-                    ? 'w-7 bg-cyan-400 shadow-[0_0_10px_#22d3ee]'
-                    : 'w-2 bg-white/30 hover:bg-white/60'
-                }`}
-              />
-            ))}
+          <div className="absolute bottom-3 right-3 sm:bottom-5 sm:right-5 z-20 flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-1 mr-1">
+              {slides.map((s, idx) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => setCurrentIndex(idx)}
+                  aria-label={`Slide ${idx + 1}`}
+                  className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                    idx === currentIndex ? 'w-6 bg-cyan-400 shadow-[0_0_8px_rgba(56,189,248,0.9)]' : 'w-1.5 bg-white/30 hover:bg-white/60'
+                  }`}
+                />
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={goPrev}
+              aria-label="Previous slide"
+              className="w-8 h-8 rounded-xl bg-slate-950/85 hover:bg-cyan-500/30 border border-cyan-500/35 text-cyan-200 flex items-center justify-center transition cursor-pointer"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={goNext}
+              aria-label="Next slide"
+              className="w-8 h-8 rounded-xl bg-slate-950/85 hover:bg-cyan-500/30 border border-cyan-500/35 text-cyan-200 flex items-center justify-center transition cursor-pointer"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
         )}
       </div>
     </div>
   );
-}
+});
+
+export default HeroBanner;
