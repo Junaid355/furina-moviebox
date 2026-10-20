@@ -282,9 +282,9 @@ const Navbar = memo(function Navbar({
           </div>
         </nav>
 
-        {/* ZONE 3: Compact Search Bar + Watch Together + Library + Settings */}
-        <div className="flex items-center gap-1.5 flex-1 lg:flex-initial justify-end max-w-[230px] xs:max-w-xs sm:max-w-sm">
-          <div className="relative flex-1 min-w-[96px] sm:w-48">
+        {/* ZONE 3: Compact Search Bar + MCP Hub + Watch Together + Library + Settings */}
+        <div className="flex items-center gap-1.5 flex-1 lg:flex-initial justify-end max-w-[260px] xs:max-w-xs sm:max-w-md">
+          <div className="relative flex-1 min-w-[96px] sm:w-44">
             <input
               type="text"
               value={searchQuery}

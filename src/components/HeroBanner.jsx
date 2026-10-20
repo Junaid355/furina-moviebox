@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef, memo } from 'react';
 import { Play, Plus, Check, Star, Info, ChevronLeft, ChevronRight, Volume2, Users, Sparkles } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { isHindiAvailable } from '../services/tmdb';
 import { resolveBackdropUrl, resolvePosterUrl, extractGenres, getGenreBadgeStyle } from '../services/contentModel';
+import { BorderBeam } from './ui/border-beam';
+import { ShineBorder } from './ui/shine-border';
+import { Tilt } from './ui/tilt';
 import soundFx from '../services/soundFx';
 
 const HeroBanner = memo(function HeroBanner({
@@ -21,6 +24,29 @@ const HeroBanner = memo(function HeroBanner({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const timerRef = useRef(null);
+  const containerRef = useRef(null);
+
+  // Motion Primitives — 3D Interactive Mouse-Parallax Physics
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [4.5, -4.5]), {
+    stiffness: 180,
+    damping: 24,
+    mass: 0.6
+  });
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-5.5, 5.5]), {
+    stiffness: 180,
+    damping: 24,
+    mass: 0.6
+  });
+  const bgShiftX = useSpring(useTransform(mouseX, [-0.5, 0.5], [10, -10]), {
+    stiffness: 140,
+    damping: 24
+  });
+  const bgShiftY = useSpring(useTransform(mouseY, [-0.5, 0.5], [8, -8]), {
+    stiffness: 140,
+    damping: 24
+  });
 
   const slides = Array.isArray(items) && items.length > 0 ? items.slice(0, 6) : item ? [item] : [];
 
@@ -59,6 +85,21 @@ const HeroBanner = memo(function HeroBanner({
     ? isWatchlisted(current.id)
     : Array.isArray(watchlist) && watchlist.some((w) => String(w.id) === String(current.id));
 
+  const handleMouseMove = (e) => {
+    if (!containerRef.current || window.innerWidth < 1024) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const xPct = (e.clientX - rect.left) / rect.width - 0.5;
+    const yPct = (e.clientY - rect.top) / rect.height - 0.5;
+    mouseX.set(xPct);
+    mouseY.set(yPct);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    mouseX.set(0);
+    mouseY.set(0);
+  };
+
   const goPrev = () => {
     soundFx.playClick?.();
     setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
@@ -71,22 +112,37 @@ const HeroBanner = memo(function HeroBanner({
 
   return (
     <div
+      ref={containerRef}
       onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="relative w-full pt-2 pb-3 select-none perspective-1000"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{ perspective: '1400px' }}
+      className="relative w-full pt-2 pb-3 select-none"
     >
-      <div className="relative w-full min-h-[270px] sm:min-h-[340px] md:min-h-[390px] rounded-3xl overflow-hidden border border-cyan-400/35 bg-[#040a1a] shadow-[0_24px_60px_rgba(0,0,0,0.85),0_0_35px_rgba(6,182,212,0.2)] flex items-end">
+      <motion.div
+        style={{
+          rotateX: isHovered ? rotateX : 0,
+          rotateY: isHovered ? rotateY : 0,
+          transformStyle: 'preserve-3d'
+        }}
+        className="relative w-full min-h-[270px] sm:min-h-[340px] md:min-h-[395px] rounded-3xl overflow-hidden border border-cyan-400/40 bg-[#040a1a] shadow-[0_28px_70px_rgba(0,0,0,0.88),0_0_40px_rgba(6,182,212,0.24)] flex items-end transition-shadow duration-300"
+      >
+        {/* Magic UI Desktop-Only ShineBorder & Animated Border Beam */}
+        <ShineBorder borderRadius={24} borderWidth={1.5} duration={10} color={['#38bdf8', '#818cf8', '#a855f7']} desktopOnly={true} />
+        <BorderBeam size={280} duration={10} colorFrom="#38bdf8" colorTo="#a855f7" desktopOnly={true} />
+
         {/* Top 3D Specular Highlight */}
         <div className="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-cyan-300/90 to-transparent z-20" />
 
-        {/* Animated Backdrop Image */}
+        {/* Animated Backdrop Image with 3D Counter-Parallax */}
         <AnimatePresence mode="wait">
           <motion.img
             key={`backdrop-${current.id}`}
             src={backdropUrl}
             alt={title}
-            initial={{ opacity: 0, scale: 1.06 }}
-            animate={{ opacity: 0.72, scale: 1 }}
+            style={{ x: bgShiftX, y: bgShiftY }}
+            initial={{ opacity: 0, scale: 1.09 }}
+            animate={{ opacity: 0.74, scale: 1.04 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.55, ease: 'easeOut' }}
             onError={(e) => {
@@ -101,12 +157,15 @@ const HeroBanner = memo(function HeroBanner({
         <div className="absolute inset-0 bg-gradient-to-r from-[#030712] via-[#030712]/80 to-transparent sm:w-4/5" />
 
         {/* Content & 3D Floating Poster Card */}
-        <div className="relative z-10 w-full p-4 sm:p-7 md:p-9 flex items-end justify-between gap-6">
+        <div
+          style={{ transform: 'translateZ(30px)', transformStyle: 'preserve-3d' }}
+          className="relative z-10 w-full p-4 sm:p-7 md:p-9 flex items-end justify-between gap-6"
+        >
           <motion.div
             key={`info-${current.id}`}
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35 }}
+            initial={{ opacity: 0, y: 16, rotateX: 8 }}
+            animate={{ opacity: 1, y: 0, rotateX: 0 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             className="max-w-2xl space-y-2.5 sm:space-y-3.5"
           >
             {/* Official Cinema Brand Logo Badge + Multi-Dub Pill */}
@@ -157,21 +216,25 @@ const HeroBanner = memo(function HeroBanner({
 
             {/* Action Buttons */}
             <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 pt-1">
-              <button
+              <motion.button
                 type="button"
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.96 }}
                 onClick={() => {
                   soundFx.playClick?.();
                   onPlay?.(current);
                 }}
-                className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-gray-950 font-black text-xs sm:text-sm flex items-center gap-2 shadow-[0_0_25px_rgba(56,189,248,0.65)] hover:scale-105 active:scale-95 transition cursor-pointer"
+                className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-gray-950 font-black text-xs sm:text-sm flex items-center gap-2 shadow-[0_0_25px_rgba(56,189,248,0.65)] transition cursor-pointer"
               >
                 <Play className="w-4 h-4 fill-gray-950 text-gray-950" />
                 <span>Watch Now (Multi-Dub 4K)</span>
-              </button>
+              </motion.button>
 
               {watchTogetherHandler && (
-                <button
+                <motion.button
                   type="button"
+                  whileHover={{ scale: 1.04, y: -1 }}
+                  whileTap={{ scale: 0.96 }}
                   onClick={() => {
                     soundFx.playClick?.();
                     watchTogetherHandler(current);
@@ -180,12 +243,14 @@ const HeroBanner = memo(function HeroBanner({
                 >
                   <Users className="w-3.5 h-3.5 text-purple-300" />
                   <span>Watch Together</span>
-                </button>
+                </motion.button>
               )}
 
               {detailsHandler && (
-                <button
+                <motion.button
                   type="button"
+                  whileHover={{ scale: 1.04, y: -1 }}
+                  whileTap={{ scale: 0.96 }}
                   onClick={() => {
                     soundFx.playClick?.();
                     detailsHandler(current);
@@ -194,12 +259,14 @@ const HeroBanner = memo(function HeroBanner({
                 >
                   <Info className="w-3.5 h-3.5 text-cyan-400" />
                   <span>Details</span>
-                </button>
+                </motion.button>
               )}
 
               {onToggleWatchlist && (
-                <button
+                <motion.button
                   type="button"
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.94 }}
                   onClick={() => {
                     soundFx.playClick?.();
                     onToggleWatchlist(current);
@@ -212,7 +279,7 @@ const HeroBanner = memo(function HeroBanner({
                   title={inWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
                 >
                   {inWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                </button>
+                </motion.button>
               )}
             </div>
           </motion.div>
@@ -220,13 +287,20 @@ const HeroBanner = memo(function HeroBanner({
           {/* Right Side: 3D Floating Movie Poster & Official Emblem Card */}
           <motion.div
             key={`poster-${current.id}`}
-            initial={{ opacity: 0, rotateY: -16, scale: 0.92 }}
-            animate={{ opacity: 1, rotateY: -8, scale: 1 }}
-            transition={{ duration: 0.45 }}
+            style={{ transform: 'translateZ(55px)' }}
+            initial={{ opacity: 0, rotateY: -22, scale: 0.9 }}
+            animate={{ opacity: 1, rotateY: -10, scale: 1 }}
+            whileHover={{ rotateY: 0, scale: 1.08, y: -6 }}
+            transition={{ type: 'spring', stiffness: 220, damping: 20 }}
             onClick={() => onPlay?.(current)}
             className="hidden md:flex flex-col items-center shrink-0 mr-10 cursor-pointer group/heroposter"
           >
-            <div className="relative w-32 lg:w-36 aspect-[2/3] rounded-2xl overflow-hidden border-2 border-cyan-400/60 shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_30px_rgba(56,189,248,0.45)] group-hover/heroposter:scale-105 transition-transform duration-300">
+            <Tilt
+              rotationFactor={14}
+              desktopOnly={true}
+              className="relative w-32 lg:w-36 aspect-[2/3] rounded-2xl overflow-hidden border-2 border-cyan-400/65 shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_35px_rgba(56,189,248,0.5)]"
+            >
+              <ShineBorder borderRadius={16} borderWidth={2} duration={6} color={['#67e8f9', '#38bdf8', '#c084fc']} desktopOnly={true} />
               <img
                 src={posterUrl}
                 alt={title}
@@ -235,12 +309,12 @@ const HeroBanner = memo(function HeroBanner({
                 }}
                 className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end justify-center p-2">
-                <span className="px-2 py-0.5 rounded-md bg-cyan-500/90 text-gray-950 text-[9px] font-black uppercase tracking-wider shadow">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent flex items-end justify-center p-2.5">
+                <span className="px-2.5 py-0.5 rounded-md bg-cyan-400 text-gray-950 text-[9px] font-black uppercase tracking-wider shadow-[0_0_12px_rgba(56,189,248,0.8)]">
                   ▶ PLAY 4K
                 </span>
               </div>
-            </div>
+            </Tilt>
           </motion.div>
         </div>
 
@@ -278,7 +352,7 @@ const HeroBanner = memo(function HeroBanner({
             </button>
           </div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 });

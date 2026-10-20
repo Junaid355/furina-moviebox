@@ -1,0 +1,91 @@
+{
+  "mcpServers": {
+    "magic_ui": {
+      "command": "npx",
+      "args": ["-y", "@magicuidesign/mcp@latest"],
+      "category": "UI, 3D Animation & Design System",
+      "repo": "https://github.com/magicuidesign/mcp",
+      "capabilities": ["border-beam", "shine-border", "marquee", "ripple", "blur-fade"]
+    },
+    "motion_primitives": {
+      "command": "npx",
+      "args": ["-y", "motion-primitives-mcp@latest"],
+      "category": "UI, 3D Animation & Design System",
+      "repo": "https://github.com/ibelick/motion-primitives",
+      "capabilities": ["3d-card-tilt", "spring-physics", "magnetic-hover", "smooth-modal-transitions"]
+    },
+    "aceternity_ui": {
+      "command": "npx",
+      "args": ["-y", "aceternityui-mcp@latest"],
+      "category": "UI, 3D Animation & Design System",
+      "repo": "https://github.com/Prathamesh0901/aceternityui-mcp",
+      "capabilities": ["3d-card-effect", "background-beams", "sparkles-core", "spotlight-search"]
+    },
+    "shadcn_ui": {
+      "command": "npx",
+      "args": ["-y", "@jpisnice/shadcn-ui-mcp-server@latest"],
+      "category": "UI, 3D Animation & Design System",
+      "repo": "https://github.com/Jpisnice/shadcn-ui-mcp-server",
+      "capabilities": ["dialog-primitives", "accessible-tabs", "theme-tokens", "responsive-sheets"]
+    },
+    "firecrawl": {
+      "command": "npx",
+      "args": ["-y", "firecrawl-mcp@latest"],
+      "env": {
+        "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
+      },
+      "category": "Video Stream Inspection, Reverse-Engineering & Scraper",
+      "repo": "https://github.com/firecrawl/firecrawl-mcp-server",
+      "capabilities": ["4k-mirror-discovery", "multi-dub-endpoint-indexing", "metadata-enrichment"]
+    },
+    "pyrecrawl": {
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/rabiauynk1/pyrecrawl-mcp.git", "pyrecrawl.server"],
+      "category": "Video Stream Inspection, Reverse-Engineering & Scraper",
+      "repo": "https://github.com/rabiauynk1/pyrecrawl-mcp",
+      "capabilities": ["deep-embed-crawler", "fallback-stream-discovery", "provider-health-check"]
+    },
+    "web_reversing": {
+      "command": "npx",
+      "args": ["-y", "web-reversing-mcp@latest"],
+      "category": "Video Stream Inspection, Reverse-Engineering & Scraper",
+      "repo": "https://github.com/burningtnt/web-reversing-mcp",
+      "capabilities": ["embed-query-param-inspection", "audio-track-forcing", "cors-header-analysis"]
+    },
+    "stealth_browser": {
+      "command": "npx",
+      "args": ["-y", "stealth-agent-browser-mcp@latest"],
+      "category": "Video Stream Inspection, Reverse-Engineering & Scraper",
+      "repo": "https://github.com/vibheksoni/stealth-browser-mcp",
+      "capabilities": ["anti-block-stream-verification", "iframe-shield-compatibility", "ad-free-mirror-routing"]
+    },
+    "chrome_devtools": {
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@latest"],
+      "category": "QA, Browser Automation & Self-Testing",
+      "repo": "https://github.com/ChromeDevTools/chrome-devtools-mcp",
+      "capabilities": ["dom-scroll-unlock-audit", "zero-overflow-verification", "console-network-diagnostics"]
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "."],
+      "category": "Core System, Persistent Memory & Reasoning",
+      "repo": "https://github.com/modelcontextprotocol/servers",
+      "capabilities": ["atomic-file-operations", "config-persistence", "schema-validation"]
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "category": "Core System, Persistent Memory & Reasoning",
+      "repo": "https://github.com/modelcontextprotocol/servers",
+      "capabilities": ["verified-dub-knowledge-graph", "provider-health-persistence", "user-preference-memory"]
+    },
+    "sequential_thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "category": "Core System, Persistent Memory & Reasoning",
+      "repo": "https://github.com/modelcontextprotocol/servers",
+      "capabilities": ["multi-step-stream-failover", "audio-dub-resolution-chain", "deterministic-diagnostics"]
+    }
+  }
+}

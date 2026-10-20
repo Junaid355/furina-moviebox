@@ -1,5 +1,6 @@
-import React, { useRef, useState, useEffect, useMemo, memo } from 'react';
+import React, { useRef, useState, useEffect, useMemo, memo, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion } from 'framer-motion';
 import MediaCard from './MediaCard';
 import { BlurFade } from './ui/blur-fade';
 
@@ -24,22 +25,101 @@ const MediaShelf = memo(function MediaShelf({
   const scrollRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStateRef = useRef({
+    isDown: false,
+    startX: 0,
+    scrollLeft: 0,
+    movedDistance: 0
+  });
 
   const visibleItems = useMemo(() => {
     if (!Array.isArray(items)) return [];
     return items.slice(0, 16);
   }, [items]);
 
-  const checkScroll = () => {
+  const checkScroll = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
-    setCanScrollLeft(el.scrollLeft > 12);
-    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 12);
-  };
+    setCanScrollLeft(el.scrollLeft > 10);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 10);
+  }, []);
 
   useEffect(() => {
     checkScroll();
-  }, [visibleItems.length]);
+    window.addEventListener('resize', checkScroll);
+    return () => window.removeEventListener('resize', checkScroll);
+  }, [visibleItems.length, checkScroll]);
+
+  // Attach non-passive wheel listener for horizontal gestures (Shift+Wheel or trackpad deltaX)
+  // while allowing regular vertical mouse wheel (deltaY) to natively scroll the page.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const onWheel = (e) => {
+      const isHorizontalGesture = Math.abs(e.deltaX) > Math.abs(e.deltaY) || e.shiftKey;
+      if (!isHorizontalGesture) {
+        // Pure vertical mouse wheel: do not intercept so window scrolls vertically without friction
+        return;
+      }
+
+      const delta = e.shiftKey && e.deltaY !== 0 ? e.deltaY : e.deltaX;
+      const canGoLeft = el.scrollLeft > 0 && delta < 0;
+      const canGoRight = el.scrollLeft + el.clientWidth < el.scrollWidth - 2 && delta > 0;
+
+      if (canGoLeft || canGoRight) {
+        e.preventDefault();
+        el.scrollLeft += delta * 1.25;
+        checkScroll();
+      }
+    };
+
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, [checkScroll]);
+
+  // Desktop PC Click-and-Drag Horizontal Carousel Scrolling
+  const handleMouseDown = (e) => {
+    const el = scrollRef.current;
+    if (!el || e.button !== 0) return;
+    dragStateRef.current = {
+      isDown: true,
+      startX: e.pageX - el.offsetLeft,
+      scrollLeft: el.scrollLeft,
+      movedDistance: 0
+    };
+  };
+
+  const handleMouseMove = (e) => {
+    const state = dragStateRef.current;
+    const el = scrollRef.current;
+    if (!state.isDown || !el) return;
+    const x = e.pageX - el.offsetLeft;
+    const walk = (x - state.startX) * 1.4;
+    state.movedDistance = Math.abs(walk);
+    if (state.movedDistance > 6) {
+      if (!isDragging) setIsDragging(true);
+      e.preventDefault();
+      el.scrollLeft = state.scrollLeft - walk;
+      checkScroll();
+    }
+  };
+
+  const stopDragging = () => {
+    dragStateRef.current.isDown = false;
+    if (isDragging) {
+      setTimeout(() => setIsDragging(false), 40);
+    }
+  };
+
+  const handleClickCapture = (e) => {
+    if (dragStateRef.current.movedDistance > 10) {
+      e.stopPropagation();
+      e.preventDefault();
+      dragStateRef.current.movedDistance = 0;
+    }
+  };
 
   if (!visibleItems.length) return null;
 
@@ -56,8 +136,8 @@ const MediaShelf = memo(function MediaShelf({
   const resolvedBadge = badge || badgeText;
 
   return (
-    <BlurFade delay={0.05} inView>
-      <section className="relative py-2.5 sm:py-3.5 select-none">
+    <BlurFade delay={0.04} inView>
+      <section data-mcp-shelf="true" className="relative py-2.5 sm:py-3.5 select-none">
         {/* Shelf Header */}
         <div className="mb-2.5 sm:mb-3.5 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2.5 min-w-0">
@@ -102,6 +182,7 @@ const MediaShelf = memo(function MediaShelf({
               onClick={() => scrollByAmount('left')}
               disabled={!canScrollLeft}
               aria-label="Scroll shelf left"
+              title="Scroll Left (or Drag / Shift+Wheel)"
               className={`w-8 h-8 rounded-xl border flex items-center justify-center transition cursor-pointer ${
                 canScrollLeft
                   ? 'bg-[#081533]/90 border-cyan-400/40 text-cyan-200 hover:bg-cyan-500/25 hover:border-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
@@ -115,6 +196,7 @@ const MediaShelf = memo(function MediaShelf({
               onClick={() => scrollByAmount('right')}
               disabled={!canScrollRight}
               aria-label="Scroll shelf right"
+              title="Scroll Right (or Drag / Shift+Wheel)"
               className={`w-8 h-8 rounded-xl border flex items-center justify-center transition cursor-pointer ${
                 canScrollRight
                   ? 'bg-[#081533]/90 border-cyan-400/40 text-cyan-200 hover:bg-cyan-500/25 hover:border-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
@@ -126,13 +208,21 @@ const MediaShelf = memo(function MediaShelf({
           </div>
         </div>
 
-        {/* 3D Perspective Horizontal Carousel */}
+        {/* 3D Perspective Horizontal Carousel (No scroll-smooth class so wheel & drag respond immediately) */}
         <div
           ref={scrollRef}
           onScroll={checkScroll}
-          className="flex items-stretch gap-3 sm:gap-4 overflow-x-auto no-scrollbar scroll-smooth py-2 perspective-1000"
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={stopDragging}
+          onMouseLeave={stopDragging}
+          onClickCapture={handleClickCapture}
+          style={{ touchAction: 'pan-x pan-y', scrollBehavior: 'auto' }}
+          className={`flex items-stretch gap-3 sm:gap-4 overflow-x-auto no-scrollbar py-2.5 perspective-1000 ${
+            isDragging ? 'cursor-grabbing' : 'cursor-grab'
+          }`}
         >
-          {visibleItems.map((item) => {
+          {visibleItems.map((item, idx) => {
             const idKey = String(item.id);
             const watchlisted = typeof isWatchlisted === 'function'
               ? isWatchlisted(item.id)
@@ -141,19 +231,28 @@ const MediaShelf = memo(function MediaShelf({
               : Boolean(isWatchlisted);
 
             return (
-              <div
+              <motion.div
                 key={`${item.id}-${item.media_type || 'media'}`}
+                initial={{ opacity: 0, y: 14, rotateX: 8 }}
+                whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+                viewport={{ once: true, margin: '-20px' }}
+                transition={{
+                  duration: 0.38,
+                  delay: Math.min(idx * 0.03, 0.24),
+                  ease: [0.22, 1, 0.36, 1]
+                }}
                 className="w-[125px] xs:w-[138px] sm:w-[156px] md:w-[172px] shrink-0"
               >
                 <MediaCard
                   item={item}
-                  onPlay={onPlay || onPlayDirect}
+                  onPlay={onPlay}
+                  onPlayDirect={onPlayDirect}
                   onOpenDetails={onOpenDetails || onSelect}
-                  isWatchlisted={watchlisted}
                   onToggleWatchlist={onToggleWatchlist}
-                  progressInfo={progressMap[item.id]}
+                  isWatchlisted={watchlisted}
+                  progress={progressMap[item.id] || progressMap[idKey]}
                 />
-              </div>
+              </motion.div>
             );
           })}
         </div>

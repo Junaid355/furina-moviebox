@@ -4,9 +4,11 @@
 
 @layer base {
   html {
-    scroll-behavior: smooth;
+    scroll-behavior: auto;
     color-scheme: dark;
-    overflow-x: clip;
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: auto;
     -webkit-text-size-adjust: 100%;
   }
 
@@ -14,18 +16,25 @@
     background-color: #030712;
     color: #f0f9ff;
     font-family: "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    overflow-x: clip;
+    overflow: visible;
+    min-height: 100vh;
+    height: auto;
     width: 100%;
-    max-width: 100vw;
     background-image:
       radial-gradient(circle at 15% 10%, rgba(14, 165, 233, 0.14) 0%, transparent 38%),
       radial-gradient(circle at 85% 20%, rgba(59, 130, 246, 0.12) 0%, transparent 40%),
       radial-gradient(circle at 50% 85%, rgba(6, 182, 212, 0.1) 0%, transparent 45%),
       linear-gradient(180deg, #020617 0%, #040b1e 50%, #020617 100%);
-    background-attachment: fixed;
+    background-attachment: scroll;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    touch-action: manipulation;
+    touch-action: pan-y pan-x;
+  }
+
+  #root {
+    min-height: 100vh;
+    height: auto;
+    overflow: visible;
   }
 
   @media (max-width: 768px) {

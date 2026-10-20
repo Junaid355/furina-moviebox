@@ -28,6 +28,8 @@ const WatchTogetherModal = lazy(() => import('./components/WatchTogetherModal'))
 const MovieBoxHub = lazy(() => import('./components/MovieBoxHub'));
 const LiveTvHub = lazy(() => import('./components/LiveTvHub'));
 const LibraryHub = lazy(() => import('./components/LibraryHub'));
+import { ensurePcScrollUnlocked } from './services/mcpRegistryService';
+import { motion } from 'framer-motion';
 
 import {
   fetchTrendingAll,
@@ -553,8 +555,19 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isSettingsOpen, isStudioOpen, isIPhoneModalOpen, isAndroidModalOpen, detailsItem, isSearchOverlayOpen]);
 
+  // Background Active PC Scroll Unlock Guard whenever modals open/close
+  useEffect(() => {
+    const anyBlockingModal = Boolean(
+      activeMedia ||
+      detailsItem ||
+      isSearchOverlayOpen ||
+      isMobileExploreOpen
+    );
+    ensurePcScrollUnlocked(anyBlockingModal);
+  }, [activeMedia, detailsItem, isSearchOverlayOpen, isMobileExploreOpen, isSettingsOpen, activeCategory]);
+
   return (
-    <div className={`min-h-screen ${isStealthMode ? 'bg-[#080b11]' : 'bg-[#030712]'} text-white flex flex-col selection:bg-cyan-500 selection:text-gray-950 pb-16 md:pb-16 relative overflow-x-hidden`}>
+    <div className={`min-h-screen ${isStealthMode ? 'bg-[#080b11]' : 'bg-[#030712]'} text-white flex flex-col selection:bg-cyan-500 selection:text-gray-950 pb-16 md:pb-16 relative`}>
       {/* 3D Animated Fontaine Hydro Background Beams */}
       {!isStealthMode && !activeMedia && (
         <div className="fixed inset-0 pointer-events-none z-0 opacity-75">
@@ -580,8 +593,14 @@ export default function App() {
         onOpenWatchTogether={() => setIsWatchTogetherOpen(true)}
       />
 
-      {/* Compact Main Container (1400px max width) */}
-      <main className="max-w-[1400px] mx-auto w-full px-3 sm:px-5 pt-3.5 pb-20 md:pb-8 flex-1 relative z-10">
+      {/* Compact Main Container (1400px max width) with 3D Category Spring Transition */}
+      <motion.main
+        key={`main-${activeCategory}`}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+        className="max-w-[1400px] mx-auto w-full px-3 sm:px-5 pt-3.5 pb-20 md:pb-8 flex-1 relative z-10"
+      >
         {isStealthMode && (
           <div className="mb-3 bg-slate-900 border border-slate-700/60 rounded-xl px-4 py-2 flex items-center justify-between text-xs text-slate-300">
             <span>Stealth Mode Active — Disguised neutral cinema UI</span>
@@ -1047,7 +1066,7 @@ export default function App() {
             )}
           </>
         )}
-      </main>
+      </motion.main>
 
       {/* Lazy-Loaded Async Modals */}
       <Suspense fallback={null}>

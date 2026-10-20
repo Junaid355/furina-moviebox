@@ -3,6 +3,9 @@ import { Play, Star, Bookmark, Check, Info, Volume2 } from 'lucide-react';
 import { isHindiAvailable } from '../services/tmdb';
 import { resolvePosterUrl, extractGenres, getGenreBadgeStyle } from '../services/contentModel';
 import soundFx from '../services/soundFx';
+import { Tilt } from './ui/tilt';
+import { ShineBorder } from './ui/shine-border';
+import { BorderBeam } from './ui/border-beam';
 
 const MediaCard = memo(function MediaCard({
   item,
@@ -16,6 +19,7 @@ const MediaCard = memo(function MediaCard({
 }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [isDesktopHovered, setIsDesktopHovered] = useState(false);
 
   if (!item) return null;
 
@@ -73,11 +77,36 @@ const MediaCard = memo(function MediaCard({
   };
 
   return (
-    <div
+    <Tilt
       data-testid="media-card"
       onClick={handleCardClick}
-      className="group relative flex flex-col rounded-2xl bg-[#071026]/95 border border-cyan-500/25 hover:border-cyan-400/80 overflow-hidden cursor-pointer select-none card-3d shadow-[0_10px_28px_rgba(0,0,0,0.65)]"
+      onMouseEnter={() => setIsDesktopHovered(true)}
+      onMouseLeave={() => setIsDesktopHovered(false)}
+      rotationFactor={10}
+      desktopOnly={true}
+      className="group relative flex flex-col rounded-2xl bg-[#071026]/95 border border-cyan-500/25 hover:border-cyan-400/80 overflow-hidden cursor-pointer select-none shadow-[0_10px_28px_rgba(0,0,0,0.65)] hover:shadow-[0_22px_45px_-12px_rgba(6,182,212,0.42)] transition-shadow duration-300"
     >
+      {/* Magic UI Desktop-Only ShineBorder & BorderBeam on Mouse-Over */}
+      {isDesktopHovered && (
+        <>
+          <ShineBorder
+            borderRadius={16}
+            borderWidth={1.5}
+            duration={7}
+            color={['#38bdf8', '#818cf8', '#c084fc']}
+            desktopOnly={true}
+          />
+          <BorderBeam
+            size={120}
+            duration={6}
+            borderWidth={1.5}
+            colorFrom="#38bdf8"
+            colorTo="#a855f7"
+            desktopOnly={true}
+          />
+        </>
+      )}
+
       {/* Top 3D Specular Highlight Line */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-cyan-300/75 to-transparent opacity-60 group-hover:opacity-100 z-20 transition-opacity" />
 
@@ -106,7 +135,10 @@ const MediaCard = memo(function MediaCard({
         <div className="absolute inset-0 bg-gradient-to-t from-[#040918] via-[#040918]/25 to-transparent opacity-90 group-hover:opacity-95 transition-opacity" />
 
         {/* Top Left: Rating & Multi-Dub Audio Pill */}
-        <div className="absolute top-2 left-2 z-10 flex flex-col gap-1 items-start">
+        <div
+          style={{ transform: 'translateZ(18px)' }}
+          className="absolute top-2 left-2 z-10 flex flex-col gap-1 items-start"
+        >
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-950/90 backdrop-blur-md border border-amber-400/45 text-[10px] font-black text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.3)]">
             <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
             {rating}
@@ -132,6 +164,7 @@ const MediaCard = memo(function MediaCard({
             type="button"
             onClick={handleWatchlistClick}
             title={watchlistedBool ? 'Remove from Watchlist' : 'Add to Watchlist'}
+            style={{ transform: 'translateZ(20px)' }}
             className={`absolute top-2 right-2 z-20 w-7 h-7 rounded-xl flex items-center justify-center border backdrop-blur-md transition-all cursor-pointer ${
               watchlistedBool
                 ? 'bg-cyan-500 text-gray-950 border-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.7)]'
@@ -143,7 +176,10 @@ const MediaCard = memo(function MediaCard({
         )}
 
         {/* Center 3D Hover Play Orb */}
-        <div className="absolute inset-0 z-10 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-slate-950/45 backdrop-blur-[2px]">
+        <div
+          style={{ transform: 'translateZ(28px)' }}
+          className="absolute inset-0 z-10 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-slate-950/45 backdrop-blur-[2px]"
+        >
           <button
             type="button"
             onClick={handlePlayNow}
@@ -210,7 +246,7 @@ const MediaCard = memo(function MediaCard({
           </span>
         </div>
       </div>
-    </div>
+    </Tilt>
   );
 });
 
