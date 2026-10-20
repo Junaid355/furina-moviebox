@@ -34,7 +34,7 @@ export function ShineBorder({
         maskComposite: 'exclude',
       }}
       className={`pointer-events-none absolute inset-0 z-20 rounded-[inherit] will-change-[background-position] animate-shine ${
-        desktopOnly ? 'hidden lg:block' : ''
+        desktopOnly ? 'hidden [@media(min-width:1024px)_and_(hover:hover)_and_(pointer:fine)]:block' : ''
       } ${className}`}
     />
   );

@@ -13,6 +13,9 @@ import { BackgroundBeams } from './components/ui/background-beams';
 import { Marquee } from './components/ui/marquee';
 import { FloatingDock } from './components/ui/floating-dock';
 import { FurinaMascot } from './components/ui/FurinaMascot';
+import { BorderBeam } from './components/ui/border-beam';
+import { ShineBorder } from './components/ui/shine-border';
+import { Tilt } from './components/ui/tilt';
 import { resolvePosterUrl } from './services/contentModel';
 
 // Lazy-loaded modals and dedicated hubs
@@ -667,7 +670,14 @@ export default function App() {
                   }}
                 />
                 {activeCategory === 'trending' && (
-                  <div className="my-2 rounded-2xl bg-[#050d24]/85 border border-cyan-500/25 overflow-hidden backdrop-blur-md shadow-[0_8px_25px_rgba(0,0,0,0.5)]">
+                  <div className="relative my-2 rounded-2xl bg-[#050d24]/85 border border-cyan-500/25 overflow-hidden backdrop-blur-md shadow-[0_8px_25px_rgba(0,0,0,0.5)]">
+                    <BorderBeam
+                      size={180}
+                      duration={12}
+                      colorFrom="#38bdf8"
+                      colorTo="#a855f7"
+                      desktopOnly
+                    />
                     <Marquee pauseOnHover className="[--duration:38s] py-1.5">
                       {items.slice(0, 10).map((m) => (
                         <button
@@ -715,11 +725,22 @@ export default function App() {
                         : `https://image.tmdb.org/t/p/w500${cw.poster_path}`
                       : './icon-512.png';
                     return (
-                      <div
+                      <Tilt
                         key={cw.id}
+                        rotationFactor={8}
+                        enableGlare
+                        desktopOnly
                         onClick={() => setActiveMedia(cw)}
                         className="relative shrink-0 w-28 sm:w-36 bg-[#071026] border border-cyan-500/25 hover:border-cyan-400 rounded-xl overflow-hidden cursor-pointer group"
                       >
+                        <ShineBorder
+                          borderRadius={12}
+                          borderWidth={1.2}
+                          duration={8}
+                          color={['#38bdf8', '#818cf8', '#22d3ee']}
+                          desktopOnly
+                          className="opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                        />
                         <div className="aspect-video w-full bg-[#040a18] relative overflow-hidden">
                           <img
                             src={
@@ -757,7 +778,7 @@ export default function App() {
                             <span className="text-slate-400">Resume</span>
                           </div>
                         </div>
-                      </div>
+                      </Tilt>
                     );
                   })}
                 </div>
@@ -969,9 +990,28 @@ export default function App() {
                       />
                     )}
 
-                    {/* Compact Franchise Chronological Timelines Strip */}
-                    <div className="my-4 p-3.5 sm:p-4 rounded-xl bg-[#07112a] border border-purple-500/25 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                      <div className="flex items-center gap-2.5">
+                    {/* Compact Franchise Chronological Timelines Strip with Desktop 3D Tilt & Magic UI ShineBorder + BorderBeam */}
+                    <Tilt
+                      rotationFactor={4}
+                      enableGlare
+                      desktopOnly
+                      className="relative my-4 p-3.5 sm:p-4 rounded-xl bg-[#07112a] border border-purple-500/25 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 overflow-hidden"
+                    >
+                      <ShineBorder
+                        borderRadius={12}
+                        borderWidth={1.5}
+                        duration={12}
+                        color={['#c084fc', '#38bdf8', '#818cf8']}
+                        desktopOnly
+                      />
+                      <BorderBeam
+                        size={160}
+                        duration={10}
+                        colorFrom="#c084fc"
+                        colorTo="#38bdf8"
+                        desktopOnly
+                      />
+                      <div className="flex items-center gap-2.5 relative z-10">
                         <div className="w-7 h-7 rounded-lg bg-purple-500/20 border border-purple-400/35 flex items-center justify-center text-purple-300 shrink-0">
                           <Milestone className="w-4 h-4" />
                         </div>
@@ -990,11 +1030,11 @@ export default function App() {
                           soundFx.playClick?.();
                           setIsTimelineOpen(true);
                         }}
-                        className="px-3.5 py-1.5 rounded-lg bg-purple-500 hover:bg-purple-400 text-slate-950 font-black text-xs cursor-pointer shrink-0"
+                        className="relative z-10 px-3.5 py-1.5 rounded-lg bg-purple-500 hover:bg-purple-400 text-slate-950 font-black text-xs cursor-pointer shrink-0"
                       >
                         Open Timelines →
                       </button>
-                    </div>
+                    </Tilt>
 
                     {/* Compact 6-7 Column Explore Grid */}
                     <div className="pt-2">
