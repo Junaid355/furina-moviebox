@@ -8,23 +8,26 @@
 //  2 = player shell rendered (source picker / loading UI) but slower or ad-heavier
 //  3 = blank frame or embed-side error in testing
 export const SERVER_PROFILES = {
-  vidstuck:          { tier: 1, badge: 'Multi-Dub • Centaurus (High-Speed)', adLevel: 'Clean', hindi: true },
+  vidstuck:          { tier: 1, badge: 'Multi-Dub • 123Embed (Hindi / English / 1080p)', adLevel: 'Clean', hindi: true },
+  one23embed:        { tier: 1, badge: 'Multi-Dub • 123Embed (Hindi / English / 1080p)', adLevel: 'Clean', hindi: true },
+  vidlink:           { tier: 1, badge: 'Multi-Audio 4K (Instant Play)', adLevel: 'Clean', hindi: true },
   nxsha:             { tier: 1, badge: 'Dual Audio • 4K (Ultra Fast)', adLevel: 'Clean', hindi: true },
   vidfast:           { tier: 1, badge: '4K Ultra Fast (Instant Play)', adLevel: 'Clean', hindi: false },
-  bingr:             { tier: 1, badge: 'High Bitrate • Clean CDN', adLevel: 'Clean', hindi: false },
   vidsrc_pm:         { tier: 1, badge: 'Zero Ads • 4K Direct', adLevel: 'Clean', hindi: false },
-  moviebox:          { tier: 1, badge: 'MovieBox Stream • Multi-Dub', adLevel: 'Clean', hindi: true },
-  moviebox_cloud:    { tier: 1, badge: 'MovieBox Ultra • Multi-Dub', adLevel: 'Clean', hindi: true },
-  twoembed_vip:      { tier: 1, badge: 'VIP Cinema Stream (Direct CDN)', adLevel: 'Low', hindi: false },
   vidsrc_su:         { tier: 1, badge: 'VidSrc Cloud • 4K UHD Direct', adLevel: 'Clean', hindi: false },
   autoembed:         { tier: 1, badge: 'Instant 1080p • Zero Lag', adLevel: 'Clean', hindi: true },
-  multiembed:        { tier: 2, badge: 'MultiEmbed VIP • Global Dubs', adLevel: 'Clean', hindi: true },
+  twoembed_vip:      { tier: 1, badge: 'VIP Cinema Stream (Direct CDN)', adLevel: 'Low', hindi: false },
+  moviebox:          { tier: 1, badge: 'MovieBox Stream • Multi-Dub', adLevel: 'Clean', hindi: true },
+  moviebox_cloud:    { tier: 1, badge: 'MovieBox Ultra • Multi-Dub', adLevel: 'Clean', hindi: true },
+  vidsrc_to:         { tier: 1, badge: 'VidSrc TO • 1080p HD', adLevel: 'Clean', hindi: false },
+  vidsrc_net:        { tier: 1, badge: 'VidSrc Net • High Bitrate', adLevel: 'Clean', hindi: false },
+  vidsrc_me:         { tier: 1, badge: 'VidSrc SH • Sub-Second Play', adLevel: 'Clean', hindi: false },
+  zxcstream:         { tier: 1, badge: 'VidJoy 4K Cloud (Fast Streams)', adLevel: 'Clean', hindi: false },
+  multiembed:        { tier: 2, badge: '123Embed VIP • Global Dubs', adLevel: 'Clean', hindi: true },
+  tgvid:             { tier: 2, badge: 'Ad-Free Multi-Language Backup', adLevel: 'Clean', hindi: true },
+  bingr:             { tier: 2, badge: 'High Bitrate • Clean CDN', adLevel: 'Clean', hindi: false },
   animeworld_india:  { tier: 2, badge: 'High-Speed CDN Mirror', adLevel: 'Low', hindi: true },
-  vidlink:           { tier: 2, badge: 'Multi-Audio Pro', adLevel: 'Medium', hindi: false },
-  zxcstream:         { tier: 2, badge: 'Fast Stream • Roxy Prime', adLevel: 'Clean', hindi: true },
-  one23embed:        { tier: 2, badge: 'Multi-Source 1080p', adLevel: 'Medium', hindi: true },
-  smashy:            { tier: 2, badge: 'AnyEmbed Direct Stream', adLevel: 'Clean', hindi: true },
-  tgvid:             { tier: 3, badge: 'Backup Mirror (Slow / Unstable)', adLevel: 'Clean', hindi: true }
+  smashy:            { tier: 2, badge: 'AnyEmbed Direct Stream', adLevel: 'Clean', hindi: true }
 };
 
 const DEFAULT_PROFILE = { tier: 2, badge: 'HD Mirror', adLevel: 'Unknown', hindi: false };

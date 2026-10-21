@@ -5,23 +5,24 @@
 export const SERVERS = [
   {
     id: 'vidstuck',
-    name: '[ 🇮🇳 Server 1 (High-Speed CDN) ] VidStuck Pro (Centaurus • Multi-Dub • 1080p)',
-    shortName: '[ 🇮🇳 Server 1 (Fast CDN) ]',
-    badge: 'Multi-Dub • Centaurus',
-    statusBadge: '🟢 Fast',
+    aliasIds: ['one23embed', '123embed'],
+    name: '[ 🇮🇳 Server 1 (Multi-Dub Hindi) ] 123Embed Prime (Hindi / English / Japanese • 1080p)',
+    shortName: '[ 🇮🇳 Server 1 (Multi-Dub) ]',
+    badge: 'Multi-Dub • 1080p Ultra',
+    statusBadge: '🎧 Multi-Dub',
     color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
     supportedAudios: ['hindi', 'english', 'sub'],
     getMovieUrl: (tmdbId, audioMode = 'hindi') => {
       const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '533535';
-      const dub = audioMode === 'english' ? 'en' : 'hi';
-      return `https://vidstuck.xyz/embed/movie/${cleanId}?dubLang=${dub}`;
+      const lang = audioMode === 'english' ? 'en' : (audioMode === 'sub' ? 'ja' : 'hi');
+      return `https://play2.123embed.net/movie/${cleanId}?audio=${lang}`;
     },
     getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'hindi') => {
       const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '66732';
-      const dub = audioMode === 'english' ? 'en' : 'hi';
+      const lang = audioMode === 'english' ? 'en' : (audioMode === 'sub' ? 'ja' : 'hi');
       const seasonNum = Math.max(1, Number(s) || 1);
       const epNum = Math.max(1, Number(e) || 1);
-      return `https://vidstuck.xyz/embed/tv/${cleanId}/${seasonNum}/${epNum}?dubLang=${dub}`;
+      return `https://play2.123embed.net/tv/${cleanId}/${seasonNum}/${epNum}?audio=${lang}`;
     }
   },
   {
@@ -248,23 +249,22 @@ export const SERVERS = [
   },
   {
     id: 'zxcstream',
-    name: '[ ⚡ Server 12 (Roxy Prime) ] ZXC Roxy (Fast Streams • Zero Captcha)',
-    shortName: '[ ⚡ Server 12 (Roxy) ]',
-    badge: 'Fast Streams',
+    aliasIds: ['vidjoy'],
+    name: '[ ⚡ Server 12 (VidJoy 4K) ] VidJoy Cloud (Fast Streams • Zero Captcha • 1080p)',
+    shortName: '[ ⚡ Server 12 (VidJoy 4K) ]',
+    badge: 'Fast Streams • 4K',
     statusBadge: '🟢 Fast',
     color: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
     supportedAudios: ['english', 'sub', 'hindi'],
-    getMovieUrl: (tmdbId, audioMode = 'hindi') => {
+    getMovieUrl: (tmdbId) => {
       const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '533535';
-      const lang = audioMode === 'english' ? 'en' : 'hi';
-      return `https://player.zxcprime.xyz/player/movie/${cleanId}?dubLang=${lang}&server=0`;
+      return `https://vidjoy.pro/embed/movie/${cleanId}`;
     },
-    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'hindi') => {
+    getTvUrl: (tmdbId, s = 1, e = 1) => {
       const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '66732';
-      const lang = audioMode === 'english' ? 'en' : 'hi';
       const seasonNum = Math.max(1, Number(s) || 1);
       const epNum = Math.max(1, Number(e) || 1);
-      return `https://player.zxcprime.xyz/player/tv/${cleanId}/${seasonNum}/${epNum}?dubLang=${lang}&server=0`;
+      return `https://vidjoy.pro/embed/tv/${cleanId}/${seasonNum}/${epNum}`;
     }
   },
   {
@@ -386,14 +386,14 @@ export function getDownloadMirrors(tmdbId, type = 'movie', season = 1, episode =
     },
     {
       id: 'mirror_vidstuck',
-      name: '[ 🇮🇳 Server 2 (Hindi Dubbed) ] VidStuck Centaurus Cloud',
+      name: '[ 🇮🇳 Server 2 (Hindi Dubbed) ] 123Embed Multi-Dub Cloud',
       quality: '1080p Full HD',
-      badge: 'Hindi Dubbed • Centaurus',
+      badge: 'Hindi Dubbed • 1080p Ultra',
       color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
       isHindi: true,
       url: isTv 
-        ? `https://vidstuck.xyz/embed/tv/${tmdbId}/${season}/${episode}?branding=FurinaMovieBox&server=centaurus&overlay=true&color=38bdf8&dubLang=${audioMode === 'english' ? 'en' : 'hi'}&subtitle=english&loading=2` 
-        : `https://vidstuck.xyz/embed/movie/${tmdbId}?branding=FurinaMovieBox&server=centaurus&overlay=true&color=38bdf8&dubLang=${audioMode === 'english' ? 'en' : 'hi'}&subtitle=english&loading=2`
+        ? `https://play2.123embed.net/tv/${tmdbId}/${season}/${episode}?audio=${audioMode === 'english' ? 'en' : 'hi'}` 
+        : `https://play2.123embed.net/movie/${tmdbId}?audio=${audioMode === 'english' ? 'en' : 'hi'}`
     },
     {
       id: 'mirror_nxsha',

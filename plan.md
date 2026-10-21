@@ -1,23 +1,32 @@
-# Furina MovieBox — Feature & Streaming Overhaul Plan & Verification
+# GitHub Bug Audit & Restoration Report
 
-## Deliverables & Verification Checklist
-1. **Icon & Avatar Integration (`public/furina-avatar.jpg`, `public/favicon.svg`, `public/furina-logo.svg`, `public/favicon.png`, `public/apple-touch-icon.png`)**:
-   - Status: Complete & Verified (Test 64 PASSED). User's authentic Furina artwork integrated into Navbar, player header, favicon, and PWA icons.
-2. **TV Routing Fix & Server 404 Resolution (Stranger Things TMDB 66732, Series & Anime)**:
-   - Status: Complete & Verified (Tests 46, 53, 63 PASSED). All server endpoints enforce `/tv/{id}/{s}/{e}` and pass valid season & episode parameters.
-3. **Multi-Audio & Player UX (Crunchyroll & Netflix style)**:
-   - Status: Complete & Verified (Tests 48, 58, 59 PASSED). In-player HUD chips `[ 🎙️ EN ] [ 🇮🇳 HI ] [ 🇯🇵 JA ]`, smart category language memory, binge mode countdown + skip intro.
-4. **iPhone & Mobile-First Interface (MovieBox Pro & TikTok PWA style)**:
-   - Status: Complete & Verified (Tests 57, 60, 61 PASSED, Mobile M1-M12 PASSED). Sticky floating mini-player PiP, 1-row thumb carousel with live status badges, mobile gesture controls. Disabled automatic shrink-to-mini on scroll to keep modal browsing 100% smooth.
-5. **Clean Streaming & Failover (Braflix & VidLink style)**:
-   - Status: Complete & Verified (Test 62 PASSED). Silent 3.5s watchdog auto-rescue with zero black screens, pure CDN mirror prioritization.
-6. **Content Discovery & Curation (Letterboxd & Trakt style)**:
-   - Status: Complete & Verified (Tests 54, 55, 56 PASSED). Interactive franchise timelines (MCU, Spider-Verse, Star Wars, Naruto), curated mood rows, watch together sync rooms (`#room=FURINA-XXXX`) with cross-device SSE relay.
-7. **Player Modal TDZ Resolution**:
-   - Status: Complete. Resolved Temporal Dead Zone ReferenceError in `PlayerModal.jsx` by ordering `aiBoostMode` state declaration before hook dependencies.
-8. **Test Suites & Production Deployment**:
-   - Status: Complete.
-   - 11/11 Mobile emulation tests PASSED (iPhone 14 Pro, iPhone SE).
-   - 75/75 E2E CDP browser tests PASSED.
-   - Production bundle compiled clean in 6.3s.
-   - Deployed and live verified on `https://junaid355.github.io/furina-moviebox/`.
+## 1. Root Cause Analysis of AI Studio Commits (751e0467, 8e0d607e, 207963ff)
+
+1. **Dead Server URL & Redirect Loop in `src/services/streaming.js`**:
+   - Google AI Studio reintroduced `multiembed.mov/directstream.php` as Server 4. `multiembed.mov` redirects to `streamingnow.mov`, which enforces `X-Frame-Options: SAMEORIGIN`, producing white "refused to connect" error frames.
+   - Replaced with fast, verified CDN mirrors (`vidstuck.xyz`, `autoembed.co`, `vidfast.vc`, `nxsha.space`, `vidsrc.cc`, `2embed`, `smashystream`).
+
+2. **Broken Parameter Appending Breaking Player CDNs**:
+   - AI Studio appended `?server=1&lang=${lang}&audio=${lang}` to `player.autoembed.co`, returning HTTP 404.
+   - AI Studio appended `&sub_dub=${subDub}&lang=${lang}&audio=${lang}` to `vidlink.pro`, triggering Next.js 500 server-side exceptions (`Digest: 4082599258`).
+   - All parameters sanitized and verified clean.
+
+3. **Erased 3.5s Watchdog & Silent Auto-Rescue (`src/components/PlayerModal.jsx`)**:
+   - AI Studio deleted lines 334–370 in `PlayerModal.jsx`, leaving the player dead on black screens or timed-out servers with zero failover.
+   - Watchdog auto-rescue loop fully restored with `iframeLoadedRef` and `rescueAttemptsRef`.
+
+4. **Hidden Server Mirror Carousel (`src/components/PlayerModal.jsx`)**:
+   - AI Studio wrapped the 1-row server ribbon behind `showServerList = false`, hiding server buttons.
+   - Default visibility restored with live status badges (`🟢 Fast`, `⚡ 4K`, `🎧 Multi-Dub`).
+
+5. **Fake Audio Flags & Regression in App.jsx**:
+   - Artificial `hasWorkingHindiSource = true` forced on English-only titles was reverted to honest source validation.
+   - Restored full modal routing, watch party sync rooms, and curated shelves in `src/App.jsx`.
+   - Integrated desktop-only 3D motion primitives (`Tilt`, `ShineBorder`, `BorderBeam`, `mcpRegistryService.js`).
+
+## 2. Test Verification
+
+- `node test_mobile_emulation.js`: 11 / 11 PASSED (iPhone 14 Pro, iPhone SE).
+- `node test_e2e_cdp.js`: 75 / 75 PASSED (Headless Edge CDP).
+- Production build: `npm run build` completed in 9.08s with 0 errors.
+- Deployment: Synced and pushed to GitHub `gh-pages` and `main` (commit `cf690f3b`).
