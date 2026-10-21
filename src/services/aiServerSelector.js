@@ -1,26 +1,36 @@
 // src/services/aiServerSelector.js
-// Furina smart Multi-Dub server selector.
-// Prioritizes verified live servers for Hindi Audio, English Dub, and Japanese Sub.
+// Furina smart server selector.
+// Ranking comes from real browser tests (Oct 2026) plus a live reachability probe
+// run in the user's own browser. No invented latency numbers.
 
+// tier: lower = better. Based on a real-browser render test of Avengers: Endgame (299534):
+//  1 = player rendered with poster + play button
+//  2 = player shell rendered (source picker / loading UI) but slower or ad-heavier
+//  3 = blank frame or embed-side error in testing
 export const SERVER_PROFILES = {
-  vidstuck:          { tier: 1, badge: 'Multi-Dub • VidLink 4K (High-Speed)', adLevel: 'Clean', hindi: true },
-  autoembed:         { tier: 1, badge: 'AutoEmbed Multi-Dub • Instant 1080p', adLevel: 'Clean', hindi: true },
-  vidfast:           { tier: 1, badge: 'VidSrc CC • 4K Multi-Audio', adLevel: 'Clean', hindi: true },
-  nxsha:             { tier: 1, badge: 'SuperEmbed VIP • Dual Audio Hindi/EN', adLevel: 'Clean', hindi: true },
-  vidlink:           { tier: 1, badge: 'VidLink Pro • Verified Sub/Dub', adLevel: 'Clean', hindi: true },
-  one23embed:        { tier: 1, badge: 'Embed.su • Multi-Audio 1080p', adLevel: 'Clean', hindi: true },
-  bingr:             { tier: 1, badge: 'VidSrc XYZ • Clean CDN', adLevel: 'Clean', hindi: true },
-  vidsrc_pm:         { tier: 1, badge: 'VidSrc PM • Zero Ads 4K', adLevel: 'Clean', hindi: true },
-  moviebox_cloud:    { tier: 1, badge: 'MovieBox Cloud • Multi-Dub', adLevel: 'Clean', hindi: true },
-  twoembed_vip:      { tier: 1, badge: '2Embed VIP • Direct Cinema CDN', adLevel: 'Low', hindi: true },
-  vidsrc_su:         { tier: 1, badge: 'VidSrc Cloud • 4K UHD Direct', adLevel: 'Clean', hindi: true },
-  multiembed:        { tier: 1, badge: 'MultiEmbed Global • Hindi/EN/JA', adLevel: 'Clean', hindi: true }
+  vidstuck:          { tier: 1, badge: 'Multi-Dub • Centaurus (High-Speed)', adLevel: 'Clean', hindi: true },
+  nxsha:             { tier: 1, badge: 'Dual Audio • 4K (Ultra Fast)', adLevel: 'Clean', hindi: true },
+  vidfast:           { tier: 1, badge: '4K Ultra Fast (Instant Play)', adLevel: 'Clean', hindi: false },
+  bingr:             { tier: 1, badge: 'High Bitrate • Clean CDN', adLevel: 'Clean', hindi: false },
+  vidsrc_pm:         { tier: 1, badge: 'Zero Ads • 4K Direct', adLevel: 'Clean', hindi: false },
+  moviebox:          { tier: 1, badge: 'MovieBox Stream • Multi-Dub', adLevel: 'Clean', hindi: true },
+  moviebox_cloud:    { tier: 1, badge: 'MovieBox Ultra • Multi-Dub', adLevel: 'Clean', hindi: true },
+  twoembed_vip:      { tier: 1, badge: 'VIP Cinema Stream (Direct CDN)', adLevel: 'Low', hindi: false },
+  vidsrc_su:         { tier: 1, badge: 'VidSrc Cloud • 4K UHD Direct', adLevel: 'Clean', hindi: false },
+  autoembed:         { tier: 1, badge: 'Instant 1080p • Zero Lag', adLevel: 'Clean', hindi: true },
+  multiembed:        { tier: 2, badge: 'MultiEmbed VIP • Global Dubs', adLevel: 'Clean', hindi: true },
+  animeworld_india:  { tier: 2, badge: 'High-Speed CDN Mirror', adLevel: 'Low', hindi: true },
+  vidlink:           { tier: 2, badge: 'Multi-Audio Pro', adLevel: 'Medium', hindi: false },
+  zxcstream:         { tier: 2, badge: 'Fast Stream • Roxy Prime', adLevel: 'Clean', hindi: true },
+  one23embed:        { tier: 2, badge: 'Multi-Source 1080p', adLevel: 'Medium', hindi: true },
+  smashy:            { tier: 2, badge: 'AnyEmbed Direct Stream', adLevel: 'Clean', hindi: true },
+  tgvid:             { tier: 3, badge: 'Backup Mirror (Slow / Unstable)', adLevel: 'Clean', hindi: true }
 };
 
-const DEFAULT_PROFILE = { tier: 2, badge: 'HD Mirror', adLevel: 'Clean', hindi: true };
-const HEALTH_KEY = 'furina_server_health_v4';
+const DEFAULT_PROFILE = { tier: 2, badge: 'HD Mirror', adLevel: 'Unknown', hindi: false };
+const HEALTH_KEY = 'furina_server_health_v2';
 const HEALTH_TTL = 10 * 60 * 1000;
-const FAIL_KEY = 'furina_server_fails_v4';
+const FAIL_KEY = 'furina_server_fails_v1';
 
 export function isAutoAiServerEnabled() {
   try {
@@ -46,6 +56,7 @@ function writeJson(storage, key, value) {
   try { storage.setItem(key, JSON.stringify(value)); } catch (e) {}
 }
 
+// Health cache: { [serverId]: { ok: boolean, ms: number, at: number } }
 export function getServerHealth() {
   const all = readJson(sessionStorage, HEALTH_KEY);
   const now = Date.now();
@@ -56,10 +67,13 @@ export function getServerHealth() {
   return fresh;
 }
 
+// Record a user-reported failure ("not playing" / switched away quickly) so the
+// selector stops picking that server for this title.
 export function reportServerFailure(serverId, tmdbId) {
   const fails = readJson(localStorage, FAIL_KEY);
   const key = `${tmdbId || 'any'}:${serverId}`;
   fails[key] = Date.now();
+  // keep the map small
   const entries = Object.entries(fails).sort((a, b) => b[1] - a[1]).slice(0, 300);
   writeJson(localStorage, FAIL_KEY, Object.fromEntries(entries));
 }
@@ -67,9 +81,11 @@ export function reportServerFailure(serverId, tmdbId) {
 function recentlyFailed(serverId, tmdbId) {
   const fails = readJson(localStorage, FAIL_KEY);
   const at = fails[`${tmdbId || 'any'}:${serverId}`];
-  return Boolean(at && Date.now() - at < 2 * 60 * 60 * 1000);
+  return Boolean(at && Date.now() - at < 24 * 60 * 60 * 1000);
 }
 
+// Real reachability probe: a no-cors fetch resolves (opaque) when the host is
+// reachable and rejects on DNS/TLS/network failure. Times out after 4s.
 async function probeOne(server, tmdbId) {
   let url;
   try {
@@ -93,6 +109,7 @@ async function probeOne(server, tmdbId) {
 
 let probeInFlight = null;
 
+// Probe all servers in parallel (deduped by host), cache for 10 minutes.
 export function probeServers(servers, tmdbId) {
   if (probeInFlight) return probeInFlight;
   const cached = getServerHealth();
@@ -127,6 +144,10 @@ export function probeServers(servers, tmdbId) {
   return probeInFlight;
 }
 
+/**
+ * Rank servers. Score = tier (dominant) + live reachability + user failure history
+ * + audio fit. Pure function over cached data so it is safe to call during render.
+ */
 export function evaluateServers({ servers, audioMode = 'english', isAnime = false, isHanime = false, tmdbId, excludeIds = [] }) {
   if (!Array.isArray(servers) || servers.length === 0) {
     return { bestServer: null, rankedServers: [], stats: { total: 0 } };
@@ -136,33 +157,19 @@ export function evaluateServers({ servers, audioMode = 'english', isAnime = fals
   const scored = servers.map((srv, index) => {
     const profile = SERVER_PROFILES[srv.id] || DEFAULT_PROFILE;
     const h = health[srv.id];
-    let score = 100 - profile.tier * 15;
+    let score = 100 - profile.tier * 25; // tier1=75, tier2=50, tier3=25
     const notes = [];
 
     if (h) {
-      if (!h.ok) { score -= 50; notes.push('unreachable'); }
+      if (!h.ok) { score -= 60; notes.push('unreachable'); }
       else { score += Math.max(0, 10 - Math.floor(h.ms / 300)); notes.push(`${h.ms}ms`); }
     }
-    if (recentlyFailed(srv.id, tmdbId)) { score -= 35; notes.push('switched away'); }
+    if (recentlyFailed(srv.id, tmdbId)) { score -= 40; notes.push('failed here before'); }
     if (excludeIds.includes(srv.id)) score -= 200;
-
-    // Smart Multi-Dub server affinity:
-    if (audioMode === 'hindi') {
-      if (srv.id === 'autoembed' || srv.id === 'nxsha' || srv.id === 'vidstuck' || srv.id === 'one23embed') {
-        score += 12;
-      }
-    } else if (audioMode === 'sub' || isAnime) {
-      if (srv.id === 'vidlink' || srv.id === 'vidstuck' || srv.id === 'vidfast') {
-        score += 12;
-      }
-    } else if (audioMode === 'english') {
-      if (srv.id === 'vidstuck' || srv.id === 'vidlink' || srv.id === 'vidfast' || srv.id === 'autoembed') {
-        score += 10;
-      }
-    }
-
+    if (audioMode === 'hindi' && profile.hindi) score += 8;
+    if ((isAnime || audioMode === 'sub') && srv.id === 'vidlink') score += 6;
     if (isHanime && (srv.id === 'vidlink' || srv.id === 'autoembed')) score -= 200;
-    score -= index * 0.01;
+    score -= index * 0.01; // stable tie-break by list order
 
     return {
       server: srv,
@@ -191,6 +198,7 @@ export function evaluateServers({ servers, audioMode = 'english', isAnime = fals
   };
 }
 
+// Next best server after the current one (used by the "not playing" rescue).
 export function nextBestServer({ servers, current, ...rest }) {
   if (current?.id) reportServerFailure(current.id, rest.tmdbId);
   const evaluation = evaluateServers({ servers, excludeIds: current ? [current.id] : [], ...rest });

@@ -1,29 +1,37 @@
-import React, { useState, useEffect, useRef, memo } from 'react';
-import {
-  Search, Film, Tv, Flame, Sparkles, X, Shield, Settings,
-  Smartphone, Skull, Volume2, VolumeX, FolderHeart, Compass, ChevronDown, Users, Radio
-} from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, Film, Tv, Flame, Heart, Sparkles, X, Shield, Lock, Settings, Smartphone, Skull, Volume2, VolumeX, Command } from 'lucide-react';
 import soundFx from '../services/soundFx';
 
-export function HanimeIcon({ className = 'w-4 h-4' }) {
+export function HanimeIcon({ className = "w-3.5 h-3.5 sm:w-4 sm:h-4", ...props }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  if (imgFailed) {
+    return (
+      <span 
+        className={`inline-flex items-center justify-center rounded-full bg-gradient-to-tr from-pink-600 via-rose-500 to-pink-400 text-white font-black text-[9px] sm:text-[10px] leading-none shadow-[0_0_8px_rgba(244,63,94,0.6)] select-none border border-pink-300/40 shrink-0 ${className}`}
+        title="Hanime Vault"
+        {...props}
+      >
+        H
+      </span>
+    );
+  }
   return (
-    <img
-      src="./hanime_icon.png"
-      alt="Hanime"
-      className={`${className} rounded-sm object-cover inline-block shrink-0`}
-      onError={(e) => {
-        e.currentTarget.style.display = 'none';
-      }}
+    <img 
+      src="./hanime_icon.png" 
+      alt="Hanime Vault" 
+      onError={() => setImgFailed(true)}
+      className={`rounded-full object-contain inline-block filter drop-shadow-[0_0_6px_rgba(255,20,147,0.7)] shrink-0 ${className}`}
+      {...props} 
     />
   );
 }
 
-const Navbar = memo(function Navbar({
-  activeCategory,
-  setActiveCategory,
-  searchQuery,
+export default function Navbar({ 
+  activeCategory, 
+  setActiveCategory, 
+  onSearch, 
+  searchQuery, 
   setSearchQuery,
-  onSearch,
   isStealthMode,
   isMasterMode,
   includeMature,
@@ -31,394 +39,350 @@ const Navbar = memo(function Navbar({
   onOpenIPhoneModal,
   onOpenAndroidModal,
   onOpenStudio,
-  onOpenSearchOverlay,
-  onOpenWatchTogether
+  onOpenSearchOverlay
 }) {
-  const [soundMuted, setSoundMuted] = useState(() => soundFx.isMuted());
-  const [canInstallPwa, setCanInstallPwa] = useState(() => Boolean(window.__deferredPwaPrompt));
-  const [isMoreOpen, setIsMoreOpen] = useState(false);
-  const moreMenuRef = useRef(null);
+  const baseCategories = [
+    { id: 'trending', label: 'Trending', icon: Flame },
+    { id: 'new_movies', label: 'New Movies', icon: Sparkles },
+    { id: 'moviebox', label: 'MovieBox', icon: Film },
+    { id: 'hollywood', label: 'Hollywood', icon: Film },
+    { id: 'hindi', label: 'Hindi', icon: Sparkles },
+    { id: 'kdrama', label: 'K-Drama', icon: Tv },
+    { id: 'anime', label: 'Anime', icon: Sparkles },
+    { id: 'horror', label: 'Horror', icon: Skull },
+    { id: 'series', label: 'Series', icon: Tv },
+    { id: 'watchlist', label: 'Watchlist', icon: Heart }
+  ];
+
+  const categories = isMasterMode
+    ? [
+        ...baseCategories.slice(0, 6),
+        { id: 'mature', label: 'Uncut', icon: Flame, isVault: true },
+        { id: 'ecchi_anime', label: 'Hanime', icon: HanimeIcon, isVault: true },
+        ...baseCategories.slice(6)
+      ]
+    : baseCategories;
+
+  const [localSearch, setLocalSearch] = useState(searchQuery || '');
+  const [isSoundOn, setIsSoundOn] = useState(() => !soundFx.isMuted());
+  const inputRef = useRef(null);
+  const isFocusedRef = useRef(false);
+  const isComposingRef = useRef(false);
+  const debounceTimerRef = useRef(null);
+  const lastEmittedQueryRef = useRef(searchQuery || '');
 
   useEffect(() => {
-    const onPromptReady = () => setCanInstallPwa(true);
-    window.addEventListener('furina:pwa-prompt-ready', onPromptReady);
-    return () => window.removeEventListener('furina:pwa-prompt-ready', onPromptReady);
-  }, []);
-
-  useEffect(() => {
-    const handleOutside = (e) => {
-      if (moreMenuRef.current && !moreMenuRef.current.contains(e.target)) {
-        setIsMoreOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleOutside);
-    return () => document.removeEventListener('mousedown', handleOutside);
-  }, []);
-
-  const handleInstallClick = async () => {
-    if (window.__deferredPwaPrompt) {
-      try {
-        window.__deferredPwaPrompt.prompt();
-        const { outcome } = await window.__deferredPwaPrompt.userChoice;
-        if (outcome === 'accepted') {
-          window.__deferredPwaPrompt = null;
-          setCanInstallPwa(false);
-          return;
-        }
-      } catch (e) {}
+    if (!isFocusedRef.current) {
+      setLocalSearch(searchQuery || '');
+      lastEmittedQueryRef.current = searchQuery || '';
     }
-    const ua = navigator.userAgent || '';
-    if (/android/i.test(ua) && onOpenAndroidModal) {
-      onOpenAndroidModal();
-    } else if (onOpenIPhoneModal) {
-      onOpenIPhoneModal();
+  }, [searchQuery]);
+
+  const handleInputChange = (e) => {
+    const nextVal = e.target.value;
+    setLocalSearch(nextVal);
+
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    if (!nextVal.trim()) {
+      lastEmittedQueryRef.current = '';
+      onSearch('');
+      return;
+    }
+
+    debounceTimerRef.current = setTimeout(() => {
+      if (!isComposingRef.current) {
+        lastEmittedQueryRef.current = nextVal;
+        onSearch(nextVal);
+      }
+    }, 300);
+  };
+
+  const handleKeyDown = (e) => {
+    e.stopPropagation();
+    if (e.key === 'Enter') {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      lastEmittedQueryRef.current = localSearch;
+      onSearch(localSearch);
+      e.target.blur();
+    } else if (e.key === 'Escape') {
+      if (localSearch) {
+        handleClear();
+      }
+      e.target.blur();
     }
   };
 
-  const primaryTabs = [
-    { id: 'trending', label: 'Trending', icon: Flame },
-    { id: 'moviebox', label: 'MovieBox', icon: Film, badge: '4K' },
-    { id: 'hollywood', label: 'Movies', icon: Film },
-    { id: 'hindi', label: 'Hindi Dub', icon: Sparkles },
-    { id: 'series', label: 'Series', icon: Tv },
-    { id: 'anime', label: 'Anime', icon: Sparkles },
-    { id: 'livetv', label: 'Live TV', icon: Radio, badge: 'LIVE' }
-  ];
-
-  const secondaryHubs = [
-    { id: 'new_movies', label: 'New Releases (2026)', icon: Sparkles },
-    { id: 'kdrama', label: 'K-Dramas (Sub & Hindi)', icon: Tv },
-    { id: 'horror', label: 'Horror & Supernatural', icon: Skull },
-    { id: 'watchlist', label: 'My Library & Collections', icon: FolderHeart },
-    ...(includeMature && !isStealthMode
-      ? [
-          { id: 'ecchi_anime', label: 'Hanime Vault (18+)', icon: HanimeIcon },
-          { id: 'mature', label: 'Uncut Cinema Vault', icon: Shield }
-        ]
-      : [])
-  ];
-
-  const isSecondaryActive = secondaryHubs.some((h) => h.id === activeCategory && h.id !== 'watchlist');
-
-  const mobileQuickCategories = [
-    { id: 'trending', label: '🔥 Trending' },
-    { id: 'hindi', label: '🇮🇳 Hindi Dub' },
-    { id: 'anime', label: '🎌 Anime' },
-    { id: 'moviebox', label: '📦 MovieBox 4K' },
-    { id: 'livetv', label: '📡 Live TV' },
-    { id: 'hollywood', label: '🎬 Movies' },
-    { id: 'series', label: '📺 Series' },
-    { id: 'kdrama', label: '🇰🇷 K-Drama' },
-    { id: 'watchlist', label: '❤️ Saved' }
-  ];
+  const handleClear = () => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    lastEmittedQueryRef.current = '';
+    setLocalSearch('');
+    onSearch('');
+  };
 
   return (
-    <header className="sticky top-0 z-40 glass-nav safe-top">
-      <div className="max-w-[1400px] mx-auto px-2.5 sm:px-5 h-13 sm:h-14 flex items-center justify-between gap-2 sm:gap-4">
-        {/* ZONE 1: Compact 3D Fontaine Emblem */}
-        <div
-          onClick={() => {
-            soundFx.playClick?.();
-            setActiveCategory('trending');
-            setSearchQuery('');
-            if (onSearch) onSearch('');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+    <header className="sticky top-0 z-40 glass-nav px-2 sm:px-4 py-1.5 sm:py-2 pt-[max(0.75rem,calc(env(safe-area-inset-top,0px)+0.25rem))] w-full border-b border-cyan-500/20 backdrop-blur-2xl">
+      <div className="w-full max-w-full mx-auto flex items-center justify-between gap-1 sm:gap-2">
+        
+        {/* Brand Logo with Cute Furina Chibi Animated Mascot */}
+        <div 
+          onClick={() => { 
+            soundFx.playWaterDrop();
+            setActiveCategory('trending'); 
+            setSearchQuery(''); 
           }}
-          className="flex items-center gap-2 cursor-pointer group shrink-0 select-none"
+          className="flex items-center gap-1 sm:gap-2.5 cursor-pointer group shrink-0"
         >
           {isStealthMode ? (
-            <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center border border-slate-600">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gradient-to-br from-slate-700 to-slate-900 border border-slate-600/50 flex items-center justify-center text-cyan-400 font-black text-xs shadow">
               <Film className="w-4 h-4 text-cyan-400" />
             </div>
           ) : (
-            <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-cyan-400 via-blue-600 to-indigo-900 p-[1.5px] shadow-md">
-              <div className="w-full h-full rounded-[10px] bg-[#040b1e] flex items-center justify-center overflow-hidden relative">
-                <img
-                  src="./furina-avatar.png"
-                  alt="Furina"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              </div>
-              <span className="absolute -bottom-1 -right-1 px-1 py-[1px] rounded bg-cyan-400 text-[7px] font-black text-slate-950 uppercase leading-none">
-                4K
-              </span>
+            <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden border-2 border-cyan-400/90 shadow-[0_0_16px_rgba(56,189,248,0.7)] ring-1 ring-cyan-200/50 group-hover:scale-105 group-hover:shadow-[0_0_24px_rgba(56,189,248,0.9)] group-active:scale-95 transition-all duration-300 bg-[#060d24] shrink-0">
+              <img 
+                src="./furina-avatar.png" 
+                alt="Furina MovieBox" 
+                className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-300" 
+                onError={(e) => { e.currentTarget.src = './favicon.png'; }}
+              />
             </div>
           )}
-
-          <div className="flex flex-col">
-            <div className="flex items-center gap-1">
-              <span className="font-black text-xs sm:text-sm tracking-tight text-white group-hover:text-cyan-300 transition whitespace-nowrap">
-                {isStealthMode ? 'StreamBox' : 'Furina'}
-                <span className="hidden xs:inline">{isStealthMode ? '' : ' MovieBox'}</span>
+          
+          <div className="shrink-0 flex flex-col justify-center">
+            <div className="flex items-center gap-1 sm:gap-1.5">
+              <span className={`font-black text-sm sm:text-base tracking-tight ${
+                isStealthMode
+                  ? 'text-white'
+                  : 'bg-gradient-to-r from-cyan-200 via-sky-300 to-blue-400 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(56,189,248,0.5)]'
+              }`}>
+                {isStealthMode ? 'Stream' : 'Furina'}
               </span>
-              {isMasterMode && (
-                <span className="px-1 py-0.5 text-[8px] font-black uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded">
-                  PRO
-                </span>
-              )}
+              <span className="font-extrabold text-sm sm:text-base text-white tracking-tight flex items-center gap-1">
+                <span>{isStealthMode ? 'Cinema' : 'MovieBox'}</span>
+                {!isStealthMode && (
+                  <span className="text-[8.5px] font-black uppercase px-1 py-0.5 rounded bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 font-mono shadow-[0_0_8px_rgba(56,189,248,0.6)] leading-none hidden xs:inline-block">
+                    4K
+                  </span>
+                )}
+              </span>
             </div>
-            <span className="text-[8px] uppercase tracking-widest text-cyan-400/75 font-bold hidden sm:block">
-              4K Multi-Audio Cinema
-            </span>
+            <div className="text-[8px] sm:text-[8.5px] text-cyan-300/80 font-semibold tracking-wider uppercase hidden 2xl:flex items-center gap-1">
+              <span>{isStealthMode ? 'HD Stream Player' : '4K Cinema & Multi-Dub'}</span>
+              <span className="text-cyan-400">✦</span>
+            </div>
           </div>
         </div>
 
-        {/* ZONE 2: Compact Single-Line Navigation Pills (Desktop) */}
-        <nav className="hidden lg:flex items-center gap-1 bg-[#050d22] p-1 rounded-xl border border-cyan-500/20">
-          {primaryTabs.map((tab) => {
-            const isActive = !searchQuery.trim() && activeCategory === tab.id;
-            const Icon = tab.icon;
+        {/* Compact Search Bar with 3D Spotlight Overlay Shortcut Trigger */}
+        <div className="flex-1 min-w-[110px] max-w-[190px] sm:max-w-xs md:max-w-sm relative transition-all duration-300">
+          <div className="relative flex items-center">
+            <Search className="absolute left-2.5 w-3.5 h-3.5 text-cyan-400/70 pointer-events-none" />
+            <input
+              ref={inputRef}
+              type="text"
+              inputMode="search"
+              value={localSearch}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              onFocus={() => { 
+                isFocusedRef.current = true;
+              }}
+              onBlur={() => { isFocusedRef.current = false; }}
+              onCompositionStart={() => { isComposingRef.current = true; }}
+              onCompositionEnd={(e) => {
+                isComposingRef.current = false;
+                handleInputChange(e);
+              }}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="none"
+              spellCheck="false"
+              enterKeyHint="search"
+              placeholder="Search..."
+              style={{ touchAction: 'manipulation' }}
+              className="w-full bg-[#0b1633]/90 border border-cyan-500/25 rounded-full pl-7 pr-7 py-1 sm:py-1 text-base sm:text-xs text-white placeholder-cyan-200/40 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 transition shadow-inner"
+            />
+            {localSearch && (
+              <>
+                <button 
+                  onClick={handleClear}
+                  className="absolute right-2 text-cyan-400/60 hover:text-white cursor-pointer"
+                  type="button"
+                  aria-label="Clear search"
+                  title="Clear search"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={handleClear}
+                  className="sr-only"
+                  type="button"
+                  aria-label="Clear search input"
+                  tabIndex={-1}
+                />
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* 3D Spotlight Launcher Button (Desktop & Tablet) */}
+        {onOpenSearchOverlay && (
+          <button
+            onClick={() => {
+              soundFx.playSearchBeam();
+              onOpenSearchOverlay();
+            }}
+            title="Open 3D Spotlight Search (Ctrl+K or /)"
+            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-300 hover:text-white hover:border-cyan-400 text-xs font-semibold shadow-sm transition shrink-0 cursor-pointer"
+          >
+            <Sparkles className="w-3 h-3 text-cyan-400 animate-pulse" />
+            <span className="hidden xl:inline">Spotlight</span>
+            <kbd className="hidden lg:inline text-[9px] bg-black/50 border border-cyan-500/40 px-1 rounded font-mono text-cyan-200">
+              Ctrl+K
+            </kbd>
+          </button>
+        )}
+
+        {/* Desktop Category Navigation */}
+        <nav className="hidden lg:flex items-center gap-1 bg-[#0a1329]/80 p-0.5 rounded-full border border-cyan-500/20 min-w-0 shrink overflow-x-auto no-scrollbar">
+          {categories.map((cat) => {
+            const Icon = cat.icon;
+            const isActive = activeCategory === cat.id && !searchQuery;
             return (
               <button
-                key={tab.id}
-                type="button"
+                key={cat.id}
                 onClick={() => {
-                  soundFx.playClick?.();
-                  setActiveCategory(tab.id);
+                  soundFx.playClick();
+                  setActiveCategory(cat.id);
                   setSearchQuery('');
-                  if (onSearch) onSearch('');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  setLocalSearch('');
                 }}
-                className={`relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold transition cursor-pointer whitespace-nowrap shrink-0 ${
-                  isActive
-                    ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 font-black shadow-sm'
-                    : 'text-slate-300 hover:text-white hover:bg-white/5'
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold whitespace-nowrap transition shrink-0 cursor-pointer ${
+                  cat.isVault
+                    ? isActive
+                      ? 'bg-amber-500 text-gray-950 font-bold shadow'
+                      : 'text-amber-400 hover:bg-amber-500/10'
+                    : isActive
+                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-[0_0_10px_rgba(77,197,249,0.4)]'
+                    : 'text-cyan-200/70 hover:text-white hover:bg-white/5'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-slate-950' : tab.id === 'livetv' ? 'text-rose-400' : 'text-cyan-400'}`} />
-                <span>{tab.label}</span>
-                {tab.badge && (
-                  <span
-                    className={`px-1 py-0.2 rounded text-[8px] font-black uppercase tracking-wider ${
-                      isActive
-                        ? 'bg-slate-950/20 text-slate-950'
-                        : tab.badge === 'LIVE'
-                        ? 'bg-rose-500/20 text-rose-300 border border-rose-500/35'
-                        : 'bg-cyan-500/20 text-cyan-300'
-                    }`}
-                  >
-                    {tab.badge}
-                  </span>
-                )}
+                <Icon className="w-3 h-3" />
+                <span>{cat.label}</span>
               </button>
             );
           })}
-
-          {/* More Hub Dropdown */}
-          <div className="relative" ref={moreMenuRef}>
-            <button
-              type="button"
-              onClick={() => {
-                soundFx.playClick?.();
-                setIsMoreOpen((v) => !v);
-              }}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold transition cursor-pointer whitespace-nowrap ${
-                isSecondaryActive
-                  ? 'bg-cyan-400 text-slate-950 font-black'
-                  : 'text-slate-300 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              <Compass className="w-3.5 h-3.5 text-cyan-400" />
-              <span>More</span>
-              <ChevronDown className={`w-3 h-3 transition-transform ${isMoreOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            {isMoreOpen && (
-              <div className="absolute right-0 mt-2 w-56 rounded-xl bg-[#050d24] border border-cyan-500/30 shadow-2xl p-1.5 z-50 space-y-0.5">
-                {secondaryHubs.map((hub) => {
-                  const Icon = hub.icon;
-                  const active = activeCategory === hub.id;
-                  return (
-                    <button
-                      key={hub.id}
-                      type="button"
-                      onClick={() => {
-                        soundFx.playClick?.();
-                        setActiveCategory(hub.id);
-                        setSearchQuery('');
-                        if (onSearch) onSearch('');
-                        setIsMoreOpen(false);
-                      }}
-                      className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-                        active
-                          ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/35'
-                          : 'text-slate-300 hover:bg-white/5 hover:text-white'
-                      }`}
-                    >
-                      <Icon className="w-3.5 h-3.5 text-cyan-400" />
-                      <span>{hub.label}</span>
-                    </button>
-                  );
-                })}
-                <div className="border-t border-white/10 my-1 pt-1 space-y-0.5">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsMoreOpen(false);
-                      onOpenStudio?.();
-                    }}
-                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-bold text-emerald-300 hover:bg-emerald-500/10 transition cursor-pointer"
-                  >
-                    <Film className="w-3.5 h-3.5" />
-                    <span>Movie Studio Creator</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsMoreOpen(false);
-                      handleInstallClick();
-                    }}
-                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-bold text-cyan-300 hover:bg-cyan-500/10 transition cursor-pointer"
-                  >
-                    <Smartphone className="w-3.5 h-3.5" />
-                    <span>{canInstallPwa ? 'Install Web App' : 'Mobile App Guide'}</span>
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
         </nav>
 
-        {/* ZONE 3: Compact Search Bar + MCP Hub + Watch Together + Library + Settings */}
-        <div className="flex items-center gap-1.5 flex-1 lg:flex-initial justify-end max-w-[260px] xs:max-w-xs sm:max-w-md">
-          <div className="relative flex-1 min-w-[96px] sm:w-44">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                if (onSearch) onSearch(e.target.value);
-              }}
-              placeholder="Search movies..."
-              className="w-full bg-[#061026] text-base sm:text-xs text-white placeholder-slate-400 pl-7 pr-7 py-1 sm:py-1.5 rounded-lg border border-cyan-500/25 focus:outline-none focus:border-cyan-400 transition"
-            />
-            <Search className="w-3.5 h-3.5 text-cyan-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-
-            {searchQuery ? (
-              <button
-                type="button"
-                aria-label="Clear search"
-                onClick={() => {
-                  setSearchQuery('');
-                  if (onSearch) onSearch('');
-                }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-0.5 cursor-pointer"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            ) : (
-              onOpenSearchOverlay && (
-                <button
-                  type="button"
-                  onClick={onOpenSearchOverlay}
-                  title="Quick Search (Ctrl+K)"
-                  className="hidden sm:inline-flex absolute right-1.5 top-1/2 -translate-y-1/2 px-1 py-0.5 rounded bg-cyan-500/15 hover:bg-cyan-500/30 text-[9px] font-mono font-bold text-cyan-300 border border-cyan-500/25 cursor-pointer"
-                >
-                  ⌘K
-                </button>
-              )
-            )}
-          </div>
-
-          {/* Watch Together Party Room Button (Visible on Mobile & Desktop) */}
-          {onOpenWatchTogether && (
-            <button
-              type="button"
-              onClick={() => {
-                soundFx.playClick?.();
-                onOpenWatchTogether();
-              }}
-              title="Watch Together with Friends"
-              className="flex h-8 px-2 sm:px-2.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/40 text-emerald-300 items-center gap-1 text-[11px] font-extrabold cursor-pointer shrink-0"
-            >
-              <Users className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="hidden xl:inline">Party</span>
-            </button>
-          )}
-
-          {/* Saved / Collections Quick Button (Desktop) */}
+        {/* Action Controls: Movie Studio, Apps, Audio FX, Settings */}
+        <div className="flex items-center gap-1 sm:gap-1.5 shrink-0 ml-auto">
           <button
-            type="button"
+            onClick={onOpenStudio}
+            data-testid="studio-btn"
+            title="Furina Movie Studio & Content Platform"
+            className="btn-shine p-1.5 sm:px-2.5 sm:py-1 rounded-full border border-cyan-500/40 bg-gradient-to-r from-cyan-500/20 to-blue-600/20 hover:from-cyan-500/35 hover:to-blue-600/35 text-cyan-300 hover:text-white transition-all duration-200 flex items-center gap-1 text-[10px] sm:text-[11px] font-bold cursor-pointer shadow-sm shrink-0 group/studio hover:shadow-[0_0_12px_rgba(6,182,212,0.4)]"
+          >
+            <Film className="w-3.5 h-3.5 sm:w-3 sm:h-3 text-cyan-400 group-hover/studio:scale-110 group-hover/studio:rotate-6 transition-transform duration-200" />
+            <span className="hidden sm:inline">Studio</span>
+          </button>
+
+          <button
+            onClick={onOpenAndroidModal}
+            title="Install App on Android (1-Tap Standalone PWA & Native)"
+            className="hidden sm:flex p-1 sm:px-2 sm:py-1 rounded-full border border-emerald-500/40 bg-emerald-500/15 text-emerald-300 hover:text-white hover:bg-emerald-500/25 transition-all duration-200 items-center gap-1 text-[10px] sm:text-[11px] font-bold cursor-pointer shrink-0 group/android hover:shadow-[0_0_12px_rgba(16,185,129,0.4)]"
+          >
+            <Smartphone className="w-3 h-3 text-emerald-400 group-hover/android:scale-110 transition-transform duration-200" />
+            <span className="hidden sm:inline">Android App</span>
+          </button>
+
+          <button
+            onClick={onOpenIPhoneModal}
+            title="Install App on iPhone / iPad (Zero Ads)"
+            className="hidden sm:flex px-2 py-1 rounded-full border border-cyan-500/30 bg-[#0b1633] text-cyan-300 hover:text-white hover:bg-white/10 transition-all duration-200 items-center gap-1 text-[11px] font-semibold cursor-pointer shrink-0 group/iphone hover:border-cyan-400/50"
+          >
+            <Smartphone className="w-3 h-3 text-cyan-400 group-hover/iphone:scale-110 transition-transform duration-200" />
+            <span>iPhone</span>
+          </button>
+
+          <button
             onClick={() => {
-              soundFx.playClick?.();
-              setActiveCategory('watchlist');
-              setSearchQuery('');
+              const unmuted = soundFx.toggleMute();
+              setIsSoundOn(unmuted);
             }}
-            title="My Library & Collections"
-            className={`hidden sm:flex w-8 h-8 rounded-lg items-center justify-center border cursor-pointer shrink-0 ${
-              activeCategory === 'watchlist'
-                ? 'bg-pink-500/20 border-pink-400 text-pink-300'
-                : 'bg-[#061026] border-cyan-500/25 text-slate-300 hover:text-pink-300'
+            data-testid="cozy-sound-btn"
+            title={isSoundOn ? '3D Sound FX: Active (Click to Mute)' : '3D Sound FX: Muted (Click to Enable)'}
+            className={`p-1.5 sm:p-1.5 rounded-full border transition-all duration-200 flex items-center gap-1 cursor-pointer shrink-0 ${
+              isSoundOn
+                ? 'bg-amber-500/20 border-amber-400/40 text-amber-300 hover:bg-amber-500/30 shadow-[0_0_10px_rgba(251,146,60,0.35)]'
+                : 'bg-[#0b1633] border-cyan-500/30 text-slate-400 hover:text-white hover:bg-white/10'
             }`}
           >
-            <FolderHeart className="w-3.5 h-3.5" />
+            {isSoundOn ? <Volume2 className="w-3.5 h-3.5 text-amber-300 animate-pulse" /> : <VolumeX className="w-3.5 h-3.5 text-slate-400" />}
+            <span className="hidden 2xl:inline text-[11px] font-semibold">
+              {isSoundOn ? 'Audio' : 'Muted'}
+            </span>
           </button>
 
-          {/* Sound FX Toggle (Desktop) */}
           <button
-            type="button"
-            onClick={() => {
-              const muted = soundFx.toggleMute();
-              setSoundMuted(muted);
-              if (!muted) soundFx.playClick?.();
-            }}
-            title={soundMuted ? 'Unmute UI Sound FX' : 'Mute UI Sound FX'}
-            className="hidden md:flex w-8 h-8 rounded-lg bg-[#061026] hover:bg-cyan-500/15 border border-cyan-500/25 items-center justify-center text-cyan-300 cursor-pointer shrink-0"
-          >
-            {soundMuted ? <VolumeX className="w-3.5 h-3.5 text-slate-500" /> : <Volume2 className="w-3.5 h-3.5 text-cyan-400" />}
-          </button>
-
-          {/* Settings Trigger Button */}
-          <button
-            type="button"
-            onClick={() => {
-              soundFx.playClick?.();
-              onOpenSettings?.();
-            }}
-            aria-label="Open settings"
-            title="Settings & Preferences"
-            className={`w-8 h-8 rounded-lg flex items-center justify-center border cursor-pointer shrink-0 ${
+            onClick={onOpenSettings}
+            data-testid="settings-btn"
+            aria-label="Settings"
+            title="Settings & Master Vault"
+            className={`p-1.5 sm:px-2 sm:py-1 rounded-full border transition-all duration-200 flex items-center gap-1 cursor-pointer shrink-0 group/settings ${
               isMasterMode
-                ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300'
-                : 'bg-[#061026] hover:bg-cyan-500/20 border-cyan-500/30 text-cyan-300'
+                ? 'bg-emerald-500/20 border-emerald-400 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.5)]'
+                : 'bg-[#0b1633] border-cyan-500/30 text-cyan-300 hover:text-white hover:bg-white/10 hover:border-cyan-400/50'
             }`}
           >
-            {isMasterMode ? <Shield className="w-3.5 h-3.5" /> : <Settings className="w-3.5 h-3.5" />}
+            {isMasterMode ? (
+              <Shield className="w-3.5 h-3.5 text-emerald-400 group-hover/settings:scale-110 transition-transform" />
+            ) : (
+              <Settings className="w-3.5 h-3.5 text-cyan-400 group-hover/settings:rotate-90 transition-transform duration-500" />
+            )}
+            <span className="hidden sm:inline text-[11px] font-semibold">
+              {isMasterMode ? 'VIP Active' : 'Settings'}
+            </span>
           </button>
         </div>
+
       </div>
 
-      {/* ZONE 4: Swipeable Mobile & Tablet Top Category Pill Strip */}
-      <div className="lg:hidden border-t border-cyan-500/15 bg-[#040a1c]/95 px-2.5 py-1.5 overflow-x-auto no-scrollbar flex items-center gap-1.5 snap-x">
-        {mobileQuickCategories.map((cat) => {
-          const isActive = !searchQuery.trim() && activeCategory === cat.id;
+      {/* Mobile Category Scrollable Bar */}
+      <div className="flex lg:hidden overflow-x-auto gap-1 pt-1.5 pb-0.5 no-scrollbar">
+        {categories.map((cat) => {
+          const Icon = cat.icon;
+          const isActive = activeCategory === cat.id && !searchQuery;
           return (
             <button
               key={cat.id}
-              type="button"
-              onClick={() => {
-                soundFx.playClick?.();
-                setActiveCategory(cat.id);
-                setSearchQuery('');
-                if (onSearch) onSearch('');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+              data-category={cat.id}
+              onClick={() => { 
+                soundFx.playClick();
+                setActiveCategory(cat.id); 
+                setSearchQuery(''); 
               }}
-              className={`snap-start shrink-0 px-3 py-1 rounded-full text-[11px] font-extrabold transition cursor-pointer whitespace-nowrap border ${
-                isActive
-                  ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 font-black border-cyan-300 shadow-[0_0_12px_rgba(56,189,248,0.5)]'
-                  : 'bg-[#081229] text-slate-300 border-cyan-500/20 active:scale-95'
+              className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-medium whitespace-nowrap transition border ${
+                cat.isVault
+                  ? isActive
+                    ? 'bg-amber-500 text-gray-950 border-amber-400 font-bold shadow'
+                    : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                  : isActive
+                  ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_8px_rgba(77,197,249,0.3)] font-semibold'
+                  : 'bg-[#0c1836]/60 border-cyan-500/15 text-cyan-200/60'
               }`}
             >
-              {cat.label}
+              <Icon className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+              <span>{cat.label}</span>
             </button>
           );
         })}
       </div>
     </header>
   );
-});
-
-export default Navbar;
+}

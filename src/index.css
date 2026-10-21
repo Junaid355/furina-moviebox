@@ -4,184 +4,422 @@
 
 @layer base {
   html {
-    scroll-behavior: auto;
+    scroll-behavior: smooth;
     color-scheme: dark;
-    overflow-x: hidden;
-    overflow-y: auto;
-    height: auto;
-    -webkit-text-size-adjust: 100%;
   }
 
   body {
-    background-color: #030712;
+    background-color: #030819;
     color: #f0f9ff;
     font-family: "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    overflow: visible;
+    -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
+    text-rendering: optimizeLegibility;
+    position: relative;
     min-height: 100vh;
-    height: auto;
-    width: 100%;
-    background-image:
-      radial-gradient(circle at 15% 10%, rgba(14, 165, 233, 0.14) 0%, transparent 38%),
-      radial-gradient(circle at 85% 20%, rgba(59, 130, 246, 0.12) 0%, transparent 40%),
-      radial-gradient(circle at 50% 85%, rgba(6, 182, 212, 0.1) 0%, transparent 45%),
-      linear-gradient(180deg, #020617 0%, #040b1e 50%, #020617 100%);
-    background-attachment: scroll;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    touch-action: pan-y pan-x;
   }
 
-  #root {
-    min-height: 100vh;
-    height: auto;
-    overflow: visible;
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+    background-image: 
+      radial-gradient(at 20% 0%, rgba(0, 242, 254, 0.1) 0px, transparent 55%),
+      radial-gradient(at 80% 0%, rgba(37, 99, 235, 0.14) 0px, transparent 60%),
+      radial-gradient(at 50% 40%, rgba(56, 189, 248, 0.08) 0px, transparent 60%),
+      radial-gradient(at 50% 100%, rgba(20, 184, 166, 0.05) 0px, transparent 55%),
+      radial-gradient(at 85% 90%, rgba(147, 51, 234, 0.06) 0px, transparent 50%);
+    will-change: opacity;
+    transition: opacity 0.3s ease;
   }
 
-  @media (max-width: 768px) {
-    body {
-      /* iOS Safari lags and glitches with background-attachment: fixed */
-      background-attachment: scroll;
-    }
-    input, select, textarea {
-      font-size: 16px !important;
-    }
+  body.furina-player-active::before {
+    opacity: 0.15;
   }
 
-  h1, h2, h3, h4, .font-cinzel {
-    font-family: "Cinzel", Georgia, serif;
+  button, a {
+    user-select: none;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  button:active, a:active {
+    transform: scale(0.97);
   }
 }
 
-/* iPhone Notch & Home Indicator Safe Area Utilities */
-.safe-top {
-  padding-top: env(safe-area-inset-top, 0px);
-}
-
-.safe-bottom {
-  padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
-}
-
-.glass-nav {
-  background: rgba(3, 8, 22, 0.92);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
-}
-
-/* Custom sleek hydro scrollbar */
+/* Fontaine Hydro Cyan & Deep Sapphire Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
 }
-
 ::-webkit-scrollbar-track {
-  background: #020617;
+  background: #030819;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #0284c7, #2563eb);
+  background: linear-gradient(180deg, #0f2757 0%, #1e3a8a 50%, #0369a1 100%);
   border-radius: 9999px;
+  border: 1px solid rgba(0, 242, 254, 0.25);
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #38bdf8, #3b82f6);
+  background: linear-gradient(180deg, #0284c7 0%, #00f2fe 50%, #38bdf8 100%);
+  box-shadow: 0 0 14px rgba(0, 242, 254, 0.5);
 }
 
-.no-scrollbar::-webkit-scrollbar,
-.scrollbar-none::-webkit-scrollbar {
+/* Glassmorphic Fontaine Navbar with specular cyan highlight */
+.glass-nav {
+  background: rgba(4, 11, 32, 0.86);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+  box-shadow: 0 8px 36px rgba(0, 0, 0, 0.75), 0 1px 0 rgba(0, 242, 254, 0.15);
+}
+
+/* Fontaine Frosted Glass Panel */
+.glass-panel {
+  background: rgba(6, 15, 42, 0.86);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.8), 0 0 25px rgba(0, 242, 254, 0.18);
+}
+
+/* Ultra-Smooth 3D Fontaine Glass Media Card (Deep Sapphire with hydro cyan glow & gold trim) */
+.glass-card {
+  background: linear-gradient(180deg, rgba(8, 20, 52, 0.85) 0%, rgba(4, 11, 31, 0.92) 70%, rgba(3, 8, 24, 0.96) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  contain: content;
+  content-visibility: auto;
+  contain-intrinsic-size: 320px;
+  transform-style: preserve-3d;
+  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.28s ease;
+  will-change: transform;
+}
+
+.glass-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  border-color: rgba(0, 242, 254, 0.7);
+  box-shadow: 
+    0 20px 45px -8px rgba(0, 0, 0, 0.9),
+    0 0 28px rgba(0, 242, 254, 0.4),
+    0 0 14px rgba(56, 189, 248, 0.25);
+}
+
+/* Skeleton Shimmer Loading Effect with Cozy Undertone */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, rgba(14, 21, 46, 0.6) 25%, rgba(32, 28, 66, 0.9) 50%, rgba(14, 21, 46, 0.6) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s infinite ease-in-out;
+}
+
+/* Smooth Fade In */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* Soft Ambient Cozy Glows */
+.cozy-glow-amber {
+  box-shadow: 0 0 35px rgba(251, 146, 60, 0.35);
+}
+
+.cozy-glow-violet {
+  box-shadow: 0 0 35px rgba(168, 85, 247, 0.35);
+}
+
+.cozy-glow-cyan {
+  box-shadow: 0 0 35px rgba(56, 189, 248, 0.35);
+}
+
+.hydro-glow {
+  box-shadow: 0 0 30px rgba(56, 189, 248, 0.35);
+}
+
+.hydro-glow-lg {
+  box-shadow: 0 0 60px rgba(56, 189, 248, 0.45);
+}
+
+/* Slow ambient floating light effect */
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-10px) scale(1.04);
+  }
+}
+
+.animate-float-slow {
+  animation: floatSlow 8s ease-in-out infinite;
+}
+
+/* Hide scrollbars for clean navigation rows */
+.no-scrollbar::-webkit-scrollbar {
   display: none;
 }
-
-.no-scrollbar,
-.scrollbar-none {
+.no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
-/* 3D Perspective & Motion Cinema Utilities */
-.perspective-1000 {
-  perspective: 1000px;
+/* Subtitle ::cue styling driven by player custom settings (Requirement 8 & 11) */
+video::cue {
+  font-size: var(--sub-font-size, 1.15rem);
+  opacity: var(--sub-opacity, 1);
+  background-color: var(--sub-bg, transparent);
+  color: var(--sub-color, #ffffff);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.95), 0 0 10px rgba(0, 0, 0, 0.85);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-weight: 700;
+  border-radius: 6px;
+  padding: 2px 8px;
 }
 
-.card-3d {
-  transform-style: preserve-3d;
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-              box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-              border-color 0.3s ease;
-  will-change: transform;
+/* Reduced motion override when user disables animations in Settings */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
 }
 
-@media (hover: hover) {
-  .card-3d:hover {
-    transform: translateY(-7px) scale(1.03) rotateX(3deg) rotateY(-2deg);
-    box-shadow:
-      0 20px 40px -12px rgba(2, 6, 23, 0.92),
-      0 0 26px rgba(56, 189, 248, 0.36),
-      inset 0 1px 0 rgba(255, 255, 255, 0.22);
+/* Compact UI mode from Settings */
+.compact-mode .glass-card {
+  margin-bottom: 0 !important;
+}
+
+/* ==========================================================================
+   Furina MovieBox 4K Cinematic UI & Luxury Button Animations
+   ========================================================================== */
+
+/* Button Light Sweep Shine Effect */
+@keyframes buttonShine {
+  0% {
+    left: -100%;
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    left: 200%;
+    opacity: 0;
   }
 }
 
-/* Glassmorphism & Neon Glow */
-.glass-panel {
-  background: linear-gradient(145deg, rgba(10, 22, 54, 0.85), rgba(5, 11, 28, 0.92));
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-shine::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -100%;
+  width: 50%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    transparent 100%
+  );
+  transform: rotate(25deg);
+  pointer-events: none;
+}
+
+.btn-shine:hover::after {
+  animation: buttonShine 0.9s ease-out;
+}
+
+/* Pulsing Glow for 4K Play Buttons */
+@keyframes pulsePlay {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.5), 0 0 40px rgba(6, 182, 212, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(6, 182, 212, 0.8), 0 0 60px rgba(139, 92, 246, 0.4);
+  }
+}
+
+.animate-pulse-play {
+  animation: pulsePlay 2.6s infinite ease-in-out;
+}
+
+/* Glowing Border Pulse */
+@keyframes borderPulse {
+  0%, 100% {
+    border-color: rgba(6, 182, 212, 0.4);
+  }
+  50% {
+    border-color: rgba(168, 85, 247, 0.7);
+  }
+}
+
+.border-pulse {
+  animation: borderPulse 3s infinite ease-in-out;
+}
+
+/* Metallic Shimmer Badge Ribbon */
+@keyframes ribbonShimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.badge-4k-uhd {
+  background: linear-gradient(90deg, #0284c7, #06b6d4, #38bdf8, #818cf8, #0284c7);
+  background-size: 300% 300%;
+  animation: ribbonShimmer 4s ease infinite;
+  color: #030712;
+  font-weight: 900;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+
+.badge-fhd {
+  background: linear-gradient(90deg, #4f46e5, #7c3aed, #a855f7, #4f46e5);
+  background-size: 300% 300%;
+  animation: ribbonShimmer 5s ease infinite;
+  color: #ffffff;
+  font-weight: 900;
+}
+
+.badge-hindi-gold {
+  background: linear-gradient(90deg, #d97706, #f59e0b, #fbbf24, #d97706);
+  background-size: 300% 300%;
+  animation: ribbonShimmer 4s ease infinite;
+  color: #1a0a00;
+  font-weight: 900;
+}
+
+/* Luxury 4K Cinema Primary Button */
+.btn-cinema-4k {
+  background: linear-gradient(135deg, #06b6d4 0%, #0284c7 50%, #2563eb 100%);
+  color: #050b1d;
+  font-weight: 800;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 20px rgba(6, 182, 212, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.btn-cinema-4k:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 30px rgba(6, 182, 212, 0.65), 0 0 25px rgba(56, 189, 248, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.6);
+  background: linear-gradient(135deg, #22d3ee 0%, #38bdf8 50%, #3b82f6 100%);
+}
+
+/* Glass Pill for Category & Filter Navigation */
+.glass-pill {
+  background: rgba(15, 23, 42, 0.65);
   backdrop-filter: blur(16px);
-  border: 1px solid rgba(56, 189, 248, 0.25);
-  box-shadow:
-    0 16px 36px -8px rgba(0, 0, 0, 0.78),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.neon-text {
-  text-shadow:
-    0 0 14px rgba(56, 189, 248, 0.65),
-    0 0 28px rgba(37, 99, 235, 0.4);
+.glass-pill:hover {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: rgba(6, 182, 212, 0.4);
+  transform: translateY(-1px);
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+.glass-pill-active {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.25) 0%, rgba(139, 92, 246, 0.25) 100%);
+  border: 1px solid rgba(6, 182, 212, 0.6);
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.35);
+  color: #ffffff;
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+/* Smooth Rotation on hover for settings/studio */
+.spin-hover:hover {
+  transform: rotate(45deg);
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-@keyframes floatSlow {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-6px); }
+/* Subtle icon bounce on hover */
+.bounce-hover:hover {
+  transform: scale(1.15) translateY(-2px);
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.animate-float-slow {
-  animation: floatSlow 4s ease-in-out infinite;
+/* ==========================================================================
+   Mobile & iPhone Optimization (Safe Areas & 16px Font Zoom Prevention)
+   ========================================================================== */
+@media screen and (max-width: 768px) {
+  input[type="text"],
+  input[type="number"],
+  input[type="search"],
+  textarea,
+  select {
+    font-size: 16px !important; /* Prevents auto-zoom on iOS Safari */
+  }
 }
 
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(calc(-100% - var(--gap, 1rem))); }
+.safe-top {
+  padding-top: max(0.75rem, env(safe-area-inset-top, 0px));
 }
 
-@keyframes marquee-vertical {
-  from { transform: translateY(0); }
-  to { transform: translateY(calc(-100% - var(--gap, 1rem))); }
+.safe-bottom {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
 }
 
-.animate-marquee {
-  animation: marquee var(--duration, 35s) linear infinite;
+/* Shimmer Button Keyframes */
+@keyframes shimmerSlide {
+  to {
+    transform: translate(calc(100cqw - 100%), 0);
+  }
 }
 
-.animate-marquee-vertical {
-  animation: marquee-vertical var(--duration, 35s) linear infinite;
+@keyframes spinAround {
+  0% {
+    transform: translateZ(0) rotate(0);
+  }
+  15%, 35% {
+    transform: translateZ(0) rotate(90deg);
+  }
+  65%, 85% {
+    transform: translateZ(0) rotate(270deg);
+  }
+  100% {
+    transform: translateZ(0) rotate(360deg);
+  }
 }
 
-/* Dynamic HTML5 Video Subtitle Cue Styling */
-video::cue {
-  font-size: var(--sub-font-size, 1.15rem);
-  color: var(--sub-color, #ffffff);
-  background-color: var(--sub-bg, rgba(0, 0, 0, 0.75));
-  opacity: var(--sub-opacity, 1);
-  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
-  font-weight: 700;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95), 0 0 3px rgba(0, 0, 0, 0.9);
-  border-radius: 6px;
-  padding: 0.15em 0.45em;
+.animate-shimmer-slide {
+  animation: shimmerSlide var(--speed) ease-in-out infinite alternate;
 }
+
+.animate-spin-around {
+  animation: spinAround calc(var(--speed) * 2) infinite linear;
+}
+
+

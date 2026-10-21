@@ -1,206 +1,115 @@
-import React, { useRef, useState, useEffect, useMemo, memo, useCallback } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { motion } from 'framer-motion';
 import MediaCard from './MediaCard';
 import { BlurFade } from './ui/blur-fade';
 
-const MediaShelf = memo(function MediaShelf({
-  title,
-  subtitle,
-  icon: Icon,
-  items = [],
-  onPlay,
-  onPlayDirect,
-  onOpenDetails,
-  onSelect,
+export default function MediaShelf({ 
+  title, 
+  subtitle, 
+  icon: Icon, 
+  items = [], 
+  onPlay, 
+  isWatchlisted, 
   onToggleWatchlist,
-  isWatchlisted,
-  watchlistIds = new Set(),
-  progressMap = {},
-  accentColor = 'from-cyan-400 to-blue-500',
-  badge = '',
-  badgeText = '',
-  onViewAll
+  onViewAll,
+  badgeText,
+  badge,
+  onOpenDetails
 }) {
+  const displayBadge = badgeText || badge;
   const scrollRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStateRef = useRef({
-    isDown: false,
-    startX: 0,
-    scrollLeft: 0,
-    movedDistance: 0
-  });
 
-  const visibleItems = useMemo(() => {
-    if (!Array.isArray(items)) return [];
-    return items.slice(0, 16);
-  }, [items]);
-
-  const checkScroll = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    setCanScrollLeft(el.scrollLeft > 10);
-    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 10);
-  }, []);
+  const checkScroll = () => {
+    if (!scrollRef.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+    setCanScrollLeft(scrollLeft > 10);
+    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 10);
+  };
 
   useEffect(() => {
     checkScroll();
     window.addEventListener('resize', checkScroll);
     return () => window.removeEventListener('resize', checkScroll);
-  }, [visibleItems.length, checkScroll]);
+  }, [items]);
 
-  // Attach non-passive wheel listener for horizontal gestures (Shift+Wheel or trackpad deltaX)
-  // while allowing regular vertical mouse wheel (deltaY) to natively scroll the page.
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-
-    const onWheel = (e) => {
-      const isHorizontalGesture = Math.abs(e.deltaX) > Math.abs(e.deltaY) || e.shiftKey;
-      if (!isHorizontalGesture) {
-        // Pure vertical mouse wheel: do not intercept so window scrolls vertically without friction
-        return;
-      }
-
-      const delta = e.shiftKey && e.deltaY !== 0 ? e.deltaY : e.deltaX;
-      const canGoLeft = el.scrollLeft > 0 && delta < 0;
-      const canGoRight = el.scrollLeft + el.clientWidth < el.scrollWidth - 2 && delta > 0;
-
-      if (canGoLeft || canGoRight) {
-        e.preventDefault();
-        el.scrollLeft += delta * 1.25;
-        checkScroll();
-      }
-    };
-
-    el.addEventListener('wheel', onWheel, { passive: false });
-    return () => el.removeEventListener('wheel', onWheel);
-  }, [checkScroll]);
-
-  // Desktop PC Click-and-Drag Horizontal Carousel Scrolling
-  const handleMouseDown = (e) => {
-    const el = scrollRef.current;
-    if (!el || e.button !== 0) return;
-    dragStateRef.current = {
-      isDown: true,
-      startX: e.pageX - el.offsetLeft,
-      scrollLeft: el.scrollLeft,
-      movedDistance: 0
-    };
-  };
-
-  const handleMouseMove = (e) => {
-    const state = dragStateRef.current;
-    const el = scrollRef.current;
-    if (!state.isDown || !el) return;
-    const x = e.pageX - el.offsetLeft;
-    const walk = (x - state.startX) * 1.4;
-    state.movedDistance = Math.abs(walk);
-    if (state.movedDistance > 6) {
-      if (!isDragging) setIsDragging(true);
-      e.preventDefault();
-      el.scrollLeft = state.scrollLeft - walk;
-      checkScroll();
-    }
-  };
-
-  const stopDragging = () => {
-    dragStateRef.current.isDown = false;
-    if (isDragging) {
-      setTimeout(() => setIsDragging(false), 40);
-    }
-  };
-
-  const handleClickCapture = (e) => {
-    if (dragStateRef.current.movedDistance > 10) {
-      e.stopPropagation();
-      e.preventDefault();
-      dragStateRef.current.movedDistance = 0;
-    }
-  };
-
-  if (!visibleItems.length) return null;
-
-  const scrollByAmount = (direction) => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const distance = Math.max(320, el.clientWidth * 0.78);
-    el.scrollBy({
+  const handleScroll = (direction) => {
+    if (!scrollRef.current) return;
+    const distance = scrollRef.current.clientWidth * 0.75;
+    scrollRef.current.scrollBy({
       left: direction === 'left' ? -distance : distance,
       behavior: 'smooth'
     });
+    setTimeout(checkScroll, 350);
   };
 
-  const resolvedBadge = badge || badgeText;
+  if (!Array.isArray(items) || items.length === 0) return null;
 
   return (
-    <BlurFade delay={0.04} inView>
-      <section data-mcp-shelf="true" className="relative py-2.5 sm:py-3.5 select-none">
+    <BlurFade delay={0.05} duration={0.4}>
+      <section className="relative my-6 sm:my-8 group/shelf">
         {/* Shelf Header */}
-        <div className="mb-2.5 sm:mb-3.5 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className={`w-1.5 h-6 sm:h-7 rounded-full bg-gradient-to-b ${accentColor} shrink-0 shadow-[0_0_14px_rgba(56,189,248,0.65)]`} />
+        <div className="flex items-center justify-between gap-3 mb-3 sm:mb-4 px-1">
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
             {Icon && (
-              <div className="w-8 h-8 rounded-xl bg-cyan-500/15 border border-cyan-400/35 flex items-center justify-center text-cyan-300 shrink-0 shadow-[0_0_15px_rgba(6,182,212,0.25)]">
-                <Icon className="w-4 h-4" />
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-cyan-500/15 border border-cyan-400/30 flex items-center justify-center text-cyan-300 shrink-0 shadow-sm">
+                <Icon className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
               </div>
             )}
             <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-sm sm:text-lg md:text-xl font-black text-white tracking-tight truncate neon-text">
+              <div className="flex items-center gap-2">
+                <h2 className="text-base sm:text-lg md:text-xl font-black text-white tracking-tight truncate drop-shadow-sm">
                   {title}
                 </h2>
-                {resolvedBadge && (
-                  <span className="px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 shadow-[0_0_10px_rgba(6,182,212,0.3)]">
-                    {resolvedBadge}
+                {displayBadge && (
+                  <span className="hidden sm:inline-block text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
+                    {displayBadge}
                   </span>
                 )}
               </div>
               {subtitle && (
-                <p className="text-[10px] sm:text-xs text-cyan-200/65 truncate hidden sm:block">
+                <p className="text-[11px] sm:text-xs text-slate-400 truncate">
                   {subtitle}
                 </p>
               )}
             </div>
           </div>
 
-          {/* Carousel Controls */}
+          {/* Shelf Actions & Arrows */}
           <div className="flex items-center gap-1.5 shrink-0">
             {onViewAll && (
               <button
-                type="button"
                 onClick={onViewAll}
-                className="px-2.5 py-1 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-400/35 text-cyan-300 text-[10px] sm:text-xs font-extrabold transition cursor-pointer mr-1"
+                className="text-[11px] sm:text-xs font-bold text-cyan-400 hover:text-cyan-300 px-2 sm:px-2.5 py-1 rounded-lg hover:bg-cyan-500/10 transition border border-transparent hover:border-cyan-500/30 mr-1"
               >
-                View All →
+                Explore All →
               </button>
             )}
+
+            {/* Left Arrow */}
             <button
-              type="button"
-              onClick={() => scrollByAmount('left')}
+              onClick={() => handleScroll('left')}
               disabled={!canScrollLeft}
-              aria-label="Scroll shelf left"
-              title="Scroll Left (or Drag / Shift+Wheel)"
-              className={`w-8 h-8 rounded-xl border flex items-center justify-center transition cursor-pointer ${
+              aria-label={`Scroll ${title} left`}
+              className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center backdrop-blur-md border transition ${
                 canScrollLeft
-                  ? 'bg-[#081533]/90 border-cyan-400/40 text-cyan-200 hover:bg-cyan-500/25 hover:border-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
-                  : 'bg-slate-900/40 border-white/5 text-slate-600 opacity-40 cursor-not-allowed'
+                  ? 'bg-black/70 hover:bg-cyan-500 hover:text-gray-950 text-white border-white/10 hover:border-cyan-400 shadow-md cursor-pointer'
+                  : 'bg-black/30 text-white/20 border-transparent cursor-not-allowed opacity-30'
               }`}
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
+
+            {/* Right Arrow */}
             <button
-              type="button"
-              onClick={() => scrollByAmount('right')}
+              onClick={() => handleScroll('right')}
               disabled={!canScrollRight}
-              aria-label="Scroll shelf right"
-              title="Scroll Right (or Drag / Shift+Wheel)"
-              className={`w-8 h-8 rounded-xl border flex items-center justify-center transition cursor-pointer ${
+              aria-label={`Scroll ${title} right`}
+              className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center backdrop-blur-md border transition ${
                 canScrollRight
-                  ? 'bg-[#081533]/90 border-cyan-400/40 text-cyan-200 hover:bg-cyan-500/25 hover:border-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
-                  : 'bg-slate-900/40 border-white/5 text-slate-600 opacity-40 cursor-not-allowed'
+                  ? 'bg-black/70 hover:bg-cyan-500 hover:text-gray-950 text-white border-white/10 hover:border-cyan-400 shadow-md cursor-pointer'
+                  : 'bg-black/30 text-white/20 border-transparent cursor-not-allowed opacity-30'
               }`}
             >
               <ChevronRight className="w-4 h-4" />
@@ -208,57 +117,29 @@ const MediaShelf = memo(function MediaShelf({
           </div>
         </div>
 
-        {/* 3D Perspective Horizontal Carousel (No scroll-smooth class so wheel & drag respond immediately) */}
+        {/* Horizontal Carousel Track */}
         <div
           ref={scrollRef}
           onScroll={checkScroll}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={stopDragging}
-          onMouseLeave={stopDragging}
-          onClickCapture={handleClickCapture}
-          style={{ touchAction: 'pan-x pan-y', scrollBehavior: 'auto' }}
-          className={`flex items-stretch gap-3 sm:gap-4 overflow-x-auto no-scrollbar py-2.5 perspective-1000 ${
-            isDragging ? 'cursor-grabbing' : 'cursor-grab'
-          }`}
+          className="flex gap-2 sm:gap-4 overflow-x-auto scrollbar-none scroll-smooth pb-2 pt-1 px-1 snap-x snap-mandatory"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {visibleItems.map((item, idx) => {
-            const idKey = String(item.id);
-            const watchlisted = typeof isWatchlisted === 'function'
-              ? isWatchlisted(item.id)
-              : watchlistIds instanceof Set
-              ? watchlistIds.has(item.id) || watchlistIds.has(Number(item.id)) || watchlistIds.has(idKey)
-              : Boolean(isWatchlisted);
-
-            return (
-              <motion.div
-                key={`${item.id}-${item.media_type || 'media'}`}
-                initial={{ opacity: 0, y: 14, rotateX: 8 }}
-                whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
-                viewport={{ once: true, margin: '-20px' }}
-                transition={{
-                  duration: 0.38,
-                  delay: Math.min(idx * 0.03, 0.24),
-                  ease: [0.22, 1, 0.36, 1]
-                }}
-                className="w-[125px] xs:w-[138px] sm:w-[156px] md:w-[172px] shrink-0"
-              >
-                <MediaCard
-                  item={item}
-                  onPlay={onPlay}
-                  onPlayDirect={onPlayDirect}
-                  onOpenDetails={onOpenDetails || onSelect}
-                  onToggleWatchlist={onToggleWatchlist}
-                  isWatchlisted={watchlisted}
-                  progress={progressMap[item.id] || progressMap[idKey]}
-                />
-              </motion.div>
-            );
-          })}
+          {items.map((item) => (
+            <div
+              key={`shelf-${item.id}-${item.title}`}
+              className="w-[115px] xs:w-[135px] sm:w-[170px] md:w-[190px] lg:w-[205px] shrink-0 snap-start"
+            >
+              <MediaCard
+                item={item}
+                onPlay={onPlay}
+                onOpenDetails={onOpenDetails}
+                isWatchlisted={isWatchlisted ? isWatchlisted(item.id) : false}
+                onToggleWatchlist={onToggleWatchlist}
+              />
+            </div>
+          ))}
         </div>
       </section>
     </BlurFade>
   );
-});
-
-export default MediaShelf;
+}

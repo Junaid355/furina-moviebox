@@ -3,7 +3,7 @@ import {
   X, Server, Film, Tv, RefreshCw, ExternalLink, Info, Zap, Play, Pause,
   Sparkles, ShieldCheck, Download, Maximize2, Minimize2, Volume2,
   CheckCircle2, AlertTriangle, ArrowRight, Loader2, ChevronLeft, ChevronRight,
-  PictureInPicture, Keyboard, Subtitles, Users, FastForward, Search, Monitor
+  PictureInPicture, Keyboard, Subtitles, Users, FastForward
 } from 'lucide-react';
 import { SERVERS, getStreamUrl, getDownloadUrl } from '../services/streaming';
 import { 
@@ -16,14 +16,10 @@ import {
   setShieldEnabled, getShieldMode, setShieldMode, setPlayerActive 
 } from '../services/adblocker';
 import { evaluateServers, probeServers, nextBestServer } from '../services/aiServerSelector';
-import { resolveMovieBoxToTmdb } from '../services/movieboxService';
-import { recordWatchHistory } from '../services/playlistService';
 import soundFx from '../services/soundFx';
 import DownloadModal from './DownloadModal';
 import UBlockShieldModal from './UBlockShieldModal';
 import WatchTogetherModal from './WatchTogetherModal';
-import WatchPartyPlayerBar from './WatchPartyPlayerBar';
-import { getGenreBadgeStyle } from '../services/contentModel';
 import hindiProviderManager, { 
   selectPhysicalAudioTrack, 
   getPrioritizedAudioSources 
@@ -64,9 +60,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     ((item?.genre_ids?.includes(16) || item?.genres?.some((g) => g.id === 16 || g.name === 'Animation')) && item?.original_language === 'ja')
   );
 
-  const [asyncTmdbId, setAsyncTmdbId] = useState(null);
-
-  const staticTmdbId = useMemo(() => {
+  const resolvedTmdbId = useMemo(() => {
     if (item?.isCustom || item?.isCustomMovie || item?.id === 'studio_sample_1' || String(item?.id).startsWith('studio_')) {
       return null;
     }
@@ -103,22 +97,6 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     if (item?.id && !isNaN(Number(item.id)) && Number(item.id) < 20000000) return Number(item.id);
     return null;
   }, [item]);
-
-  useEffect(() => {
-    let cancelled = false;
-    setAsyncTmdbId(null);
-    if (!staticTmdbId && item && !item.isCustom && !item.isCustomMovie && !String(item.id).startsWith('studio_')) {
-      resolveMovieBoxToTmdb(item).then((resolved) => {
-        if (!cancelled && resolved) {
-          const foundId = resolved.tmdb_id || (typeof resolved.id === 'number' ? resolved.id : null);
-          if (foundId) setAsyncTmdbId(foundId);
-        }
-      }).catch(() => {});
-    }
-    return () => { cancelled = true; };
-  }, [item, staticTmdbId]);
-
-  const resolvedTmdbId = staticTmdbId || asyncTmdbId;
 
   // Safe classification and robust fallbacks for TV Series vs Movies
   const isSeries = Boolean(
@@ -176,22 +154,22 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     ja: resolveCustomAudioUrl('ja')
   };
 
-  // Universal Multi-Dub Support: Hindi, English & Japanese tracks enabled across all servers & Direct Multi-Dub engine
+  // Authentic audio tracks strictly based on physical audio assets, native spoken languages, or verified provider sources
   const verifiedId = Number(item?.id) || Number(item?.tmdb_id) || Number(resolvedTmdbId);
   const isTopVerifiedHindiTitle = [94997, 533535, 12609, 12971, 46260, 31910, 85937, 95479, 127532, 1429, 37854, 30984, 1423191, 63174, 108978].includes(verifiedId);
   const isResidentEvilMovie = (item?.title || item?.name || item?.original_title || '').toLowerCase().includes('resident evil') || verifiedId === 1423191;
   const isMovieBoxHindi = Boolean(item?.hasHindiDub || item?.corner?.includes('Hindi') || String(item?.id).startsWith('mb_'));
   const hasWorkingHindiSource = (isCustom && playerMode === 'studio')
-    ? Boolean(customSources.hi || true)
-    : true;
+    ? Boolean(customSources.hi)
+    : (Boolean(customSources.hi) || isBollywoodHindi || isTopVerifiedHindiTitle || isResidentEvilMovie || isMovieBoxHindi || isHindiAvailable(item) || hindiProviderManager.hasLegitimateHindiSource(item));
 
-  const hasWorkingEnglishSource = (isCustom && playerMode === 'studio')
-    ? Boolean(customSources.en || true)
-    : true;
+  const hasWorkingEnglishSource = isBollywoodHindi
+    ? false
+    : (isCustom ? Boolean(customSources.en) : !isBollywoodHindi);
 
-  const hasWorkingJapaneseSource = (isCustom && playerMode === 'studio')
-    ? Boolean(customSources.ja || true)
-    : true;
+  const hasWorkingJapaneseSource = isCustom
+    ? Boolean(customSources.ja)
+    : isAnime;
 
   // Read saved user audio preference from settings or prop
   const userPreferredAudio = (() => {
@@ -333,12 +311,9 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
   const [selectedServer, setSelectedServer] = useState(getInitialServer);
   const [iframeLoading, setIframeLoading] = useState(true);
-  const [showServerList, setShowServerList] = useState(false);
 
-  // Fullscreen, Theater Mode & Core Player Refs
+  // Fullscreen & Core Player Refs
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isTheaterMode, setIsTheaterMode] = useState(false);
-  const [episodeSearchQuery, setEpisodeSearchQuery] = useState('');
   const [showControls, setShowControls] = useState(true);
   const playerWrapperRef = useRef(null);
   const videoRef = useRef(null);
@@ -358,6 +333,38 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const touchStartRef = useRef({ x: 0, y: 0, time: 0 });
   const iframeLoadedRef = useRef(false);
   const rescueAttemptsRef = useRef(0);
+
+  // Silent Auto-Rescue (3.5s Watchdog): Auto-failover to next fastest mirror on timeout or hang
+  useEffect(() => {
+    iframeLoadedRef.current = false;
+    setIframeLoading(true);
+    const timer = setTimeout(() => {
+      // If iframe already loaded successfully, NEVER switch server
+      if (iframeLoadedRef.current) {
+        return;
+      }
+      setIframeLoading(false);
+      // If still loading on a non-custom stream and not manually pinned, auto-failover silently
+      if (playerMode === 'stream' && !isCustomMovie && !manualPickRef.current) {
+        if (rescueAttemptsRef.current < 3) {
+          rescueAttemptsRef.current += 1;
+          const next = nextBestServer({
+            servers: availableServers,
+            current: selectedServer,
+            audioMode,
+            isAnime,
+            isHanime,
+            tmdbId: resolvedTmdbId
+          });
+          if (next && next.id !== selectedServer?.id) {
+            setSelectedServer(next);
+            showServerToast(next, null, 'Auto-Rescued to fastest mirror ⚡');
+          }
+        }
+      }
+    }, 3500);
+    return () => clearTimeout(timer);
+  }, [selectedServer?.id, season, episode, audioMode, playerMode, isCustomMovie, availableServers, isAnime, isHanime, resolvedTmdbId]);
 
   // Furina uBlock Ad-Shield Pro & AI Server Selection
   const [adShieldActive, setAdShieldActive] = useState(() => isAdBlockEnabled());
@@ -641,7 +648,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     return () => clearTimeout(timer);
   }, [bingeCountdown]);
 
-  // Persist Watch Progress & Watch History on Mount and Season / Episode Change
+  // Persist Watch Progress on Mount and Season / Episode Change
   useEffect(() => {
     if (item?.id) {
       try {
@@ -653,10 +660,9 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
           updatedAt: Date.now()
         }));
         window.dispatchEvent(new CustomEvent('furina:progress-updated'));
-        recordWatchHistory(item, isSeries ? season : 1, isSeries ? episode : 1, selectedServer?.id || 'vidstuck');
       } catch (e) {}
     }
-  }, [item?.id, season, episode, isSeries, title, selectedServer?.id]);
+  }, [item?.id, season, episode, isSeries, title]);
 
   // AdBlock / Guide States
   const [showUBlockGuide, setShowUBlockGuide] = useState(false);
@@ -700,7 +706,8 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       physicalSwitched = selectPhysicalAudioTrack(videoRef.current, newMode);
     }
 
-    // Smart Multi-Dub server routing when switching between Hindi, English, and Japanese
+    // Keep the current server if it is still a good pick for the new audio mode;
+    // otherwise re-rank (this avoids jumping onto known-blank mirrors).
     setSelectedServer((prevSrv) => {
       const evaluation = evaluateServers({
         servers: availableServers,
@@ -709,27 +716,18 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
         isHanime,
         tmdbId: resolvedTmdbId
       });
-      if (newMode === 'hindi') {
-        const hindiPreferred = availableServers.find((s) => s.id === 'vidstuck' || s.id === 'autoembed' || s.id === 'nxsha');
-        if (hindiPreferred && prevSrv?.id !== 'autoembed' && prevSrv?.id !== 'nxsha' && prevSrv?.id !== 'vidstuck') {
-          return hindiPreferred;
-        }
-      } else if (newMode === 'sub') {
-        const subPreferred = availableServers.find((s) => s.id === 'vidlink' || s.id === 'vidstuck');
-        if (subPreferred && prevSrv?.id !== 'vidlink' && prevSrv?.id !== 'vidstuck') {
-          return subPreferred;
-        }
-      }
+      const prevRank = evaluation.rankedServers.find((r) => r.server.id === prevSrv?.id);
+      const best = evaluation.rankedServers[0];
+      if (prevRank && best && prevRank.score >= best.score - 10) return prevSrv;
       return evaluation.bestServer || prevSrv;
     });
 
-    setIframeLoading(true);
     setTimeout(() => {
       setIsSwitchingAudio(false);
-      setAudioSwitchFeedback(`✓ ${newMode === 'hindi' ? '🇮🇳 Hindi Dub' : newMode === 'sub' ? '🇯🇵 Japanese Sub' : '🇬🇧 English Dub'} Active${physicalSwitched ? ' (Hardware Track)' : ''}`);
-      setTimeout(() => setAudioSwitchFeedback(''), 2800);
-    }, 300);
-  }, [audioMode, isCustom, isBollywoodHindi, isAnime, isHanime, availableServers, item?.id, resolvedTmdbId]);
+      setAudioSwitchFeedback(`✓ ${newMode === 'hindi' ? 'Hindi' : newMode === 'sub' ? 'Japanese' : 'English'} Audio Active${physicalSwitched ? ' (Hardware Track)' : ''}`);
+      setTimeout(() => setAudioSwitchFeedback(''), 2500);
+    }, 350);
+  }, [audioMode, isCustom, isBollywoodHindi, isAnime, isHanime, availableServers, item?.id]);
 
   // Prioritized audio sources for custom / owned / blockbuster content
   const currentLangSources = useMemo(() => {
@@ -995,9 +993,6 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       } else if (e.key === 'f' || e.key === 'F') {
         e.preventDefault();
         toggleFullscreen();
-      } else if (e.key === 't' || e.key === 'T') {
-        e.preventDefault();
-        setIsTheaterMode((prev) => !prev);
       } else if (e.key === 'b' || e.key === 'B') {
         e.preventDefault();
         const modes = ['off', '4k', 'hdr', 'night'];
@@ -1144,28 +1139,17 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const streamUrl = getStreamUrl(currentServer, resolvedTmdbId || item?.id, isSeries ? 'tv' : 'movie', season, episode, audioMode, isAnime, activeSubtitle);
   const downloadUrl = getDownloadUrl(resolvedTmdbId || item?.id, isSeries ? 'tv' : 'movie', season, episode);
 
-  // Active custom or Direct Multi-Dub HTML5 video URL
-  const directMultiDubFallbackUrl = useMemo(() => {
-    if (item?.trailerUrl) return item.trailerUrl;
-    if (audioMode === 'hindi') {
-      return 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4';
-    }
-    if (audioMode === 'sub' || isAnime) {
-      return 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4';
-    }
-    return 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4';
-  }, [item?.trailerUrl, audioMode, isAnime]);
-
+  // Active custom video URL for owned/studio content - priority failover aware (Section 3 & 10)
   const activeCustomVideoUrl = isCustom ? (
     currentLangSources && currentLangSources.length > 0
       ? (currentLangSources[activeSourcePriority - 1]?.url || currentLangSources[0]?.url || '')
       : (
-          audioMode === 'hindi' ? (customSources.hi || directMultiDubFallbackUrl) :
-          audioMode === 'english' ? (customSources.en || directMultiDubFallbackUrl) :
-          audioMode === 'sub' ? (customSources.ja || directMultiDubFallbackUrl) :
-          (customSources.hi || customSources.en || customSources.ja || item.video_url || directMultiDubFallbackUrl)
+          audioMode === 'hindi' ? (customSources.hi || '') :
+          audioMode === 'english' ? (customSources.en || '') :
+          audioMode === 'sub' ? (customSources.ja || '') :
+          (customSources.hi || customSources.en || customSources.ja || item.video_url || '')
         )
-  ) : (playerMode === 'direct_dub' ? directMultiDubFallbackUrl : null);
+  ) : null;
 
   const isAudioOnly = Boolean(
     activeCustomVideoUrl && (
@@ -1268,8 +1252,6 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
         className={`relative flex flex-col bg-[#050b1d] border-0 sm:border sm:border-cyan-500/35 overflow-hidden transition-all duration-300 ${
           isFullscreen
             ? 'fixed inset-0 z-[999999] w-screen h-screen rounded-none max-w-none max-h-none p-0 bg-black overflow-hidden select-none'
-            : isTheaterMode
-            ? 'w-full max-w-[100vw] h-[100dvh] max-h-[100dvh] rounded-none shadow-[0_0_90px_rgba(0,0,0,0.95)] bg-black'
             : 'w-full max-w-[97vw] xl:max-w-7xl 2xl:max-w-[1600px] h-[100dvh] sm:h-[95vh] max-h-[100dvh] sm:max-h-[96vh] rounded-none sm:rounded-2xl shadow-[0_0_80px_rgba(56,189,248,0.35)] animate-fade-in'
         }`}
         onClick={(e) => e.stopPropagation()}
@@ -1280,7 +1262,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
         {/* ========================================================================= */}
         {isFullscreen && (
           <div 
-            className={`absolute top-0 left-0 right-0 z-50 p-2.5 sm:p-4 md:p-6 safe-top bg-gradient-to-b from-black/95 via-black/60 to-transparent flex items-center justify-between transition-opacity duration-300 ${
+            className={`absolute top-0 left-0 right-0 z-50 p-2.5 sm:p-4 md:p-6 bg-gradient-to-b from-black/95 via-black/60 to-transparent flex items-center justify-between transition-opacity duration-300 ${
               showControls ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
             }`}
           >
@@ -1456,7 +1438,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
         {/* 2. REGULAR HEADER (STICKY AT TOP OF MODAL CARD - CANNOT SCROLL AWAY)     */}
         {/* ========================================================================= */}
         {!isFullscreen && (
-          <div className="flex items-center justify-between p-2 sm:p-3.5 safe-top border-b border-cyan-500/30 bg-[#050b1d] shrink-0 z-30 shadow-md">
+          <div className="flex items-center justify-between p-2 sm:p-4 border-b border-cyan-500/30 bg-[#050b1d] shrink-0 z-30 shadow-md">
             <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 flex-1 pr-1.5 sm:pr-2">
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden border-2 border-cyan-400 shadow-[0_0_15px_rgba(56,189,248,0.7)] ring-1 ring-cyan-200/50 bg-[#060d24] shrink-0">
                 <img src="./furina-avatar.png" alt="Furina" onError={(e) => { e.currentTarget.src = './favicon.png'; }} className="w-full h-full object-cover object-center" />
@@ -1549,25 +1531,6 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   )}
                 </button>
               )}
-
-              {/* Theater Mode Toggle Button */}
-              <button
-                type="button"
-                data-testid="theater-mode-btn"
-                onClick={() => {
-                  soundFx.playClick?.();
-                  setIsTheaterMode((prev) => !prev);
-                }}
-                title="Theater Mode (T) - Expand Video & Dim Surrounding UI"
-                className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold transition cursor-pointer shrink-0 border ${
-                  isTheaterMode
-                    ? 'bg-cyan-500/25 border-cyan-400 text-cyan-200 shadow-[0_0_12px_rgba(56,189,248,0.4)]'
-                    : 'bg-[#0c1836] border-cyan-500/30 text-cyan-300 hover:text-white hover:bg-white/10'
-                }`}
-              >
-                <Monitor className="w-3.5 h-3.5" />
-                <span>{isTheaterMode ? 'Standard View' : 'Theater'}</span>
-              </button>
 
               {/* Fullscreen Mode Button */}
               <button
@@ -1870,27 +1833,6 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 ))}
               </div>
 
-              {/* Built-In Direct Multi-Dub Engine Toggle */}
-              {!isCustom && (
-                <button
-                  type="button"
-                  data-testid="direct-multidub-toggle"
-                  onClick={() => {
-                    soundFx.playClick?.();
-                    setPlayerMode((prev) => (prev === 'direct_dub' ? 'stream' : 'direct_dub'));
-                  }}
-                  title="Switch between Live Multi-Dub Embed Servers and Built-In Direct Multi-Dub HTML5 Player"
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] sm:text-xs font-extrabold border transition cursor-pointer ${
-                    playerMode === 'direct_dub'
-                      ? 'bg-gradient-to-r from-emerald-400 to-cyan-500 text-gray-950 border-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.6)]'
-                      : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/25 hover:text-white'
-                  }`}
-                >
-                  <Volume2 className="w-3 h-3" />
-                  <span>{playerMode === 'direct_dub' ? '✓ Direct Multi-Dub Player Active' : '🎧 Direct Multi-Dub Player'}</span>
-                </button>
-              )}
-
               {/* Quick Cinema Fullscreen Button */}
               <button
                 onClick={toggleFullscreen}
@@ -1968,10 +1910,10 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
             style={{ filter: `brightness(${brightnessLevel})` }}
             className={`relative w-full bg-black flex items-center justify-center overflow-hidden transition-all duration-300 ${
               isMiniPlayer && !isFullscreen
-                ? 'fixed bottom-16 sm:bottom-4 right-3 sm:right-4 w-48 sm:w-80 md:w-96 aspect-video z-[99999] rounded-xl shadow-[0_0_35px_rgba(6,182,212,0.85)] border-2 border-cyan-400 overflow-hidden bg-black'
+                ? 'fixed bottom-4 right-4 w-44 sm:w-80 md:w-96 aspect-video z-[99999] rounded-xl shadow-[0_0_35px_rgba(6,182,212,0.85)] border-2 border-cyan-400 overflow-hidden bg-black'
                 : isFullscreen 
                   ? 'w-full h-full flex-1 max-w-full max-h-full' 
-                  : 'w-full flex-1 aspect-video min-h-[230px] max-h-[46vh] sm:h-auto sm:aspect-auto sm:min-h-[500px] md:min-h-[600px] lg:min-h-[680px]'
+                  : 'w-full flex-1 h-[52vh] min-h-[280px] max-h-[58vh] sm:h-auto sm:aspect-auto sm:min-h-[500px] md:min-h-[600px] lg:min-h-[720px]'
             }`}
           >
             {/* Mini Player Control Bar (when docked) */}
@@ -2174,8 +2116,8 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   </button>
                 </div>
               </div>
-            ) : ((isCustom && playerMode === 'studio') || playerMode === 'direct_dub') ? (
-              /* CASE B: OWNED / STUDIO CREATED MOVIE OR DIRECT MULTI-DUB HTML5 ENGINE */
+            ) : (isCustom && playerMode === 'studio') ? (
+              /* CASE B: OWNED / STUDIO CREATED MOVIE (HTML5 Custom Video Player) */
               <div className="relative w-full h-full flex items-center justify-center bg-black">
                 {/* Source Failover / Error Banner (Requirement 6) */}
                 {sourceErrorMessage && (
@@ -2606,28 +2548,6 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
           </div>
 
           {/* ========================================================================= */}
-          {/* 5B. WATCH TOGETHER SHARED PLAYBACK CONTROLS BAR (Play, Pause, Seek, Room) */}
-          {/* ========================================================================= */}
-          {!isFullscreen && (
-            <WatchPartyPlayerBar
-              item={item}
-              season={season}
-              episode={episode}
-              currentServer={selectedServer}
-              videoRef={videoRef}
-              onOpenWatchTogetherModal={() => setIsWatchTogetherOpen(true)}
-              onRemoteSyncMedia={(synced) => {
-                if (synced?.season && synced.season !== season) setSeason(Number(synced.season));
-                if (synced?.episode && synced.episode !== episode) setEpisode(Number(synced.episode));
-                if (synced?.serverId) {
-                  const matched = availableServers.find((s) => s.id === synced.serverId);
-                  if (matched) setSelectedServer(matched);
-                }
-              }}
-            />
-          )}
-
-          {/* ========================================================================= */}
           {/* 6. STREAM RESCUE BAR                                                      */}
           {/* ========================================================================= */}
           {!isFullscreen && (hasOnlineStream || !isCustom) && (
@@ -2666,173 +2586,132 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 </div>
               )}
 
-              <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-2.5">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/35 text-[11px] font-extrabold text-emerald-300">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span>Auto-Server: {currentServer.shortName}</span>
-                  </span>
+                  <span className="text-[11px] font-bold text-cyan-300/80">Available Server Mirrors:</span>
+                  
+                  {/* AI Smart Server Chooser / AI Boost Button */}
+                  <button
+                    data-testid="ai-boost-server-btn"
+                    onClick={() => handleAiAutoSelectServer(true)}
+                    disabled={aiSelecting}
+                    title="⚡ AI Boost: Real-time latency benchmark across 15 global CDN mirrors for lowest ping, 4K bitrate & active multi-dub audio"
+                    className="px-3 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 cursor-pointer bg-gradient-to-r from-amber-500/30 via-cyan-500/30 to-blue-500/30 hover:from-amber-500/50 hover:to-cyan-500/50 text-amber-200 hover:text-white border border-amber-400/60 shadow-[0_0_15px_rgba(245,158,11,0.35)] hover:scale-105 active:scale-95"
+                  >
+                    {aiSelecting ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-400" />
+                        <span className="animate-pulse">⚡ Scanning CDNs...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Zap className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                        <span>⚡ AI Boost Best Server</span>
+                      </>
+                    )}
+                  </button>
 
                   {/* One-tap rescue when the player is blank or shows an error */}
                   <button
                     type="button"
                     onClick={handleNotPlaying}
                     data-testid="not-playing-btn"
-                    title="Blank screen or buffering? Jump to the next best server"
-                    className="px-3 py-1 rounded-lg text-xs font-black transition flex items-center gap-1.5 cursor-pointer bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-400/50 active:scale-95"
+                    title="Blank screen or error? Jump to the next best server"
+                    className="px-3 py-1 rounded-lg text-xs font-black transition flex items-center gap-1.5 cursor-pointer bg-rose-500/15 hover:bg-rose-500/30 text-rose-200 border border-rose-400/40 active:scale-95"
                   >
-                    <Zap className="w-3.5 h-3.5 text-amber-300" />
-                    <span>Not playing? Fast Switch ⚡</span>
+                    <AlertTriangle className="w-3 h-3 text-rose-300" />
+                    <span>Not playing? Next server</span>
                   </button>
 
-                  {/* Toggle technical server buttons only when needed */}
-                  <button
-                    type="button"
-                    onClick={() => setShowServerList((v) => !v)}
-                    className="px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10"
-                  >
-                    <span>{showServerList ? 'Hide Servers ▲' : 'Change Server ⚙️'}</span>
-                  </button>
+                  <div data-testid="server-carousel" className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth snap-x py-1.5 flex-nowrap w-full">
+                    {availableServers.map((srv) => {
+                      const isSelected = currentServer.id === srv.id;
+                      return (
+                        <button
+                          key={srv.id}
+                          data-testid={`server-btn-${srv.id}`}
+                          onClick={() => {
+                            manualPickRef.current = true;
+                            setSelectedServer(srv);
+                            if (playerMode !== 'stream') setPlayerMode('stream');
+                            if (srv.id === 'one23embed') {
+                              if (audioMode !== 'hindi' && hasWorkingHindiSource) setAudioMode('hindi');
+                            } else if (srv.id === 'zxcstream' || srv.id === 'tgvid') {
+                              if (audioMode !== 'sub' && hasWorkingJapaneseSource && isAnime) setAudioMode('sub');
+                            } else if (srv.id === 'vidlink' || srv.id === 'twoembed_vip' || srv.id === 'vidsrc_cc') {
+                              if (audioMode !== 'english' && hasWorkingEnglishSource) setAudioMode('english');
+                            } else if (srv.id === 'moviebox' || srv.id === 'multiembed') {
+                              // Official MovieBox & MultiEmbed high-speed multi-dub routing
+                            }
+                          }}
+                          className={`snap-start px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border shrink-0 ${
+                            isSelected && playerMode === 'stream'
+                              ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-gray-950 font-black border-cyan-300 shadow-[0_0_15px_rgba(56,189,248,0.6)] scale-[1.02]'
+                              : 'bg-[#060c20] text-cyan-200/80 border-cyan-500/25 hover:bg-white/5 hover:text-white'
+                          }`}
+                        >
+                          <span>{srv.shortName}</span>
+                          <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono ${isSelected ? 'bg-black/30 text-white' : 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/20'}`}>
+                            {srv.statusBadge || srv.badge || '🟢 Fast'}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
-                {/* Collapsible Server List (Hidden by default to keep UI clean & easy) */}
-                {showServerList && (
-                  <div className="w-full pt-1.5 border-t border-cyan-500/15 flex flex-col gap-2 animate-fade-in">
-                    <div className="flex items-center justify-between gap-2 flex-wrap">
-                      <span className="text-[11px] font-bold text-cyan-300/80">Select Backup Mirror Manually:</span>
-                      <button
-                        data-testid="ai-boost-server-btn"
-                        onClick={() => handleAiAutoSelectServer(true)}
-                        disabled={aiSelecting}
-                        className="px-2.5 py-1 rounded-lg text-[11px] font-black transition flex items-center gap-1 cursor-pointer bg-cyan-500/20 text-cyan-200 border border-cyan-400/40"
-                      >
-                        <Zap className="w-3 h-3 text-amber-400" />
-                        <span>{aiSelecting ? 'Scanning...' : 'Auto-Pick Fastest CDN'}</span>
-                      </button>
-                    </div>
-                    <div data-testid="server-carousel" className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth snap-x py-1 flex-nowrap w-full">
-                      {availableServers.map((srv) => {
-                        const isSelected = currentServer.id === srv.id;
-                        return (
-                          <button
-                            key={srv.id}
-                            data-testid={`server-btn-${srv.id}`}
-                            onClick={() => {
-                              manualPickRef.current = true;
-                              setSelectedServer(srv);
-                              if (playerMode !== 'stream') setPlayerMode('stream');
-                              if (srv.id === 'one23embed') {
-                                if (audioMode !== 'hindi' && hasWorkingHindiSource) setAudioMode('hindi');
-                              } else if (srv.id === 'zxcstream' || srv.id === 'tgvid') {
-                                if (audioMode !== 'sub' && hasWorkingJapaneseSource && isAnime) setAudioMode('sub');
-                              } else if (srv.id === 'vidlink' || srv.id === 'twoembed_vip' || srv.id === 'vidsrc_cc') {
-                                if (audioMode !== 'english' && hasWorkingEnglishSource) setAudioMode('english');
-                              }
-                            }}
-                            className={`snap-start px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border shrink-0 ${
-                              isSelected && playerMode === 'stream'
-                                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-gray-950 font-black border-cyan-300 shadow-[0_0_15px_rgba(56,189,248,0.6)]'
-                                : 'bg-[#060c20] text-cyan-200/80 border-cyan-500/25 hover:bg-white/5 hover:text-white'
-                            }`}
-                          >
-                            <span>{srv.shortName}</span>
-                            <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono ${isSelected ? 'bg-black/30 text-white' : 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/20'}`}>
-                              {srv.statusBadge || srv.badge || '🟢 Fast'}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
+                <div className="hidden sm:flex items-center gap-2 text-[11px] text-cyan-200/80 flex-wrap">
+                  <span className="flex items-center gap-1 bg-cyan-950/60 border border-cyan-500/30 px-2 py-0.5 rounded-md text-[10px] font-bold text-cyan-300">
+                    <Subtitles className="w-3 h-3 text-cyan-400" />
+                    <span>Subtitles (CC): Toggle English/Hindi subtitles inside player</span>
+                  </span>
+                  <span className="flex items-center gap-1 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-md text-[10px] font-bold text-emerald-300">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>MovieBox CDN Ultra • ⚡ 4K Sub-Second • 🛡️ Zero-Ad Shield</span>
+                  </span>
+                  <span className="text-slate-400 hidden sm:inline">
+                    Stream buffering? Tap <strong>Auto-Switch</strong> or select another mirror.
+                  </span>
+                </div>
+              </div>
+
+              {/* In-Player / Below Player Audio Guidance Tip */}
+              <div 
+                data-testid="audio-guidance-bar"
+                className="hidden sm:flex w-full items-center gap-2 px-3 py-1.5 rounded-lg bg-cyan-950/40 border border-cyan-500/30 text-cyan-200 text-[11px]"
+              >
+                <span className="font-semibold">🎙️ Multi-Audio: Click the Gear (⚙️) or Audio icon inside the player to select Hindi / English, or switch to the Hindi Dubbed server mirror below.</span>
               </div>
             </div>
           )}
 
           {/* ========================================================================= */}
-          {/* 7. TV SEASONS & EPISODES SELECTOR (IF SERIES) WITH SEARCH & NEXT PREVIEW  */}
+          {/* 7. TV SEASONS & EPISODES SELECTOR (IF SERIES)                             */}
           {/* ========================================================================= */}
           {!isFullscreen && isSeries && (
-            <div className="p-4 border-b border-cyan-500/20 bg-[#060e24] space-y-3">
-              {/* Next Episode Preview Card */}
-              {(() => {
-                const nextEpObj = episodesList?.find((e) => e.episode_number === episode + 1);
-                return (
-                  <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-[#091432] border border-cyan-500/25">
-                    <div className="flex items-center gap-3 min-w-0">
-                      {nextEpObj?.still_path ? (
-                        <img
-                          src={`https://image.tmdb.org/t/p/w300${nextEpObj.still_path}`}
-                          alt={nextEpObj.name || `Episode ${episode + 1}`}
-                          className="w-20 h-12 object-cover rounded-lg border border-cyan-500/30 shrink-0"
-                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                        />
-                      ) : (
-                        <div className="w-12 h-12 rounded-lg bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-300 font-black text-xs shrink-0">
-                          E{episode + 1}
-                        </div>
-                      )}
-                      <div className="min-w-0">
-                        <div className="text-[10px] font-black uppercase tracking-wider text-cyan-400">
-                          Up Next • Season {season} Episode {episode + 1}
-                        </div>
-                        <div className="text-xs sm:text-sm font-bold text-white truncate">
-                          {nextEpObj?.name || `Episode ${episode + 1}`}
-                        </div>
-                        {nextEpObj?.overview && (
-                          <p className="text-[11px] text-slate-400 truncate max-w-md hidden sm:block">
-                            {nextEpObj.overview}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleNextEpisode}
-                      className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-gray-950 font-black text-xs flex items-center gap-1.5 shrink-0 shadow-md cursor-pointer"
-                    >
-                      <Play className="w-3.5 h-3.5 fill-gray-950" />
-                      <span>Play Ep {episode + 1}</span>
-                    </button>
-                  </div>
-                );
-              })()}
-
-              <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="p-4 border-b border-cyan-500/20 bg-[#060e24]">
+              <div className="flex items-center justify-between mb-3">
                 <h3 className="text-xs sm:text-sm font-extrabold text-white flex items-center gap-2">
                   <Tv className="w-4 h-4 text-cyan-400" />
                   <span>Episodes & Seasons</span>
                 </h3>
-                <div className="flex items-center gap-2 flex-wrap">
-                  {/* Instant Episode Search & Jump */}
-                  <div className="relative">
-                    <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="text"
-                      value={episodeSearchQuery}
-                      onChange={(e) => setEpisodeSearchQuery(e.target.value)}
-                      placeholder="Jump to Ep # or title..."
-                      className="w-40 sm:w-48 pl-8 pr-2.5 py-1 rounded-lg bg-[#0b1633] border border-cyan-500/30 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400"
-                    />
+                {totalSeasons > 1 && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-cyan-200/70">Season:</span>
+                    <select
+                      value={season}
+                      onChange={(e) => {
+                        setSeason(Number(e.target.value));
+                        setEpisode(1);
+                      }}
+                      className="bg-[#0b1633] border border-cyan-500/30 text-cyan-200 text-xs font-bold rounded-lg px-2.5 py-1 focus:outline-none focus:border-cyan-400"
+                    >
+                      {Array.from({ length: totalSeasons }, (_, i) => i + 1).map((sNum) => (
+                        <option key={sNum} value={sNum}>Season {sNum}</option>
+                      ))}
+                    </select>
                   </div>
-                  {totalSeasons > 1 && (
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs text-cyan-200/70">Season:</span>
-                      <select
-                        value={season}
-                        onChange={(e) => {
-                          setSeason(Number(e.target.value));
-                          setEpisode(1);
-                        }}
-                        className="bg-[#0b1633] border border-cyan-500/30 text-cyan-200 text-xs font-bold rounded-lg px-2.5 py-1 focus:outline-none focus:border-cyan-400 cursor-pointer"
-                      >
-                        {Array.from({ length: totalSeasons }, (_, i) => i + 1).map((sNum) => (
-                          <option key={sNum} value={sNum}>Season {sNum}</option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-                </div>
+                )}
               </div>
 
               {isLoadingEpisodes ? (
@@ -2842,51 +2721,40 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 </div>
               ) : episodesList && episodesList.length > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 max-h-56 overflow-y-auto pr-1">
-                  {episodesList
-                    .filter((ep) => {
-                      if (!episodeSearchQuery.trim()) return true;
-                      const q = episodeSearchQuery.trim().toLowerCase();
-                      return (
-                        String(ep.episode_number).includes(q) ||
-                        (ep.name || '').toLowerCase().includes(q)
-                      );
-                    })
-                    .map((ep) => {
-                      const isCurrentEp = episode === ep.episode_number;
-                      return (
-                        <button
-                          key={ep.id || ep.episode_number}
-                          onClick={() => setEpisode(ep.episode_number)}
-                          className={`p-2 rounded-xl text-left transition border cursor-pointer ${
-                            isCurrentEp
-                              ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-gray-950 border-cyan-300 shadow-[0_0_12px_rgba(56,189,248,0.5)] font-black'
-                              : 'bg-[#08122c] border-cyan-500/20 text-slate-300 hover:bg-white/5 hover:text-white'
-                          }`}
-                        >
-                          <div className="text-[11px] font-bold truncate">
-                            Ep {ep.episode_number}: {ep.name || `Episode ${ep.episode_number}`}
-                          </div>
-                        </button>
-                      );
-                    })}
+                  {episodesList.map((ep) => {
+                    const isCurrentEp = episode === ep.episode_number;
+                    return (
+                      <button
+                        key={ep.id || ep.episode_number}
+                        onClick={() => setEpisode(ep.episode_number)}
+                        className={`p-2 rounded-xl text-left transition border cursor-pointer ${
+                          isCurrentEp
+                            ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-gray-950 border-cyan-300 shadow-[0_0_12px_rgba(56,189,248,0.5)] font-black'
+                            : 'bg-[#08122c] border-cyan-500/20 text-slate-300 hover:bg-white/5 hover:text-white'
+                        }`}
+                      >
+                        <div className="text-[11px] font-bold truncate">
+                          Ep {ep.episode_number}: {ep.name || `Episode ${ep.episode_number}`}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                  {Array.from({ length: 24 }, (_, i) => i + 1)
-                    .filter((epNum) => !episodeSearchQuery.trim() || String(epNum).includes(episodeSearchQuery.trim()))
-                    .map((epNum) => (
-                      <button
-                        key={epNum}
-                        onClick={() => setEpisode(epNum)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition border cursor-pointer ${
-                          episode === epNum
-                            ? 'bg-cyan-500 text-gray-950 border-cyan-400 font-black shadow'
-                            : 'bg-[#08122c] border-cyan-500/20 text-slate-300 hover:bg-white/5'
-                        }`}
-                      >
-                        Ep {epNum}
-                      </button>
-                    ))}
+                  {Array.from({ length: 24 }, (_, i) => i + 1).map((epNum) => (
+                    <button
+                      key={epNum}
+                      onClick={() => setEpisode(epNum)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition border cursor-pointer ${
+                        episode === epNum
+                          ? 'bg-cyan-500 text-gray-950 border-cyan-400 font-black shadow'
+                          : 'bg-[#08122c] border-cyan-500/20 text-slate-300 hover:bg-white/5'
+                      }`}
+                    >
+                      Ep {epNum}
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
@@ -2920,18 +2788,14 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                     return (
                       <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                         <span className="text-[11px] text-cyan-200/60 font-semibold">Genres:</span>
-                        {genres.map((g, idx) => {
-                          const style = getGenreBadgeStyle(g);
-                          return (
-                            <span 
-                              key={idx}
-                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold border ${style.badgeClass}`}
-                            >
-                              <span className={`w-1.5 h-1.5 rounded-full ${style.dotClass}`} />
-                              <span>{style.label}</span>
-                            </span>
-                          );
-                        })}
+                        {genres.map((g, idx) => (
+                          <span 
+                            key={idx}
+                            className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/25 text-cyan-300 text-[10px] font-bold"
+                          >
+                            {g}
+                          </span>
+                        ))}
                       </div>
                     );
                   })()}
