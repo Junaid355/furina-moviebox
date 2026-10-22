@@ -180,17 +180,18 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const isTopVerifiedHindiTitle = [94997, 533535, 12609, 12971, 46260, 31910, 85937, 95479, 127532, 1429, 37854, 30984, 1423191, 63174, 108978, 866398, 801688, 823219, 579974, 585268, 872906].includes(verifiedId);
   const isResidentEvilMovie = (item?.title || item?.name || item?.original_title || '').toLowerCase().includes('resident evil') || verifiedId === 1423191;
   const isMovieBoxHindi = Boolean(item?.hasHindiDub || item?.corner?.includes('Hindi') || String(item?.id).startsWith('mb_'));
-  const hasWorkingHindiSource = (isCustom && playerMode === 'studio')
-    ? Boolean(customSources.hi)
-    : (Boolean(customSources.hi) || isBollywoodHindi || isTopVerifiedHindiTitle || isResidentEvilMovie || isMovieBoxHindi || isHindiAvailable(item) || Boolean(selectedServer?.supportsAudioSwitching || selectedServer?.badge?.includes('Multi') || selectedServer?.name?.includes('Multi') || ['nxsha', '123embed', 'autoembed', 'vidlink'].includes(selectedServer?.id)) || hindiProviderManager.hasLegitimateHindiSource(item));
+  const hasInherentHindi = Boolean(
+    customSources.hi ||
+    isBollywoodHindi ||
+    isTopVerifiedHindiTitle ||
+    isResidentEvilMovie ||
+    isMovieBoxHindi ||
+    isHindiAvailable(item) ||
+    hindiProviderManager.hasLegitimateHindiSource(item)
+  );
 
-  const hasWorkingEnglishSource = (isCustom && playerMode === 'studio') ? Boolean(customSources.en) : true; //
-    // ? false
-    // : (isCustom ? Boolean(customSources.en) : !isBollywoodHindi);
-
-  const hasWorkingJapaneseSource = isCustom
-    ? Boolean(customSources.ja)
-    : (isAnime || Boolean(selectedServer?.supportsAudioSwitching || selectedServer?.badge?.includes('Multi') || selectedServer?.name?.includes('Multi')));
+  const hasInherentEnglish = (isCustom && playerMode === 'studio') ? Boolean(customSources.en) : true;
+  const hasInherentJapanese = Boolean(customSources.ja || isAnime);
 
   // Read saved user audio preference from settings or prop
   const userPreferredAudio = (() => {
@@ -212,21 +213,21 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       try {
         const savedChoice = localStorage.getItem(`furina_audio_${item.id}`);
         if (savedChoice) {
-          if (savedChoice === 'hindi' && hasWorkingHindiSource) return 'hindi';
-          if (savedChoice === 'sub' && hasWorkingJapaneseSource) return 'sub';
-          if (savedChoice === 'english' && hasWorkingEnglishSource) return 'english';
+          if (savedChoice === 'hindi' && hasInherentHindi) return 'hindi';
+          if (savedChoice === 'sub' && hasInherentJapanese) return 'sub';
+          if (savedChoice === 'english' && hasInherentEnglish) return 'english';
         }
       } catch (e) {}
     }
 
     // 2. Smart Language Memory by Category:
     // Anime: Automatically play in Japanese with subtitles
-    if (isAnime && hasWorkingJapaneseSource) {
+    if (isAnime && hasInherentJapanese) {
       return 'sub';
     }
 
     // Bollywood: Automatically play in Hindi
-    if (isBollywoodHindi && hasWorkingHindiSource) {
+    if (isBollywoodHindi && hasInherentHindi) {
       return 'hindi';
     }
 
@@ -235,24 +236,24 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       const catKey = isAnime ? 'furina_anime_audio_pref' : isBollywoodHindi ? 'furina_bollywood_audio_pref' : 'furina_hollywood_audio_pref';
       const catSaved = localStorage.getItem(catKey);
       if (catSaved) {
-        if (catSaved === 'hindi' && hasWorkingHindiSource) return 'hindi';
-        if (catSaved === 'sub' && hasWorkingJapaneseSource) return 'sub';
-        if (catSaved === 'english' && hasWorkingEnglishSource) return 'english';
+        if (catSaved === 'hindi' && hasInherentHindi) return 'hindi';
+        if (catSaved === 'sub' && hasInherentJapanese) return 'sub';
+        if (catSaved === 'english' && hasInherentEnglish) return 'english';
       }
     } catch (e) {}
 
     // Hollywood blockbusters: in user's chosen default (Hindi Dub or English)
     if (userPreferredAudio === 'hindi') {
-      if (hasWorkingHindiSource) return 'hindi';
-      return hasWorkingEnglishSource ? 'english' : (hasWorkingJapaneseSource ? 'sub' : 'english');
+      if (hasInherentHindi) return 'hindi';
+      return hasInherentEnglish ? 'english' : (hasInherentJapanese ? 'sub' : 'english');
     }
     if (userPreferredAudio === 'japanese' || userPreferredAudio === 'sub') {
-      if (hasWorkingJapaneseSource) return 'sub';
-      return hasWorkingEnglishSource ? 'english' : (hasWorkingHindiSource ? 'hindi' : 'english');
+      if (hasInherentJapanese) return 'sub';
+      return hasInherentEnglish ? 'english' : (hasInherentHindi ? 'hindi' : 'english');
     }
     if (userPreferredAudio === 'english') {
-      if (hasWorkingEnglishSource) return 'english';
-      return hasWorkingHindiSource ? 'hindi' : (hasWorkingJapaneseSource ? 'sub' : 'english');
+      if (hasInherentEnglish) return 'english';
+      return hasInherentHindi ? 'hindi' : (hasInherentJapanese ? 'sub' : 'english');
     }
 
     if (isCustom) {
@@ -261,7 +262,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       if (customSources.ja) return 'sub';
       return 'english';
     }
-    if (hasWorkingHindiSource) {
+    if (hasInherentHindi) {
       return 'hindi';
     }
     return 'english';
@@ -332,6 +333,17 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
   const [selectedServer, setSelectedServer] = useState(getInitialServer);
   const [iframeLoading, setIframeLoading] = useState(true);
+
+  // Authenticated real working audio sources computed with selectedServer available
+  const hasWorkingHindiSource = (isCustom && playerMode === 'studio')
+    ? Boolean(customSources.hi)
+    : (hasInherentHindi || Boolean(selectedServer?.supportsAudioSwitching || selectedServer?.badge?.includes('Multi') || selectedServer?.name?.includes('Multi') || ['nxsha', '123embed', 'autoembed', 'vidlink'].includes(selectedServer?.id)));
+
+  const hasWorkingEnglishSource = hasInherentEnglish;
+
+  const hasWorkingJapaneseSource = isCustom
+    ? Boolean(customSources.ja)
+    : (hasInherentJapanese || Boolean(selectedServer?.supportsAudioSwitching || selectedServer?.badge?.includes('Multi') || selectedServer?.name?.includes('Multi')));
 
   // Fullscreen & Core Player Refs
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -689,7 +701,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const [showUBlockGuide, setShowUBlockGuide] = useState(false);
   const [subtitleToast, setSubtitleToast] = useState(null);
   const [unavailableNotice, setUnavailableNotice] = useState(() => {
-    if (userPreferredAudio === 'hindi' && !hasWorkingHindiSource) {
+    if (userPreferredAudio === 'hindi' && !hasInherentHindi) {
       return { show: true, message: "Hindi audio isn't available for this title. Streaming in English Dub." };
     }
     return { show: false, message: '' };
@@ -771,16 +783,16 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       setUnavailableNotice({ show: true, message: errText });
       setIsSwitchingAudio(false);
       if (audioMode === 'hindi') {
-        if (hasWorkingEnglishSource) {
+        if (hasInherentEnglish) {
           setAudioMode('english');
           setActiveSourcePriority(1);
-        } else if (hasWorkingJapaneseSource) {
+        } else if (hasInherentJapanese) {
           setAudioMode('sub');
           setActiveSourcePriority(1);
         }
       }
     }
-  }, [currentLangSources, activeSourcePriority, audioMode, hasWorkingEnglishSource, hasWorkingJapaneseSource]);
+  }, [currentLangSources, activeSourcePriority, audioMode, hasInherentEnglish, hasInherentJapanese]);
 
   const handleUnavailableClick = useCallback((langName) => {
     setUnavailableNotice({
@@ -803,14 +815,14 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       { id: 'off', label: 'Off', flag: '🚫' },
       { id: 'en', label: 'English CC', flag: '🇬🇧' }
     ];
-    if (hasWorkingHindiSource || isBollywoodHindi || item?.languages?.hi || item?.subtitles?.some((s) => s.lang === 'hi')) {
+    if (hasInherentHindi || isBollywoodHindi || item?.languages?.hi || item?.subtitles?.some((s) => s.lang === 'hi')) {
       list.push({ id: 'hi', label: 'Hindi CC', flag: '🇮🇳' });
     }
     if (isAnime || item?.original_language === 'ja' || item?.languages?.ja || item?.subtitles?.some((s) => s.lang === 'ja')) {
       list.push({ id: 'ja', label: 'Japanese Sub', flag: '🇯🇵' });
     }
     return list;
-  }, [hasWorkingHindiSource, isBollywoodHindi, isAnime, item]);
+  }, [hasInherentHindi, isBollywoodHindi, isAnime, item]);
 
   const changeSubtitle = useCallback((subId) => {
     setActiveSubtitle(subId);
@@ -875,21 +887,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     errorMsg: ''
   });
 
-  const AI_BOOST_STYLES = {
-    off: {},
-    '4k': {
-      filter: 'contrast(1.05) saturate(1.08) brightness(1.01)',
-      transition: 'filter 0.3s ease'
-    },
-    hdr: {
-      filter: 'contrast(1.12) saturate(1.18) brightness(1.02)',
-      transition: 'filter 0.3s ease'
-    },
-    night: {
-      filter: 'brightness(1.10) contrast(1.05) saturate(1.05)',
-      transition: 'filter 0.3s ease'
-    }
-  };
+// AI_BOOST_STYLES inherited from top-level module definition
 
   // Safely close modal and exit browser fullscreen mode
   const handleSafeClose = () => {
@@ -1362,7 +1360,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
               {/* Fullscreen Multi-Dub Quick Switcher */}
               <div className="flex items-center gap-1 bg-black/80 px-2 py-1 rounded-xl border border-cyan-500/30 shrink-0">
-                {hasWorkingEnglishSource && (
+                {hasInherentEnglish && (
                   <button
                     onClick={() => handleAudioChange('english')}
                     className={`px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-extrabold transition cursor-pointer ${
@@ -1375,7 +1373,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                     🎙️ EN
                   </button>
                 )}
-                {hasWorkingHindiSource && (
+                {hasInherentHindi && (
                   <button
                     onClick={() => handleAudioChange('hindi')}
                     className={`px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-extrabold transition cursor-pointer ${
@@ -1388,7 +1386,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                     🇮🇳 HI
                   </button>
                 )}
-                {hasWorkingJapaneseSource && (
+                {hasInherentJapanese && (
                   <button
                     onClick={() => handleAudioChange('sub')}
                     className={`px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-extrabold transition cursor-pointer ${
@@ -1718,7 +1716,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 )}
                 <div className="flex items-center gap-1 sm:gap-1.5 bg-black/40 p-0.5 rounded-full border border-white/10">
                   {/* English Dub Option */}
-                  {hasWorkingEnglishSource ? (
+                  {hasInherentEnglish ? (
                     <button
                       data-testid="audio-btn-english"
                       onClick={() => handleAudioChange('english')}
@@ -1746,7 +1744,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   )}
 
                   {/* Japanese Sub Option */}
-                  {hasWorkingJapaneseSource ? (
+                  {hasInherentJapanese ? (
                     <button
                       data-testid="audio-btn-sub"
                       onClick={() => handleAudioChange('sub')}
@@ -1774,7 +1772,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   )}
 
                   {/* Hindi Audio Option */}
-                  {hasWorkingHindiSource ? (
+                  {hasInherentHindi ? (
                     <button
                       data-testid="audio-btn-hindi"
                       onClick={() => handleAudioChange('hindi')}
@@ -1867,17 +1865,17 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
             {/* Audio Mode Active Guidance Badge & Hardware Track Detection */}
             <div className="hidden sm:flex items-center gap-2 flex-wrap text-[11px] text-cyan-200/70">
-              {audioMode === 'english' && hasWorkingEnglishSource && (
+              {audioMode === 'english' && hasInherentEnglish && (
                 <span className="text-cyan-300 font-medium">
                   ✓ <strong>English Audio Active</strong> ({isCustom ? 'Studio Master Track' : isAnime ? 'VidLink Pro verified English stream' : 'Original Theatrical Master Audio'})
                 </span>
               )}
-              {audioMode === 'sub' && hasWorkingJapaneseSource && (
+              {audioMode === 'sub' && hasInherentJapanese && (
                 <span className="text-purple-300 font-medium">
                   ✓ <strong>Japanese Subbed Active</strong> ({isCustom ? 'Studio Master Track' : 'Original Japanese Dialogue'})
                 </span>
               )}
-              {audioMode === 'hindi' && hasWorkingHindiSource && (
+              {audioMode === 'hindi' && hasInherentHindi && (
                 <span className="text-amber-300 font-medium">
                   ✓ <strong>Hindi Audio Active</strong> ({isCustom ? 'Studio Master Track' : isBollywoodHindi ? 'Original Native Hindi Audio Track' : 'Verified Multi-Audio Hindi Stream'})
                 </span>
@@ -1975,12 +1973,12 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 type="button"
                 data-testid="audio-chip-en"
                 onClick={() => handleAudioChange('english')}
-                disabled={!hasWorkingEnglishSource}
+                disabled={!hasInherentEnglish}
                 title="English Dub"
                 className={`px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-extrabold transition cursor-pointer flex items-center gap-0.5 ${
                   audioMode === 'english'
                     ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 shadow-[0_0_12px_rgba(6,182,212,0.8)] font-black border border-cyan-300'
-                    : hasWorkingEnglishSource ? 'text-slate-300 hover:text-white bg-white/5' : 'text-slate-600 opacity-40 cursor-not-allowed'
+                    : hasInherentEnglish ? 'text-slate-300 hover:text-white bg-white/5' : 'text-slate-600 opacity-40 cursor-not-allowed'
                 }`}
               >
                 <span>🎙️ EN</span>
@@ -1989,12 +1987,12 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 type="button"
                 data-testid="audio-chip-hi"
                 onClick={() => handleAudioChange('hindi')}
-                disabled={!hasWorkingHindiSource}
+                disabled={!hasInherentHindi}
                 title="Hindi Audio"
                 className={`px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-extrabold transition cursor-pointer flex items-center gap-0.5 ${
                   audioMode === 'hindi'
                     ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-gray-950 shadow-[0_0_12px_rgba(245,158,11,0.8)] font-black border border-amber-300'
-                    : hasWorkingHindiSource ? 'text-slate-300 hover:text-white bg-white/5' : 'text-slate-600 opacity-40 cursor-not-allowed'
+                    : hasInherentHindi ? 'text-slate-300 hover:text-white bg-white/5' : 'text-slate-600 opacity-40 cursor-not-allowed'
                 }`}
               >
                 <span>🇮🇳 HI</span>
@@ -2003,12 +2001,12 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 type="button"
                 data-testid="audio-chip-ja"
                 onClick={() => handleAudioChange('sub')}
-                disabled={!hasWorkingJapaneseSource}
+                disabled={!hasInherentJapanese}
                 title="Japanese Sub"
                 className={`px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-extrabold transition cursor-pointer flex items-center gap-0.5 ${
                   audioMode === 'sub'
                     ? 'bg-gradient-to-r from-purple-400 to-indigo-500 text-white shadow-[0_0_12px_rgba(168,85,247,0.8)] font-black border border-purple-300'
-                    : hasWorkingJapaneseSource ? 'text-slate-300 hover:text-white bg-white/5' : 'text-slate-600 opacity-40 cursor-not-allowed'
+                    : hasInherentJapanese ? 'text-slate-300 hover:text-white bg-white/5' : 'text-slate-600 opacity-40 cursor-not-allowed'
                 }`}
               >
                 <span>🇯🇵 JA</span>
@@ -2462,14 +2460,14 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 )}
 
                 {/* Fallback Audio Safeguard: If Hindi was selected on an unavailable title, stream default cleanly with subtle warning banner */}
-                {audioMode === 'hindi' && !hasWorkingHindiSource && !unavailableNotice.show && (
+                {audioMode === 'hindi' && !hasInherentHindi && !unavailableNotice.show && (
                   <div className="absolute top-3 left-1/2 -translate-x-1/2 z-40 max-w-lg px-3.5 py-1.5 rounded-xl bg-slate-950/90 border border-amber-500/40 text-amber-200 text-xs shadow-xl backdrop-blur-md flex items-center justify-between gap-2.5 animate-in fade-in slide-in-from-top-2 duration-200 pointer-events-auto">
                     <div className="flex items-center gap-1.5">
                       <span className="text-amber-400 font-bold">ℹ️</span>
-                      <span>Hindi audio unavailable from providers for this title. Streaming in {hasWorkingEnglishSource ? 'English Dub' : 'Japanese Sub'}.</span>
+                      <span>Hindi audio unavailable from providers for this title. Streaming in {hasInherentEnglish ? 'English Dub' : 'Japanese Sub'}.</span>
                     </div>
                     <button
-                      onClick={() => setAudioMode(hasWorkingEnglishSource ? 'english' : 'sub')}
+                      onClick={() => setAudioMode(hasInherentEnglish ? 'english' : 'sub')}
                       className="px-2 py-0.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold text-[11px] transition cursor-pointer"
                     >
                       Switch
@@ -2656,11 +2654,11 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                             setSelectedServer(srv);
                             if (playerMode !== 'stream') setPlayerMode('stream');
                             if (srv.id === 'one23embed') {
-                              if (audioMode !== 'hindi' && hasWorkingHindiSource) setAudioMode('hindi');
+                              if (audioMode !== 'hindi' && hasInherentHindi) setAudioMode('hindi');
                             } else if (srv.id === 'zxcstream' || srv.id === 'tgvid') {
-                              if (audioMode !== 'sub' && hasWorkingJapaneseSource && isAnime) setAudioMode('sub');
+                              if (audioMode !== 'sub' && hasInherentJapanese && isAnime) setAudioMode('sub');
                             } else if (srv.id === 'vidlink' || srv.id === 'twoembed_vip' || srv.id === 'vidsrc_cc') {
-                              if (audioMode !== 'english' && hasWorkingEnglishSource) setAudioMode('english');
+                              if (audioMode !== 'english' && hasInherentEnglish) setAudioMode('english');
                             } else if (srv.id === 'moviebox' || srv.id === 'multiembed') {
                               // Official MovieBox & MultiEmbed high-speed multi-dub routing
                             }
