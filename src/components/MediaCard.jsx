@@ -102,21 +102,21 @@ const MediaCard = React.memo(function MediaCard({
 
         {/* Elegant overlay when image falls back */}
         {imageError && (
-          <div className="absolute inset-0 bg-[#060c1d]/85 flex flex-col items-center justify-center p-3 text-center pointer-events-none z-10">
-            <div className="w-10 h-10 rounded-2xl bg-cyan-500/15 border border-cyan-400/30 flex items-center justify-center mb-2 shadow">
+          <div className="absolute inset-0 bg-gradient-to-b from-[#091538]/90 via-[#060d24]/95 to-[#030819] flex flex-col items-center justify-center p-3 text-center pointer-events-none z-10">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-cyan-500/20 to-blue-600/20 border border-cyan-400/40 flex items-center justify-center mb-1.5 shadow-[0_0_15px_rgba(56,189,248,0.3)]">
               {isAnime ? (
-                <Sparkles className="w-5 h-5 text-cyan-300" />
+                <Sparkles className="w-6 h-6 text-cyan-300 animate-pulse" />
               ) : isSeries ? (
-                <Tv className="w-5 h-5 text-sky-400" />
+                <Tv className="w-6 h-6 text-sky-400" />
               ) : (
-                <Film className="w-5 h-5 text-cyan-400" />
+                <Film className="w-6 h-6 text-cyan-400" />
               )}
             </div>
-            <p className="font-bold text-xs text-white line-clamp-2 leading-snug px-1">
-              {title}
-            </p>
+            <span className="text-[10px] font-black uppercase tracking-widest text-cyan-300/90 font-mono">
+              {isAnime ? 'ANIME STREAM' : isSeries ? 'TV SERIES' : '4K CINEMA'}
+            </span>
             {year && (
-              <span className="text-[10px] text-cyan-300 font-bold mt-1">
+              <span className="text-[10px] text-slate-400 font-semibold mt-0.5">
                 {year}
               </span>
             )}

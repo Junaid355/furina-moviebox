@@ -25,6 +25,26 @@ import hindiProviderManager, {
   getPrioritizedAudioSources 
 } from '../services/HindiProviderManager';
 
+const AI_BOOST_STYLES = {
+  off: {},
+  '4k': {
+    filter: 'contrast(1.09) saturate(1.14) brightness(1.02) drop-shadow(0 0 1px rgba(0,0,0,0.45))',
+    imageRendering: '-webkit-optimize-contrast'
+  },
+  hdr: {
+    filter: 'contrast(1.16) saturate(1.24) brightness(1.03)',
+    imageRendering: 'crisp-edges'
+  },
+  anime: {
+    filter: 'contrast(1.12) saturate(1.20) brightness(1.04) hue-rotate(-1deg)',
+    imageRendering: 'crisp-edges'
+  },
+  night: {
+    filter: 'brightness(1.16) contrast(1.08) saturate(1.08)',
+    imageRendering: 'auto'
+  }
+};
+
 export default function PlayerModal({ item, onClose, preferredServerId, isHindiPreferred }) {
   if (!item) return null;
 
@@ -128,11 +148,12 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const hasOnlineStream = Boolean(resolvedTmdbId);
   const [playerMode, setPlayerMode] = useState(() => (hasOnlineStream ? 'stream' : (isCustomMovie ? 'studio' : 'stream')));
 
+  const INDIAN_LANGS = ['hi', 'te', 'ta', 'ml', 'kn', 'bn', 'mr', 'pa', 'gu', 'or', 'ur'];
   const isBollywoodHindi = Boolean(
     !isAnime && (
-      item?.original_language === 'hi' ||
+      INDIAN_LANGS.includes(item?.original_language) ||
       item?.category === 'hindi' ||
-      (item?.title || item?.name || '').toLowerCase().includes('stree') ||
+      Boolean((item?.title || item?.name || '').match(/devara|kalki|pushpa|rrr|kgf|salaar|baahubali|stree|jawan|pathaan|sholay|dangal|drishyam|kantara|leo|vikram/i)) ||
       (Array.isArray(item?.origin_country) && item?.origin_country.includes('IN') && item?.original_language !== 'en')
     )
   );
@@ -156,20 +177,20 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
 
   // Authentic audio tracks strictly based on physical audio assets, native spoken languages, or verified provider sources
   const verifiedId = Number(item?.id) || Number(item?.tmdb_id) || Number(resolvedTmdbId);
-  const isTopVerifiedHindiTitle = [94997, 533535, 12609, 12971, 46260, 31910, 85937, 95479, 127532, 1429, 37854, 30984, 1423191, 63174, 108978].includes(verifiedId);
+  const isTopVerifiedHindiTitle = [94997, 533535, 12609, 12971, 46260, 31910, 85937, 95479, 127532, 1429, 37854, 30984, 1423191, 63174, 108978, 866398, 801688, 823219, 579974, 585268, 872906].includes(verifiedId);
   const isResidentEvilMovie = (item?.title || item?.name || item?.original_title || '').toLowerCase().includes('resident evil') || verifiedId === 1423191;
   const isMovieBoxHindi = Boolean(item?.hasHindiDub || item?.corner?.includes('Hindi') || String(item?.id).startsWith('mb_'));
   const hasWorkingHindiSource = (isCustom && playerMode === 'studio')
     ? Boolean(customSources.hi)
-    : (Boolean(customSources.hi) || isBollywoodHindi || isTopVerifiedHindiTitle || isResidentEvilMovie || isMovieBoxHindi || isHindiAvailable(item) || hindiProviderManager.hasLegitimateHindiSource(item));
+    : (Boolean(customSources.hi) || isBollywoodHindi || isTopVerifiedHindiTitle || isResidentEvilMovie || isMovieBoxHindi || isHindiAvailable(item) || Boolean(selectedServer?.supportsAudioSwitching || selectedServer?.badge?.includes('Multi') || selectedServer?.name?.includes('Multi') || ['nxsha', '123embed', 'autoembed', 'vidlink'].includes(selectedServer?.id)) || hindiProviderManager.hasLegitimateHindiSource(item));
 
-  const hasWorkingEnglishSource = isBollywoodHindi
-    ? false
-    : (isCustom ? Boolean(customSources.en) : !isBollywoodHindi);
+  const hasWorkingEnglishSource = (isCustom && playerMode === 'studio') ? Boolean(customSources.en) : true; //
+    // ? false
+    // : (isCustom ? Boolean(customSources.en) : !isBollywoodHindi);
 
   const hasWorkingJapaneseSource = isCustom
     ? Boolean(customSources.ja)
-    : isAnime;
+    : (isAnime || Boolean(selectedServer?.supportsAudioSwitching || selectedServer?.badge?.includes('Multi') || selectedServer?.name?.includes('Multi')));
 
   // Read saved user audio preference from settings or prop
   const userPreferredAudio = (() => {

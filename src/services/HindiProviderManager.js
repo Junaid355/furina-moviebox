@@ -104,10 +104,15 @@ export class IndianCinemaNativeProvider {
       item.original_language === 'ja'
     );
     if (isAnime) return false;
-    if (item.original_language === 'hi') return true;
+    const INDIAN_LANGS = ['hi', 'te', 'ta', 'ml', 'kn', 'bn', 'mr', 'pa', 'gu', 'or', 'ur'];
+    if (INDIAN_LANGS.includes(item.original_language)) return true;
+    if (item.category === 'hindi' || item.isHindiDubbed === true || item.hasHindiDub === true) return true;
     if (Array.isArray(item.origin_country) && item.origin_country.includes('IN') && item.original_language !== 'en') return true;
+    if (Array.isArray(item.production_countries) && item.production_countries.some((c) => c.iso_3166_1 === 'IN' || c.name === 'India')) return true;
     const numId = Number(item.id);
     if (CURATED_BOLLYWOOD_BLOCKBUSTERS.some((b) => Number(b.id) === numId)) return true;
+    const titleLower = (item.title || item.name || '').toLowerCase();
+    if (titleLower.match(/devara|kalki|pushpa|rrr|kgf|salaar|baahubali|stree|jawan|pathaan|sholay|dangal|drishyam|kantara|leo|vikram/i)) return true;
     return false;
   }
 
@@ -427,7 +432,7 @@ export class HindiProviderManager {
     if (!item) return false;
     if (item.isUserCreated && (item.languages?.hi?.url || item.audio_hi_url)) return true;
     const numId = Number(item.id);
-    if ([94997, 533535, 12609, 12971, 46260, 31910, 85937, 95479, 127532, 1429, 37854, 30984, 1423191].includes(numId)) return true;
+    if ([94997, 533535, 12609, 12971, 46260, 31910, 85937, 95479, 127532, 1429, 37854, 30984, 1423191, 866398, 801688, 823219, 579974, 585268, 872906].includes(numId)) return true;
     try {
       if (typeof window !== 'undefined') {
         const stored = localStorage.getItem('furina_studio_movies');

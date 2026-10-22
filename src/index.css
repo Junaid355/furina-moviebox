@@ -67,6 +67,18 @@
   box-shadow: 0 0 14px rgba(0, 242, 254, 0.5);
 }
 
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+  html, body {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+}
+
 /* Glassmorphic Fontaine Navbar with specular cyan highlight */
 .glass-nav {
   background: rgba(4, 11, 32, 0.86);
@@ -375,6 +387,13 @@ video::cue {
    Mobile & iPhone Optimization (Safe Areas & 16px Font Zoom Prevention)
    ========================================================================== */
 @media screen and (max-width: 768px) {
+  ::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+  }
+  html, body {
+    scrollbar-width: none !important;
+  }
   input[type="text"],
   input[type="number"],
   input[type="search"],
@@ -421,5 +440,3 @@ video::cue {
 .animate-spin-around {
   animation: spinAround calc(var(--speed) * 2) infinite linear;
 }
-
-

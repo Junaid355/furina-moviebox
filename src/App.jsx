@@ -585,7 +585,7 @@ export default function App() {
   }, [isSettingsOpen, isStudioOpen, isIPhoneModalOpen, isAndroidModalOpen, activeMedia, detailsItem, isSearchOverlayOpen]);
 
   return (
-    <div className={`min-h-screen ${isStealthMode ? 'bg-[#080b11]' : 'bg-[#030712]'} text-white flex flex-col selection:bg-cyan-500 selection:text-gray-950 pb-20 lg:pb-8 relative overflow-x-hidden`}>
+    <div className={`min-h-screen ${isStealthMode ? 'bg-[#080b11]' : 'bg-[#030712]'} text-white flex flex-col selection:bg-cyan-500 selection:text-gray-950 pb-20 lg:pb-8 relative overflow-x-clip`}>
       
       {/* Background Ambient Hydro Glow Blobs (GPU Layered) */}
       <div className="fixed -top-40 left-1/4 w-[650px] h-[650px] bg-cyan-500/[0.07] rounded-full blur-[160px] pointer-events-none -z-10 transform-gpu" style={{ transform: 'translateZ(0)' }} />
@@ -1574,7 +1574,7 @@ export default function App() {
       <FurinaMascot onOpenSearch={() => setIsSearchOverlayOpen(true)} />
 
       {/* Mobile iOS Style Bottom Navigation Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-[#070d1e]/95 backdrop-blur-2xl border-t border-cyan-500/20 px-1 py-2 safe-bottom flex items-center justify-around shadow-[0_-5px_25px_rgba(0,0,0,0.7)]">
+      <nav style={{ transform: 'translateZ(0)' }} className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-[#070d1e]/95 backdrop-blur-2xl border-t border-cyan-500/20 px-1 py-2 safe-bottom flex items-center justify-around shadow-[0_-5px_25px_rgba(0,0,0,0.7)] transform-gpu">
         {[
           { id: 'trending', label: 'Trending', icon: Flame },
           { id: 'hollywood', label: 'Movies', icon: Film },

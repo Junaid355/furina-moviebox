@@ -733,6 +733,22 @@ export async function fetchHollywoodMovies(page = 1) {
 
 
 export const CURATED_BOLLYWOOD_BLOCKBUSTERS = [
+  {
+    "id": 866398,
+    "title": "Devara: Part 1",
+    "name": "Devara: Part 1",
+    "overview": "An epic action saga set across coastal lands, following Devara, a fearless man who vows to protect his people from smugglers and traitors, and his son Vara who must uphold his father's fierce legacy. Multi-Audio & Hindi Dubbed.",
+    "poster_path": "/A9ENz6dsn8s95iN7Fm41mBvLq4D.jpg",
+    "backdrop_path": "/v4G3oF4gq36b9M5G1qXJ2H6B7K4.jpg",
+    "media_type": "movie",
+    "vote_average": 7.2,
+    "release_date": "2024-09-27",
+    "first_air_date": "",
+    "original_language": "te",
+    "category": "hindi",
+    "isHindiDubbed": true,
+    "hasHindiDub": true
+  },
 
   {
 
@@ -2343,7 +2359,7 @@ export async function fetchHindiMovies(page = 1) {
 
     const bollywood = (data.results && data.results.length > 0)
       ? data.results
-          .filter((m) => m && m.id && !curatedIds.has(m.id))
+          .filter((m) => m && m.id && m.poster_path && (m.title || m.name) && !curatedIds.has(m.id))
           .map((m) => ({ ...m, media_type: 'movie', category: 'hindi', original_language: 'hi', isHindiDubbed: true }))
       : (page === 1 ? FALLBACK_MEDIA.filter((m) => m.category === 'hindi') : []);
 
@@ -3667,10 +3683,10 @@ export function isHindiAvailable(item) {
     return true;
   }
 
-  // Authentic Bollywood / Indian cinema whose native spoken audio is Hindi
+  // Authentic Indian cinema (Hindi & Pan-India regional languages with Hindi dubs)
   if (
-    item.original_language === 'hi' ||
-    (Array.isArray(item.origin_country) && item.origin_country.includes('IN') && item.original_language !== 'en')
+    ['hi', 'te', 'ta', 'ml', 'kn', 'bn', 'mr', 'pa', 'gu', 'or', 'ur'].includes(item.original_language) || item.category === 'hindi' || item.isHindiDubbed === true || item.hasHindiDub === true ||
+    (Array.isArray(item.origin_country) && item.origin_country.includes('IN') && item.original_language !== 'en') || (Array.isArray(item.production_countries) && item.production_countries.some((c) => c.iso_3166_1 === 'IN' || c.name === 'India'))
   ) {
     return true;
   }
@@ -3695,7 +3711,7 @@ export function isHindiAvailable(item) {
   const itemTitle = (item.title || item.name || item.original_title || item.original_name || '').toLowerCase().trim();
   if (itemTitle) {
     if (itemTitle.includes('resident evil')) return true;
-    if (itemTitle.includes('deadpool') || itemTitle.includes('avengers') || itemTitle.includes('spider-man') || itemTitle.includes('batman')) return true;
+    if (itemTitle.includes('deadpool') || itemTitle.includes('avengers') || itemTitle.includes('spider-man') || itemTitle.includes('batman') || itemTitle.includes('devara') || itemTitle.includes('kalki') || itemTitle.includes('pushpa') || itemTitle.includes('rrr') || itemTitle.includes('salaar')) return true;
     if (CURATED_HOLLYWOOD_HINDI_DUBS.some((m) => {
       const mTitle = (m.title || m.name || '').toLowerCase().trim();
       return mTitle && (itemTitle === mTitle || itemTitle.includes(mTitle) || mTitle.includes(itemTitle));
