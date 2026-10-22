@@ -166,7 +166,7 @@ export default function HeroBanner({
           alt={title}
           onError={(e) => {
             e.currentTarget.onerror = null;
-            e.currentTarget.src = './icon-512.png';
+            e.currentTarget.src = 'https://image.tmdb.org/t/p/original/yDHYTjA3R0neXjgu144Y1fX3AcA.jpg';
           }}
           className="w-full h-full object-cover object-center scale-105 transition-all duration-1000 group-hover:scale-100 filter brightness-95 animate-fade-in"
         />

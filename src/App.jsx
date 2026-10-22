@@ -90,7 +90,10 @@ export default function App() {
       const cached = localStorage.getItem('furina_cached_trending');
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) return deduplicateMedia(parsed);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const filtered = parsed.filter(m => !m?.title?.toLowerCase().includes('beekeeper') && !m?.name?.toLowerCase().includes('beekeeper'));
+          if (filtered.length > 0) return deduplicateMedia(filtered);
+        }
       }
     } catch (e) {}
     return deduplicateMedia([...FALLBACK_MEDIA, ...CURATED_HOLLYWOOD_BLOCKBUSTERS]);
@@ -492,7 +495,16 @@ export default function App() {
         const uniqueResults = deduplicateMedia(results);
         if (uniqueResults && uniqueResults.length > 0) {
           setItems(uniqueResults);
-          setHeroItem(uniqueResults[0]);
+          const premierHero = (activeCategory === 'trending' && !debouncedQuery)
+            ? (uniqueResults.find(m => 
+                m.backdrop_path && 
+                !String(m.backdrop_path).includes('icon-512') &&
+                (m.vote_average >= 7.2 || m.popularity > 80) &&
+                !m.title?.toLowerCase().includes('beekeeper') &&
+                !m.name?.toLowerCase().includes('beekeeper')
+              ) || uniqueResults.find(m => !m.title?.toLowerCase().includes('beekeeper') && !m.name?.toLowerCase().includes('beekeeper')) || uniqueResults[0] || FALLBACK_MEDIA[0])
+            : (uniqueResults[0] || FALLBACK_MEDIA[0]);
+          setHeroItem(premierHero);
           setError(null);
           // Cache top trending titles for instant subsequent loading
           if (activeCategory === 'trending' && !debouncedQuery) {

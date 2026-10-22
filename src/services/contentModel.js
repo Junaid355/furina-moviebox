@@ -10,7 +10,7 @@ export const TMDB_BACKDROP_BASE = 'https://image.tmdb.org/t/p/original';
 
 // Fallback high-resolution thematic poster when remote poster is missing or 404
 export const DEFAULT_POSTER_FALLBACK = './icon-512.png';
-export const DEFAULT_BACKDROP_FALLBACK = './icon-512.png';
+export const DEFAULT_BACKDROP_FALLBACK = 'https://image.tmdb.org/t/p/original/yDHYTjA3R0neXjgu144Y1fX3AcA.jpg';
 
 export const TMDB_GENRE_MAP = {
   28: 'Action',
