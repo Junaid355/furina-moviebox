@@ -91,8 +91,27 @@ export default function App() {
       if (cached) {
         const parsed = JSON.parse(cached);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const filtered = parsed.filter(m => !m?.title?.toLowerCase().includes('beekeeper') && !m?.name?.toLowerCase().includes('beekeeper'));
-          if (filtered.length > 0) return deduplicateMedia(filtered);
+          const sanitized = parsed.map(m => {
+            const t = (m?.title || m?.name || '').toLowerCase();
+            if (t.includes('devara') || (Number(m?.id) === 866398 && !t.includes('beekeeper')) || Number(m?.tmdb_id) === 866398) {
+              return {
+                ...m,
+                id: 811941,
+                tmdb_id: 811941,
+                tmdbId: 811941,
+                title: 'Devara: Part 1',
+                name: 'Devara: Part 1',
+                poster_path: '/lQfuaXjANoTsdx5iS0gCXlK9D2L.jpg',
+                backdrop_path: '/hAQnXxOwCjgYcKRgTdYPRC8neqL.jpg',
+                original_language: 'te',
+                category: 'hindi',
+                isHindiDubbed: true,
+                hasHindiDub: true
+              };
+            }
+            return m;
+          }).filter(m => !m?.title?.toLowerCase().includes('beekeeper') && !m?.name?.toLowerCase().includes('beekeeper'));
+          if (sanitized.length > 0) return deduplicateMedia(sanitized);
         }
       }
     } catch (e) {}
@@ -105,6 +124,31 @@ export default function App() {
   const [retryCount, setRetryCount] = useState(0);
   const [page, setPage] = useState(1);
   const [activeMedia, setActiveMedia] = useState(null);
+
+  const setSafeActiveMedia = useCallback((media) => {
+    if (!media) {
+      setActiveMedia(null);
+      return;
+    }
+    const t = (media.title || media.name || '').toLowerCase();
+    if (t.includes('devara') || (Number(media.id) === 866398 && !t.includes('beekeeper')) || Number(media.tmdb_id) === 866398) {
+      media = {
+        ...media,
+        id: 811941,
+        tmdb_id: 811941,
+        tmdbId: 811941,
+        title: 'Devara: Part 1',
+        name: 'Devara: Part 1',
+        poster_path: '/lQfuaXjANoTsdx5iS0gCXlK9D2L.jpg',
+        backdrop_path: '/hAQnXxOwCjgYcKRgTdYPRC8neqL.jpg',
+        original_language: 'te',
+        category: 'hindi',
+        isHindiDubbed: true,
+        hasHindiDub: true
+      };
+    }
+    setActiveMedia(media);
+  }, []);
   const [detailsItem, setDetailsItem] = useState(null);
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
   const [isMuted, setIsMuted] = useState(() => soundFx.isMuted());
@@ -165,7 +209,7 @@ export default function App() {
               episode: e,
               preferredServerId: srv
             };
-            setActiveMedia(syncItem);
+            setSafeActiveMedia(syncItem);
           } else {
             setIsWatchTogetherOpen(true);
           }
@@ -254,7 +298,7 @@ export default function App() {
             isHindiDubbed: isHindiAvailable({ id: numId || urlId })
           }
         );
-        setActiveMedia(matchedItem);
+        setSafeActiveMedia(matchedItem);
         if (urlServer !== null) {
           const srvIdx = parseInt(urlServer, 10);
           if (!isNaN(srvIdx) && SERVERS[srvIdx]) {
@@ -357,7 +401,7 @@ export default function App() {
     window.__closeStudio = () => setIsStudioOpen(false);
     window.__playMedia = (media) => {
       setIsStudioOpen(false);
-      setActiveMedia(media);
+      setSafeActiveMedia(media);
     };
     window.__getStudioSample = () => getStoredStudioMovies()[0];
     return () => {
@@ -646,7 +690,7 @@ export default function App() {
             <HeroBanner
               items={items}
               item={heroItem}
-              onPlay={setActiveMedia}
+              onPlay={setSafeActiveMedia}
               isWatchlisted={isWatchlisted}
               onToggleWatchlist={toggleWatchlist}
               onOpenDetails={setDetailsItem}
@@ -667,7 +711,7 @@ export default function App() {
                   key={`marquee-${m.id}`}
                   onClick={() => {
                     soundFx.playClick();
-                    setActiveMedia(m);
+                    setSafeActiveMedia(m);
                   }}
                   className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#081534] border border-cyan-500/30 hover:border-cyan-400 text-[11px] sm:text-xs text-white font-semibold cursor-pointer transition hover:scale-105 mx-1"
                 >
@@ -699,7 +743,7 @@ export default function App() {
                 return (
                   <div
                     key={cw.id}
-                    onClick={() => setActiveMedia(cw)}
+                    onClick={() => setSafeActiveMedia(cw)}
                     className="relative flex-shrink-0 w-24 xs:w-32 sm:w-44 bg-[#081534] border border-cyan-500/30 hover:border-cyan-400 rounded-xl overflow-hidden cursor-pointer group transition shadow-md"
                   >
                     <div className="aspect-[16/10] w-full bg-[#050c20] relative overflow-hidden">
@@ -1128,7 +1172,7 @@ export default function App() {
                     icon={Film}
                     badge="MOVIEBOX"
                     items={shelvesData.moviebox}
-                    onPlay={setActiveMedia}
+                    onPlay={setSafeActiveMedia}
                     onOpenDetails={setDetailsItem}
                     isWatchlisted={isWatchlisted}
                     onToggleWatchlist={toggleWatchlist}
@@ -1142,7 +1186,7 @@ export default function App() {
                   icon={Flame}
                   badge="HOT"
                   items={items}
-                  onPlay={setActiveMedia}
+                  onPlay={setSafeActiveMedia}
                   onOpenDetails={setDetailsItem}
                   isWatchlisted={isWatchlisted}
                   onToggleWatchlist={toggleWatchlist}
@@ -1155,7 +1199,7 @@ export default function App() {
                     icon={Film}
                     badge="4K UHD"
                     items={shelvesData.popularMovies}
-                    onPlay={setActiveMedia}
+                    onPlay={setSafeActiveMedia}
                     onOpenDetails={setDetailsItem}
                     isWatchlisted={isWatchlisted}
                     onToggleWatchlist={toggleWatchlist}
@@ -1170,7 +1214,7 @@ export default function App() {
                     icon={Sparkles}
                     badge="TOP ANIME"
                     items={shelvesData.popularAnime}
-                    onPlay={setActiveMedia}
+                    onPlay={setSafeActiveMedia}
                     onOpenDetails={setDetailsItem}
                     isWatchlisted={isWatchlisted}
                     onToggleWatchlist={toggleWatchlist}
@@ -1185,7 +1229,7 @@ export default function App() {
                     icon={Sparkles}
                     badge="HINDI DUB"
                     items={shelvesData.hindiDubbed}
-                    onPlay={setActiveMedia}
+                    onPlay={setSafeActiveMedia}
                     onOpenDetails={setDetailsItem}
                     isWatchlisted={isWatchlisted}
                     onToggleWatchlist={toggleWatchlist}
@@ -1200,7 +1244,7 @@ export default function App() {
                     icon={Volume2}
                     badge="MULTI-DUB"
                     items={shelvesData.multiAudio}
-                    onPlay={setActiveMedia}
+                    onPlay={setSafeActiveMedia}
                     onOpenDetails={setDetailsItem}
                     isWatchlisted={isWatchlisted}
                     onToggleWatchlist={toggleWatchlist}
@@ -1214,7 +1258,7 @@ export default function App() {
                     icon={Tv}
                     badge="SERIES"
                     items={shelvesData.series}
-                    onPlay={setActiveMedia}
+                    onPlay={setSafeActiveMedia}
                     onOpenDetails={setDetailsItem}
                     isWatchlisted={isWatchlisted}
                     onToggleWatchlist={toggleWatchlist}
@@ -1229,7 +1273,7 @@ export default function App() {
                     icon={Star}
                     badge="TOP RATED"
                     items={shelvesData.topRated}
-                    onPlay={setActiveMedia}
+                    onPlay={setSafeActiveMedia}
                     onOpenDetails={setDetailsItem}
                     isWatchlisted={isWatchlisted}
                     onToggleWatchlist={toggleWatchlist}
@@ -1293,7 +1337,7 @@ export default function App() {
                     icon={vibe.id.includes('cozy') ? Moon : vibe.id.includes('ghibli') ? Sparkles : vibe.id.includes('action') ? Flame : Volume2}
                     badge={vibe.badge}
                     items={vibe.items}
-                    onPlay={setActiveMedia}
+                    onPlay={setSafeActiveMedia}
                     onOpenDetails={setDetailsItem}
                     isWatchlisted={isWatchlisted}
                     onToggleWatchlist={toggleWatchlist}
@@ -1311,7 +1355,7 @@ export default function App() {
                       <MediaCard
                         key={`home-grid-${item.id}-${idx}`}
                         item={item}
-                        onPlay={setActiveMedia}
+                        onPlay={setSafeActiveMedia}
                         onOpenDetails={setDetailsItem}
                         isWatchlisted={isWatchlisted(item.id)}
                         onToggleWatchlist={toggleWatchlist}
@@ -1327,7 +1371,7 @@ export default function App() {
                   <MediaCard
                     key={`${item.id}-${idx}`}
                     item={item}
-                    onPlay={setActiveMedia}
+                    onPlay={setSafeActiveMedia}
                     onOpenDetails={setDetailsItem}
                     isWatchlisted={isWatchlisted(item.id)}
                     onToggleWatchlist={toggleWatchlist}
@@ -1411,7 +1455,7 @@ export default function App() {
           preferredServer={preferredServer}
           setPreferredServer={setPreferredServer}
           onClearWatchlist={clearWatchlist}
-          onPlayMedia={setActiveMedia}
+          onPlayMedia={setSafeActiveMedia}
           onSelectCategory={(cat) => { setActiveCategory(cat); setSearchQuery(''); }}
         />
 
@@ -1431,7 +1475,7 @@ export default function App() {
         <MovieStudioModal
           isOpen={isStudioOpen}
           onClose={() => setIsStudioOpen(false)}
-          onPlayMovie={(movie) => setActiveMedia(movie)}
+          onPlayMovie={(movie) => setSafeActiveMedia(movie)}
           onMoviesChanged={() => setStudioVersion((v) => v + 1)}
         />
 
@@ -1442,7 +1486,7 @@ export default function App() {
             onClose={() => setDetailsItem(null)}
             onPlay={(itemToPlay) => {
               setDetailsItem(null);
-              setActiveMedia(itemToPlay);
+              setSafeActiveMedia(itemToPlay);
             }}
             isWatchlisted={isWatchlisted}
             onToggleWatchlist={toggleWatchlist}
@@ -1455,7 +1499,7 @@ export default function App() {
           onClose={() => setIsSearchOverlayOpen(false)}
           onPlay={(itemToPlay) => {
             setIsSearchOverlayOpen(false);
-            setActiveMedia(itemToPlay);
+            setSafeActiveMedia(itemToPlay);
           }}
           onOpenDetails={(itemToDetail) => {
             setIsSearchOverlayOpen(false);
@@ -1473,7 +1517,7 @@ export default function App() {
           onClose={() => setIsTimelineOpen(false)}
           onSelectMedia={(itemToPlay) => {
             setIsTimelineOpen(false);
-            setActiveMedia(itemToPlay);
+            setSafeActiveMedia(itemToPlay);
           }}
         />
 

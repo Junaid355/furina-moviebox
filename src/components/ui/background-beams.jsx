@@ -140,8 +140,6 @@ export const BackgroundBeams = ({ className = "" }) => {
           ctx.quadraticCurveTo(0, 0, -size, 0);
           ctx.quadraticCurveTo(0, 0, 0, -size);
           ctx.fillStyle = `rgba(186, 230, 253, ${currentOpacity})`;
-          ctx.shadowColor = "rgba(0, 242, 254, 0.85)";
-          ctx.shadowBlur = 10;
           ctx.fill();
         } else {
           // Translucent Hydro Bubble with Specular Highlight
@@ -150,8 +148,6 @@ export const BackgroundBeams = ({ className = "" }) => {
           ctx.fillStyle = `rgba(56, 189, 248, ${currentOpacity * 0.35})`;
           ctx.strokeStyle = `rgba(186, 230, 253, ${currentOpacity * 0.85})`;
           ctx.lineWidth = 0.8;
-          ctx.shadowColor = "rgba(0, 242, 254, 0.9)";
-          ctx.shadowBlur = 8;
           ctx.fill();
           ctx.stroke();
 
@@ -159,16 +155,13 @@ export const BackgroundBeams = ({ className = "" }) => {
           ctx.beginPath();
           ctx.arc(b.x - b.radius * 0.35, b.y - b.radius * 0.35, b.radius * 0.28, 0, Math.PI * 2);
           ctx.fillStyle = `rgba(255, 255, 255, ${currentOpacity * 0.95})`;
-          ctx.shadowBlur = 0;
           ctx.fill();
         }
         ctx.restore();
       });
-
-      animationFrameId = requestAnimationFrame(render);
     };
 
-    render();
+    render(performance.now());
 
     return () => {
       window.removeEventListener("resize", handleResize);

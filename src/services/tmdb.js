@@ -734,12 +734,12 @@ export async function fetchHollywoodMovies(page = 1) {
 
 export const CURATED_BOLLYWOOD_BLOCKBUSTERS = [
   {
-    "id": 866398,
+    "id": 811941,
     "title": "Devara: Part 1",
     "name": "Devara: Part 1",
     "overview": "An epic action saga set across coastal lands, following Devara, a fearless man who vows to protect his people from smugglers and traitors, and his son Vara who must uphold his father's fierce legacy. Multi-Audio & Hindi Dubbed.",
-    "poster_path": "/A9ENz6dsn8s95iN7Fm41mBvLq4D.jpg",
-    "backdrop_path": "/v4G3oF4gq36b9M5G1qXJ2H6B7K4.jpg",
+    "poster_path": "/lQfuaXjANoTsdx5iS0gCXlK9D2L.jpg",
+    "backdrop_path": "/hAQnXxOwCjgYcKRgTdYPRC8neqL.jpg",
     "media_type": "movie",
     "vote_average": 7.2,
     "release_date": "2024-09-27",

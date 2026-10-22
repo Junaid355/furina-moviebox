@@ -9,7 +9,7 @@ export const SERVERS = [
     name: '[ 🇮🇳 Server 1 (Multi-Dub Prime) ] AutoEmbed Prime (Hindi / English / Japanese • 1080p Ultra)',
     shortName: '[ 🇮🇳 Server 1 (Multi-Dub) ]',
     badge: 'Multi-Dub • Instant Play',
-    statusBadge: '🎧 Multi-Dub',
+    statusBadge: '🎧 Multi-Audio',
     color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
     supportedAudios: ['hindi', 'english', 'sub'],
     supportsAudioSwitching: true,
@@ -30,7 +30,7 @@ export const SERVERS = [
     id: 'vidsrc_pm',
     aliasIds: ['vidsrcpm'],
     name: '[ 👑 Server 2 (VidSrc PM Pro) ] VidSrc PM Direct (Zero Ads • Instant Play • 4K)',
-    shortName: '[ 👑 Server 2 (VidSrc PM) ]',
+    shortName: '[ 🇺🇸 Server 2 (English VidSrc) ]',
     badge: 'Zero Ads • 4K UHD',
     statusBadge: '⚡ 4K',
     color: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
@@ -113,24 +113,49 @@ export const SERVERS = [
     }
   },
   {
-    id: 'one23embed',
-    aliasIds: ['vidstuck', '123embed'],
-    name: '[ 🎬 Server 6 (123Embed Direct V2) ] 123Embed Direct Player (Zero-Timeout • 1080p HD)',
-    shortName: '[ 🎬 Server 6 (123Embed) ]',
-    badge: 'Direct Stream • 1080p',
-    statusBadge: '🟢 Fast',
-    color: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
+    id: 'nxsha',
+    aliasIds: ['nxsha_space'],
+    name: '[ 🎧 Server 2 (NxSha Dual Audio) ] NxSha Direct Cloud (Verified Hindi Dub • 4K UHD)',
+    shortName: '[ 🎧 Server 2 (NxSha) ]',
+    badge: 'Hindi Dub • 4K UHD',
+    statusBadge: '🎧 Multi-Dub',
+    color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40',
     supportedAudios: ['hindi', 'english', 'sub'],
     supportsAudioSwitching: true,
-    getMovieUrl: (tmdbId) => {
+    getMovieUrl: (tmdbId, audioMode = 'hindi') => {
       const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '533535';
-      return `https://play.123embed.net/mv/${cleanId}`;
+      const lang = audioMode === 'english' ? 'en' : (audioMode === 'sub' ? 'ja' : 'hi');
+      return `https://nxsha.space/embed/movie/${cleanId}?lang=${lang}&disable_app_ad=true`;
     },
-    getTvUrl: (tmdbId, s = 1, e = 1) => {
+    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'hindi') => {
       const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '66732';
       const seasonNum = Math.max(1, Number(s) || 1);
       const epNum = Math.max(1, Number(e) || 1);
-      return `https://play.123embed.net/tv/${cleanId}/${seasonNum}/${epNum}`;
+      const lang = audioMode === 'english' ? 'en' : (audioMode === 'sub' ? 'ja' : 'hi');
+      return `https://nxsha.space/embed/tv/${cleanId}/${seasonNum}/${epNum}?lang=${lang}&disable_app_ad=true`;
+    }
+  },
+  {
+    id: 'vidstuck',
+    aliasIds: ['one23embed', '123embed'],
+    name: '[ 🎬 Server 6 (123Embed Direct V2) ] 123Embed Direct Player (Zero-Timeout • 1080p HD)',
+    shortName: '[ 🇮🇳 Server 6 (Hindi 123Embed) ]',
+    badge: 'Direct Stream • 1080p',
+    statusBadge: '🎧 Multi-Audio',
+    color: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
+    supportedAudios: ['hindi', 'english', 'sub'],
+    supportsAudioSwitching: true,
+    getMovieUrl: (tmdbId, audioMode = 'hindi') => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '533535';
+      const audioParam = audioMode === 'english' ? 'en' : (audioMode === 'sub' ? 'ja' : 'hi');
+      return `https://play2.123embed.net/movie/${cleanId}?audio=${audioParam}`;
+    },
+    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'hindi') => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '66732';
+      const seasonNum = Math.max(1, Number(s) || 1);
+      const epNum = Math.max(1, Number(e) || 1);
+      const audioParam = audioMode === 'english' ? 'en' : (audioMode === 'sub' ? 'ja' : 'hi');
+      return `https://play2.123embed.net/tv/${cleanId}/${seasonNum}/${epNum}?audio=${audioParam}`;
     }
   },
   {
@@ -264,6 +289,29 @@ export const SERVERS = [
       const seasonNum = Math.max(1, Number(s) || 1);
       const epNum = Math.max(1, Number(e) || 1);
       return `https://vidjoy.pro/embed/tv/${cleanId}/${seasonNum}/${epNum}`;
+    }
+  },
+  {
+    id: 'moviebox',
+    aliasIds: ['themoviebox', 'mb_cdn'],
+    name: '[ 🎬 Server 13 (MovieBox Ultra CDN) ] MovieBox High-Speed Direct Cloud',
+    shortName: '[ 🎬 Server 13 (MovieBox) ]',
+    badge: 'MovieBox Ultra 4K',
+    statusBadge: '🎧 Multi-Audio',
+    color: 'bg-teal-500/20 text-teal-300 border-teal-500/40',
+    supportedAudios: ['hindi', 'english', 'sub'],
+    supportsAudioSwitching: true,
+    getMovieUrl: (tmdbId, audioMode = 'hindi') => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '533535';
+      const langParam = audioMode === 'english' ? 'en' : (audioMode === 'sub' ? 'ja' : 'hi');
+      return `https://themoviebox.xyz/embed/movie/${cleanId}?lang=${langParam}&disable_app_ad=true`;
+    },
+    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'hindi') => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '95479';
+      const seasonNum = Math.max(1, Number(s) || 1);
+      const epNum = Math.max(1, Number(e) || 1);
+      const langParam = audioMode === 'english' ? 'en' : (audioMode === 'sub' ? 'ja' : 'hi');
+      return `https://themoviebox.xyz/embed/tv/${cleanId}/${seasonNum}/${epNum}?lang=${langParam}&disable_app_ad=true`;
     }
   }
 ];

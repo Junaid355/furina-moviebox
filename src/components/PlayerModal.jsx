@@ -85,6 +85,11 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       return null;
     }
     const titleLower = (item?.title || item?.name || '').toLowerCase();
+    // Guarantee Devara: Part 1 always resolves to genuine TMDB ID 811941 (and never 866398 The Beekeeper)
+    if (titleLower.includes('devara') || (Number(item?.id) === 866398 && !titleLower.includes('beekeeper')) || Number(item?.tmdb_id) === 866398) {
+      return 811941;
+    }
+    if (titleLower.includes('beekeeper') || titleLower === 'the beekeeper') return 866398;
     if (titleLower.includes('stranger things')) return 66732;
     if (titleLower.includes('house of the dragon')) return 94997;
     if (titleLower.includes('deadpool')) return 533535;
@@ -176,8 +181,9 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   };
 
   // Authentic audio tracks strictly based on physical audio assets, native spoken languages, or verified provider sources
-  const verifiedId = Number(item?.id) || Number(item?.tmdb_id) || Number(resolvedTmdbId);
-  const isTopVerifiedHindiTitle = [94997, 533535, 12609, 12971, 46260, 31910, 85937, 95479, 127532, 1429, 37854, 30984, 1423191, 63174, 108978, 866398, 801688, 823219, 579974, 585268, 872906].includes(verifiedId);
+  const verifiedId = Number(resolvedTmdbId) || Number(item?.tmdb_id) || Number(item?.id);
+  const isDevaraMovie = (item?.title || item?.name || '').toLowerCase().includes('devara') || verifiedId === 811941;
+  const isTopVerifiedHindiTitle = [94997, 533535, 12609, 12971, 46260, 31910, 85937, 95479, 127532, 1429, 37854, 30984, 1423191, 63174, 108978, 811941, 801688, 823219, 579974, 585268, 872906].includes(verifiedId) || isDevaraMovie;
   const isResidentEvilMovie = (item?.title || item?.name || item?.original_title || '').toLowerCase().includes('resident evil') || verifiedId === 1423191;
   const isMovieBoxHindi = Boolean(item?.hasHindiDub || item?.corner?.includes('Hindi') || String(item?.id).startsWith('mb_'));
   const hasInherentHindi = Boolean(
@@ -186,11 +192,12 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     isTopVerifiedHindiTitle ||
     isResidentEvilMovie ||
     isMovieBoxHindi ||
+    isDevaraMovie ||
     isHindiAvailable(item) ||
     hindiProviderManager.hasLegitimateHindiSource(item)
   );
 
-  const hasInherentEnglish = (isCustom && playerMode === 'studio') ? Boolean(customSources.en) : true;
+  const hasInherentEnglish = isBollywoodHindi ? false : ((isCustom && playerMode === 'studio') ? Boolean(customSources.en) : true);
   const hasInherentJapanese = Boolean(customSources.ja || isAnime);
 
   // Read saved user audio preference from settings or prop
@@ -316,6 +323,11 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     if (effectivePreferredServerId && effectivePreferredServerId !== 'multiembed') {
       const explicit = availableServers.find((s) => s.id === effectivePreferredServerId);
       if (explicit) return explicit;
+    }
+    // If opening with Hindi audio, immediately pick a verified Hindi dub mirror (autoembed, nxsha, vidstuck, or one23embed)
+    if (audioMode === 'hindi') {
+      const hindiMirror = availableServers.find((s) => s.id === 'autoembed' || s.id === 'nxsha' || s.id === 'vidstuck' || s.id === 'one23embed' || s.id === 'moviebox');
+      if (hindiMirror) return hindiMirror;
     }
     // Otherwise use the ranked list: real-test tiers + cached live reachability + failure history.
     try {
@@ -739,9 +751,12 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       physicalSwitched = selectPhysicalAudioTrack(videoRef.current, newMode);
     }
 
-    // Keep the current server if it is still a good pick for the new audio mode;
-    // otherwise re-rank (this avoids jumping onto known-blank mirrors).
+    // When switching audio mode, route to verified multi-audio servers
     setSelectedServer((prevSrv) => {
+      if (newMode === 'hindi') {
+        const hindiMirror = availableServers.find(s => s.id === 'autoembed' || s.id === 'nxsha' || s.id === 'vidstuck' || s.id === 'one23embed' || s.id === 'moviebox') || availableServers[0];
+        return hindiMirror;
+      }
       const evaluation = evaluateServers({
         servers: availableServers,
         audioMode: newMode,
@@ -1155,8 +1170,9 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     (!item?.vote_count || item.vote_count < 100)
   );
 
-  const streamUrl = getStreamUrl(currentServer, resolvedTmdbId || item?.id, isSeries ? 'tv' : 'movie', season, episode, audioMode, isAnime, activeSubtitle);
-  const downloadUrl = getDownloadUrl(resolvedTmdbId || item?.id, isSeries ? 'tv' : 'movie', season, episode);
+  const effectiveContentId = resolvedTmdbId || (isDevaraMovie ? 811941 : item?.id);
+  const streamUrl = getStreamUrl(currentServer, effectiveContentId, isSeries ? 'tv' : 'movie', season, episode, audioMode, isAnime, activeSubtitle);
+  const downloadUrl = getDownloadUrl(effectiveContentId, isSeries ? 'tv' : 'movie', season, episode);
 
   // Active custom video URL for owned/studio content - priority failover aware (Section 3 & 10)
   const activeCustomVideoUrl = isCustom ? (
@@ -1635,7 +1651,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
               <button
                 onClick={handleReload}
                 title="Reload video player"
-                className="hidden xs:flex p-2 rounded-xl bg-[#0c1836] border border-cyan-500/30 text-cyan-300 hover:text-white hover:bg-white/10 transition cursor-pointer shrink-0"
+                className="hidden sm:flex p-2 rounded-xl bg-[#0c1836] border border-cyan-500/30 text-cyan-300 hover:text-white hover:bg-white/10 transition cursor-pointer shrink-0"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
               </button>
@@ -1649,7 +1665,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   setIsMiniPlayer((prev) => !prev);
                 }}
                 title={isMiniPlayer ? "Restore from Mini-Player" : "Floating Mini-Player (PiP)"}
-                className="flex items-center gap-1 p-2 rounded-xl bg-[#0c1836] border border-cyan-500/30 text-cyan-300 hover:text-white hover:bg-white/10 transition cursor-pointer shrink-0"
+                className="flex items-center gap-1 p-1.5 sm:p-2 rounded-xl bg-[#0c1836] border border-cyan-500/30 text-cyan-300 hover:text-white hover:bg-white/10 transition cursor-pointer shrink-0"
               >
                 <PictureInPicture className="w-3.5 h-3.5" />
               </button>
@@ -1662,7 +1678,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                   soundFx.playClick?.();
                 }}
                 title="Watch Together / Sync Room"
-                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/40 text-purple-300 hover:text-white text-xs font-bold transition shadow-sm cursor-pointer shrink-0"
+                className="hidden md:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/40 text-purple-300 hover:text-white text-xs font-bold transition shadow-sm cursor-pointer shrink-0"
               >
                 <Users className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Sync Room</span>
@@ -1721,26 +1737,27 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                       data-testid="audio-btn-english"
                       onClick={() => handleAudioChange('english')}
                       disabled={isSwitchingAudio}
-                      className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10.5px] sm:text-xs font-extrabold transition flex items-center gap-1 border cursor-pointer ${
+                      className={`px-2.5 py-1 rounded-full text-[10.5px] sm:text-xs font-bold transition flex items-center gap-1 border cursor-pointer ${
                         audioMode === 'english'
-                          ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 border-cyan-300 shadow-[0_0_12px_rgba(56,189,248,0.5)] scale-105'
-                          : 'bg-cyan-500/10 text-cyan-200/70 border-transparent hover:text-white'
+                          ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 border-cyan-300 shadow-[0_0_10px_rgba(56,189,248,0.5)] font-black'
+                          : 'bg-cyan-500/10 text-cyan-200/80 border-transparent hover:text-white hover:bg-cyan-500/20'
                       }`}
                     >
                       <span>{audioMode === 'english' ? '✓' : '○'}</span>
                       <span>🇬🇧 English Dub</span>
                     </button>
                   ) : (
-                    <div
+                    <button
+                      type="button"
                       data-testid="audio-btn-english-unavailable"
                       onClick={() => handleUnavailableClick('English')}
-                      className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-900/60 text-slate-500 border border-slate-800 flex items-center gap-1 cursor-not-allowed opacity-50 select-none"
+                      className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-900/60 text-slate-500 border border-slate-800 flex items-center gap-1 cursor-not-allowed opacity-50 select-none"
                       title="English audio isn't available for this title"
                     >
                       <span>⊘</span>
                       <span>English</span>
-                      <span className="text-[9px] bg-slate-800/80 text-slate-400 px-1 py-0.2 rounded font-mono">Unavailable</span>
-                    </div>
+                      <span className="text-[8.5px] bg-slate-800 text-slate-400 px-1 rounded">Unavailable</span>
+                    </button>
                   )}
 
                   {/* Japanese Sub Option */}
@@ -1749,26 +1766,27 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                       data-testid="audio-btn-sub"
                       onClick={() => handleAudioChange('sub')}
                       disabled={isSwitchingAudio}
-                      className={`px-3 py-1 rounded-full text-xs font-extrabold transition flex items-center gap-1 border cursor-pointer ${
+                      className={`px-2.5 py-1 rounded-full text-[10.5px] sm:text-xs font-bold transition flex items-center gap-1 border cursor-pointer ${
                         audioMode === 'sub'
-                          ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white border-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.5)] scale-105'
-                          : 'bg-purple-500/10 text-purple-200/70 border-transparent hover:text-white'
+                          ? 'bg-gradient-to-r from-purple-400 to-indigo-500 text-white border-purple-300 shadow-[0_0_10px_rgba(168,85,247,0.5)] font-black'
+                          : 'bg-purple-500/10 text-purple-200/80 border-transparent hover:text-white hover:bg-purple-500/20'
                       }`}
                     >
                       <span>{audioMode === 'sub' ? '✓' : '○'}</span>
                       <span>🇯🇵 Japanese Sub</span>
                     </button>
                   ) : (
-                    <div
+                    <button
+                      type="button"
                       data-testid="audio-btn-sub-unavailable"
                       onClick={() => handleUnavailableClick('Japanese')}
-                      className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-900/60 text-slate-500 border border-slate-800 flex items-center gap-1 cursor-not-allowed opacity-50 select-none"
+                      className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-900/60 text-slate-500 border border-slate-800 flex items-center gap-1 cursor-not-allowed opacity-50 select-none"
                       title="Japanese audio isn't available for this title"
                     >
                       <span>⊘</span>
-                      <span>Japanese</span>
-                      <span className="text-[9px] bg-slate-800/80 text-slate-400 px-1 py-0.2 rounded font-mono">Unavailable</span>
-                    </div>
+                      <span>🇯🇵 Japanese</span>
+                      <span className="text-[8.5px] bg-slate-800 text-slate-400 px-1 rounded">Unavailable</span>
+                    </button>
                   )}
 
                   {/* Hindi Audio Option */}
@@ -1777,26 +1795,27 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                       data-testid="audio-btn-hindi"
                       onClick={() => handleAudioChange('hindi')}
                       disabled={isSwitchingAudio}
-                      className={`px-3 py-1 rounded-full text-xs font-extrabold transition flex items-center gap-1 border cursor-pointer ${
+                      className={`px-2.5 py-1 rounded-full text-[10.5px] sm:text-xs font-bold transition flex items-center gap-1 border cursor-pointer ${
                         audioMode === 'hindi'
-                          ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-gray-950 border-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.6)] scale-105'
-                          : 'bg-amber-500/10 text-amber-200/70 border-transparent hover:text-white'
+                          ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-gray-950 border-amber-300 shadow-[0_0_10px_rgba(251,191,36,0.6)] font-black'
+                          : 'bg-amber-500/10 text-amber-200/80 border-transparent hover:text-white hover:bg-amber-500/20'
                       }`}
                     >
                       <span>{audioMode === 'hindi' ? '✓' : '○'}</span>
-                      <span>🇮🇳 Hindi Audio</span>
+                      <span>🇮🇳 Hindi Dubbed</span>
                     </button>
                   ) : (
-                    <div
+                    <button
+                      type="button"
                       data-testid="audio-btn-hindi-unavailable"
                       onClick={() => handleUnavailableClick('Hindi')}
-                      className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-900/60 text-slate-500 border border-slate-800 flex items-center gap-1 cursor-not-allowed opacity-50 select-none"
+                      className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-900/60 text-slate-500 border border-slate-800 flex items-center gap-1 cursor-not-allowed opacity-50 select-none"
                       title="Hindi audio isn't available for this title"
                     >
                       <span>⊘</span>
-                      <span>Hindi</span>
-                      <span className="text-[9px] bg-slate-800/80 text-slate-400 px-1 py-0.2 rounded font-mono">Unavailable</span>
-                    </div>
+                      <span>🇮🇳 Hindi</span>
+                      <span className="text-[8.5px] bg-slate-800 text-slate-400 px-1 rounded">Unavailable</span>
+                    </button>
                   )}
                 </div>
               </div>
@@ -1864,31 +1883,26 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
             </div>
 
             {/* Audio Mode Active Guidance Badge & Hardware Track Detection */}
-            <div className="hidden sm:flex items-center gap-2 flex-wrap text-[11px] text-cyan-200/70">
+            <div className="hidden lg:flex items-center gap-2 text-[10.5px] text-cyan-200/80">
               {audioMode === 'english' && hasInherentEnglish && (
                 <span className="text-cyan-300 font-medium">
-                  ✓ <strong>English Audio Active</strong> ({isCustom ? 'Studio Master Track' : isAnime ? 'VidLink Pro verified English stream' : 'Original Theatrical Master Audio'})
+                  ✓ <strong>English Audio Active</strong>
                 </span>
               )}
               {audioMode === 'sub' && hasInherentJapanese && (
                 <span className="text-purple-300 font-medium">
-                  ✓ <strong>Japanese Subbed Active</strong> ({isCustom ? 'Studio Master Track' : 'Original Japanese Dialogue'})
+                  ✓ <strong>Japanese Subbed Active</strong>
                 </span>
               )}
               {audioMode === 'hindi' && hasInherentHindi && (
                 <span className="text-amber-300 font-medium">
-                  ✓ <strong>Hindi Audio Active</strong> ({isCustom ? 'Studio Master Track' : isBollywoodHindi ? 'Original Native Hindi Audio Track' : 'Verified Multi-Audio Hindi Stream'})
+                  ✓ <strong>Hindi Audio Active</strong>
                 </span>
               )}
               {detectedTracks && detectedTracks.length > 0 && (
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 flex items-center gap-1">
                   <span>🎧 HTML5 Tracks:</span>
                   <strong className="text-white">{detectedTracks.map((t) => t.language.toUpperCase()).join(', ')}</strong>
-                </span>
-              )}
-              {isCustom && currentLangSources.length > 1 && (
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-950/80 border border-blue-500/30 text-blue-300">
-                  Priority {activeSourcePriority}/{currentLangSources.length}
                 </span>
               )}
             </div>
@@ -1967,18 +1981,18 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
             )}
 
             {/* In-Player Translucent HUD Chips (Crunchyroll / Netflix style) */}
-            <div data-testid="audio-hud-chips" className="absolute top-3 left-3 z-30 flex items-center gap-1 bg-slate-950/85 backdrop-blur-md px-2 py-1 rounded-xl border border-cyan-500/30 shadow-lg pointer-events-auto">
-              <span className="text-[9px] font-extrabold text-cyan-300 uppercase tracking-wider hidden xs:inline mr-0.5">Audio:</span>
+            <div data-testid="audio-hud-chips" className="absolute top-2.5 left-2.5 z-30 hidden sm:flex items-center gap-1 bg-slate-950/80 backdrop-blur-md px-2 py-0.5 rounded-lg border border-cyan-500/30 shadow-md opacity-80 hover:opacity-100 transition-opacity pointer-events-auto">
+              <span className="text-[8.5px] font-extrabold text-cyan-300 uppercase tracking-wider mr-0.5">Audio:</span>
               <button
                 type="button"
                 data-testid="audio-chip-en"
                 onClick={() => handleAudioChange('english')}
                 disabled={!hasInherentEnglish}
                 title="English Dub"
-                className={`px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-extrabold transition cursor-pointer flex items-center gap-0.5 ${
+                className={`px-1.5 py-0.5 rounded text-[9.5px] font-extrabold transition cursor-pointer flex items-center gap-0.5 ${
                   audioMode === 'english'
-                    ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 shadow-[0_0_12px_rgba(6,182,212,0.8)] font-black border border-cyan-300'
-                    : hasInherentEnglish ? 'text-slate-300 hover:text-white bg-white/5' : 'text-slate-600 opacity-40 cursor-not-allowed'
+                    ? 'bg-cyan-400 text-gray-950 font-black'
+                    : hasInherentEnglish ? 'text-slate-300 hover:text-white' : 'text-slate-600 opacity-40 cursor-not-allowed'
                 }`}
               >
                 <span>🎙️ EN</span>
@@ -1989,10 +2003,10 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 onClick={() => handleAudioChange('hindi')}
                 disabled={!hasInherentHindi}
                 title="Hindi Audio"
-                className={`px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-extrabold transition cursor-pointer flex items-center gap-0.5 ${
+                className={`px-1.5 py-0.5 rounded text-[9.5px] font-extrabold transition cursor-pointer flex items-center gap-0.5 ${
                   audioMode === 'hindi'
-                    ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-gray-950 shadow-[0_0_12px_rgba(245,158,11,0.8)] font-black border border-amber-300'
-                    : hasInherentHindi ? 'text-slate-300 hover:text-white bg-white/5' : 'text-slate-600 opacity-40 cursor-not-allowed'
+                    ? 'bg-amber-400 text-gray-950 font-black'
+                    : hasInherentHindi ? 'text-slate-300 hover:text-white' : 'text-slate-600 opacity-40 cursor-not-allowed'
                 }`}
               >
                 <span>🇮🇳 HI</span>
@@ -2003,34 +2017,36 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 onClick={() => handleAudioChange('sub')}
                 disabled={!hasInherentJapanese}
                 title="Japanese Sub"
-                className={`px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-extrabold transition cursor-pointer flex items-center gap-0.5 ${
+                className={`px-1.5 py-0.5 rounded text-[9.5px] font-extrabold transition cursor-pointer flex items-center gap-0.5 ${
                   audioMode === 'sub'
-                    ? 'bg-gradient-to-r from-purple-400 to-indigo-500 text-white shadow-[0_0_12px_rgba(168,85,247,0.8)] font-black border border-purple-300'
-                    : hasInherentJapanese ? 'text-slate-300 hover:text-white bg-white/5' : 'text-slate-600 opacity-40 cursor-not-allowed'
+                    ? 'bg-purple-400 text-white font-black'
+                    : hasInherentJapanese ? 'text-slate-300 hover:text-white' : 'text-slate-600 opacity-40 cursor-not-allowed'
                 }`}
               >
                 <span>🇯🇵 JA</span>
               </button>
             </div>
 
-            {/* Skip Intro (85s) Button */}
-            <button
-              type="button"
-              data-testid="skip-intro-btn"
-              onClick={() => {
-                soundFx.playClick?.();
-                if (videoRef.current) {
-                  videoRef.current.currentTime = (videoRef.current.currentTime || 0) + 85;
-                }
-                setSkipIntroToast('⏭️ Intro Skipped (+85s)');
-                setTimeout(() => setSkipIntroToast(null), 2500);
-              }}
-              className="absolute bottom-12 left-3 z-30 px-2.5 py-1 rounded-xl bg-slate-950/85 hover:bg-black text-cyan-300 hover:text-white border border-cyan-400/50 shadow-lg backdrop-blur-md text-[10.5px] font-black transition flex items-center gap-1.5 cursor-pointer active:scale-95 pointer-events-auto"
-              title="Skip Intro sequence (85 seconds)"
-            >
-              <FastForward className="w-3 h-3 text-cyan-400" />
-              <span>Skip Intro (85s)</span>
-            </button>
+            {/* Skip Intro (85s) Button — Only for TV Series & Anime with opening themes */}
+            {(isSeries || isAnime) && (
+              <button
+                type="button"
+                data-testid="skip-intro-btn"
+                onClick={() => {
+                  soundFx.playClick?.();
+                  if (videoRef.current) {
+                    videoRef.current.currentTime = (videoRef.current.currentTime || 0) + 85;
+                  }
+                  setSkipIntroToast('⏭️ Intro Skipped (+85s)');
+                  setTimeout(() => setSkipIntroToast(null), 2500);
+                }}
+                className="absolute bottom-12 left-3 z-30 px-2.5 py-1 rounded-xl bg-slate-950/85 hover:bg-black text-cyan-300 hover:text-white border border-cyan-400/50 shadow-lg backdrop-blur-md text-[10.5px] font-black transition flex items-center gap-1.5 cursor-pointer active:scale-95 pointer-events-auto"
+                title="Skip Intro sequence (85 seconds)"
+              >
+                <FastForward className="w-3 h-3 text-cyan-400" />
+                <span>Skip Intro (85s)</span>
+              </button>
+            )}
 
             {/* 1-Tap Binge Next Mode & Quick Next Ep for Series */}
             {isSeries && (
@@ -2476,19 +2492,19 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 )}
 
                 {/* Floating Quick Mirror Switcher & Buffering Turbo-Rescue */}
-                <div className="absolute top-2.5 right-2.5 z-30 flex items-center gap-1.5 bg-slate-950/90 backdrop-blur-md px-2.5 py-1 rounded-xl border border-cyan-500/40 text-white shadow-2xl pointer-events-auto">
-                  <span className="text-[10px] text-cyan-300 font-bold hidden sm:flex items-center gap-1">
+                <div className="absolute top-2.5 right-2.5 z-30 hidden sm:flex items-center gap-1.5 bg-slate-950/80 backdrop-blur-md px-2 py-1 rounded-xl border border-cyan-500/30 text-white shadow-lg pointer-events-auto opacity-75 hover:opacity-100 transition-opacity">
+                  <span className="text-[10px] text-cyan-300 font-bold flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping inline-block" />
                     <span>{currentServer.shortName}</span>
                   </span>
                   <button
                     type="button"
                     onClick={handleNotPlaying}
-                    className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-rose-600/90 via-amber-600/90 to-cyan-600/90 hover:from-rose-500 hover:to-cyan-500 text-white border border-cyan-400/50 text-[10px] sm:text-[11px] font-black flex items-center gap-1.5 transition cursor-pointer active:scale-95 shadow-[0_0_15px_rgba(244,63,94,0.4)]"
+                    className="px-2 py-0.5 rounded-lg bg-gradient-to-r from-rose-600/90 to-cyan-600/90 hover:from-rose-500 hover:to-cyan-500 text-white text-[10px] font-bold flex items-center gap-1 transition cursor-pointer active:scale-95"
                     title="Buffering or slow stream? 1-Tap instant switch to fastest low-latency mirror!"
                   >
-                    <Zap className="w-3 h-3 text-amber-300 animate-bounce" />
-                    <span>Buffering? Fast Switch ⚡</span>
+                    <Zap className="w-3 h-3 text-amber-300" />
+                    <span>Turbo ⚡</span>
                   </button>
                 </div>
 
@@ -2605,27 +2621,25 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 </div>
               )}
 
-              <div className="flex flex-wrap items-center justify-between gap-2.5">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[11px] font-bold text-cyan-300/80">Available Server Mirrors:</span>
-                  
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 shrink-0">
                   {/* AI Smart Server Chooser / AI Boost Button */}
                   <button
                     data-testid="ai-boost-server-btn"
                     onClick={() => handleAiAutoSelectServer(true)}
                     disabled={aiSelecting}
                     title="⚡ AI Boost: Real-time latency benchmark across 15 global CDN mirrors for lowest ping, 4K bitrate & active multi-dub audio"
-                    className="px-3 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 cursor-pointer bg-gradient-to-r from-amber-500/30 via-cyan-500/30 to-blue-500/30 hover:from-amber-500/50 hover:to-cyan-500/50 text-amber-200 hover:text-white border border-amber-400/60 shadow-[0_0_15px_rgba(245,158,11,0.35)] hover:scale-105 active:scale-95"
+                    className="px-2.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 cursor-pointer bg-gradient-to-r from-amber-500/25 via-cyan-500/25 to-blue-500/25 hover:from-amber-500/40 hover:to-cyan-500/40 text-amber-200 hover:text-white border border-amber-400/50 shadow-sm active:scale-95 shrink-0"
                   >
                     {aiSelecting ? (
                       <>
                         <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-400" />
-                        <span className="animate-pulse">⚡ Scanning CDNs...</span>
+                        <span className="animate-pulse text-[11px]">Benchmarking...</span>
                       </>
                     ) : (
                       <>
                         <Zap className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-                        <span>⚡ AI Boost Best Server</span>
+                        <span className="text-[11px]">⚡ AI Boost</span>
                       </>
                     )}
                   </button>
@@ -2636,70 +2650,52 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                     onClick={handleNotPlaying}
                     data-testid="not-playing-btn"
                     title="Blank screen or error? Jump to the next best server"
-                    className="px-3 py-1 rounded-lg text-xs font-black transition flex items-center gap-1.5 cursor-pointer bg-rose-500/15 hover:bg-rose-500/30 text-rose-200 border border-rose-400/40 active:scale-95"
+                    className="px-2.5 py-1.5 rounded-xl text-[11px] font-black transition flex items-center gap-1.5 cursor-pointer bg-rose-500/15 hover:bg-rose-500/30 text-rose-200 border border-rose-400/40 active:scale-95 shrink-0"
                   >
                     <AlertTriangle className="w-3 h-3 text-rose-300" />
-                    <span>Not playing? Next server</span>
+                    <span>Next Mirror</span>
                   </button>
-
-                  <div data-testid="server-carousel" className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth snap-x py-1.5 flex-nowrap w-full">
-                    {availableServers.map((srv) => {
-                      const isSelected = currentServer.id === srv.id;
-                      return (
-                        <button
-                          key={srv.id}
-                          data-testid={`server-btn-${srv.id}`}
-                          onClick={() => {
-                            manualPickRef.current = true;
-                            setSelectedServer(srv);
-                            if (playerMode !== 'stream') setPlayerMode('stream');
-                            if (srv.id === 'one23embed') {
-                              if (audioMode !== 'hindi' && hasInherentHindi) setAudioMode('hindi');
-                            } else if (srv.id === 'zxcstream' || srv.id === 'tgvid') {
-                              if (audioMode !== 'sub' && hasInherentJapanese && isAnime) setAudioMode('sub');
-                            } else if (srv.id === 'vidlink' || srv.id === 'twoembed_vip' || srv.id === 'vidsrc_cc') {
-                              if (audioMode !== 'english' && hasInherentEnglish) setAudioMode('english');
-                            } else if (srv.id === 'moviebox' || srv.id === 'multiembed') {
-                              // Official MovieBox & MultiEmbed high-speed multi-dub routing
-                            }
-                          }}
-                          className={`snap-start px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border shrink-0 ${
-                            isSelected && playerMode === 'stream'
-                              ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-gray-950 font-black border-cyan-300 shadow-[0_0_15px_rgba(56,189,248,0.6)] scale-[1.02]'
-                              : 'bg-[#060c20] text-cyan-200/80 border-cyan-500/25 hover:bg-white/5 hover:text-white'
-                          }`}
-                        >
-                          <span>{srv.shortName}</span>
-                          <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono ${isSelected ? 'bg-black/30 text-white' : 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/20'}`}>
-                            {srv.statusBadge || srv.badge || '🟢 Fast'}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
                 </div>
 
-                <div className="hidden sm:flex items-center gap-2 text-[11px] text-cyan-200/80 flex-wrap">
-                  <span className="flex items-center gap-1 bg-cyan-950/60 border border-cyan-500/30 px-2 py-0.5 rounded-md text-[10px] font-bold text-cyan-300">
-                    <Subtitles className="w-3 h-3 text-cyan-400" />
-                    <span>Subtitles (CC): Toggle English/Hindi subtitles inside player</span>
-                  </span>
-                  <span className="flex items-center gap-1 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-md text-[10px] font-bold text-emerald-300">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>MovieBox CDN Ultra • ⚡ 4K Sub-Second • 🛡️ Zero-Ad Shield</span>
-                  </span>
-                  <span className="text-slate-400 hidden sm:inline">
-                    Stream buffering? Tap <strong>Auto-Switch</strong> or select another mirror.
-                  </span>
+                {/* Single Sleek Thumb-Scrollable Server Carousel */}
+                <div data-testid="server-carousel" className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth snap-x py-0.5 flex-nowrap flex-1 min-w-0">
+                  {availableServers.map((srv) => {
+                    const isSelected = currentServer.id === srv.id;
+                    return (
+                      <button
+                        key={srv.id}
+                        data-testid={`server-btn-${srv.id}`}
+                        onClick={() => {
+                          manualPickRef.current = true;
+                          setSelectedServer(srv);
+                          if (playerMode !== 'stream') setPlayerMode('stream');
+                          if (srv.id === 'one23embed' || srv.id === 'vidstuck') {
+                            if (audioMode !== 'hindi' && hasInherentHindi) setAudioMode('hindi');
+                          } else if (srv.id === 'zxcstream' || srv.id === 'tgvid') {
+                            if (audioMode !== 'sub' && hasInherentJapanese && isAnime) setAudioMode('sub');
+                          } else if (srv.id === 'vidlink' || srv.id === 'twoembed_vip' || srv.id === 'vidsrc_cc') {
+                            if (audioMode !== 'english' && hasInherentEnglish) setAudioMode('english');
+                          }
+                        }}
+                        className={`snap-start px-2.5 py-1 rounded-xl text-[11px] font-bold transition flex items-center gap-1 cursor-pointer border shrink-0 ${
+                          isSelected && playerMode === 'stream'
+                            ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-gray-950 font-black border-cyan-300 shadow-[0_0_12px_rgba(56,189,248,0.5)] scale-[1.02]'
+                            : 'bg-[#060c20] text-cyan-200/80 border-cyan-500/25 hover:bg-white/5 hover:text-white'
+                        }`}
+                      >
+                        <span>{srv.shortName}</span>
+                        <span className={`text-[8.5px] px-1 py-0.2 rounded-full font-mono ${isSelected ? 'bg-black/30 text-white' : 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/20'}`}>
+                          {srv.statusBadge || srv.badge || '🟢 Fast'}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* In-Player / Below Player Audio Guidance Tip */}
-              <div 
-                data-testid="audio-guidance-bar"
-                className="hidden sm:flex w-full items-center gap-2 px-3 py-1.5 rounded-lg bg-cyan-950/40 border border-cyan-500/30 text-cyan-200 text-[11px]"
-              >
-                <span className="font-semibold">🎙️ Multi-Audio: Click the Gear (⚙️) or Audio icon inside the player to select Hindi / English, or switch to the Hindi Dubbed server mirror below.</span>
+              {/* Discreet compact audio indicator for guidance and test suite compatibility */}
+              <div data-testid="audio-guidance-bar" className="text-[10.5px] text-cyan-300/80 text-center py-1 px-3 mt-1.5 rounded-lg bg-cyan-950/30 border border-cyan-500/20">
+                🎙️ Multi-Audio: Click the Gear (⚙️) or Audio icon inside the player to select Hindi / English, or switch to the Hindi Dubbed server mirror below.
               </div>
             </div>
           )}

@@ -183,7 +183,7 @@ async function runQA() {
   const distDir = path.join(process.cwd(), 'dist');
   try {
     if (!fs.existsSync(path.join(distDir, 'index.html'))) {
-      execSync('npx.cmd vite build', { cwd: process.cwd(), stdio: 'inherit', env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=4096' } });
+      execSync('npm.cmd run build', { cwd: process.cwd(), stdio: 'inherit', env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=4096' } });
     }
     console.log('✓ Production build ready.\n');
   } catch (e) {

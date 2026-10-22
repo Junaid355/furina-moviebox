@@ -113,11 +113,16 @@ export class IndianCinemaNativeProvider {
     if (CURATED_BOLLYWOOD_BLOCKBUSTERS.some((b) => Number(b.id) === numId)) return true;
     const titleLower = (item.title || item.name || '').toLowerCase();
     if (titleLower.match(/devara|kalki|pushpa|rrr|kgf|salaar|baahubali|stree|jawan|pathaan|sholay|dangal|drishyam|kantara|leo|vikram/i)) return true;
+    if (Number(item.id) === 811941 || (Number(item.id) === 866398 && !titleLower.includes('beekeeper'))) return true;
     return false;
   }
 
   resolve(item, type = 'movie', season = 1, episode = 1) {
-    const tmdbId = item?.id;
+    let tmdbId = item?.id;
+    const titleLower = (item?.title || item?.name || '').toLowerCase();
+    if (titleLower.includes('devara') || (Number(tmdbId) === 866398 && !titleLower.includes('beekeeper')) || Number(item?.tmdb_id) === 866398) {
+      tmdbId = 811941;
+    }
     return {
       providerId: this.id,
       providerName: this.name,
@@ -431,8 +436,10 @@ export class HindiProviderManager {
   hasLegitimateHindiSource(item) {
     if (!item) return false;
     if (item.isUserCreated && (item.languages?.hi?.url || item.audio_hi_url)) return true;
-    const numId = Number(item.id);
-    if ([94997, 533535, 12609, 12971, 46260, 31910, 85937, 95479, 127532, 1429, 37854, 30984, 1423191, 866398, 801688, 823219, 579974, 585268, 872906].includes(numId)) return true;
+    const titleLower = (item.title || item.name || '').toLowerCase();
+    if (titleLower.includes('devara')) return true;
+    const numId = (Number(item.id) === 866398 && !titleLower.includes('beekeeper')) ? 811941 : Number(item.id);
+    if ([94997, 533535, 12609, 12971, 46260, 31910, 85937, 95479, 127532, 1429, 37854, 30984, 1423191, 811941, 801688, 823219, 579974, 585268, 872906].includes(numId)) return true;
     try {
       if (typeof window !== 'undefined') {
         const stored = localStorage.getItem('furina_studio_movies');

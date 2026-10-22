@@ -24,7 +24,8 @@ class APIManager {
       vidlink: { name: 'VidLink Pro Multi-Audio', status: 'online', latency: 115, lastChecked: Date.now(), errors: 0, successes: 1 },
       one23embed: { name: '123Embed Multi-Audio', status: 'online', latency: 125, lastChecked: Date.now(), errors: 0, successes: 1 },
       smashy: { name: 'SmashyStream Dual-Audio', status: 'online', latency: 115, lastChecked: Date.now(), errors: 0, successes: 1 },
-      autoembed: { name: 'AutoEmbed Prime', status: 'online', latency: 120, lastChecked: Date.now(), errors: 0, successes: 1 }
+      autoembed: { name: 'AutoEmbed Prime', status: 'online', latency: 120, lastChecked: Date.now(), errors: 0, successes: 1 },
+      moviebox: { name: 'MovieBox Direct 4K Cloud', status: 'online', latency: 95, lastChecked: Date.now(), errors: 0, successes: 1 }
     };
   }
 
