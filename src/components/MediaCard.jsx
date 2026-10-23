@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { Play, Star, Bookmark, Check, Sparkles, Volume2, Film, Tv, Info } from 'lucide-react';
 import { isHindiAvailable } from '../services/tmdb';
 import { resolvePosterUrl } from '../services/contentModel';
@@ -13,7 +13,44 @@ const MediaCard = React.memo(function MediaCard({
 }) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 });
   const cardRef = useRef(null);
+  const rafRef = useRef(null);
+
+  const handleMouseMove = useCallback((e) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      // Apple-style subtle 3D perspective tilt (-5deg to +5deg)
+      const rotateX = -((y - centerY) / centerY) * 5.5;
+      const rotateY = ((x - centerX) / centerX) * 5.5;
+      setTilt({ x: rotateX, y: rotateY });
+      setGlare({
+        x: Math.round((x / rect.width) * 100),
+        y: Math.round((y / rect.height) * 100),
+        opacity: 0.28
+      });
+    });
+  }, []);
+
+  const handleMouseEnter = useCallback(() => {
+    setIsHovered(true);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    setIsHovered(false);
+    setTilt({ x: 0, y: 0 });
+    setGlare(g => ({ ...g, opacity: 0 }));
+  }, []);
 
   if (!item) return null;
 
@@ -70,9 +107,32 @@ const MediaCard = React.memo(function MediaCard({
         soundFx.playClick();
         onPlay(item);
       }}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       data-media-id={item.id}
-      className="group relative rounded-xl sm:rounded-2xl overflow-hidden glass-card cursor-pointer flex flex-col border border-cyan-500/25 hover:border-cyan-400/90 shadow-[0_8px_20px_rgba(0,0,0,0.7)] hover:shadow-[0_14px_35px_rgba(0,0,0,0.9),0_0_25px_rgba(0,242,254,0.35)] transition-all duration-200 transform-gpu hover:-translate-y-1 hover:scale-[1.015]"
+      style={{
+        transform: isHovered 
+          ? `perspective(1000px) rotateX(${tilt.x.toFixed(2)}deg) rotateY(${tilt.y.toFixed(2)}deg) scale3d(1.025, 1.025, 1.025) translateY(-4px)`
+          : 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1) translateY(0px)',
+        transition: isHovered 
+          ? 'transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease' 
+          : 'transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.45s ease',
+        transformStyle: 'preserve-3d',
+        willChange: 'transform'
+      }}
+      className="group relative rounded-xl sm:rounded-2xl overflow-hidden glass-card cursor-pointer flex flex-col border border-cyan-500/25 hover:border-cyan-400/90 shadow-[0_8px_20px_rgba(0,0,0,0.7)] hover:shadow-[0_22px_45px_rgba(0,0,0,0.95),0_0_28px_rgba(0,242,254,0.38)]"
     >
+      {/* Apple-style Silky Glare Specular Sheen */}
+      <div 
+        className="pointer-events-none absolute inset-0 rounded-xl sm:rounded-2xl transition-opacity duration-300 z-30"
+        style={{
+          opacity: glare.opacity,
+          background: `radial-gradient(circle 220px at ${glare.x}% ${glare.y}%, rgba(255,255,255,0.22), transparent 75%)`,
+          mixBlendMode: 'screen'
+        }}
+      />
+
       {/* Poster Image Container */}
       <div 
         className="relative aspect-[2/3] w-full overflow-hidden bg-[#04091c]"

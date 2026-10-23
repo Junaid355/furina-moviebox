@@ -121,7 +121,7 @@ export default function MediaShelf({
         <div
           ref={scrollRef}
           onScroll={checkScroll}
-          className="flex gap-2 sm:gap-4 overflow-x-auto scrollbar-none scroll-smooth pb-2 pt-1 px-1 snap-x snap-mandatory"
+          className="flex gap-2.5 sm:gap-4 overflow-x-auto scrollbar-none scroll-smooth py-3 sm:py-4 px-2 snap-x snap-mandatory"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {items.map((item) => (

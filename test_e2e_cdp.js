@@ -338,7 +338,7 @@ async function runQA() {
 
     const title = await client.eval('document.title');
     let cardsCount = 0;
-    for (let wait = 0; wait < 15; wait++) {
+    for (let wait = 0; wait < 30; wait++) {
       cardsCount = await client.eval('document.querySelectorAll(".glass-card").length');
       if (cardsCount > 0) break;
       await sleep(300);

@@ -8,21 +8,21 @@
 //  2 = player shell rendered (source picker / loading UI) but slower or ad-heavier
 //  3 = blank frame or embed-side error in testing
 export const SERVER_PROFILES = {
-  autoembed:         { tier: 1, badge: 'AutoEmbed Prime • Multi-Audio 1080p', adLevel: 'Clean', hindi: true },
-  one23embed:        { tier: 1, badge: '123Embed Direct V2 • 1080p HD', adLevel: 'Clean', hindi: true },
   nxsha:             { tier: 1, badge: 'NxSha Direct • Dual Audio 4K', adLevel: 'Clean', hindi: true },
-  vidlink:           { tier: 1, badge: 'VidLink Pro • Multi-Audio 4K', adLevel: 'Clean', hindi: true },
-  tgvid:             { tier: 1, badge: 'TgVid Direct • Multi-Language', adLevel: 'Clean', hindi: true },
-  vidsrc_pm:         { tier: 1, badge: 'VidSrc PM Direct • 4K UHD Direct', adLevel: 'Clean', hindi: false },
   vidfast:           { tier: 1, badge: 'VidFast Ultra • Instant AutoPlay', adLevel: 'Clean', hindi: false },
+  vidlink:           { tier: 1, badge: 'VidLink Pro • Multi-Audio 4K', adLevel: 'Clean', hindi: true },
+  vidsrc_pm:         { tier: 1, badge: 'VidSrc PM Direct • 4K UHD Direct', adLevel: 'Clean', hindi: false },
   vidsrc_su:         { tier: 1, badge: 'VidSrc Cloud • 4K UHD Direct', adLevel: 'Clean', hindi: false },
+  one23embed:        { tier: 1, badge: '123Embed Direct V2 • 1080p HD', adLevel: 'Clean', hindi: true },
   smashy:            { tier: 1, badge: 'SmashyStream Direct • Clean 1080p', adLevel: 'Clean', hindi: false },
   twoembed_vip:      { tier: 1, badge: '2Embed VIP • High Bitrate CDN', adLevel: 'Low', hindi: false },
   vidsrc_to:         { tier: 1, badge: 'VidSrc TO • 1080p HD Direct', adLevel: 'Clean', hindi: false },
   vidsrc_net:        { tier: 1, badge: 'VidSrc Net • High Bitrate Mirror', adLevel: 'Clean', hindi: false },
+  tgvid:             { tier: 1, badge: 'TgVid Direct • Multi-Language', adLevel: 'Clean', hindi: true },
   zxcstream:         { tier: 1, badge: 'VidJoy 4K Cloud • Fast Streams', adLevel: 'Clean', hindi: false },
-  vidstuck:          { tier: 1, badge: '123Embed Direct V2 • 1080p HD', adLevel: 'Clean', hindi: true },
   moviebox:          { tier: 1, badge: 'MovieBox Ultra • Direct 4K Cloud', adLevel: 'Clean', hindi: true },
+  autoembed:         { tier: 3, badge: 'AutoEmbed (Turnstile Blocked)', adLevel: 'Captcha', hindi: false },
+  vidstuck:          { tier: 3, badge: 'Legacy Mirror (Offline)', adLevel: 'Offline', hindi: false },
   bingr:             { tier: 3, badge: 'Legacy Mirror (Backup)', adLevel: 'Unknown', hindi: false },
   multiembed:        { tier: 3, badge: 'Legacy Mirror (Backup)', adLevel: 'Unknown', hindi: false }
 };

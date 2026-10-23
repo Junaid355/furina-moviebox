@@ -84,11 +84,14 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   
-  // Instant Cache & Hydration: Never show blank/stuck spinner on load
+  // Instant Cache & Hydration: Fresh TTL cache ensures modern UI without stale historical data
   const [items, setItems] = useState(() => {
     try {
-      const cached = localStorage.getItem('furina_cached_trending');
-      if (cached) {
+      localStorage.removeItem('furina_cached_trending'); // Evict legacy key
+      const cached = localStorage.getItem('furina_cached_trending_v5');
+      const cachedTime = Number(localStorage.getItem('furina_cached_trending_v5_time') || 0);
+      const isFresh = Date.now() - cachedTime < 2 * 60 * 60 * 1000;
+      if (cached && isFresh) {
         const parsed = JSON.parse(cached);
         if (Array.isArray(parsed) && parsed.length > 0) {
           const sanitized = parsed.map(m => {
@@ -550,10 +553,11 @@ export default function App() {
             : (uniqueResults[0] || FALLBACK_MEDIA[0]);
           setHeroItem(premierHero);
           setError(null);
-          // Cache top trending titles for instant subsequent loading
+          // Cache top trending titles with version tag and timestamp
           if (activeCategory === 'trending' && !debouncedQuery) {
             try {
-              localStorage.setItem('furina_cached_trending', JSON.stringify(uniqueResults.slice(0, 40)));
+              localStorage.setItem('furina_cached_trending_v5', JSON.stringify(uniqueResults.slice(0, 40)));
+              localStorage.setItem('furina_cached_trending_v5_time', String(Date.now()));
             } catch (e) {}
           }
         } else {
