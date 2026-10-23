@@ -27,21 +27,34 @@ import hindiProviderManager, {
 
 const AI_BOOST_STYLES = {
   off: {},
-  '4k': {
-    filter: 'contrast(1.09) saturate(1.14) brightness(1.02) drop-shadow(0 0 1px rgba(0,0,0,0.45))',
-    imageRendering: '-webkit-optimize-contrast'
+  oled: {
+    // Flagship iPhone & Mobile Super Retina XDR OLED tuning
+    filter: 'contrast(1.14) saturate(1.20) brightness(1.02) drop-shadow(0 0 1px rgba(0,0,0,0.5))',
+    imageRendering: '-webkit-optimize-contrast',
+    WebkitBackfaceVisibility: 'hidden'
   },
-  hdr: {
-    filter: 'contrast(1.16) saturate(1.24) brightness(1.03)',
+  '4k': {
+    // 8K Super-Resolution & Sub-pixel Sharpener
+    filter: 'contrast(1.12) saturate(1.15) brightness(1.02) drop-shadow(0 0 1px rgba(0,242,254,0.25))',
     imageRendering: 'crisp-edges'
   },
+  hdr: {
+    // Dolby Cinema Dynamic Range & Vibrance
+    filter: 'contrast(1.18) saturate(1.28) brightness(1.04) drop-shadow(0 0 2px rgba(0,0,0,0.6))',
+    imageRendering: '-webkit-optimize-contrast'
+  },
   anime: {
-    filter: 'contrast(1.12) saturate(1.20) brightness(1.04) hue-rotate(-1deg)',
+    // Anime Vibrant Cell-Shade Pro
+    filter: 'contrast(1.14) saturate(1.26) brightness(1.05) hue-rotate(-1deg)',
     imageRendering: 'crisp-edges'
   },
   night: {
-    filter: 'brightness(1.16) contrast(1.08) saturate(1.08)',
-    imageRendering: 'auto'
+    // Low-Light Shadow Detail Booster
+    filter: 'brightness(1.18) contrast(1.10) saturate(1.08)'
+  },
+  true_black: {
+    // True Black Zero-Backlight OLED Night Mode
+    filter: 'contrast(1.24) saturate(1.14) brightness(0.97)'
   }
 };
 
@@ -1017,7 +1030,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
         toggleFullscreen();
       } else if (e.key === 'b' || e.key === 'B') {
         e.preventDefault();
-        const modes = ['off', '4k', 'hdr', 'night'];
+        const modes = ['off', 'oled', '4k', 'hdr', 'anime', 'night', 'true_black'];
         const nextMode = modes[(modes.indexOf(aiBoostMode) + 1) % modes.length];
         changeAiBoost(nextMode);
       } else if (e.key === 'c' || e.key === 'C') {
@@ -1226,10 +1239,13 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       localStorage.setItem('furina_ai_boost', mode);
     } catch (e) {}
     const labels = {
-      off: 'AI Video Boost: Disabled (Raw Stream)',
-      '4k': '💎 4K AI Clarity Boost Active (Enhanced Micro-Contrast)',
-      hdr: '🌈 Cinema HDR Boost Active (Dolby Dynamic Vibrance)',
-      night: '🌙 Dark Scene Boost Active (Low-Light & Shadow Enhanced)'
+      off: 'AI Video Boost: Off (Raw Stream)',
+      oled: '📱 iPhone OLED Retina Pro Active (Deep Contrast & XDR Clarity)',
+      '4k': '💎 8K Super-Resolution AI Upscaler Active',
+      hdr: '🌈 Dolby Cinema HDR Active (Dynamic Vibrance)',
+      anime: '✨ Anime Vibrant Cell-Shade Active',
+      night: '🌙 Shadow Night Vision Active (Low-Light Detail)',
+      true_black: '🖤 True Black Zero-Backlight OLED Active'
     };
     setAiBoostToast(labels[mode] || 'AI Boost Active');
     setTimeout(() => setAiBoostToast(null), 2500);
@@ -1329,9 +1345,12 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse mr-0.5 shrink-0" />
                 {[
                   { id: 'off', label: 'Off' },
-                  { id: '4k', label: '4K' },
-                  { id: 'hdr', label: 'HDR' },
-                  { id: 'night', label: 'Night' },
+                  { id: 'oled', label: '📱 OLED' },
+                  { id: '4k', label: '💎 8K' },
+                  { id: 'hdr', label: '🌈 HDR' },
+                  { id: 'anime', label: '✨ Anime' },
+                  { id: 'night', label: '🌙 Night' },
+                  { id: 'true_black', label: '🖤 Black' },
                 ].map((mode) => (
                   <button
                     key={mode.id}
@@ -1832,23 +1851,26 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 </div>
               </div>
 
-              {/* Integrated AI Boost Filter Switcher */}
-              <div className="hidden sm:flex items-center gap-1 bg-black/50 p-0.5 rounded-full border border-cyan-500/30">
-                <span className="flex items-center gap-1 px-2 py-0.5 text-cyan-300 font-extrabold text-[10px]">
+              {/* Integrated AI Boost Filter Switcher (Visible & Swipeable on iPhone & Mobile) */}
+              <div className="flex items-center gap-1 bg-black/60 p-0.5 rounded-full border border-cyan-500/30 overflow-x-auto scrollbar-none max-w-full">
+                <span className="flex items-center gap-1 px-2 py-0.5 text-cyan-300 font-extrabold text-[10px] shrink-0">
                   <Sparkles className="w-3 h-3 text-cyan-400 animate-pulse" />
                   <span>AI Boost:</span>
                 </span>
                 {[
                   { id: 'off', label: 'Off', desc: 'Raw stream' },
-                  { id: '4k', label: '💎 4K', desc: 'Sharpening & micro-contrast' },
+                  { id: 'oled', label: '📱 OLED Pro', desc: 'iPhone Super Retina XDR OLED Tuning' },
+                  { id: '4k', label: '💎 8K AI', desc: 'Sharpening & micro-contrast upscaler' },
                   { id: 'hdr', label: '🌈 HDR', desc: 'Dolby-grade dynamic vibrance' },
-                  { id: 'night', label: '🌙 Night', desc: 'Shadow booster' },
+                  { id: 'anime', label: '✨ Anime', desc: 'Anime cell-shade color boost' },
+                  { id: 'night', label: '🌙 Night', desc: 'Shadow & low-light booster' },
+                  { id: 'true_black', label: '🖤 Black', desc: 'True Black zero-backlight OLED' },
                 ].map((mode) => (
                   <button
                     key={mode.id}
                     onClick={() => changeAiBoost(mode.id)}
                     title={mode.desc}
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold transition cursor-pointer ${
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold transition cursor-pointer shrink-0 ${
                       aiBoostMode === mode.id
                         ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-gray-950 shadow-[0_0_10px_rgba(56,189,248,0.6)] font-black'
                         : 'text-slate-300 hover:text-white hover:bg-white/10'
