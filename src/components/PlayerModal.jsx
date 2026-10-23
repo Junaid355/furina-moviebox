@@ -378,6 +378,9 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const [brightnessLevel, setBrightnessLevel] = useState(1);
   const [volumeLevel, setVolumeLevel] = useState(1);
   const [gestureToast, setGestureToast] = useState(null);
+  const [doubleTapSide, setDoubleTapSide] = useState(null); // 'left' | 'right' | null
+  const [activeGesture, setActiveGesture] = useState(null); // 'brightness' | 'volume' | null
+  const [isWideFillMode, setIsWideFillMode] = useState(false); // Mobile notch fill toggle (19.5:9 Ultra-Wide)
   const lastTouchTapRef = useRef({ time: 0, x: 0 });
   const touchStartRef = useRef({ x: 0, y: 0, time: 0 });
   const iframeLoadedRef = useRef(false);
@@ -605,7 +608,7 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     return () => window.removeEventListener('message', handleMessage);
   }, [isSeries, autoNextEnabled]);
 
-  // Touch Gesture controls on mobile (Double-tap skip 10s, Vertical drag for brightness in fullscreen)
+  // Touch Gesture controls on mobile (Double-tap skip 10s, Vertical drag for brightness & volume in fullscreen)
   const handleTouchStart = (e) => {
     if (!e.touches || e.touches.length === 0) return;
     const touch = e.touches[0];
@@ -620,18 +623,22 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
       const isRight = relativeX > rect.width * 0.55;
 
       if (isLeft) {
-        soundFx.playClick?.();
+        soundFx.playWaterDrop?.();
         if (videoRef.current) {
           videoRef.current.currentTime = Math.max(0, (videoRef.current.currentTime || 0) - 10);
         }
-        setGestureToast('⏪ -10s');
+        setDoubleTapSide('left');
+        setGestureToast('⏪ 10s Rewind');
+        setTimeout(() => setDoubleTapSide(null), 650);
         setTimeout(() => setGestureToast(null), 1200);
       } else if (isRight) {
-        soundFx.playClick?.();
+        soundFx.playWaterDrop?.();
         if (videoRef.current) {
           videoRef.current.currentTime = Math.min(videoRef.current.duration || 9999, (videoRef.current.currentTime || 0) + 10);
         }
-        setGestureToast('⏩ +10s');
+        setDoubleTapSide('right');
+        setGestureToast('⏩ 10s Forward');
+        setTimeout(() => setDoubleTapSide(null), 650);
         setTimeout(() => setGestureToast(null), 1200);
       }
       lastTouchTapRef.current = { time: 0, x: 0 };
@@ -650,18 +657,20 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
     const relativeX = touchStartRef.current.x - rect.left;
 
     // Vertical drag on left edge: Adjust brightness overlay
-    if (relativeX < rect.width * 0.35 && Math.abs(deltaY) > 20) {
-      const step = deltaY > 0 ? 0.02 : -0.02;
+    if (relativeX < rect.width * 0.35 && Math.abs(deltaY) > 15) {
+      setActiveGesture('brightness');
+      const step = deltaY > 0 ? 0.025 : -0.025;
       setBrightnessLevel((prev) => {
-        const next = Math.min(1.5, Math.max(0.4, Math.round((prev + step) * 100) / 100));
+        const next = Math.min(1.5, Math.max(0.35, Math.round((prev + step) * 100) / 100));
         setGestureToast(`☀️ Brightness: ${Math.round(next * 100)}%`);
         return next;
       });
       touchStartRef.current.y = touch.clientY;
     }
     // Vertical drag on right edge: Adjust volume
-    else if (relativeX > rect.width * 0.65 && Math.abs(deltaY) > 20) {
-      const step = deltaY > 0 ? 0.04 : -0.04;
+    else if (relativeX > rect.width * 0.65 && Math.abs(deltaY) > 15) {
+      setActiveGesture('volume');
+      const step = deltaY > 0 ? 0.035 : -0.035;
       if (videoRef.current) {
         const curVol = typeof videoRef.current.volume === 'number' ? videoRef.current.volume : 1;
         const nextVol = Math.min(1, Math.max(0, Math.round((curVol + step) * 100) / 100));
@@ -680,7 +689,10 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   };
 
   const handleTouchEnd = () => {
-    setTimeout(() => setGestureToast(null), 1200);
+    setTimeout(() => {
+      setActiveGesture(null);
+      setGestureToast(null);
+    }, 1200);
   };
 
   // Episode Binge Countdown Handler
@@ -1983,6 +1995,52 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
               </div>
             )}
 
+            {/* Double Tap Visual Ripple Overlays */}
+            {doubleTapSide === 'left' && (
+              <div className="absolute inset-y-0 left-0 w-1/2 z-40 bg-gradient-to-r from-cyan-500/20 to-transparent flex items-center justify-center pointer-events-none animate-in fade-in zoom-in-90 duration-200">
+                <div className="flex flex-col items-center gap-1.5 p-3 rounded-full bg-black/75 border border-cyan-400 text-cyan-300 shadow-2xl backdrop-blur-md">
+                  <span className="text-2xl font-black">⏪</span>
+                  <span className="text-[10px] font-black tracking-wider uppercase">10s Rewind</span>
+                </div>
+              </div>
+            )}
+            {doubleTapSide === 'right' && (
+              <div className="absolute inset-y-0 right-0 w-1/2 z-40 bg-gradient-to-l from-cyan-500/20 to-transparent flex items-center justify-center pointer-events-none animate-in fade-in zoom-in-90 duration-200">
+                <div className="flex flex-col items-center gap-1.5 p-3 rounded-full bg-black/75 border border-cyan-400 text-cyan-300 shadow-2xl backdrop-blur-md">
+                  <span className="text-2xl font-black">⏩</span>
+                  <span className="text-[10px] font-black tracking-wider uppercase">10s Forward</span>
+                </div>
+              </div>
+            )}
+
+            {/* Left Edge: Apple-Style Vertical Brightness HUD Pill */}
+            {activeGesture === 'brightness' && (
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 z-50 flex flex-col items-center gap-2 p-2 rounded-2xl bg-black/85 border border-white/20 backdrop-blur-xl shadow-2xl pointer-events-none animate-in fade-in slide-in-from-left-2 duration-150">
+                <span className="text-amber-300 text-xs">☀️</span>
+                <div className="w-2 h-28 rounded-full bg-slate-800 overflow-hidden relative flex flex-col justify-end">
+                  <div 
+                    className="w-full bg-gradient-to-t from-amber-500 to-yellow-300 rounded-full transition-all duration-75"
+                    style={{ height: `${Math.min(100, Math.round(((brightnessLevel - 0.35) / 1.15) * 100))}%` }}
+                  />
+                </div>
+                <span className="text-[10px] font-mono font-bold text-white">{Math.round(brightnessLevel * 100)}%</span>
+              </div>
+            )}
+
+            {/* Right Edge: Apple-Style Vertical Volume HUD Pill */}
+            {activeGesture === 'volume' && (
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 z-50 flex flex-col items-center gap-2 p-2 rounded-2xl bg-black/85 border border-white/20 backdrop-blur-xl shadow-2xl pointer-events-none animate-in fade-in slide-in-from-right-2 duration-150">
+                <span className="text-cyan-300 text-xs">🔊</span>
+                <div className="w-2 h-28 rounded-full bg-slate-800 overflow-hidden relative flex flex-col justify-end">
+                  <div 
+                    className="w-full bg-gradient-to-t from-cyan-500 to-sky-300 rounded-full transition-all duration-75"
+                    style={{ height: `${Math.round(volumeLevel * 100)}%` }}
+                  />
+                </div>
+                <span className="text-[10px] font-mono font-bold text-white">{Math.round(volumeLevel * 100)}%</span>
+              </div>
+            )}
+
             {/* Gesture Toast (Double Tap 10s Skip & Brightness Indicator) */}
             {gestureToast && (
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 px-4 py-2 rounded-2xl bg-black/90 border border-cyan-400 text-cyan-200 text-sm font-black shadow-2xl backdrop-blur-md pointer-events-none animate-in fade-in zoom-in duration-100">
@@ -2031,6 +2089,24 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                 }`}
               >
                 <span>🇯🇵 JA</span>
+              </button>
+              <button
+                type="button"
+                data-testid="fill-screen-toggle-btn"
+                onClick={() => {
+                  soundFx.playClick?.();
+                  setIsWideFillMode((prev) => !prev);
+                  setGestureToast(isWideFillMode ? '📺 Aspect: Fit 16:9' : '📱 Aspect: Fill 19.5:9');
+                  setTimeout(() => setGestureToast(null), 1200);
+                }}
+                title="Toggle Fill Screen Aspect Ratio (Mobile OLED 19.5:9)"
+                className={`ml-1 px-1.5 py-0.5 rounded text-[9.5px] font-extrabold transition cursor-pointer flex items-center gap-1 ${
+                  isWideFillMode
+                    ? 'bg-amber-400 text-gray-950 font-black shadow-[0_0_8px_rgba(251,191,36,0.6)]'
+                    : 'text-slate-300 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                <span>{isWideFillMode ? '📱 Fill' : '📺 Fit'}</span>
               </button>
             </div>
 
@@ -2562,10 +2638,10 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
                     }
                   }}
                   style={AI_BOOST_STYLES[aiBoostMode] || {}}
-                  className={`border-0 bg-black ${
+                  className={`border-0 bg-black transition-all duration-300 ${
                     isFullscreen 
-                      ? 'w-full h-full aspect-video max-w-[calc(100vh*16/9)] max-h-[calc(100vw*9/16)] shadow-2xl' 
-                      : 'w-full h-full'
+                      ? (isWideFillMode ? 'w-full h-full scale-[1.18] sm:scale-100' : 'w-full h-full aspect-video max-w-[calc(100vh*16/9)] max-h-[calc(100vw*9/16)] shadow-2xl') 
+                      : (isWideFillMode ? 'w-full h-full scale-[1.12] sm:scale-100' : 'w-full h-full')
                   }`}
                   loading="eager"
                   importance="high"

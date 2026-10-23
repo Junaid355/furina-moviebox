@@ -366,6 +366,33 @@ class SoundEffectsEngine {
       });
     } catch (e) {}
   }
+
+  /**
+   * Furina Regal Fanfare — Crystal Fontaine celebration chord
+   */
+  playFurinaFanfare() {
+    if (this.muted) return;
+    const ctx = this.getAudioContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      // Majestic Fontaine chord: C5, E5, G5, B5, C6 (Cmaj7 shimmer)
+      const frequencies = [523.25, 659.25, 783.99, 987.77, 1046.50];
+      frequencies.forEach((f, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = i % 2 === 0 ? 'sine' : 'triangle';
+        osc.frequency.setValueAtTime(f, now + i * 0.06);
+        gain.gain.setValueAtTime(0.08, now + i * 0.06);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6 + i * 0.06);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + i * 0.06);
+        osc.stop(now + 0.7 + i * 0.06);
+      });
+    } catch (e) {}
+  }
 }
 
 export const soundFx = new SoundEffectsEngine();

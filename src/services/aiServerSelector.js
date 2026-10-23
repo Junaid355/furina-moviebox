@@ -21,6 +21,8 @@ export const SERVER_PROFILES = {
   tgvid:             { tier: 1, badge: 'TgVid Direct • Multi-Language', adLevel: 'Clean', hindi: true },
   zxcstream:         { tier: 1, badge: 'VidJoy 4K Cloud • Fast Streams', adLevel: 'Clean', hindi: false },
   moviebox:          { tier: 1, badge: 'MovieBox Ultra • Direct 4K Cloud', adLevel: 'Clean', hindi: true },
+  aniwave:           { tier: 1, badge: 'Aniwave Cloud • Dual Audio 1080p', adLevel: 'Clean', hindi: true },
+  animeheaven:       { tier: 1, badge: 'AnimeHeaven Direct • Clean Stream', adLevel: 'Clean', hindi: true },
   autoembed:         { tier: 3, badge: 'AutoEmbed (Turnstile Blocked)', adLevel: 'Captcha', hindi: false },
   vidstuck:          { tier: 3, badge: 'Legacy Mirror (Offline)', adLevel: 'Offline', hindi: false },
   bingr:             { tier: 3, badge: 'Legacy Mirror (Backup)', adLevel: 'Unknown', hindi: false },

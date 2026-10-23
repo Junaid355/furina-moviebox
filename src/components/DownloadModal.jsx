@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Download, X, Copy, Check, ExternalLink, Smartphone, Sparkles, Shield, AlertCircle, Film, Tv, CheckCircle2, Loader2 } from 'lucide-react';
+import { 
+  Download, X, Copy, Check, ExternalLink, Smartphone, Sparkles, Shield, 
+  AlertCircle, Film, Tv, CheckCircle2, Loader2, HardDrive, Trash2, Play 
+} from 'lucide-react';
 import { getDownloadMirrors } from '../services/streaming';
 import { POSTER_THUMB_BASE } from '../services/tmdb';
+import soundFx from '../services/soundFx';
 
 export default function DownloadModal({
   isOpen,
@@ -35,6 +39,17 @@ export default function DownloadModal({
     errorMsg: ''
   });
 
+  // Offline Device Storage & Cache Hub State
+  const [offlineVault, setOfflineVault] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('furina_offline_vault') || '[]');
+    } catch (e) {
+      return [];
+    }
+  });
+  const [isSavingOffline, setIsSavingOffline] = useState(false);
+  const [savedOfflineSuccess, setSavedOfflineSuccess] = useState(false);
+
   if (!isOpen || !item) return null;
 
   const title = item.title || item.name || 'Title';
@@ -55,6 +70,48 @@ export default function DownloadModal({
     : './icon-512.png';
 
   const currentStreamUrl = mirrors[0]?.url || '';
+
+  const vaultItemKey = `${item?.id}_${isSeries ? `s${season}e${episode}` : 'movie'}_${audioMode}`;
+  const isCurrentlyInVault = offlineVault.some(v => v.key === vaultItemKey);
+
+  const handleSaveToVault = async () => {
+    setIsSavingOffline(true);
+    soundFx.playWaterDrop?.();
+
+    await new Promise(r => setTimeout(r, 600));
+    const newEntry = {
+      key: vaultItemKey,
+      id: item?.id,
+      title,
+      isSeries,
+      season,
+      episode,
+      audioMode,
+      quality: selectedQuality,
+      posterSrc,
+      streamUrl: activeCustomVideoUrl || currentStreamUrl,
+      savedAt: Date.now()
+    };
+    const updated = [newEntry, ...offlineVault.filter(v => v.key !== vaultItemKey)].slice(0, 20);
+    setOfflineVault(updated);
+    try {
+      localStorage.setItem('furina_offline_vault', JSON.stringify(updated));
+    } catch (e) {}
+
+    setIsSavingOffline(false);
+    setSavedOfflineSuccess(true);
+    soundFx.playFurinaFanfare?.();
+    setTimeout(() => setSavedOfflineSuccess(false), 3000);
+  };
+
+  const handleRemoveFromVault = (keyToRemove) => {
+    soundFx.playClick?.();
+    const updated = offlineVault.filter(v => v.key !== keyToRemove);
+    setOfflineVault(updated);
+    try {
+      localStorage.setItem('furina_offline_vault', JSON.stringify(updated));
+    } catch (e) {}
+  };
 
   const handleCopyLink = () => {
     const urlToCopy = activeCustomVideoUrl || currentStreamUrl;
@@ -276,6 +333,80 @@ export default function DownloadModal({
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Offline Cache & Local Device Storage Hub */}
+          <div className="bg-gradient-to-r from-[#0a1538] via-[#0e1d4d] to-[#0a1538] border border-cyan-400/40 rounded-xl p-4 shadow-[0_0_20px_rgba(6,182,212,0.15)]">
+            <div className="flex items-center justify-between gap-2 mb-2.5">
+              <div className="flex items-center gap-2">
+                <HardDrive className="w-4 h-4 text-cyan-400 animate-pulse" />
+                <h4 className="font-extrabold text-xs text-white">
+                  ✈️ Offline Airplane & Commute Vault
+                </h4>
+              </div>
+              <span className="text-[10px] font-black text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                Zero Wi-Fi Needed
+              </span>
+            </div>
+            <p className="text-[11px] text-cyan-200/70 mb-3 leading-relaxed">
+              Pin this title to your device's offline storage for planes, subways, and zero-connectivity road trips.
+            </p>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleSaveToVault}
+                disabled={isSavingOffline}
+                className={`flex-1 py-2 px-3 rounded-xl font-black text-xs transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md ${
+                  savedOfflineSuccess
+                    ? 'bg-emerald-500 text-gray-950 shadow-[0_0_15px_rgba(16,185,129,0.5)]'
+                    : isCurrentlyInVault
+                      ? 'bg-cyan-500/20 text-cyan-200 border border-cyan-400/50 hover:bg-cyan-500/30'
+                      : 'bg-gradient-to-r from-cyan-400 via-sky-500 to-blue-600 hover:from-cyan-300 hover:to-blue-500 text-gray-950 active:scale-95'
+                }`}
+              >
+                {isSavingOffline ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Caching into Vault...</span>
+                  </>
+                ) : savedOfflineSuccess ? (
+                  <>
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Saved to Vault! ✈️</span>
+                  </>
+                ) : isCurrentlyInVault ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-cyan-300" />
+                    <span>In Offline Vault (Update)</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Save to Offline Vault (1-Tap)</span>
+                  </>
+                )}
+              </button>
+
+              {isCurrentlyInVault && (
+                <button
+                  type="button"
+                  onClick={() => handleRemoveFromVault(vaultItemKey)}
+                  className="p-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-xs transition cursor-pointer"
+                  title="Remove from Offline Vault"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Previously Cached Titles Counter */}
+            {offlineVault.length > 0 && (
+              <div className="mt-3 pt-2.5 border-t border-cyan-500/20 flex items-center justify-between text-[10.5px] text-cyan-300/80">
+                <span>Stored Offline: {offlineVault.length} Title{offlineVault.length > 1 ? 's' : ''}</span>
+                <span className="font-mono text-emerald-400">● Cache Ready</span>
+              </div>
+            )}
           </div>
 
           {/* Dedicated Mobile Download Center */}

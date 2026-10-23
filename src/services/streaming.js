@@ -288,6 +288,50 @@ export const SERVERS = [
       const langParam = audioMode === 'english' ? 'en' : (audioMode === 'sub' ? 'ja' : 'hi');
       return `https://themoviebox.xyz/embed/tv/${cleanId}/${seasonNum}/${epNum}?lang=${langParam}&disable_app_ad=true`;
     }
+  },
+  {
+    id: 'aniwave',
+    aliasIds: ['aniwave_engine', 'aniwave_ru', 'echovideo'],
+    name: '[ 🍥 Server 14 (Aniwave Multi-Dub) ] Aniwave Cloud (Vidplay/MyCloud Dual Audio • 1080p HD)',
+    shortName: '[ 🍥 Server 14 (Aniwave) ]',
+    badge: 'Dual Audio • Aniwave CDN',
+    statusBadge: '🎧 Multi-Dub',
+    color: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
+    supportedAudios: ['english', 'sub', 'hindi'],
+    supportsAudioSwitching: true,
+    getMovieUrl: (tmdbId, audioMode = 'english') => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '533535';
+      const dubParam = audioMode === 'sub' ? 'sub' : (audioMode === 'hindi' ? 'hindi' : 'dub');
+      return `https://vidlink.pro/movie/${cleanId}?primaryColor=f43f5e&sub_dub=${dubParam}&server=vidplay`;
+    },
+    getTvUrl: (tmdbId, s = 1, e = 1, audioMode = 'english') => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '82777';
+      const seasonNum = Math.max(1, Number(s) || 1);
+      const epNum = Math.max(1, Number(e) || 1);
+      const dubParam = audioMode === 'sub' ? 'sub' : (audioMode === 'hindi' ? 'hindi' : 'dub');
+      return `https://vidlink.pro/tv/${cleanId}/${seasonNum}/${epNum}?primaryColor=f43f5e&sub_dub=${dubParam}&server=vidplay`;
+    }
+  },
+  {
+    id: 'animeheaven',
+    aliasIds: ['animeheaven_direct', 'animeheaven_me'],
+    name: '[ ⛩️ Server 15 (AnimeHeaven Direct) ] AnimeHeaven Direct Stream (Clean MP4 • Zero Lag)',
+    shortName: '[ ⛩️ Server 15 (AnimeHeaven) ]',
+    badge: 'Direct Stream • Zero Lag',
+    statusBadge: '⚡ Instant',
+    color: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+    supportedAudios: ['sub', 'english', 'hindi'],
+    supportsAudioSwitching: true,
+    getMovieUrl: (tmdbId) => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '533535';
+      return `https://play.123embed.net/mv/${cleanId}?autoPlay=true`;
+    },
+    getTvUrl: (tmdbId, s = 1, e = 1) => {
+      const cleanId = String(tmdbId).replace(/[^0-9]/g, '') || '31910';
+      const seasonNum = Math.max(1, Number(s) || 1);
+      const epNum = Math.max(1, Number(e) || 1);
+      return `https://play.123embed.net/tv/${cleanId}/${seasonNum}/${epNum}?autoPlay=true`;
+    }
   }
 ];
 
@@ -333,6 +377,28 @@ export function getDownloadMirrors(tmdbId, type = 'movie', season = 1, episode =
   const isTv = type === 'tv';
   const isMature = Boolean(isHanime || Number(tmdbId) === 1033051 || String(tmdbId).includes('1033051'));
   const allMirrors = [
+    {
+      id: 'mirror_aniwave',
+      name: '[ 🍥 Server 0 (Aniwave Dual-Audio) ] Aniwave Cloud Mirror',
+      quality: '1080p Ultra HD',
+      badge: 'Aniwave • Dual Audio Sub/Dub',
+      color: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
+      isHindi: true,
+      url: isTv
+        ? `https://vidlink.pro/tv/${tmdbId}/${season}/${episode}?primaryColor=f43f5e&sub_dub=${audioMode === 'sub' ? 'sub' : (audioMode === 'hindi' ? 'hindi' : 'dub')}&server=vidplay`
+        : `https://vidlink.pro/movie/${tmdbId}?primaryColor=f43f5e&sub_dub=${audioMode === 'sub' ? 'sub' : (audioMode === 'hindi' ? 'hindi' : 'dub')}&server=vidplay`
+    },
+    {
+      id: 'mirror_animeheaven',
+      name: '[ ⛩️ Server 00 (AnimeHeaven Direct) ] AnimeHeaven Direct Stream',
+      quality: '1080p Direct MP4',
+      badge: 'Zero Delay • Direct Stream',
+      color: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+      isHindi: false,
+      url: isTv
+        ? `https://play.123embed.net/tv/${tmdbId}/${season}/${episode}?autoPlay=true`
+        : `https://play.123embed.net/mv/${tmdbId}?autoPlay=true`
+    },
     {
       id: 'mirror_tgvid',
       name: '[ 🌸 Server 1 (Ad-Free Cinema) ] TgVid Direct Cloud',
