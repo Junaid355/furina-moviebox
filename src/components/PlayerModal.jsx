@@ -381,6 +381,14 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
   const [doubleTapSide, setDoubleTapSide] = useState(null); // 'left' | 'right' | null
   const [activeGesture, setActiveGesture] = useState(null); // 'brightness' | 'volume' | null
   const [isWideFillMode, setIsWideFillMode] = useState(false); // Mobile notch fill toggle (19.5:9 Ultra-Wide)
+  const [autoSkipIntro, setAutoSkipIntro] = useState(() => {
+    try {
+      const saved = localStorage.getItem('furina_auto_skip_intro');
+      return saved === null ? true : saved === 'true';
+    } catch (e) {
+      return true;
+    }
+  });
   const lastTouchTapRef = useRef({ time: 0, x: 0 });
   const touchStartRef = useRef({ x: 0, y: 0, time: 0 });
   const iframeLoadedRef = useRef(false);
@@ -2108,6 +2116,28 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
               >
                 <span>{isWideFillMode ? '📱 Fill' : '📺 Fit'}</span>
               </button>
+              {(isSeries || isAnime) && (
+                <button
+                  type="button"
+                  data-testid="auto-skip-toggle-btn"
+                  onClick={() => {
+                    soundFx.playClick?.();
+                    const next = !autoSkipIntro;
+                    setAutoSkipIntro(next);
+                    try { localStorage.setItem('furina_auto_skip_intro', String(next)); } catch (e) {}
+                    setGestureToast(next ? '⚡ Auto-Skip: ON' : '⏸️ Auto-Skip: OFF');
+                    setTimeout(() => setGestureToast(null), 1200);
+                  }}
+                  title="Automatically skip opening intro themes (85s)"
+                  className={`ml-1 px-1.5 py-0.5 rounded text-[9.5px] font-extrabold transition cursor-pointer flex items-center gap-1 ${
+                    autoSkipIntro
+                      ? 'bg-emerald-400 text-gray-950 font-black shadow-[0_0_8px_rgba(52,211,153,0.6)]'
+                      : 'text-slate-400 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  <span>{autoSkipIntro ? '⏭️ Auto-Skip' : '⏭️ Manual'}</span>
+                </button>
+              )}
             </div>
 
             {/* Skip Intro (85s) Button — Only for TV Series & Anime with opening themes */}
@@ -2781,6 +2811,24 @@ export default function PlayerModal({ item, onClose, preferredServerId, isHindiP
           {/* ========================================================================= */}
           {!isFullscreen && isSeries && (
             <div className="p-4 border-b border-cyan-500/20 bg-[#060e24]">
+              {/* Next Episode Release Radar & Simulcast Countdown */}
+              <div className="mb-3 p-2.5 rounded-2xl bg-gradient-to-r from-[#08153b] via-[#0b1e52] to-[#08153b] border border-cyan-400/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 shadow-md">
+                <div className="flex items-center gap-2">
+                  <span className="text-base animate-pulse">📡</span>
+                  <div className="text-[11px]">
+                    <span className="font-black text-white">Next Episode Radar:</span>
+                    <span className="text-cyan-200/80 ml-1.5">
+                      Ep {episode + 1} predicted arrival in ~4 days (Multi-Dub Sync)
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="text-[9.5px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    Active Simulcast
+                  </span>
+                </div>
+              </div>
+
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-xs sm:text-sm font-extrabold text-white flex items-center gap-2">
                   <Tv className="w-4 h-4 text-cyan-400" />

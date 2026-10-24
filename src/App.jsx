@@ -22,6 +22,8 @@ const AndroidAppModal = lazy(() => import('./components/AndroidAppModal'));
 const MovieStudioModal = lazy(() => import('./components/MovieStudioModal'));
 const FranchiseTimelineModal = lazy(() => import('./components/FranchiseTimelineModal'));
 const WatchTogetherModal = lazy(() => import('./components/WatchTogetherModal'));
+const AiVibeOracleModal = lazy(() => import('./components/AiVibeOracleModal'));
+const VinylJukeboxModal = lazy(() => import('./components/VinylJukeboxModal'));
 import { 
   fetchTrendingAll, 
   fetchHollywoodMovies, 
@@ -54,7 +56,7 @@ import { VIBE_CURATIONS } from './services/curatedMoods';
 import { syncWorldAnimeNow, getLastAnimeSyncDisplay } from './services/animeAutoSync';
 import { 
   Flame, Film, Tv, Sparkles, Heart, RefreshCw, Shield, Settings, 
-  ChevronDown, Clock, Play, X, Star, Volume2, VolumeX, Search, Milestone, Users, Moon
+  ChevronDown, Clock, Play, X, Star, Volume2, VolumeX, Search, Milestone, Users, Moon, Disc, Music
 } from 'lucide-react';
 
 function getContinueWatchingList() {
@@ -157,6 +159,8 @@ export default function App() {
   const [isMuted, setIsMuted] = useState(() => soundFx.isMuted());
   const [isTimelineOpen, setIsTimelineOpen] = useState(false);
   const [isWatchTogetherOpen, setIsWatchTogetherOpen] = useState(false);
+  const [isOracleOpen, setIsOracleOpen] = useState(false);
+  const [isJukeboxOpen, setIsJukeboxOpen] = useState(false);
   const [syncStatus, setSyncStatus] = useState(() => getLastAnimeSyncDisplay());
   const [isSyncingAnime, setIsSyncingAnime] = useState(false);
 
@@ -630,6 +634,8 @@ export default function App() {
         if (isStudioOpen) { setIsStudioOpen(false); return; }
         if (isIPhoneModalOpen) { setIsIPhoneModalOpen(false); return; }
         if (isAndroidModalOpen) { setIsAndroidModalOpen(false); return; }
+        if (isOracleOpen) { setIsOracleOpen(false); return; }
+        if (isJukeboxOpen) { setIsJukeboxOpen(false); return; }
         return;
       }
 
@@ -642,7 +648,7 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isSettingsOpen, isStudioOpen, isIPhoneModalOpen, isAndroidModalOpen, activeMedia, detailsItem, isSearchOverlayOpen]);
+  }, [isSettingsOpen, isStudioOpen, isIPhoneModalOpen, isAndroidModalOpen, isOracleOpen, isJukeboxOpen, activeMedia, detailsItem, isSearchOverlayOpen]);
 
   return (
     <div className={`min-h-screen ${isStealthMode ? 'bg-[#080b11]' : 'bg-[#030712]'} text-white flex flex-col selection:bg-cyan-500 selection:text-gray-950 pb-20 lg:pb-8 relative overflow-x-clip`}>
@@ -670,6 +676,8 @@ export default function App() {
         onOpenAndroidModal={() => setIsAndroidModalOpen(true)}
         onOpenStudio={() => setIsStudioOpen(true)}
         onOpenSearchOverlay={() => setIsSearchOverlayOpen(true)}
+        onOpenOracle={() => setIsOracleOpen(true)}
+        onOpenJukebox={() => setIsJukeboxOpen(true)}
       />
 
       {/* Main Container */}
@@ -1532,6 +1540,19 @@ export default function App() {
           activeMedia={activeMedia || heroItem}
           currentServer={SERVERS[0]}
         />
+
+        {/* Furina AI Vibe Oracle Modal */}
+        <AiVibeOracleModal
+          isOpen={isOracleOpen}
+          onClose={() => setIsOracleOpen(false)}
+          onSelectMedia={(media) => setSafeActiveMedia(media)}
+        />
+
+        {/* Anime OST & Cinema Vinyl Jukebox Modal */}
+        <VinylJukeboxModal
+          isOpen={isJukeboxOpen}
+          onClose={() => setIsJukeboxOpen(false)}
+        />
       </Suspense>
 
       {/* Aceternity UI 3D Floating Dock (Desktop & Large Screens) */}
@@ -1577,6 +1598,22 @@ export default function App() {
                 setSearchQuery('');
               },
               active: activeCategory === 'anime'
+            },
+            {
+              title: "AI Vibe Oracle",
+              icon: <Sparkles className="w-5 h-5 text-yellow-300 animate-pulse" />,
+              onClick: () => {
+                soundFx.playClick();
+                setIsOracleOpen(true);
+              }
+            },
+            {
+              title: "Vinyl Jukebox",
+              icon: <Disc className="w-5 h-5 text-cyan-300 animate-[spin_8s_linear_infinite]" />,
+              onClick: () => {
+                soundFx.playClick();
+                setIsJukeboxOpen(true);
+              }
             },
             {
               title: "Franchises",

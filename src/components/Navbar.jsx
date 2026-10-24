@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Film, Tv, Flame, Heart, Sparkles, X, Shield, Lock, Settings, Smartphone, Skull, Volume2, VolumeX, Command } from 'lucide-react';
+import { Search, Film, Tv, Flame, Heart, Sparkles, X, Shield, Lock, Settings, Smartphone, Skull, Volume2, VolumeX, Command, Disc } from 'lucide-react';
 import soundFx from '../services/soundFx';
 
 export function HanimeIcon({ className = "w-3.5 h-3.5 sm:w-4 sm:h-4", ...props }) {
@@ -39,7 +39,9 @@ export default function Navbar({
   onOpenIPhoneModal,
   onOpenAndroidModal,
   onOpenStudio,
-  onOpenSearchOverlay
+  onOpenSearchOverlay,
+  onOpenOracle,
+  onOpenJukebox
 }) {
   const baseCategories = [
     { id: 'trending', label: 'Trending', icon: Flame },
@@ -282,6 +284,34 @@ export default function Navbar({
 
         {/* Action Controls: Movie Studio, Apps, Audio FX, Settings */}
         <div className="flex items-center gap-1 sm:gap-1.5 shrink-0 ml-auto">
+          {onOpenOracle && (
+            <button
+              onClick={() => {
+                soundFx.playSearchBeam?.();
+                onOpenOracle();
+              }}
+              title="Lady Furina's AI Mood & Vibe Oracle"
+              className="p-1.5 sm:px-2.5 sm:py-1 rounded-full border border-cyan-400/50 bg-gradient-to-r from-cyan-500/25 to-blue-600/25 hover:from-cyan-400 hover:to-blue-500 text-cyan-200 hover:text-gray-950 transition-all duration-200 flex items-center gap-1 text-[10px] sm:text-[11px] font-black cursor-pointer shadow-[0_0_12px_rgba(6,182,212,0.35)] shrink-0 active:scale-95"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-spin" />
+              <span className="hidden sm:inline">AI Oracle</span>
+            </button>
+          )}
+
+          {onOpenJukebox && (
+            <button
+              onClick={() => {
+                soundFx.playClick?.();
+                onOpenJukebox();
+              }}
+              title="Anime OST & Cinema Vinyl Jukebox"
+              className="p-1.5 sm:px-2 sm:py-1 rounded-full border border-pink-500/40 bg-gradient-to-r from-pink-500/20 to-purple-600/20 hover:from-pink-500/35 hover:to-purple-600/35 text-pink-300 hover:text-white transition-all duration-200 flex items-center gap-1 text-[10px] sm:text-[11px] font-bold cursor-pointer shadow-sm shrink-0 active:scale-95 hover:shadow-[0_0_12px_rgba(244,63,94,0.4)]"
+            >
+              <Disc className="w-3.5 h-3.5 text-pink-400" />
+              <span className="hidden md:inline">Jukebox</span>
+            </button>
+          )}
+
           <button
             onClick={onOpenStudio}
             data-testid="studio-btn"
