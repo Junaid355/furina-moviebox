@@ -51,12 +51,14 @@
     <script>
       // Build Version Sentinel & Stale Cache Eviction
       (function() {
-        var CURRENT_BUILD = '2026.10.23.v6';
+        var CURRENT_BUILD = '2026.10.24.v9';
         try {
           var stored = localStorage.getItem('furina_build_ver');
-          if (stored && stored !== CURRENT_BUILD) {
-            console.log('[Furina Version Sentinel] Newer build detected. Evicting stale cache...');
+          if (stored !== CURRENT_BUILD) {
+            console.log('[Furina Version Sentinel] Newer build detected (' + CURRENT_BUILD + '). Evicting stale cache...');
             localStorage.removeItem('furina_cached_trending');
+            localStorage.removeItem('furina_cached_trending_v5');
+            localStorage.removeItem('furina_cached_trending_v5_time');
             localStorage.removeItem('furina_server_health_v2');
             if ('caches' in window) {
               caches.keys().then(function(keys) {
@@ -83,6 +85,15 @@
               reg.update();
             })
             .catch(function() {});
+        });
+
+        // Automatically reload once if service worker activates a new version, eliminating stale UI
+        var isRefreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', function() {
+          if (!isRefreshing) {
+            isRefreshing = true;
+            window.location.reload();
+          }
         });
 
         // Check for updates whenever user returns to the tab

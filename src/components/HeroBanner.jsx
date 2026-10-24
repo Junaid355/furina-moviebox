@@ -342,7 +342,7 @@ export default function HeroBanner({
               soundFx.playClick();
               onToggleWatchlist(currentItem);
             }}
-            className={`flex items-center gap-1 px-2.5 py-1.5 sm:px-6 sm:py-3.5 rounded-full text-xs sm:text-sm font-bold transition-all border backdrop-blur-xl cursor-pointer hover:scale-105 active:scale-95 ${
+            className={`flex items-center gap-1 px-3 py-1.5 sm:px-6 sm:py-3.5 rounded-full text-xs sm:text-sm font-bold transition-all border backdrop-blur-xl cursor-pointer hover:scale-105 active:scale-95 whitespace-nowrap shrink-0 ${
               saved
                 ? 'bg-cyan-500/25 border-cyan-400 text-cyan-200 shadow-[0_0_20px_rgba(56,189,248,0.4)]'
                 : 'bg-slate-950/80 border-cyan-400/30 text-slate-200 hover:text-white hover:bg-cyan-500/20 hover:border-cyan-300'

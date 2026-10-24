@@ -365,6 +365,25 @@ export default function App() {
     } catch (err) {}
   };
 
+  const clearAllContinueWatching = () => {
+    if (window.confirm("Clear all Continue Watching history?")) {
+      try {
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('furina_progress_')) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach((k) => localStorage.removeItem(k));
+        setContinueWatching([]);
+        soundFx.playClick?.();
+      } catch (err) {}
+    }
+  };
+
+  const [showAllContinueWatching, setShowAllContinueWatching] = useState(false);
+
   // Settings & Secret Master Mode (Passcode: 2030)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isIPhoneModalOpen, setIsIPhoneModalOpen] = useState(false);
@@ -744,12 +763,22 @@ export default function App() {
                 <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400" />
                 <h3 className="text-sm sm:text-lg font-black text-white">Continue Watching</h3>
               </div>
-              <span className="text-[10px] sm:text-[11px] text-cyan-200/60 font-medium">
-                {continueWatching.length} in progress
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] sm:text-[11px] text-cyan-200/60 font-medium">
+                  {continueWatching.length} in progress
+                </span>
+                <button
+                  type="button"
+                  onClick={clearAllContinueWatching}
+                  className="text-[10px] sm:text-[11px] text-rose-400 hover:text-rose-300 font-bold hover:underline transition px-1.5 py-0.5 rounded bg-rose-500/10 border border-rose-500/20 cursor-pointer"
+                  title="Clear all continue watching items"
+                >
+                  Clear All
+                </button>
+              </div>
             </div>
             <div className="flex gap-2.5 sm:gap-3 overflow-x-auto pb-2 no-scrollbar">
-              {continueWatching.map((cw) => {
+              {(showAllContinueWatching ? continueWatching : continueWatching.slice(0, 10)).map((cw) => {
                 const cwTitle = cw.title || cw.name || 'Untitled';
                 const poster = cw.poster_path ? (cw.poster_path.startsWith('http') ? cw.poster_path : `https://image.tmdb.org/t/p/w500${cw.poster_path}`) : './icon-512.png';
                 return (
@@ -790,6 +819,16 @@ export default function App() {
                   </div>
                 );
               })}
+              {continueWatching.length > 10 && (
+                <button
+                  type="button"
+                  onClick={() => setShowAllContinueWatching(!showAllContinueWatching)}
+                  className="flex-shrink-0 w-24 xs:w-28 sm:w-36 bg-[#081534]/70 hover:bg-[#0b1c44] border border-cyan-500/30 hover:border-cyan-400 rounded-xl flex flex-col items-center justify-center p-3 text-cyan-300 text-xs font-bold transition cursor-pointer"
+                >
+                  <span className="text-sm">⚡</span>
+                  <span className="mt-1">{showAllContinueWatching ? 'Show Less ◀' : `+${continueWatching.length - 10} More ▶`}</span>
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -1668,7 +1707,16 @@ export default function App() {
       </div>
 
       {/* Interactive Cute Furina Chibi Mascot Companion */}
-      <FurinaMascot onOpenSearch={() => setIsSearchOverlayOpen(true)} />
+      <FurinaMascot
+        onOpenSearch={() => setIsSearchOverlayOpen(true)}
+        onOpenOracle={() => setIsOracleOpen(true)}
+        onOpenJukebox={() => setIsJukeboxOpen(true)}
+        onPickRandom={() => {
+          const pool = (items && items.length > 0) ? items : FALLBACK_MEDIA;
+          const chosen = pool[Math.floor(Math.random() * pool.length)];
+          if (chosen) setSafeActiveMedia(chosen);
+        }}
+      />
 
       {/* Mobile iOS Style Bottom Navigation Bar */}
       <nav style={{ transform: 'translateZ(0)' }} className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-[#070d1e]/95 backdrop-blur-2xl border-t border-cyan-500/20 px-1 py-2 safe-bottom flex items-center justify-around shadow-[0_-5px_25px_rgba(0,0,0,0.7)] transform-gpu">

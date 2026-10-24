@@ -1,20 +1,22 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Sparkles, MessageCircle, X, Volume2, VolumeX, Heart, PartyPopper } from "lucide-react";
+import { Sparkles, MessageCircle, X, Volume2, VolumeX, Heart, PartyPopper, Disc, Shuffle, RefreshCw } from "lucide-react";
 import soundFx from "../../services/soundFx";
 
 const FURINA_QUOTES = [
   "Welcome to Fontaine Cinema! All movies and series are 100% free in crisp 4K!",
   "Shall we watch in 4K? Tap me anytime for Fontaine's finest premieres!",
+  "Try the new AI Vibe Oracle! Type any mood like 'dark anime thriller' to get instant picks!",
+  "The Vinyl Jukebox is spinning! Turn on Demon Slayer or Interstellar while browsing!",
   "Looking for Hindi Dubbed blockbusters? Check out Server 1 & Server 14!",
   "Press 'Ctrl+K' or '/' anytime to launch the 3D Spotlight Search!",
   "Hydro power powers every stream with zero buffering!",
   "Court of Fontaine decrees: Streaming in OLED mode is mandatory for maximum eye candy!",
-  "Joke of the day: Why do programmers prefer dark mode? Because light attracts bugs! 😂",
+  "Tip: Tap 'Clean Cache' below if your browser ever shows old screens after an update!",
   "Aniwave and AnimeHeaven direct engines are live! Instant 1080p anime at your fingertips!",
   "Remember to try the AI Video Booster — tap 'B' or choose OLED for ultra-deep contrast!"
 ];
 
-export const FurinaMascot = ({ onOpenSearch }) => {
+export const FurinaMascot = ({ onOpenSearch, onOpenOracle, onOpenJukebox, onPickRandom }) => {
   const [quoteIndex, setQuoteIndex] = useState(0);
   const [showBubble, setShowBubble] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -22,6 +24,7 @@ export const FurinaMascot = ({ onOpenSearch }) => {
   const [hearts, setHearts] = useState([]);
   const [tapCount, setTapCount] = useState(0);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
+  const [isWiping, setIsWiping] = useState(false);
   const lastTapTimeRef = useRef(0);
 
   useEffect(() => {
@@ -98,6 +101,29 @@ export const FurinaMascot = ({ onOpenSearch }) => {
     }
   };
 
+  const handleCleanCache = async () => {
+    setIsWiping(true);
+    soundFx.playClick?.();
+    try {
+      if (typeof window !== 'undefined') {
+        if ('caches' in window) {
+          const keys = await caches.keys();
+          for (const k of keys) await caches.delete(k);
+        }
+        if ('serviceWorker' in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          for (const r of regs) await r.unregister();
+        }
+        localStorage.removeItem('furina_cached_trending');
+        localStorage.removeItem('furina_cached_trending_v5');
+        localStorage.removeItem('furina_cached_trending_v5_time');
+        window.location.href = window.location.pathname + '?refresh=' + Date.now();
+      }
+    } catch (e) {
+      window.location.reload();
+    }
+  };
+
   if (isMinimized) {
     return (
       <button
@@ -144,11 +170,11 @@ export const FurinaMascot = ({ onOpenSearch }) => {
 
       {/* Interactive Speech Bubble */}
       {showBubble && (
-        <div className="pointer-events-auto relative mb-2.5 max-w-[240px] sm:max-w-[290px] p-2.5 sm:p-3 rounded-2xl bg-[#040d28]/95 border-2 border-cyan-400/50 shadow-[0_12px_35px_rgba(0,0,0,0.85),0_0_25px_rgba(0,242,254,0.35)] backdrop-blur-xl text-cyan-100 text-[11px] sm:text-[11.5px] leading-relaxed animate-in fade-in zoom-in-95 duration-200">
+        <div className="pointer-events-auto relative mb-2.5 max-w-[260px] sm:max-w-[310px] p-2.5 sm:p-3.5 rounded-2xl bg-[#040d28]/95 border-2 border-cyan-400/50 shadow-[0_12px_35px_rgba(0,0,0,0.85),0_0_25px_rgba(0,242,254,0.35)] backdrop-blur-xl text-cyan-100 text-[11px] sm:text-[11.5px] leading-relaxed animate-in fade-in zoom-in-95 duration-200">
           <div className="flex items-center justify-between gap-1.5 pb-1 border-b border-cyan-400/20 mb-1.5">
             <div className="flex items-center gap-1 text-[10px] sm:text-[10.5px] font-black text-cyan-300 uppercase tracking-wider">
               <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-spin" />
-              <span>Lady Furina</span>
+              <span>Lady Furina (Chibi)</span>
             </div>
             <div className="flex items-center gap-1">
               <button
@@ -172,9 +198,53 @@ export const FurinaMascot = ({ onOpenSearch }) => {
             </div>
           </div>
 
-          <p className="font-medium text-cyan-50/90 drop-shadow-sm">{FURINA_QUOTES[quoteIndex]}</p>
+          <p className="font-medium text-cyan-50/90 drop-shadow-sm mb-2">{FURINA_QUOTES[quoteIndex]}</p>
 
-          <div className="mt-2.5 flex items-center gap-1.5">
+          {/* Quick Interactive Companion Pills */}
+          <div className="grid grid-cols-2 gap-1 mb-2">
+            {onOpenOracle && (
+              <button
+                type="button"
+                onClick={() => { soundFx.playClick?.(); onOpenOracle(); }}
+                className="py-1 px-1.5 rounded-lg bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/30 text-[9.5px] font-bold text-cyan-300 flex items-center justify-center gap-1 transition"
+              >
+                <Sparkles className="w-3 h-3 text-amber-300" />
+                <span>AI Oracle</span>
+              </button>
+            )}
+            {onOpenJukebox && (
+              <button
+                type="button"
+                onClick={() => { soundFx.playClick?.(); onOpenJukebox(); }}
+                className="py-1 px-1.5 rounded-lg bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/30 text-[9.5px] font-bold text-cyan-300 flex items-center justify-center gap-1 transition"
+              >
+                <Disc className="w-3 h-3 text-sky-300" />
+                <span>Jukebox</span>
+              </button>
+            )}
+            {onPickRandom && (
+              <button
+                type="button"
+                onClick={() => { soundFx.playClick?.(); onPickRandom(); }}
+                className="py-1 px-1.5 rounded-lg bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/30 text-[9.5px] font-bold text-purple-300 flex items-center justify-center gap-1 transition"
+              >
+                <Shuffle className="w-3 h-3 text-purple-300" />
+                <span>Surprise Me</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handleCleanCache}
+              disabled={isWiping}
+              className="py-1 px-1.5 rounded-lg bg-cyan-950/80 hover:bg-cyan-900 border border-rose-500/30 text-[9.5px] font-bold text-rose-300 flex items-center justify-center gap-1 transition"
+              title="Wipe stale cache and force latest app version"
+            >
+              <RefreshCw className={`w-3 h-3 ${isWiping ? 'animate-spin' : ''}`} />
+              <span>{isWiping ? 'Wiping...' : 'Clean Cache'}</span>
+            </button>
+          </div>
+
+          <div className="flex items-center gap-1.5">
             {onOpenSearch && (
               <button
                 type="button"
@@ -210,14 +280,14 @@ export const FurinaMascot = ({ onOpenSearch }) => {
         title="Tap Lady Furina for cinema wisdom!"
       >
         <div className="absolute -inset-1.5 sm:-inset-2 rounded-full bg-gradient-to-r from-cyan-400 via-sky-500 to-blue-600 blur-md group-hover:blur-xl transition-all duration-300 animate-pulse" />
-        <div className="relative w-11 h-11 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-cyan-300 shadow-[0_0_20px_rgba(0,242,254,0.7)] group-hover:scale-110 group-active:scale-95 transition-all duration-200 bg-[#040d28]">
+        <div className="relative w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-cyan-300 shadow-[0_0_20px_rgba(0,242,254,0.7)] group-hover:scale-110 group-active:scale-95 transition-all duration-200 bg-[#040d28]">
           <img
             src="./furina_chibi.gif"
             alt="Cute Furina Mascot"
             className="w-full h-full object-cover"
           />
         </div>
-        <div className="absolute -bottom-1 -right-1 px-1.5 py-0.2 sm:px-2 sm:py-0.5 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-gray-950 font-black text-[7px] sm:text-[8.5px] tracking-wider uppercase border border-white/60 shadow">
+        <div className="absolute -bottom-1 -right-1 px-1.5 py-0.2 sm:px-2 sm:py-0.5 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-gray-950 font-black text-[7px] sm:text-[8.5px] tracking-wider uppercase border border-white/60 shadow animate-pulse">
           HYDRO 👑
         </div>
       </div>
