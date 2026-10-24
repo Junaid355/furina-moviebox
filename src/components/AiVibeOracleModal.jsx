@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Sparkles, X, Search, Play, Info, Flame, Moon, Compass, Wand2, Star } from 'lucide-react';
-import { queryVibeOracle, QUICK_VIBES } from '../services/aiVibeOracle';
+import { Sparkles, X, Search, Play, Info, Flame, Moon, Compass, Wand2, Star, Zap, Bot } from 'lucide-react';
+import { queryVibeOracle, queryVibeOracleAsync, QUICK_VIBES } from '../services/aiVibeOracle';
 import soundFx from '../services/soundFx';
 import { POSTER_THUMB_BASE } from '../services/tmdb';
 
@@ -18,19 +18,23 @@ export default function AiVibeOracleModal({ isOpen, onClose, onSelectMedia }) {
 
   if (!isOpen) return null;
 
-  const handleSearch = (customText) => {
+  const handleSearch = async (customText) => {
     const textToSearch = typeof customText === 'string' ? customText : prompt;
     if (!textToSearch.trim()) return;
 
     soundFx.playSearchBeam?.();
     setIsThinking(true);
 
-    setTimeout(() => {
+    try {
+      const res = await queryVibeOracleAsync(textToSearch);
+      setCurrentResult(res);
+      soundFx.playFurinaFanfare?.();
+    } catch (e) {
       const res = queryVibeOracle(textToSearch);
       setCurrentResult(res);
+    } finally {
       setIsThinking(false);
-      soundFx.playFurinaFanfare?.();
-    }, 450);
+    }
   };
 
   const handleChipClick = (chipQuery) => {
@@ -124,15 +128,27 @@ export default function AiVibeOracleModal({ isOpen, onClose, onSelectMedia }) {
           {/* Oracle Recommendation Header */}
           <div className="p-4 rounded-2xl bg-gradient-to-r from-[#0b1842] via-[#0d2057] to-[#0b1842] border border-cyan-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
             <div>
-              <div className="flex items-center gap-2 mb-1">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
                 <span className="px-2.5 py-0.5 rounded-full bg-cyan-400/20 text-cyan-300 border border-cyan-400/40 text-[10px] font-black uppercase tracking-wider">
                   {currentResult.vibeBadge}
                 </span>
-                <span className="text-xs text-cyan-200/70">Verified Curated Shelf</span>
+                {currentResult.isGeminiPowered ? (
+                  <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-purple-500/30 to-cyan-500/30 text-purple-200 border border-purple-400/50 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-sm">
+                    <Sparkles className="w-2.5 h-2.5 text-amber-300" />
+                    <span>Google Gemini Live</span>
+                  </span>
+                ) : (
+                  <span className="text-xs text-cyan-200/70">Verified Curated Shelf</span>
+                )}
               </div>
               <h3 className="text-base sm:text-lg font-black text-white">
                 {currentResult.vibeName}
               </h3>
+              {currentResult.furinaCommentary && (
+                <div className="mt-1.5 p-2 rounded-xl bg-cyan-950/70 border border-cyan-400/30 text-[11px] text-cyan-200 italic">
+                  👑 {currentResult.furinaCommentary}
+                </div>
+              )}
               <p className="text-xs text-cyan-200/80 mt-1 max-w-2xl leading-relaxed">
                 {currentResult.reason}
               </p>

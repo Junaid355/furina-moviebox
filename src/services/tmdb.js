@@ -2716,6 +2716,20 @@ export async function fetchMatureMovies(page = 1) {
 
 export const CURATED_HOLLYWOOD_HINDI_DUBS = [
   {
+    id: 597,
+    title: "Titanic",
+    name: "Titanic",
+    overview: "101-year-old Rose DeWitt Bukater tells the story of her life aboard the Titanic, 84 years later. Iconic Indian theatrical Hindi Dubbed stream in pristine 4K UHD.",
+    poster_path: "/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg",
+    backdrop_path: "/yDHYTfA3R0jFYba16jBB1ef8oIt.jpg",
+    media_type: "movie",
+    vote_average: 7.9,
+    release_date: "1997-11-18",
+    category: "hollywood",
+    isHindiDubbed: true,
+    hasHindiDub: true
+  },
+  {
     "id": 1423191,
     "title": "Resident Evil",
     "name": "Resident Evil",
@@ -3593,6 +3607,11 @@ export const VERIFIED_HINDI_GLOBAL_SERIES_IDS = new Set([
 
 // Verified Hollywood Blockbusters with official Indian theatrical/OTT Hindi dubs
 export const VERIFIED_HINDI_HOLLYWOOD_IDS = new Set([
+  597,    // Titanic (1997)
+  603,    // The Matrix
+  120,    // LOTR
+  671,    // Harry Potter 1
+  135397, // Jurassic World
   533535, // Deadpool & Wolverine
   299534, // Avengers: Endgame
   299536, // Avengers: Infinity War

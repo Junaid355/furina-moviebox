@@ -176,7 +176,8 @@ export class MultiEmbedLocalizedProvider {
     if (VERIFIED_HINDI_GLOBAL_SERIES_IDS.has(numId)) return true;
     if (VERIFIED_HINDI_ANIME_IDS.has(numId)) return true;
     if (CURATED_HINDI_DUBBED_ANIME.some((a) => Number(a.id) === numId)) return true;
-    if (numId === 94997 || numId === 533535 || numId === 1423191) return true;
+    if (numId === 94997 || numId === 533535 || numId === 1423191 || numId === 597) return true;
+    if (title.includes('titanic')) return true;
     const title = (item.title || item.name || '').toLowerCase();
     if (
       title.includes('house of the dragon') ||

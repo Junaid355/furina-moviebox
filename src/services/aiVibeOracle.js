@@ -142,4 +142,22 @@ export function queryVibeOracle(naturalPrompt) {
   return bestMatch;
 }
 
-export default { queryVibeOracle, QUICK_VIBES };
+import { askGeminiOracle } from './geminiOracleService';
+
+export async function queryVibeOracleAsync(naturalPrompt) {
+  const clean = (naturalPrompt || '').trim();
+  if (!clean) return queryVibeOracle('');
+
+  // 1. Try real live Gemini AI first with user's key
+  try {
+    const geminiResult = await askGeminiOracle(clean);
+    if (geminiResult && geminiResult.matches && geminiResult.matches.length > 0) {
+      return geminiResult;
+    }
+  } catch (e) {}
+
+  // 2. Seamless instant local fallback
+  return queryVibeOracle(clean);
+}
+
+export default { queryVibeOracle, queryVibeOracleAsync, QUICK_VIBES };
